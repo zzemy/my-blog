@@ -89,7 +89,7 @@ export function AdminHeader() {
               className="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors"
             >
               <ExternalLink className="w-4 h-4" />
-              Vercel 控制台
+              Vercel
             </a>
             <a
               href="https://supabase.com/dashboard/project/clpmxrgdzhsitzjlmkhf"
@@ -98,7 +98,7 @@ export function AdminHeader() {
               className="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors"
             >
               <ExternalLink className="w-4 h-4" />
-              Supabase 控制台
+              Supabase
             </a>
             <ModeToggle />
             <Button
@@ -175,7 +175,7 @@ export function AdminHeader() {
                     className="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors"
                   >
                     <ExternalLink className="w-4 h-4" />
-                    Vercel 控制台
+                    Vercel
                   </a>
                   <a
                     href="https://supabase.com/dashboard/project/clpmxrgdzhsitzjlmkhf"
@@ -184,7 +184,7 @@ export function AdminHeader() {
                     className="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-50 transition-colors"
                   >
                     <ExternalLink className="w-4 h-4" />
-                    Supabase 控制台
+                    Supabase
                   </a>
                   <Button
                     onClick={() => {
