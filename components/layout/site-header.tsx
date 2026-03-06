@@ -25,7 +25,7 @@ export function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-white/30 bg-background/70 backdrop-blur-2xl shadow-[0_12px_45px_-30px_rgba(0,0,0,0.55)] supports-[backdrop-filter]:bg-background/70 dark:border-white/10">
-      <div className="container flex h-14 items-center">
+      <div className="mx-auto flex h-14 w-full items-center px-3 md:px-6">
         <MobileNav />
         <div className="mr-4 flex">
           <Link href="/" className="mr-6 flex items-center space-x-2 ml-4 md:ml-6">
@@ -60,7 +60,7 @@ export function SiteHeader() {
             })}
           </nav>
         </div>
-        <div className="flex flex-1 items-center justify-end space-x-2 pr-3 md:pr-0">
+        <div className="flex flex-1 items-center justify-end space-x-2">
            <div className="w-full flex-1 md:w-auto md:flex-none">
              <CommandMenu />
            </div>
