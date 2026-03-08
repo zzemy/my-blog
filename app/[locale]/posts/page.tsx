@@ -1,11 +1,25 @@
 import { setRequestLocale, getTranslations } from 'next-intl/server';
-import { PostList } from "@/components/blog/post-list";
+import { PostList } from "@/features/blog/components/shared/post-list";
 import { supabase } from '@/lib/supabase/client';
+import { isExpectedSupabaseBuildError, logExpectedSupabaseBuildErrorOnce } from '@/lib/supabase/error-utils';
 
 // Enable ISR for posts index page (seconds)
 export const revalidate = 60; // Regenerate at most once per minute
 
 const locales = ['zh', 'en', 'fr', 'ja'];
+
+type PostRow = {
+  id: string;
+  slug: string;
+  title: string;
+  published_at: string | null;
+  created_at: string;
+  description: string | null;
+  tags: string[] | null;
+  reading_time: number | null;
+  cover_image: string | null;
+  locale: string;
+};
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
@@ -26,20 +40,28 @@ async function getPosts(locale: string) {
       return [];
     }
 
-    return data.map((post: any) => ({
+    return (data as PostRow[]).map((post) => ({
       id: post.id,
       slug: post.slug,
       title: post.title,
       date: post.published_at || post.created_at,
-      summary: post.description,
-      excerpt: post.description,
-      tags: post.tags,
+      summary: post.description || undefined,
+      excerpt: post.description || undefined,
+      tags: post.tags || undefined,
       readingTime: post.reading_time ? `${post.reading_time} 字` : undefined,
       coverImage: post.cover_image,
       locale: post.locale,
     }));
   } catch (error) {
-    console.error('Error fetching posts (this is expected during build if Supabase env vars are not set):', error);
+    if (isExpectedSupabaseBuildError(error)) {
+      logExpectedSupabaseBuildErrorOnce(
+        'locale-posts-page-build-fallback',
+        'Using empty localized posts list because Supabase is unavailable in this environment:',
+        error
+      )
+    } else {
+      console.error('Error fetching posts:', error)
+    }
     return [];
   }
 }

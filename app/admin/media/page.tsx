@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useSupabaseAuthStore } from '@/lib/supabase-auth-store'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { 
@@ -29,7 +28,6 @@ interface MediaFile {
 }
 
 export default function MediaLibraryPage() {
-  const { accessToken: _token } = useSupabaseAuthStore()
   const [files, setFiles] = useState<MediaFile[]>([])
   const [loading, setLoading] = useState(true)
   const [uploading, setUploading] = useState(false)
@@ -76,7 +74,7 @@ export default function MediaLibraryPage() {
       } else {
         alert('删除失败')
       }
-    } catch (error) {
+    } catch {
       alert('删除失败')
     } finally {
       setDeleting(null)
@@ -102,7 +100,7 @@ export default function MediaLibraryPage() {
         } else {
           alert('上传失败')
         }
-      } catch (error) {
+      } catch {
         alert('上传失败')
       } finally {
         setUploading(false)

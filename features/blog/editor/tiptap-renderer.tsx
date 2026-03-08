@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createRoot } from 'react-dom/client'
 import { EditorContent, useEditor, NodeViewContent, NodeViewWrapper, ReactNodeViewRenderer } from '@tiptap/react'
+import type { Content } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { Link } from '@tiptap/extension-link'
 import { Image } from '@tiptap/extension-image'
@@ -18,7 +19,7 @@ import { CodeBlockLowlight } from '@tiptap/extension-code-block-lowlight'
 import { Mathematics } from '@tiptap/extension-mathematics'
 import { common, createLowlight } from 'lowlight'
 import { Check, Copy } from 'lucide-react'
-import { LinkPreview } from '@/components/common/link-preview'
+import { LinkPreview } from '@/shared/components/common/link-preview'
 
 const lowlight = createLowlight(common)
 
@@ -210,7 +211,7 @@ const CodeBlock = ({ node: { textContent } }: { node: { textContent: string } })
           className="flex-1 pl-6 pr-4 pb-0 !m-0 !bg-transparent overflow-visible scrollbar-hide !text-[#24292e] dark:!text-[#d4d4d4]"
           style={{ fontFamily: 'inherit', fontSize: 'inherit', lineHeight: 'inherit' }}
         >
-          <NodeViewContent as={"code" as any} className="!bg-transparent !p-0 !whitespace-pre !font-inherit !text-inherit" />
+          <NodeViewContent className="!bg-transparent !p-0 !whitespace-pre !font-inherit !text-inherit" />
         </pre>
       </div>
     </NodeViewWrapper>
@@ -224,7 +225,7 @@ interface TocItem {
 }
 
 interface TipTapRendererProps {
-  content: any
+  content: Content
   className?: string
   toc?: TocItem[]
 }
@@ -302,17 +303,17 @@ export function TipTapRenderer({ content, className = '', toc = [] }: TipTapRend
   })
 
   // 将标题批量设置 id 和 scroll-margin-top
-  const assignHeadingIds = () => {
+  const assignHeadingIds = useCallback(() => {
     if (!editor || !toc.length) return
     const headings = editor.view.dom.querySelectorAll('h1, h2, h3, h4, h5, h6')
     toc.slice(0, headings.length).forEach((item, idx) => {
       const el = headings[idx] as HTMLElement
       if (el) {
         el.setAttribute('id', item.id)
-        ;(el.style as any).scrollMarginTop = '96px'
+        el.style.scrollMarginTop = '96px'
       }
     })
-  }
+  }, [editor, toc])
 
   // 给标题添加 id 和 scroll-margin-top，支持目录定位并避免被顶部遮挡
   useEffect(() => {
@@ -325,7 +326,7 @@ export function TipTapRenderer({ content, className = '', toc = [] }: TipTapRend
       editor.off('update', handler)
       editor.off('create', handler)
     }
-  }, [editor, toc])
+  }, [editor, assignHeadingIds])
 
   // 将纯文本中的 URL 自动转成可点击链接（避免内容里未显式插入链接时无法点击）
   useEffect(() => {
@@ -446,6 +447,8 @@ export function TipTapRenderer({ content, className = '', toc = [] }: TipTapRend
           className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
           onClick={() => setPreviewSrc(null)}
         >
+          {/* Intentional raw img for runtime external URL preview in modal overlay */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={previewSrc}
             alt="preview"

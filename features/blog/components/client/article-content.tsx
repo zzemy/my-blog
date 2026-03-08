@@ -5,7 +5,7 @@ import { Check, Copy } from 'lucide-react';
 import { createRoot } from 'react-dom/client';
 import { cn } from '@/lib/utils';
 import mediumZoom from 'medium-zoom';
-import { LinkPreview } from '@/components/common/link-preview';
+import { LinkPreview } from '@/shared/components/common/link-preview';
 
 export function ArticleContent({ html, className }: { html: string; className?: string }) {
   const ref = React.useRef<HTMLDivElement>(null);

@@ -2,12 +2,12 @@ import { Link } from "@/i18n/routing";
 import { getPublishedPosts } from "@/lib/supabase/posts";
 import { getTranslations } from "next-intl/server";
 import { setRequestLocale } from 'next-intl/server';
-import { PostList } from "@/components/blog/post-list";
-import { FadeIn } from "@/components/visuals/fade-in";
-import { TypewriterEffect } from "@/components/visuals/typewriter-effect";
-import { TextShimmer } from "@/components/visuals/text-shimmer";
-import { HomeButtons } from "@/components/effects/home-buttons";
-import { SiteUptimeBadge } from "@/components/common/site-uptime";
+import { PostList } from "@/features/blog/components/shared/post-list";
+import { FadeIn } from "@/shared/visuals/fade-in";
+import { TypewriterEffect } from "@/shared/visuals/typewriter-effect";
+import { TextShimmer } from "@/shared/visuals/text-shimmer";
+import { HomeButtons } from "@/features/blog/effects/home-buttons";
+import { SiteUptimeBadge } from "@/shared/components/common/site-uptime";
 import { getSiteSettings } from "@/lib/site-settings";
 
 export const revalidate = 60;

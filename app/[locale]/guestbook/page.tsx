@@ -1,6 +1,6 @@
 import { setRequestLocale, getTranslations } from 'next-intl/server';
-import { Comments } from "@/components/blog/comments";
-import { FadeIn } from "@/components/visuals/fade-in";
+import { Comments } from "@/features/blog/components/client/comments";
+import { FadeIn } from "@/shared/visuals/fade-in";
 
 const locales = ['zh', 'en', 'fr', 'ja'];
 

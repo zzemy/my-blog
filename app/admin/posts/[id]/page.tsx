@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { useSupabaseAuthStore } from '@/lib/supabase-auth-store'
 import { pinyin } from 'pinyin-pro'
-import { TipTapEditor } from '@/components/editor/tiptap-editor'
+import type { Content } from '@tiptap/react'
+import { TipTapEditor } from '@/features/blog/editor/tiptap-editor'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -19,7 +19,6 @@ import {
   Image as ImageIcon,
   AlertCircle,
   CheckCircle,
-  Clock,
   Star,
   Search,
 } from 'lucide-react'
@@ -28,7 +27,7 @@ import Link from 'next/link'
 export default function EditPostPage() {
   const router = useRouter()
   const params = useParams()
-  const { accessToken: _token } = useSupabaseAuthStore()
+  const postId = String(params.id ?? '')
   
   const isoToLocalInput = (iso: string) => {
     const d = new Date(iso)
@@ -54,7 +53,7 @@ export default function EditPostPage() {
     description: '',
     cover_image: '',
     tags: [] as string[],
-    content: null as any,
+    content: undefined as Content | undefined,
     published: false,
     featured: false,
     reading_time: 0,
@@ -64,13 +63,9 @@ export default function EditPostPage() {
     seo_description: '',
   })
 
-  useEffect(() => {
-    fetchPost()
-  }, [])
-
-  const fetchPost = async () => {
+  const fetchPost = useCallback(async () => {
     try {
-      const res = await fetch(`/api/admin/posts/${params.id}`)
+      const res = await fetch(`/api/admin/posts/${postId}`)
 
       if (!res.ok) {
         throw new Error('获取文章失败')
@@ -85,7 +80,7 @@ export default function EditPostPage() {
         description: post.description || '',
         cover_image: post.cover_image || '',
         tags: post.tags || [],
-        content: post.content,
+        content: (post.content ?? undefined) as Content | undefined,
         published: post.published,
         featured: post.featured || false,
         reading_time: post.reading_time || 0,
@@ -100,7 +95,11 @@ export default function EditPostPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [postId])
+
+  useEffect(() => {
+    fetchPost()
+  }, [fetchPost])
 
   const generateSlug = () => {
     const slug = pinyin(formData.title, { 
@@ -159,7 +158,7 @@ export default function EditPostPage() {
 
     setSaving(true)
     try {
-      const submitData: any = {
+      const submitData: Record<string, unknown> = {
         title: formData.title,
         slug: formData.slug,
         description: formData.description,

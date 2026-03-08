@@ -9,21 +9,27 @@ import {
   XAxis,
   YAxis,
   ResponsiveContainer,
-  RadarChart,
-  PolarGrid,
-  PolarAngleAxis,
-  PolarRadiusAxis,
-  Radar,
   PieChart,
   Pie,
   Cell,
   Legend
 } from "recharts"
-import { format, subDays, eachDayOfInterval, getDay, startOfWeek, endOfWeek, parseISO, isSameDay } from "date-fns"
+import { format, subDays, eachDayOfInterval, startOfWeek, parseISO } from "date-fns"
 import { zhCN } from "date-fns/locale"
 
+type ChartDatum = Record<string, string | number | undefined>
+
+type PieLabelProps = {
+    cx?: number
+    cy?: number
+    midAngle?: number
+    outerRadius?: number
+    percent?: number
+    name?: string | number
+}
+
 // --- Traffic Trend Chart ---
-export function TrafficTrendChart({ data }: { data: any[] }) {
+export function TrafficTrendChart({ data }: { data: ChartDatum[] }) {
     // Mock data generation if empty, or formatting
     // Assuming data is [{ date: '2023-01-01', pv: 100, uv: 50 }]
     return (
@@ -54,7 +60,7 @@ export function TrafficTrendChart({ data }: { data: any[] }) {
 }
 
 // --- Tag Distribution Chart (Pie Chart) ---
-export function TagPieChart({ data }: { data: any[] }) {
+export function TagPieChart({ data }: { data: ChartDatum[] }) {
     // Minimalist grayscale palette for a clean, professional look
     const COLORS = [
         'hsl(220, 15%, 65%)',  // Blue Gray
@@ -68,7 +74,17 @@ export function TagPieChart({ data }: { data: any[] }) {
     ];
 
     // Custom label component for better readability
-    const renderCustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, name }: any) => {
+    const renderCustomLabel = ({ cx, cy, midAngle, outerRadius, percent, name }: PieLabelProps) => {
+                if (
+                    cx === undefined ||
+                    cy === undefined ||
+                    midAngle === undefined ||
+                    outerRadius === undefined ||
+                    percent === undefined ||
+                    name === undefined
+                ) {
+                    return null;
+                }
         const RADIAN = Math.PI / 180;
         const radius = outerRadius + 35;
         const x = cx + radius * Math.cos(-midAngle * RADIAN);
@@ -127,7 +143,7 @@ export function TagPieChart({ data }: { data: any[] }) {
                         color: 'hsl(var(--popover-foreground))',
                         fontWeight: 500
                     }}
-                    formatter={(value: any, name: any) => [`${value} 篇文章`, name]}
+                    formatter={(value, name) => [`${value ?? 0} 篇文章`, String(name ?? '')]}
                 />
                 <Legend 
                     layout="horizontal" 
@@ -186,7 +202,6 @@ export function ActivityHeatmap({ data }: { data: { date: string, count: number 
     // Generate month labels based on the weeks
     const monthLabels: { label: string, colIndex: number }[] = [];
     weeks.forEach((weekData, i) => {
-        const firstDayOfWeek = weekData[0];
         // If this week contains the 1st of a month, or simply change of month?
         // Usually GitHub puts the label on the column where the month starts.
         // Let's check if the week contains the 1st day of a month OR if the first day of the week is a new month

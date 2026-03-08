@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { useTranslations } from 'next-intl';
-import { Lottie404 } from '@/components/effects/lottie-404';
+import { Lottie404 } from '@/shared/effects/lottie-404';
 
 export default function NotFound() {
   const t = useTranslations('NotFound');

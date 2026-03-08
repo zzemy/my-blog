@@ -1,16 +1,17 @@
 import { Link } from "@/i18n/routing";
 import { notFound } from "next/navigation";
 import { setRequestLocale } from 'next-intl/server';
-import { PostLayout } from "@/components/blog/post-layout";
-import { FadeIn } from "@/components/visuals/fade-in";
-import { TipTapRenderer } from "@/components/editor/tiptap-renderer";
-import { PostBreadcrumb } from "@/components/blog/post-breadcrumb";
-import { FallbackBanner } from '@/components/blog/fallback-banner';
-import { ShareButtons } from "@/components/blog/share-buttons";
-import { PostStats } from "@/components/blog/post-stats";
-import { Comments } from "@/components/blog/comments";
+import { PostLayout } from "@/features/blog/components/client/post-layout";
+import { FadeIn } from "@/shared/visuals/fade-in";
+import { TipTapRenderer } from "@/features/blog/editor/tiptap-renderer";
+import { PostBreadcrumb } from "@/features/blog/components/shared/post-breadcrumb";
+import { FallbackBanner } from '@/features/blog/components/client/fallback-banner';
+import { ShareButtons } from "@/features/blog/components/client/share-buttons";
+import { PostStats } from "@/features/blog/components/client/post-stats";
+import { Comments } from "@/features/blog/components/client/comments";
 import { supabase } from '@/lib/supabase/client';
 import { Database } from "@/lib/supabase/types";
+import { isExpectedSupabaseBuildError, logExpectedSupabaseBuildErrorOnce } from '@/lib/supabase/error-utils';
 
 // Enable ISR for post detail pages (seconds)
 export const revalidate = 60; // Regenerate at most once per minute
@@ -54,13 +55,23 @@ async function getPost(slug: string, locale: string): Promise<Post | null> {
       .single();
 
     if (error) {
-      console.error('Failed to fetch post:', error);
+      if (!isExpectedSupabaseBuildError(error)) {
+        console.error('Failed to fetch post:', error)
+      }
       return null;
     }
 
     return data;
   } catch (error) {
-    console.error('Error fetching post (this is expected during build if Supabase env vars are not set):', error);
+    if (isExpectedSupabaseBuildError(error)) {
+      logExpectedSupabaseBuildErrorOnce(
+        'locale-post-page-build-fallback',
+        'Skipping post detail fetch because Supabase is unavailable in this environment:',
+        error
+      )
+    } else {
+      console.error('Error fetching post:', error)
+    }
     return null;
   }
 }
@@ -75,13 +86,23 @@ async function getAllPosts(locale: string) {
       .neq('slug', 'about');
 
     if (error) {
-      console.error('Failed to fetch posts:', error);
+      if (!isExpectedSupabaseBuildError(error)) {
+        console.error('Failed to fetch posts:', error)
+      }
       return [];
     }
 
     return data as { slug: string }[];
   } catch (error) {
-    console.error('Error fetching posts (this is expected during build if Supabase env vars are not set):', error);
+    if (isExpectedSupabaseBuildError(error)) {
+      logExpectedSupabaseBuildErrorOnce(
+        'locale-post-page-all-posts-build-fallback',
+        'Using empty post slugs because Supabase is unavailable in this environment:',
+        error
+      )
+    } else {
+      console.error('Error fetching posts:', error)
+    }
     return [];
   }
 }
@@ -190,7 +211,14 @@ type TocItem = {
   depth: number
 }
 
-function buildToc(content: any): TocItem[] {
+type TiptapNode = {
+  type?: string
+  text?: string
+  attrs?: { level?: number }
+  content?: TiptapNode[]
+}
+
+function buildToc(content: TiptapNode | TiptapNode[] | null | undefined): TocItem[] {
   const toc: TocItem[] = []
   const idCount: Record<string, number> = {}
 
@@ -202,7 +230,7 @@ function buildToc(content: any): TocItem[] {
       .replace(/\s+/g, '-')
       .replace(/-+/g, '-')
 
-  const walk = (node: any) => {
+  const walk = (node: TiptapNode | TiptapNode[] | null | undefined) => {
     if (!node) return
     if (Array.isArray(node)) {
       node.forEach(walk)
@@ -234,7 +262,7 @@ function buildToc(content: any): TocItem[] {
   return toc
 }
 
-function extractText(node: any): string {
+function extractText(node: TiptapNode | null | undefined): string {
   if (!node) return ''
   if (node.text) return node.text
   if (node.content) {

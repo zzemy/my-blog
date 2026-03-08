@@ -3,6 +3,7 @@
 // For server components using 'createClient' from '@supabase/supabase-js' with anon key is fine for public data.
 
 import { createClient } from '@supabase/supabase-js'
+import { isExpectedSupabaseBuildError, logExpectedSupabaseBuildErrorOnce } from '@/lib/supabase/error-utils'
 
 function normalizeEnvValue(value?: string) {
   if (!value) return undefined
@@ -56,7 +57,15 @@ export const getSiteSettings = async () => {
       }
     }
   } catch (error) {
-    console.error('Error fetching site settings (this is expected during build if Supabase env vars are not set):', error);
+    if (isExpectedSupabaseBuildError(error)) {
+      logExpectedSupabaseBuildErrorOnce(
+        'site-settings-build-fallback',
+        'Using fallback site settings because Supabase is unavailable in this environment:',
+        error
+      )
+    } else {
+      console.error('Error fetching site settings:', error)
+    }
     return {
       site_title: 'My Blog',
       site_description: 'A dedicated space for sharing knowledge and insights.',

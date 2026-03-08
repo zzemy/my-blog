@@ -194,7 +194,7 @@ export function VantaBackground() {
         vantaEffectRef.current = null
       }
     }
-  }, [effect, theme, shouldDisableEffect, hasMounted])
+  }, [effect, theme, shouldDisableEffect, hasMounted, isDark])
 
   if (!hasMounted || effect === 'none' || shouldDisableEffect) return null
 

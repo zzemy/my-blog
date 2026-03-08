@@ -1,6 +1,7 @@
 'use client'
 
 import { EditorContent, useEditor, Editor } from '@tiptap/react'
+import type { Content } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { Link } from '@tiptap/extension-link'
 import { Image } from '@tiptap/extension-image'
@@ -90,8 +91,8 @@ const syntaxThemeCss = `
 `
 
 interface TipTapEditorProps {
-  content?: any
-  onChange?: (content: any) => void
+  content?: Content
+  onChange?: (content: Content) => void
   placeholder?: string
   editable?: boolean
 }
@@ -182,7 +183,7 @@ export function TipTapEditor({
       attributes: {
         class: 'prose prose-lg dark:prose-invert max-w-none focus:outline-none min-h-[500px] leading-relaxed article-font ProseMirror',
       },
-      handlePaste: (view, event, slice) => {
+      handlePaste: (view, event) => {
         // 1. Image Paste Support
         const item = event.clipboardData?.items[0]
         if (item?.type.indexOf('image') === 0) {
@@ -224,7 +225,7 @@ export function TipTapEditor({
                    .use(remarkGfm)
                    .use(remarkRehype, {
                      handlers: {
-                       math: (state: any, node: any) => {
+                       math: (_state: unknown, node: { value?: string }) => {
                          // Build HAST node directly (mdast-util-to-hast 13+ passes state as first arg)
                          return {
                            type: 'element',
@@ -236,7 +237,7 @@ export function TipTapEditor({
                            children: [{ type: 'text', value: node.value || '' }]
                          }
                        },
-                       inlineMath: (state: any, node: any) => {
+                       inlineMath: (_state: unknown, node: { value?: string }) => {
                          return {
                            type: 'element',
                            tagName: 'span',

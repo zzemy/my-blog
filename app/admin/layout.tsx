@@ -1,8 +1,7 @@
-import { ComponentType } from "react"
 import "../globals.css"
-import { AdminHeader } from "@/components/admin/header"
-import { AdminProtector } from "@/components/admin/protector"
-import { ThemeProvider } from "@/components/layout/theme-provider"
+import { AdminHeader } from "@/features/admin/components/header"
+import { AdminProtector } from "@/features/admin/components/protector"
+import { ThemeProvider } from "@/shared/layout/theme-provider"
 import { Toaster } from "sonner"
 
 export const metadata = {

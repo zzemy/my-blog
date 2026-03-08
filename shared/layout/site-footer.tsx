@@ -1,4 +1,3 @@
-import { getSiteSettings } from "@/lib/site-settings"; // 假设你可能需要再次获取 link 如果要动态显示
 import Link from "next/link";
 
 export function SiteFooter({ text }: { text: string }) {

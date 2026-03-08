@@ -15,7 +15,6 @@ export function SupabaseLoginForm() {
   const [loading, setLoading] = useState(false)
   const [csrfToken, setCsrfToken] = useState<string | null>(null)
   const router = useRouter()
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const checkAuth = useSupabaseAuthStore((state) => state.checkAuth)
 
   // 获取 CSRF token
@@ -86,8 +85,9 @@ export function SupabaseLoginForm() {
       // 认证成功，更新状态并跳转
       await checkAuth()
       router.push('/admin/posts')
-    } catch (err: any) {
-      setError(err.message || '发生错误，请重试')
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : '发生错误，请重试'
+      setError(message)
       console.error(err)
     } finally {
       setLoading(false)

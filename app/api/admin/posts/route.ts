@@ -3,10 +3,20 @@ import { getAdminClient } from '@/lib/supabase/client'
 import { getAuthTokenFromRequest, validateAdminRequestWithReason } from '@/lib/auth'
 import { Redis } from '@upstash/redis'
 
-const redisUrl = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL || process.env.STORAGE_URL || ''
-const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN || process.env.STORAGE_TOKEN || ''
-const redisEnabled = Boolean(redisUrl && redisToken)
-const redis = redisEnabled ? new Redis({ url: redisUrl, token: redisToken }) : null
+function normalizeEnv(value?: string) {
+  const normalized = value?.trim()
+  return normalized && normalized.length > 0 ? normalized : undefined
+}
+
+const redisUrl = normalizeEnv(process.env.UPSTASH_REDIS_REST_URL) ?? normalizeEnv(process.env.KV_REST_API_URL)
+const redisToken = normalizeEnv(process.env.UPSTASH_REDIS_REST_TOKEN) ?? normalizeEnv(process.env.KV_REST_API_TOKEN)
+const redisEnabled = Boolean(redisUrl?.startsWith('http') && redisToken)
+const redis = redisEnabled ? new Redis({ url: redisUrl!, token: redisToken! }) : null
+
+type PostWithSlugAndViews = {
+  slug: string
+  views?: number
+}
 
 // GET - 获取所有文章列表（需要认证）
 export async function GET(request: NextRequest) {
@@ -24,7 +34,7 @@ export async function GET(request: NextRequest) {
     const tag = searchParams.get('tag')
     const published = searchParams.get('published') !== 'false' // 默认只获取已发布的
 
-    const client = getAdminClient(token || undefined) as any
+    const client = getAdminClient(token || undefined)
 
     let query = client
       .from('posts')
@@ -50,10 +60,10 @@ export async function GET(request: NextRequest) {
     // 从 Redis 获取每篇文章的实时浏览量（仅在配置存在时）
     if (redisEnabled && redis && data && data.length > 0) {
       try {
-        const keys = data.map((post: any) => `views:${post.slug}`)
+        const keys = (data as PostWithSlugAndViews[]).map((post) => `views:${post.slug}`)
         const views = await redis.mget(keys)
 
-        data.forEach((post: any, index: number) => {
+        ;(data as PostWithSlugAndViews[]).forEach((post, index: number) => {
           const viewCount = views[index]
           post.views = viewCount ? Number(viewCount) : 0
         })
@@ -82,7 +92,7 @@ export async function POST(request: NextRequest) {
   }
   
   try {
-    const client = getAdminClient(token || undefined) as any
+    const client = getAdminClient(token || undefined)
     const body = await request.json()
     const {
       title,
@@ -134,7 +144,7 @@ export async function POST(request: NextRequest) {
         reading_time,
         // 若前端提供发布时间则尊重该值；否则在发布时使用当前时间
         published_at: published ? (body.published_at || new Date().toISOString()) : null,
-      })
+      } as never)
       .select()
       .single()
 

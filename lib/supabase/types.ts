@@ -21,7 +21,7 @@ export interface Database {
           created_at: string
           updated_at: string
           published_at: string | null
-          metadata: Record<string, any>
+          metadata: Record<string, unknown>
         }
         Insert: {
           id?: string
@@ -40,7 +40,7 @@ export interface Database {
           created_at?: string
           updated_at?: string
           published_at?: string | null
-          metadata?: Record<string, any>
+          metadata?: Record<string, unknown>
         }
         Update: {
           id?: string
@@ -59,7 +59,7 @@ export interface Database {
           created_at?: string
           updated_at?: string
           published_at?: string | null
-          metadata?: Record<string, any>
+          metadata?: Record<string, unknown>
         }
       }
       pages: {
@@ -72,7 +72,7 @@ export interface Database {
           published: boolean
           created_at: string
           updated_at: string
-          metadata: Record<string, any>
+          metadata: Record<string, unknown>
         }
         Insert: {
           id?: string
@@ -83,7 +83,7 @@ export interface Database {
           published?: boolean
           created_at?: string
           updated_at?: string
-          metadata?: Record<string, any>
+          metadata?: Record<string, unknown>
         }
         Update: {
           id?: string
@@ -94,7 +94,7 @@ export interface Database {
           published?: boolean
           created_at?: string
           updated_at?: string
-          metadata?: Record<string, any>
+          metadata?: Record<string, unknown>
         }
       }
       tags: {
@@ -135,7 +135,7 @@ export interface Database {
           height: number | null
           alt_text: string | null
           created_at: string
-          metadata: Record<string, any>
+          metadata: Record<string, unknown>
         }
         Insert: {
           id?: string
@@ -148,7 +148,7 @@ export interface Database {
           height?: number | null
           alt_text?: string | null
           created_at?: string
-          metadata?: Record<string, any>
+          metadata?: Record<string, unknown>
         }
         Update: {
           id?: string
@@ -161,7 +161,7 @@ export interface Database {
           height?: number | null
           alt_text?: string | null
           created_at?: string
-          metadata?: Record<string, any>
+          metadata?: Record<string, unknown>
         }
       }
     }

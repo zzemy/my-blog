@@ -1,6 +1,6 @@
 import { getPostsByTag, getPublishedPosts } from "@/lib/supabase/posts";
 import { setRequestLocale, getTranslations } from 'next-intl/server';
-import { PostList } from "@/components/blog/post-list";
+import { PostList } from "@/features/blog/components/shared/post-list";
 
 export const revalidate = 60;
 

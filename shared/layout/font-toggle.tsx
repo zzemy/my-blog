@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useState } from "react"
 import { Check, Code, Italic, Sparkles, Type } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -131,7 +131,7 @@ export function FontToggle() {
       setFont(initial.font)
       setSize(initial.size)
       applyFontPreference(initial)
-    } catch (e) {
+    } catch {
       applyFontPreference({ font: "system-sans", size: "base" })
     }
   }, [])
@@ -142,8 +142,6 @@ export function FontToggle() {
     applyFontPreference(pref)
     window.localStorage.setItem(FONT_STORAGE_KEY, JSON.stringify(pref))
   }, [font, size])
-
-  const activeOption = useMemo(() => FONT_OPTIONS.find((opt) => opt.id === font) ?? FONT_OPTIONS[0], [font])
 
   return (
     <DropdownMenu>

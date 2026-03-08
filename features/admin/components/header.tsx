@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { useSupabaseAuthStore } from '@/lib/supabase-auth-store'
 import { Button } from '@/components/ui/button'
 import { BookOpen, LogOut, LayoutDashboard, FileText, Settings, Home, Menu, Image as ImageIcon, ExternalLink } from 'lucide-react'
-import { ModeToggle } from '@/components/layout/mode-toggle'
+import { ModeToggle } from '@/shared/layout/mode-toggle'
 import {
   Sheet,
   SheetContent,

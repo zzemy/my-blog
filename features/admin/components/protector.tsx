@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useSupabaseAuthStore } from '@/lib/supabase-auth-store'
-import { SupabaseLoginForm } from '@/components/auth/login-form'
+import { SupabaseLoginForm } from '@/features/auth/components/login-form'
 
 interface AdminProtectorProps {
   children: React.ReactNode

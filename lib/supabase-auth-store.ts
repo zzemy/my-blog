@@ -1,9 +1,10 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { supabaseAuth, getSession, getCurrentUser } from '@/lib/supabase/auth'
+import type { User } from '@supabase/supabase-js'
 
 interface SupabaseAuthState {
-  user: any | null
+  user: User | null
   accessToken: string | null
   isAuthenticated: boolean
   isLoading: boolean
@@ -131,7 +132,7 @@ export const useSupabaseAuthStore = create<SupabaseAuthState>()(
           } else {
             set({ user: null, accessToken: null, isAuthenticated: false, isLoading: false })
           }
-        } catch (error) {
+        } catch {
           set({ user: null, accessToken: null, isAuthenticated: false, isLoading: false })
         }
       },

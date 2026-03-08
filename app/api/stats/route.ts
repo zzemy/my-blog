@@ -4,10 +4,15 @@ import { Redis } from '@upstash/redis';
 export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
 
-const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL || process.env.STORAGE_URL || '',
-  token: process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN || process.env.STORAGE_TOKEN || '',
-});
+function normalizeEnv(value?: string) {
+  const normalized = value?.trim();
+  return normalized && normalized.length > 0 ? normalized : undefined;
+}
+
+const redisUrl = normalizeEnv(process.env.UPSTASH_REDIS_REST_URL) ?? normalizeEnv(process.env.KV_REST_API_URL);
+const redisToken = normalizeEnv(process.env.UPSTASH_REDIS_REST_TOKEN) ?? normalizeEnv(process.env.KV_REST_API_TOKEN);
+const redisEnabled = Boolean(redisUrl?.startsWith('http') && redisToken);
+const redis = redisEnabled ? new Redis({ url: redisUrl!, token: redisToken! }) : null;
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -18,6 +23,10 @@ export async function GET(req: NextRequest) {
   }
 
   try {
+    if (!redis) {
+      return NextResponse.json({ views: 0, likes: 0 });
+    }
+
     // Use mget to fetch both keys in one round trip
     const [views, likes] = await redis.mget<[number, number]>(`views:${slug}`, `likes:${slug}`);
 
@@ -42,6 +51,10 @@ export async function POST(req: NextRequest) {
   }
 
   try {
+    if (!redis) {
+      return NextResponse.json({ count: 0, skipped: true });
+    }
+
     let count = 0;
     if (type === 'view') {
       // Increment views

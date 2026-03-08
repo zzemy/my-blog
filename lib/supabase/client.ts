@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import type { Database as SupabaseDB } from './types'
 
 function normalizeEnvValue(value?: string) {
@@ -19,9 +19,15 @@ const supabaseUrl = normalizeEnvValue(process.env.NEXT_PUBLIC_SUPABASE_URL)
 const supabaseAnonKey = normalizeEnvValue(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
 const serviceRoleKey = normalizeEnvValue(process.env.SUPABASE_SERVICE_ROLE_KEY)
 
-let supabaseClient: any = null
+let supabaseClient: SupabaseClient<SupabaseDB> | null = null
 
-function parseJwtPayload(token: string): Record<string, any> | null {
+type ParsedJwtPayload = {
+  role?: string
+  ref?: string
+  exp?: number
+}
+
+function parseJwtPayload(token: string): ParsedJwtPayload | null {
   try {
     const parts = token.split('.')
     if (parts.length !== 3) return null
@@ -161,16 +167,16 @@ function getSupabaseClient() {
 }
 
 // Lazy-loaded singleton for better build-time compatibility
-export const supabase: any = new Proxy({}, {
-  get(target: any, prop: string | symbol) {
+export const supabase = new Proxy({} as SupabaseClient<SupabaseDB>, {
+  get(_target: unknown, prop: string | symbol) {
     try {
-      return getSupabaseClient()[prop]
+      return (getSupabaseClient() as unknown as Record<string | symbol, unknown>)[prop]
     } catch (error) {
       console.error('Supabase client error:', error)
       return undefined
     }
   },
-})
+}) as SupabaseClient<SupabaseDB>
 
 // 用于服务端的客户端（如果需要）
 export const createServerClient = () => {
@@ -218,7 +224,7 @@ export type Database = {
           id: string
           title: string
           slug: string
-          content: any // TipTap JSON content
+          content: unknown // TipTap JSON content
           excerpt: string | null
           cover_image: string | null
           author: string
@@ -235,7 +241,7 @@ export type Database = {
           id?: string
           title: string
           slug: string
-          content: any
+          content: unknown
           excerpt?: string | null
           cover_image?: string | null
           author?: string
@@ -252,7 +258,7 @@ export type Database = {
           id?: string
           title?: string
           slug?: string
-          content?: any
+          content?: unknown
           excerpt?: string | null
           cover_image?: string | null
           author?: string
@@ -271,7 +277,7 @@ export type Database = {
           id: string
           title: string
           slug: string
-          content: any // TipTap JSON content
+          content: unknown // TipTap JSON content
           locale: string
           published: boolean
           created_at: string
@@ -281,7 +287,7 @@ export type Database = {
           id?: string
           title: string
           slug: string
-          content: any
+          content: unknown
           locale?: string
           published?: boolean
           created_at?: string
@@ -291,7 +297,7 @@ export type Database = {
           id?: string
           title?: string
           slug?: string
-          content?: any
+          content?: unknown
           locale?: string
           published?: boolean
           created_at?: string

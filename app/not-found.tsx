@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Lottie404 } from '@/components/effects/lottie-404'
+import { Lottie404 } from '@/shared/effects/lottie-404'
 import "./globals.css"
 
 export default function NotFound() {

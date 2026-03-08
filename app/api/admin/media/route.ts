@@ -2,6 +2,15 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase/client'
 import { getAuthTokenFromRequest, validateAdminRequest } from '@/lib/auth'
 
+type StorageListFile = {
+  name: string
+  id?: string
+  updated_at?: string
+  created_at?: string
+  last_accessed_at?: string
+  metadata?: Record<string, unknown>
+}
+
 export async function GET(request: NextRequest) {
   const token = getAuthTokenFromRequest(request)
   const ok = await validateAdminRequest(token)
@@ -25,7 +34,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Transform data to include public URL
-    const files = data.map((file: any) => {
+    const files = (data as StorageListFile[]).map((file) => {
       const { data: { publicUrl } } = client
         .storage
         .from('images')

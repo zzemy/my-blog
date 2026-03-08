@@ -1,7 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useSupabaseAuthStore } from '@/lib/supabase-auth-store'
+import { useState, useEffect, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -9,8 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
-import { Save, Loader2, Plus, Trash2, Globe, Github, Twitter, Linkedin, Mail } from 'lucide-react'
-import { useForm, useFieldArray } from 'react-hook-form'
+import { Save, Loader2, Plus, Trash2 } from 'lucide-react'
+import { useForm, useFieldArray, type FieldErrors } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { toast } from 'sonner' // Assuming you have sommer or similar toast, or use standard alert for now
@@ -55,13 +54,11 @@ const settingsSchema = z.object({
 type SiteSettings = z.infer<typeof settingsSchema>
 
 export default function SettingsPage() {
-  const { accessToken: _token } = useSupabaseAuthStore()
   const [loading, setLoading] = useState(true)
 
   const [saving, setSaving] = useState(false)
   
   const form = useForm<SiteSettings>({
-    // @ts-ignore zod v4 与 resolver 类型声明不匹配但运行时正常
     resolver: zodResolver(settingsSchema),
     defaultValues: {
        site_title: '',
@@ -84,11 +81,7 @@ export default function SettingsPage() {
   const [keywordInput, setKeywordInput] = useState('')
   const keywords = form.watch('site_keywords') || []
 
-  useEffect(() => {
-    fetchData()
-  }, [])
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true)
     try {
       const settingsRes = await fetch('/api/admin/settings')
@@ -101,20 +94,6 @@ export default function SettingsPage() {
       }
       const data = await settingsRes.json()
       if (data.settings) {
-         // Helper to replace null with empty string/default
-         const sanitize = (obj: any): any => {
-            if (obj === null || obj === undefined) return undefined;
-            if (Array.isArray(obj)) return obj.map(sanitize);
-            if (typeof obj === 'object') {
-              const result: any = {};
-              for (const key in obj) {
-                result[key] = sanitize(obj[key]);
-              }
-              return result;
-            }
-            return obj;
-         }
-
          const s = data.settings
          // Manually sanitize top-level string fields that might be null from DB
          const cleanSettings = {
@@ -152,7 +131,11 @@ export default function SettingsPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [form])
+
+  useEffect(() => {
+    fetchData()
+  }, [fetchData])
 
   const onSubmit = async (data: SiteSettings) => {
     console.log('Submitting data:', data)
@@ -185,9 +168,9 @@ export default function SettingsPage() {
     }
   }
 
-  const onInvalid = (errors: any) => {
+  const onInvalid = (errors: FieldErrors<SiteSettings>) => {
     console.error('Form validation errors:', errors)
-    const firstError = Object.values(errors)[0] as any
+    const firstError = Object.values(errors)[0] as { message?: string } | undefined
     toast.error(`校验失败: ${firstError?.message || '请检查表单填写'}`)
   }
 

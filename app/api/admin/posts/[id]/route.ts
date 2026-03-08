@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase/client'
 import { getAuthTokenFromRequest, validateAdminRequest } from '@/lib/auth'
 
+type CurrentPost = { published: boolean }
+
 // GET - 获取单个文章（需要认证）
 export async function GET(
   request: NextRequest,
@@ -15,7 +17,7 @@ export async function GET(
   
   try {
     const { id } = await params
-    const client = getAdminClient(token || undefined) as any
+    const client = getAdminClient(token || undefined)
 
     const { data, error } = await client.from('posts').select('*').eq('id', id).single()
 
@@ -47,7 +49,7 @@ export async function PUT(
   
   try {
     const { id } = await params
-    const client = getAdminClient(token || undefined) as any
+    const client = getAdminClient(token || undefined)
     const body = await request.json()
 
     // 如果发布状态从 false 变为 true，且未显式传入发布时间，则更新为当前时间
@@ -58,7 +60,9 @@ export async function PUT(
         .eq('id', id)
         .single()
 
-      if (currentPost && !currentPost.published) {
+      const currentPostTyped = currentPost as unknown as CurrentPost | null
+
+      if (currentPostTyped && !currentPostTyped.published) {
         if (!body.published_at) {
           body.published_at = new Date().toISOString()
         }
@@ -67,7 +71,7 @@ export async function PUT(
 
     const { data, error } = await client
       .from('posts')
-      .update(body)
+      .update(body as never)
       .eq('id', id)
       .select()
       .single()
@@ -97,7 +101,7 @@ export async function DELETE(
   
   try {
     const { id } = await params
-    const client = getAdminClient(token || undefined) as any
+    const client = getAdminClient(token || undefined)
 
     const { error } = await client.from('posts').delete().eq('id', id)
 

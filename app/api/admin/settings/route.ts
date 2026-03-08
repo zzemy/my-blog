@@ -74,7 +74,20 @@ function buildApiKeyErrorDetails() {
   ]
 }
 
-export async function GET(request: NextRequest) {
+function getErrorMessage(error: unknown) {
+  if (error instanceof Error) return error.message
+  return String(error)
+}
+
+function getErrorCode(error: unknown) {
+  if (typeof error === 'object' && error !== null && 'code' in error) {
+    const code = (error as { code?: unknown }).code
+    return typeof code === 'string' ? code : undefined
+  }
+  return undefined
+}
+
+export async function GET() {
   try {
     const client = getAdminClient()
     const { data, error } = await client
@@ -95,8 +108,8 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json({ settings })
-  } catch (error: any) {
-    const message = (error?.message || '').toLowerCase()
+  } catch (error: unknown) {
+    const message = getErrorMessage(error).toLowerCase()
     if (message.includes('invalid api key')) {
       return NextResponse.json(
         {
@@ -106,7 +119,7 @@ export async function GET(request: NextRequest) {
         { status: 500 }
       )
     }
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 })
   }
 }
 
@@ -125,7 +138,7 @@ export async function PUT(request: NextRequest) {
     const client = getAdminClient(token || undefined)
     const { data, error } = await client
       .from('site_settings')
-      .update(payload)
+      .update(payload as never)
       .eq('id', 1)
       .select()
       .single()
@@ -179,9 +192,9 @@ export async function PUT(request: NextRequest) {
     }
 
     return NextResponse.json({ settings: data })
-  } catch (error: any) {
-    const code = error?.code as string | undefined
-    const message = error?.message || 'Unknown error'
+  } catch (error: unknown) {
+    const code = getErrorCode(error)
+    const message = getErrorMessage(error) || 'Unknown error'
     const lowerMessage = message.toLowerCase()
 
     if (lowerMessage.includes('invalid api key')) {

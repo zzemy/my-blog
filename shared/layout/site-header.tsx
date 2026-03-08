@@ -1,14 +1,14 @@
 "use client"
 
 import { Link } from "@/i18n/routing"
-import { ModeToggle } from "@/components/layout/mode-toggle"
-import { LanguageToggle } from "@/components/layout/language-toggle"
+import { ModeToggle } from "@/shared/layout/mode-toggle"
+import { LanguageToggle } from "@/shared/layout/language-toggle"
 import { useTranslations } from "next-intl"
 import { Terminal } from "lucide-react"
-import { CommandMenu } from "@/components/layout/command-menu"
-import { MobileNav } from "@/components/layout/mobile-nav"
-import { VantaSwitcher } from "@/components/effects/vanta-switcher"
-import { FontToggle } from "@/components/layout/font-toggle"
+import { CommandMenu } from "@/shared/layout/command-menu"
+import { MobileNav } from "@/shared/layout/mobile-nav"
+import { VantaSwitcher } from "@/shared/effects/vanta-switcher"
+import { FontToggle } from "@/shared/layout/font-toggle"
 import { usePathname } from "next/navigation"
 
 export function SiteHeader() {

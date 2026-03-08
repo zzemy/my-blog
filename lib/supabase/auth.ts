@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import type { User } from '@supabase/supabase-js'
 import type { Database } from '@/lib/supabase/types'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -98,7 +99,7 @@ export async function getSession() {
 /**
  * 监听认证状态变化
  */
-export function onAuthStateChange(callback: (user: any) => void) {
+export function onAuthStateChange(callback: (user: User | null) => void) {
   return supabaseAuth.auth.onAuthStateChange((_event, session) => {
     callback(session?.user ?? null)
   })

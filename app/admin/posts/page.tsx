@@ -1,26 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { useSupabaseAuthStore } from '@/lib/supabase-auth-store'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from '@/components/ui/dialog'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import {
   PlusCircle,
   Edit,
@@ -28,16 +14,13 @@ import {
   Eye,
   FileText,
   Calendar,
-  Tag,
   AlertCircle,
   Search,
-  Clock,
   CheckCircle2,
   Circle,
   X,
   Star,
   Settings,
-  MoreHorizontal,
 } from 'lucide-react'
 
 interface Post {
@@ -46,7 +29,7 @@ interface Post {
   slug: string
   description: string | null
   published: boolean
-  published_at?: string
+  published_at?: string | null
   created_at: string
   updated_at: string
   views: number
@@ -56,14 +39,6 @@ interface Post {
 }
 
 export default function AdminPostsPage() {
-  const { accessToken: _token } = useSupabaseAuthStore() // 保留结构但不使用，避免重命名带来的大量修改，或者直接删掉
-  // 实际上为了避免报错，我把它改成 const { accessToken } = ... 然后不用它。
-  // 但是下面有很多地方用了 token 变量，如果不改名，后面都要删。
-  // 更简单的办法：把 token 设为 undefined 或者干脆不从 store 里取，而是 mock 一个空值，
-  // 然后把所有 fetch 里的 Authorization 头都删掉。
-  //
-  // 让我们一步步来。
-  // 首先，不去解构 token。
   const { accessToken } = useSupabaseAuthStore()
   const [posts, setPosts] = useState<Post[]>([])
 
@@ -101,11 +76,7 @@ export default function AdminPostsPage() {
     return `${yyyy}-${MM}-${dd}T${hh}:${mm}`
   }
 
-  useEffect(() => {
-    fetchPosts()
-  }, [])
-
-  const fetchPosts = async () => {
+  const fetchPosts = useCallback(async () => {
     setLoading(true)
     setError(null)
     try {
@@ -132,7 +103,11 @@ export default function AdminPostsPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [accessToken])
+
+  useEffect(() => {
+    fetchPosts()
+  }, [fetchPosts])
 
   const deletePost = async (id: string, title: string) => {
     if (!confirm(`确定要删除文章"${title}"吗？这个操作不能撤销。`)) return
@@ -176,7 +151,7 @@ export default function AdminPostsPage() {
       const nowISO = new Date().toISOString()
       setPosts(posts.map((p) => 
         p.id === id 
-          ? { ...p, published: !currentStatus, published_at: !currentStatus ? nowISO : null as any }
+          ? { ...p, published: !currentStatus, published_at: !currentStatus ? nowISO : null }
           : p
       ))
     } catch (err) {
@@ -250,7 +225,7 @@ export default function AdminPostsPage() {
     if (!editingPost) return
 
     try {
-      const updateData: any = {
+      const updateData: Record<string, unknown> = {
         title: editForm.title,
         featured: editForm.featured,
         tags: editForm.tags,
@@ -317,7 +292,7 @@ export default function AdminPostsPage() {
       // 刷新列表
       setPosts(posts.filter(p => !selectedPosts.includes(p.id)))
       setSelectedPosts([])
-    } catch (err) {
+    } catch {
       alert('批量删除部分或全部失败')
     } finally {
       setBatchActionLoading(false)
@@ -342,11 +317,11 @@ export default function AdminPostsPage() {
       const nowISO = new Date().toISOString()
       setPosts(posts.map(p => 
         selectedPosts.includes(p.id) 
-          ? { ...p, published: publish, published_at: publish ? (p.published_at || nowISO) : null as any }
+          ? { ...p, published: publish, published_at: publish ? (p.published_at || nowISO) : null }
           : p
       ))
       setSelectedPosts([])
-    } catch (err) {
+    } catch {
       alert('批量操作失败')
     } finally {
       setBatchActionLoading(false)

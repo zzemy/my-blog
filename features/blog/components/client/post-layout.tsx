@@ -4,7 +4,7 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ReadingProgress } from "@/components/blog/reading-progress";
+import { ReadingProgress } from "@/features/blog/components/client/reading-progress";
 
 interface TocItem {
   id: string;

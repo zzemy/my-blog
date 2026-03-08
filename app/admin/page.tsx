@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { ActivityHeatmap } from '@/components/admin/charts'
+import { ActivityHeatmap } from '@/features/admin/components/charts'
 import { useSupabaseAuthStore } from '@/lib/supabase-auth-store'
 import { useRouter } from 'next/navigation'
-import { FileText, Eye, Edit3, MessageSquare, AlertCircle, BarChart3 } from 'lucide-react'
+import { FileText, Eye, Edit3, MessageSquare, BarChart3 } from 'lucide-react'
 import { format } from 'date-fns'
 import Link from 'next/link'
 

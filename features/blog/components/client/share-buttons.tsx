@@ -14,7 +14,7 @@ export function ShareButtons({ url }: { url: string }) {
       await navigator.clipboard.writeText(url);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch (e) {
+    } catch {
       // ignore clipboard errors silently
     }
   };

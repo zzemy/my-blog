@@ -3,10 +3,15 @@ import { getAdminClient } from '@/lib/supabase/client'
 import { getAuthTokenFromRequest, validateAdminRequest } from '@/lib/auth'
 import { Redis } from '@upstash/redis'
 
-const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL || '',
-  token: process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN || '',
-})
+function normalizeEnv(value?: string) {
+  const normalized = value?.trim()
+  return normalized && normalized.length > 0 ? normalized : undefined
+}
+
+const redisUrl = normalizeEnv(process.env.UPSTASH_REDIS_REST_URL) ?? normalizeEnv(process.env.KV_REST_API_URL)
+const redisToken = normalizeEnv(process.env.UPSTASH_REDIS_REST_TOKEN) ?? normalizeEnv(process.env.KV_REST_API_TOKEN)
+const redisEnabled = Boolean(redisUrl?.startsWith('http') && redisToken)
+const redis = redisEnabled ? new Redis({ url: redisUrl!, token: redisToken! }) : null
 
 export async function GET(request: NextRequest) {
   const token = getAuthTokenFromRequest(request)
@@ -30,7 +35,7 @@ export async function GET(request: NextRequest) {
 
     let totalViews = 0
     const postsArray = (allPosts as { slug: string }[] | null) ?? []
-    if (postsArray.length > 0) {
+    if (redis && postsArray.length > 0) {
       try {
         const keys = postsArray.map((p) => `views:${p.slug}`)
         const viewsUnknown = (await redis.mget(...keys)) as unknown[]
@@ -91,7 +96,8 @@ export async function GET(request: NextRequest) {
       tags,
       activity: activityData
     })
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error)
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }

@@ -1,13 +1,14 @@
 import { supabase } from './client'
 import type { Post } from './types'
 import type { PostData as PostListItem } from '../types'
+import { isExpectedSupabaseBuildError, logExpectedSupabaseBuildErrorOnce } from './error-utils'
 
 export interface PostData {
   id: string
   title: string
   slug: string
   description: string
-  content: any
+  content: unknown
   coverImage: string | null
   author: string
   locale: string
@@ -34,7 +35,15 @@ export async function getPublishedPosts(locale: string = 'zh'): Promise<PostList
       .order('published_at', { ascending: false })
 
     if (error) {
-      console.error('Error fetching posts:', error)
+      if (isExpectedSupabaseBuildError(error)) {
+        logExpectedSupabaseBuildErrorOnce(
+          'get-published-posts-query-fallback',
+          'Using empty post list because Supabase is unavailable in this environment:',
+          error
+        )
+      } else {
+        console.error('Error fetching posts:', error)
+      }
       return []
     }
 
@@ -53,7 +62,15 @@ export async function getPublishedPosts(locale: string = 'zh'): Promise<PostList
       locale: post.locale,
     }))
   } catch (error) {
-    console.error('Error fetching posts (this is expected during build if Supabase env vars are not set):', error)
+    if (isExpectedSupabaseBuildError(error)) {
+      logExpectedSupabaseBuildErrorOnce(
+        'get-published-posts-build-fallback',
+        'Using empty post list because Supabase is unavailable in this environment:',
+        error
+      )
+    } else {
+      console.error('Error fetching posts:', error)
+    }
     return []
   }
 }
@@ -69,13 +86,23 @@ export async function getPostBySlug(slug: string, locale: string = 'zh'): Promis
       .single()
 
     if (error) {
-      console.error('Error fetching post:', error)
+      if (isExpectedSupabaseBuildError(error)) {
+        logExpectedSupabaseBuildErrorOnce(
+          'get-post-by-slug-query-fallback',
+          'Using null post because Supabase is unavailable in this environment:',
+          error
+        )
+      } else {
+        console.error('Error fetching post:', error)
+      }
       return null
     }
 
     if (!data) return null
 
     const post = data as Post;
+
+    const metadata = post.metadata as { seo_title?: string; seo_description?: string } | undefined
 
     return {
       id: post.id,
@@ -94,16 +121,24 @@ export async function getPostBySlug(slug: string, locale: string = 'zh'): Promis
       createdAt: post.created_at,
       updatedAt: post.updated_at,
       publishedAt: post.published_at,
-      seo_title: post.metadata?.seo_title,
-      seo_description: post.metadata?.seo_description,
+      seo_title: metadata?.seo_title,
+      seo_description: metadata?.seo_description,
     }
   } catch (error) {
-    console.error('Error fetching post (this is expected during build if Supabase env vars are not set):', error)
+    if (isExpectedSupabaseBuildError(error)) {
+      logExpectedSupabaseBuildErrorOnce(
+        'get-post-by-slug-build-fallback',
+        'Using null post because Supabase is unavailable in this environment:',
+        error
+      )
+    } else {
+      console.error('Error fetching post:', error)
+    }
     return null
   }
 }
 
-export async function getAllTags(locale: string = 'zh'): Promise<Array<{ name: string; count: number }>> {
+export async function getAllTags(): Promise<Array<{ name: string; count: number }>> {
   try {
     const { data, error } = await supabase
       .from('tags')
@@ -111,13 +146,29 @@ export async function getAllTags(locale: string = 'zh'): Promise<Array<{ name: s
       .order('count', { ascending: false })
 
     if (error) {
-      console.error('Error fetching tags:', error)
+      if (isExpectedSupabaseBuildError(error)) {
+        logExpectedSupabaseBuildErrorOnce(
+          'get-all-tags-query-fallback',
+          'Using empty tags because Supabase is unavailable in this environment:',
+          error
+        )
+      } else {
+        console.error('Error fetching tags:', error)
+      }
       return []
     }
 
     return data || []
   } catch (error) {
-    console.error('Error fetching tags (this is expected during build if Supabase env vars are not set):', error)
+    if (isExpectedSupabaseBuildError(error)) {
+      logExpectedSupabaseBuildErrorOnce(
+        'get-all-tags-build-fallback',
+        'Using empty tags because Supabase is unavailable in this environment:',
+        error
+      )
+    } else {
+      console.error('Error fetching tags:', error)
+    }
     return []
   }
 }
@@ -134,7 +185,15 @@ export async function getPostsByTag(tag: string, locale: string = 'zh'): Promise
       .order('published_at', { ascending: false })
 
     if (error) {
-      console.error('Error fetching posts by tag:', error)
+      if (isExpectedSupabaseBuildError(error)) {
+        logExpectedSupabaseBuildErrorOnce(
+          'get-posts-by-tag-query-fallback',
+          'Using empty tagged posts because Supabase is unavailable in this environment:',
+          error
+        )
+      } else {
+        console.error('Error fetching posts by tag:', error)
+      }
       return []
     }
 
@@ -153,7 +212,15 @@ export async function getPostsByTag(tag: string, locale: string = 'zh'): Promise
       locale: post.locale,
     }))
   } catch (error) {
-    console.error('Error fetching posts by tag (this is expected during build if Supabase env vars are not set):', error)
+    if (isExpectedSupabaseBuildError(error)) {
+      logExpectedSupabaseBuildErrorOnce(
+        'get-posts-by-tag-build-fallback',
+        'Using empty tagged posts because Supabase is unavailable in this environment:',
+        error
+      )
+    } else {
+      console.error('Error fetching posts by tag:', error)
+    }
     return []
   }
 }
@@ -163,12 +230,28 @@ export async function incrementPostViews(slug: string, locale: string = 'zh'): P
     const { error } = await supabase.rpc('increment_post_views', {
       post_slug: slug,
       post_locale: locale,
-    } as any)
+    } as never)
 
     if (error) {
-      console.error('Error incrementing views:', error)
+      if (isExpectedSupabaseBuildError(error)) {
+        logExpectedSupabaseBuildErrorOnce(
+          'increment-views-query-fallback',
+          'Skipping view increment because Supabase is unavailable in this environment:',
+          error
+        )
+      } else {
+        console.error('Error incrementing views:', error)
+      }
     }
   } catch (error) {
-    console.error('Error incrementing views (this is expected during build if Supabase env vars are not set):', error)
+    if (isExpectedSupabaseBuildError(error)) {
+      logExpectedSupabaseBuildErrorOnce(
+        'increment-views-build-fallback',
+        'Skipping view increment because Supabase is unavailable in this environment:',
+        error
+      )
+    } else {
+      console.error('Error incrementing views:', error)
+    }
   }
 }

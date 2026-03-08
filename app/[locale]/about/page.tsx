@@ -1,7 +1,7 @@
 import { setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
-import { PostLayout } from "@/components/blog/post-layout";
-import { TipTapRenderer } from "@/components/editor/tiptap-renderer";
+import { PostLayout } from "@/features/blog/components/client/post-layout";
+import { TipTapRenderer } from "@/features/blog/editor/tiptap-renderer";
 import { supabase } from '@/lib/supabase/client';
 
 // Always serve fresh content to reflect about page edits immediately
@@ -10,13 +10,19 @@ export const dynamic = 'force-dynamic';
 
 const locales = ['zh', 'en', 'fr', 'ja'];
 
+type AboutPost = {
+  title: string;
+  description: string | null;
+  content: TiptapNode | TiptapNode[] | null;
+};
+
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
 }
 
 async function getAboutPost(locale: string) {
   // Try locale first, then fallback to zh
-  const fetchPost = async (loc: string) => {
+  const fetchPost = async (loc: string): Promise<AboutPost | null> => {
     const { data, error } = await supabase
       .from('posts')
       .select('*')
@@ -26,7 +32,7 @@ async function getAboutPost(locale: string) {
       .single();
 
     if (error) return null;
-    return data;
+    return data as AboutPost;
   };
 
   const current = await fetchPost(locale);
@@ -77,7 +83,14 @@ type TocItem = {
   depth: number;
 };
 
-function buildToc(content: any): TocItem[] {
+type TiptapNode = {
+  type?: string;
+  text?: string;
+  attrs?: { level?: number };
+  content?: TiptapNode[];
+};
+
+function buildToc(content: TiptapNode | TiptapNode[] | null | undefined): TocItem[] {
   const toc: TocItem[] = [];
   const idCount: Record<string, number> = {};
 
@@ -89,7 +102,7 @@ function buildToc(content: any): TocItem[] {
       .replace(/\s+/g, '-')
       .replace(/-+/g, '-');
 
-  const walk = (node: any) => {
+  const walk = (node: TiptapNode | TiptapNode[] | null | undefined) => {
     if (!node) return;
     if (Array.isArray(node)) {
       node.forEach(walk);
@@ -121,7 +134,7 @@ function buildToc(content: any): TocItem[] {
   return toc;
 }
 
-function extractText(node: any): string {
+function extractText(node: TiptapNode | null | undefined): string {
   if (!node) return '';
   if (node.text) return node.text;
   if (node.content) {

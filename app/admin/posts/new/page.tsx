@@ -2,9 +2,9 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useSupabaseAuthStore } from '@/lib/supabase-auth-store'
 import { pinyin } from 'pinyin-pro'
-import { TipTapEditor } from '@/components/editor/tiptap-editor'
+import type { Content } from '@tiptap/react'
+import { TipTapEditor } from '@/features/blog/editor/tiptap-editor'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -27,7 +27,6 @@ import Link from 'next/link'
 
 export default function NewPostPage() {
   const router = useRouter()
-  const { accessToken: _token } = useSupabaseAuthStore()
   const [saving, setSaving] = useState(false)
 
   const [error, setError] = useState<string | null>(null)
@@ -51,7 +50,7 @@ export default function NewPostPage() {
     description: '',
     cover_image: '',
     tags: [] as string[],
-    content: null as any,
+    content: undefined as Content | undefined,
     published: false,
     locale: 'zh',
     featured: false,
