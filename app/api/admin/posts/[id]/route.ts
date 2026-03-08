@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase/client'
 import { getAuthTokenFromRequest, validateAdminRequest } from '@/lib/auth'
 
-type CurrentPost = { published: boolean }
-
 // GET - 获取单个文章（需要认证）
 export async function GET(
   request: NextRequest,
@@ -60,9 +58,12 @@ export async function PUT(
         .eq('id', id)
         .single()
 
-      const currentPostTyped = currentPost as unknown as CurrentPost | null
-
-      if (currentPostTyped && !currentPostTyped.published) {
+      if (
+        currentPost &&
+        typeof currentPost === 'object' &&
+        'published' in currentPost &&
+        currentPost.published === false
+      ) {
         if (!body.published_at) {
           body.published_at = new Date().toISOString()
         }

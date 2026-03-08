@@ -14,6 +14,21 @@ const eslintConfig = [
   {
     files: ["**/*.{js,jsx,ts,tsx}"],
     rules: {
+      // Guardrail against casually introducing `any` in app code.
+      "@typescript-eslint/no-explicit-any": [
+        "error",
+        {
+          ignoreRestArgs: false,
+        },
+      ],
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: "TSAnyKeyword",
+          message:
+            "Avoid `any`. Prefer `unknown`, concrete interfaces, or properly typed generics.",
+        },
+      ],
       "no-restricted-imports": [
         "error",
         {
@@ -36,6 +51,14 @@ const eslintConfig = [
           ],
         },
       ],
+    },
+  },
+  {
+    files: ["**/*.d.ts"],
+    rules: {
+      // Declaration files sometimes need broad types for external compatibility.
+      "@typescript-eslint/no-explicit-any": "off",
+      "no-restricted-syntax": "off",
     },
   },
   {

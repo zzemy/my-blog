@@ -170,7 +170,7 @@ function getSupabaseClient() {
 export const supabase = new Proxy({} as SupabaseClient<SupabaseDB>, {
   get(_target: unknown, prop: string | symbol) {
     try {
-      return (getSupabaseClient() as unknown as Record<string | symbol, unknown>)[prop]
+      return Reflect.get(getSupabaseClient(), prop)
     } catch (error) {
       console.error('Supabase client error:', error)
       return undefined

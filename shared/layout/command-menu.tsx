@@ -4,7 +4,7 @@ import * as React from 'react';
 import { useRouter } from '@/i18n/routing';
 import { Search } from 'lucide-react';
 import { PostData } from '@/lib/types';
-import { create, insertMultiple, search, Orama } from '@orama/orama';
+import { create, insertMultiple, search } from '@orama/orama';
 import { createTokenizer } from '@orama/tokenizers/mandarin';
 import { useLocale, useTranslations } from 'next-intl';
 import {
@@ -51,13 +51,71 @@ function HighlightText({ text, query }: { text: string; query: string }) {
 
 type SearchScope = 'global' | 'title_summary' | 'content' | 'tags';
 
+const SCOPE_OPTIONS: ReadonlyArray<{ id: SearchScope; label: string }> = [
+  { id: 'global', label: 'Global' },
+  { id: 'title_summary', label: 'Title' },
+  { id: 'content', label: 'Article' },
+  { id: 'tags', label: 'Tag' },
+];
+
+const SEARCH_SCHEMA = {
+  id: 'string',
+  slug: 'string',
+  title: 'string',
+  summary: 'string',
+  date: 'string',
+  content: 'string',
+  tags: 'string[]',
+} as const;
+
+type SearchableProperty = 'title' | 'summary' | 'content' | 'tags';
+
+type SearchDocument = {
+  id: string;
+  slug: string;
+  title: string;
+  summary: string;
+  date: string;
+  content: string;
+  tags: string[];
+};
+
+type SearchApiPost = PostData & {
+  locale: string;
+  content?: string;
+};
+
+type SearchDb = Awaited<ReturnType<typeof create<typeof SEARCH_SCHEMA>>>;
+
+function toSearchDocument(post: SearchApiPost): SearchDocument {
+  return {
+    id: post.id,
+    slug: post.slug,
+    title: post.title,
+    summary: post.summary ?? '',
+    date: post.date,
+    content: post.content ?? '',
+    tags: post.tags ?? [],
+  };
+}
+
+function toPostData(doc: SearchDocument): PostData {
+  return {
+    id: doc.id,
+    slug: doc.slug,
+    title: doc.title,
+    date: doc.date,
+    summary: doc.summary || undefined,
+    tags: doc.tags,
+  };
+}
+
 export function CommandMenu() {
   const router = useRouter();
   const [open, setOpen] = React.useState(false);
   const [query, setQuery] = React.useState('');
   const [searchScope, setSearchScope] = React.useState<SearchScope>('global');
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [oramaDb, setOramaDb] = React.useState<Orama<any> | null>(null);
+  const [oramaDb, setOramaDb] = React.useState<SearchDb | null>(null);
   const [results, setResults] = React.useState<PostData[]>([]);
   const locale = useLocale();
   const t = useTranslations('Common');
@@ -65,24 +123,18 @@ export function CommandMenu() {
   React.useEffect(() => {
     const initOrama = async () => {
       const db = await create({
-        schema: {
-          id: 'string',
-          title: 'string',
-          summary: 'string',
-          date: 'string',
-          content: 'string', // Add content to schema for full-text search
-          tags: 'string[]',
-        },
+        schema: SEARCH_SCHEMA,
         components: {
           tokenizer: await createTokenizer(),
         },
       });
 
       const res = await fetch(`/api/search`);
-      const data: (PostData & { locale: string })[] = await res.json();
+      const data: SearchApiPost[] = await res.json();
       const filteredPosts = data.filter(post => post.locale === locale);
+      const searchableDocs = filteredPosts.map(toSearchDocument);
 
-      await insertMultiple(db, filteredPosts as unknown as Record<string, unknown>[]);
+      await insertMultiple(db, searchableDocs);
       setOramaDb(db);
       setResults(filteredPosts);
     };
@@ -94,21 +146,22 @@ export function CommandMenu() {
     const searchOrama = async () => {
       if (!oramaDb) return;
       
-      const properties = {
+      const propertiesByScope: Record<SearchScope, SearchableProperty[] | undefined> = {
         global: undefined, // search all indexed fields
         title_summary: ['title', 'summary'],
         content: ['content'],
         tags: ['tags'],
-      }[searchScope];
+      };
+      const properties = propertiesByScope[searchScope];
 
-      const searchResult = await search(oramaDb, { 
+      const searchResult = await search<SearchDb, SearchDocument>(oramaDb, {
         term: query, 
         limit: 5,
         threshold: 0, // Require exact matches for tokens
         tolerance: 0, // No typo tolerance
-        properties: properties as string[] | undefined,
+        properties,
       });
-      setResults(searchResult.hits.map(hit => hit.document as unknown as PostData));
+      setResults(searchResult.hits.map(hit => toPostData(hit.document)));
     };
 
     searchOrama();
@@ -154,17 +207,12 @@ export function CommandMenu() {
         </PopoverTrigger>
         <PopoverContent className="p-0 w-[var(--radix-popover-trigger-width)]" align="start" onOpenAutoFocus={(e) => e.preventDefault()}>
           <div className="flex items-center gap-1 p-2 border-b overflow-x-auto no-scrollbar">
-            {[
-              { id: 'global', label: 'Global' },
-              { id: 'title_summary', label: 'Title' },
-              { id: 'content', label: 'Article' },
-              { id: 'tags', label: 'Tag' },
-            ].map((scope) => (
+            {SCOPE_OPTIONS.map((scope) => (
               <Button
                 key={scope.id}
                 variant={searchScope === scope.id ? 'secondary' : 'ghost'}
                 size="sm"
-                onClick={() => setSearchScope(scope.id as SearchScope)}
+                onClick={() => setSearchScope(scope.id)}
                 className={cn(
                   "h-6 text-xs px-2 rounded-full",
                   searchScope === scope.id && "bg-primary/10 text-primary hover:bg-primary/20"

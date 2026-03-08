@@ -6,20 +6,23 @@ import { useTheme } from 'next-themes'
 import { usePathname } from 'next/navigation'
 import { useVanta } from './vanta-context'
 
+type VantaEffectInstance = {
+  destroy: () => void
+}
+
+type VantaEffectFactory = (options: Record<string, unknown>) => VantaEffectInstance
+
 // Extend Window interface to include THREE and p5
 declare global {
   interface Window {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    THREE: any;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    p5: any;
+    THREE?: typeof THREE;
+    p5?: unknown;
   }
 }
 
 export function VantaBackground() {
   const vantaRef = useRef<HTMLDivElement>(null)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const vantaEffectRef = useRef<any>(null)
+  const vantaEffectRef = useRef<VantaEffectInstance | null>(null)
   const { theme } = useTheme()
   const { effect } = useVanta()
   const pathname = usePathname()
@@ -81,15 +84,13 @@ export function VantaBackground() {
             }
         }
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        let effectModule: any;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        let newEffect: any = null;
+        let effectModule: VantaEffectFactory;
+        let newEffect: VantaEffectInstance | null = null;
 
         switch (effect) {
           case 'birds':
             // @ts-expect-error - vanta types are missing
-            effectModule = (await import('vanta/dist/vanta.birds.min')).default
+            effectModule = (await import('vanta/dist/vanta.birds.min')).default as VantaEffectFactory
             if (!isMounted) return
             newEffect = effectModule({
               ...options,
@@ -109,7 +110,7 @@ export function VantaBackground() {
             break
           case 'waves':
             // @ts-expect-error - vanta types are missing
-            effectModule = (await import('vanta/dist/vanta.waves.min')).default
+            effectModule = (await import('vanta/dist/vanta.waves.min')).default as VantaEffectFactory
             if (!isMounted) return
             newEffect = effectModule({
               ...options,
@@ -122,7 +123,7 @@ export function VantaBackground() {
             break
           case 'globe':
             // @ts-expect-error - vanta types are missing
-            effectModule = (await import('vanta/dist/vanta.globe.min')).default
+            effectModule = (await import('vanta/dist/vanta.globe.min')).default as VantaEffectFactory
             if (!isMounted) return
             newEffect = effectModule({
               ...options,
@@ -134,7 +135,7 @@ export function VantaBackground() {
             break
           case 'topology':
             // @ts-expect-error - vanta types are missing
-            effectModule = (await import('vanta/dist/vanta.topology.min')).default
+            effectModule = (await import('vanta/dist/vanta.topology.min')).default as VantaEffectFactory
             if (!isMounted) return
             newEffect = effectModule({
               ...options,
@@ -144,7 +145,7 @@ export function VantaBackground() {
             break
           case 'rings':
             // @ts-expect-error - vanta types are missing
-            effectModule = (await import('vanta/dist/vanta.rings.min')).default
+            effectModule = (await import('vanta/dist/vanta.rings.min')).default as VantaEffectFactory
             if (!isMounted) return
             newEffect = effectModule({
               ...options,
@@ -154,7 +155,7 @@ export function VantaBackground() {
             break
           case 'dots':
             // @ts-expect-error - vanta types are missing
-            effectModule = (await import('vanta/dist/vanta.dots.min')).default
+            effectModule = (await import('vanta/dist/vanta.dots.min')).default as VantaEffectFactory
             if (!isMounted) return
             newEffect = effectModule({
               ...options,
@@ -165,7 +166,7 @@ export function VantaBackground() {
             break
           case 'halo':
             // @ts-expect-error - vanta types are missing
-            effectModule = (await import('vanta/dist/vanta.halo.min')).default
+            effectModule = (await import('vanta/dist/vanta.halo.min')).default as VantaEffectFactory
             if (!isMounted) return
             newEffect = effectModule({
               ...options,

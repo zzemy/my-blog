@@ -209,14 +209,13 @@ export function TipTapEditor({
 
         // 2. Existing Markdown Support
         try {
-          const e = event as unknown as ClipboardEvent
-          const text = e.clipboardData?.getData('text/markdown') || e.clipboardData?.getData('text/plain') || ''
+          const text = event.clipboardData?.getData('text/markdown') || event.clipboardData?.getData('text/plain') || ''
           
           // Include all common markdown triggers: math, tables, headers, lists, quotes, code, formatting, html, footnotes
           const looksMarkdown = /(^|\n)\s{0,3}(#{1,6}\s|[-*+]\s|\d+\.\s|>|```|~~|[*_](?!\s)|`|[-*_]{3,}|!\[|\[|\||\$\$?|\\|<\/?[a-z]|\[\^)/i.test(text)
           
           if (text && looksMarkdown) {
-             e.preventDefault()
+             event.preventDefault()
              ;(async () => {
                // Strategy 1: Try full parse with Math
                try {
