@@ -5,7 +5,7 @@ summary: A personal tech blog and lightweight portfolio to extend my resume with
 tags: [about, resume, portfolio, blog]
 ---
 
-Hi, I'm **ZHalio**. This blog is both my writing space and a lightweight portfolio so hiring managers and collaborators can get a quick, practical view of my work:
+Hi, I'm **emmm**. This blog is both my writing space and a lightweight portfolio so hiring managers and collaborators can get a quick, practical view of my work:
 
 - Stack: **Next.js / React / TypeScript / Tailwind / Supabase** with a focus on engineering quality, performance, and maintainability.
 - Writing: Architecture choices, frontend/backend practice, perf tuning, observability, and real-world postmortems.

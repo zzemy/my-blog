@@ -38,7 +38,7 @@ export function Comments() {
     <div className="mt-10 animate-in fade-in slide-in-from-bottom-2">
       <Giscus
         id="comments"
-        repo="zhalio/my-blog"
+        repo="zzemy/my-blog"
         repoId="R_kgDOQZTj3g"
         category="Announcements"
         categoryId="DIC_kwDOQZTj3s4CyBgh"

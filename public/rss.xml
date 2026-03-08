@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/">
     <channel>
-        <title>ZHalio's Blog</title>
+        <title>emmm's Blog</title>
         <link>https://emmmxx.xyz</link>
         <description>A personal blog about technology and life.</description>
-        <lastBuildDate>Sun, 08 Mar 2026 12:10:30 GMT</lastBuildDate>
+        <lastBuildDate>Sun, 08 Mar 2026 13:56:04 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>Feed for Node.js</generator>
         <language>zh</language>
         <image>
-            <title>ZHalio's Blog</title>
+            <title>emmm's Blog</title>
             <url>https://emmmxx.xyz/icon.png</url>
             <link>https://emmmxx.xyz</link>
         </image>
-        <copyright>All rights reserved 2026, ZHalio</copyright>
+        <copyright>All rights reserved 2026, emmm</copyright>
         <item>
             <title><![CDATA[小爱老师WiFi版（ MTK 架构安卓设备） System 分区扩容与刷机折腾小记]]></title>
             <link>https://emmmxx.xyz/zh/posts/xiaoailaoshiwifibanmtkjiagouanzhuoshebeisystemfenqukuorongyushuajizhetengxiaoji</link>
@@ -133,7 +133,7 @@ fastboot reboot
             <link>https://emmmxx.xyz/zh/posts/about</link>
             <guid isPermaLink="false">https://emmmxx.xyz/zh/posts/about</guid>
             <pubDate>Tue, 20 Jan 2026 08:06:00 GMT</pubDate>
-            <content:encoded><![CDATA[ZHalio's Blog & Portfolio
+            <content:encoded><![CDATA[emmm's Blog & Portfolio
 
 基于 Next.js 16、Tailwind CSS v4、TipTap 和 Supabase 构建的现代化个人博客与轻量作品集。默认内置外链悬浮预览、图片点击放大、代码块复制、Giscus 评论等体验型能力。
 

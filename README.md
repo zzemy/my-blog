@@ -1,4 +1,4 @@
-# ZHalio's Blog & Portfolio
+# emmm's Blog & Portfolio
 
 基于 Next.js 16、Tailwind CSS v4、TipTap 和 Supabase 构建的现代化个人博客与轻量作品集。默认内置外链悬浮预览、图片点击放大、代码块复制、Giscus 评论等体验型能力。
 

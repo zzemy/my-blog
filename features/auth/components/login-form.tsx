@@ -162,7 +162,7 @@ export function SupabaseLoginForm() {
 
         {/* Footer */}
         <div className="mt-6 text-center text-xs text-zinc-500 dark:text-zinc-400">
-          <p>© {new Date().getFullYear()} ZHalio Blog. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} emmm Blog. All rights reserved.</p>
         </div>
       </div>
     </div>

@@ -22,7 +22,7 @@ export function HomeButtons({
       </MagneticButton>
       <MagneticButton className="w-full min-w-0">
         <Button variant="outline" asChild className="h-10 w-full px-2 text-xs sm:h-11 sm:px-4 sm:text-sm">
-          <Link href="https://github.com/zhalio" target="_blank" rel="noreferrer" className="flex items-center justify-center whitespace-nowrap">
+          <Link href="https://github.com/zzemy" target="_blank" rel="noreferrer" className="flex items-center justify-center whitespace-nowrap">
             <Github className="mr-1 hidden size-4 sm:inline" /> <span className="truncate">GitHub</span>
           </Link>
         </Button>

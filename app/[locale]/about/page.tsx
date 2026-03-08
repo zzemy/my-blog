@@ -16,6 +16,24 @@ type AboutPost = {
   content: TiptapNode | TiptapNode[] | null;
 };
 
+function normalizeLegacyBranding(text: string): string {
+  return text.replace(/ZHalio/g, 'emmm').replace(/github\.com\/zhalio/g, 'github.com/zzemy')
+}
+
+function normalizeAboutContent(node: TiptapNode | TiptapNode[] | null): TiptapNode | TiptapNode[] | null {
+  if (!node) return node
+
+  if (Array.isArray(node)) {
+    return node.map((item) => normalizeAboutContent(item) as TiptapNode)
+  }
+
+  return {
+    ...node,
+    text: node.text ? normalizeLegacyBranding(node.text) : node.text,
+    content: node.content ? node.content.map((item) => normalizeAboutContent(item) as TiptapNode) : node.content,
+  }
+}
+
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
 }
@@ -32,7 +50,14 @@ async function getAboutPost(locale: string) {
       .single();
 
     if (error) return null;
-    return data as AboutPost;
+
+    const post = data as AboutPost;
+    return {
+      ...post,
+      title: normalizeLegacyBranding(post.title),
+      description: post.description ? normalizeLegacyBranding(post.description) : post.description,
+      content: normalizeAboutContent(post.content),
+    };
   };
 
   const current = await fetchPost(locale);

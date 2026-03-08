@@ -19,7 +19,7 @@
     "copied": "已复制"
   },
   "Home": {
-    "title": "ZHalio",
+    "title": "emmm",
     "description": "欢迎来到我的博客",
     "viewPosts": "浏览文章",
     "latestPosts": "发现",
@@ -41,7 +41,7 @@
   "About": {
     "title": "关于本站",
     "description": "面向招聘与合作的个人技术博客和作品集",
-    "intro": "你好，我是 ZHalio，这里是我的个人博客与轻量作品集。",
+    "intro": "你好，我是 emmm，这里是我的个人博客与轻量作品集。",
     "content": "我主要分享 Web/全栈方向的实践（Next.js、React、Supabase、Tailwind），以及对工程化、性能与可维护性的经验沉淀。这个站点也作为我的简历补充，集中展示项目案例、技术文章与可运行的 Demo，方便你快速了解我的能力与风格。"
   },
   "Guestbook": {

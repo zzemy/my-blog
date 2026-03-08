@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://emmmxx.xyz</id>
-    <title>ZHalio's Blog</title>
-    <updated>2026-03-08T12:10:30.776Z</updated>
+    <title>emmm's Blog</title>
+    <updated>2026-03-08T13:56:04.464Z</updated>
     <generator>Feed for Node.js</generator>
     <author>
-        <name>ZHalio</name>
+        <name>emmm</name>
         <email>1992107794@qq.com</email>
         <uri>https://emmmxx.xyz</uri>
     </author>
@@ -14,7 +14,7 @@
     <subtitle>A personal blog about technology and life.</subtitle>
     <logo>https://emmmxx.xyz/icon.png</logo>
     <icon>https://emmmxx.xyz/favicon.ico</icon>
-    <rights>All rights reserved 2026, ZHalio</rights>
+    <rights>All rights reserved 2026, emmm</rights>
     <entry>
         <title type="html"><![CDATA[小爱老师WiFi版（ MTK 架构安卓设备） System 分区扩容与刷机折腾小记]]></title>
         <id>https://emmmxx.xyz/zh/posts/xiaoailaoshiwifibanmtkjiagouanzhuoshebeisystemfenqukuorongyushuajizhetengxiaoji</id>
@@ -138,7 +138,7 @@ fastboot reboot
         <id>https://emmmxx.xyz/zh/posts/about</id>
         <link href="https://emmmxx.xyz/zh/posts/about"/>
         <updated>2026-01-20T08:06:00.000Z</updated>
-        <content type="html"><![CDATA[ZHalio's Blog & Portfolio
+        <content type="html"><![CDATA[emmm's Blog & Portfolio
 
 基于 Next.js 16、Tailwind CSS v4、TipTap 和 Supabase 构建的现代化个人博客与轻量作品集。默认内置外链悬浮预览、图片点击放大、代码块复制、Giscus 评论等体验型能力。
 

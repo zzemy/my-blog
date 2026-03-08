@@ -19,7 +19,7 @@
     "copied": "Copied"
   },
   "Home": {
-    "title": "ZHalio",
+    "title": "emmm",
     "description": "welcome to my blog",
     "viewPosts": "View article",
     "latestPosts": "Discover",
@@ -46,7 +46,7 @@
   "About": {
     "title": "About this site",
     "description": "A personal tech blog and portfolio for hiring and collaboration",
-    "intro": "Hi, I'm ZHalio. This is my personal blog and lightweight portfolio.",
+    "intro": "Hi, I'm emmm. This is my personal blog and lightweight portfolio.",
     "content": "I focus on web/full-stack work (Next.js, React, Supabase, Tailwind) and share hands-on notes about engineering quality, performance, and maintainability. This site also extends my resume: it gathers project cases, technical articles, and runnable demos so you can quickly see how I build and ship products."
   },
   "NotFound": {

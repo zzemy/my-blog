@@ -89,7 +89,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
           >
             &gt;_
           </div>
-          <span style={{ fontSize: 32, fontWeight: 'bold', color: '#e4e4e7' }}>ZHalio</span>
+          <span style={{ fontSize: 32, fontWeight: 'bold', color: '#e4e4e7' }}>emmm</span>
         </div>
 
         <div

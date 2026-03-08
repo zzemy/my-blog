@@ -10,6 +10,14 @@ dotenv.config({ path: '.env.local' });
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://emmmxx.xyz';
 const publicDirectory = path.join(process.cwd(), 'public');
 
+function normalizeLegacyBranding(text) {
+  if (typeof text !== 'string') {
+    return text;
+  }
+
+  return text.replace(/ZHalio/g, 'emmm').replace(/github\.com\/zhalio/g, 'github.com/zzemy');
+}
+
 if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
   console.warn('Missing Supabase environment variables. Skipping RSS generation.');
   process.exit(0);
@@ -22,14 +30,14 @@ const supabase = createClient(
 
 async function generateRssFeed() {
   const feed = new Feed({
-    title: "ZHalio's Blog",
+    title: "emmm's Blog",
     description: "A personal blog about technology and life.",
     id: siteUrl,
     link: siteUrl,
     language: "zh",
     image: `${siteUrl}/icon.png`,
     favicon: `${siteUrl}/favicon.ico`,
-    copyright: `All rights reserved ${new Date().getFullYear()}, ZHalio`,
+    copyright: `All rights reserved ${new Date().getFullYear()}, emmm`,
     updated: new Date(),
     generator: "Feed for Node.js",
     feedLinks: {
@@ -38,7 +46,7 @@ async function generateRssFeed() {
       atom: `${siteUrl}/atom.xml`,
     },
     author: {
-      name: "ZHalio",
+      name: "emmm",
       email: "1992107794@qq.com",
       link: siteUrl,
     },
@@ -79,14 +87,14 @@ async function generateRssFeed() {
     }
 
     feed.addItem({
-      title: post.title,
+      title: normalizeLegacyBranding(post.title),
       id: url,
       link: url,
-      description: post.description || '',
-      content,
+      description: normalizeLegacyBranding(post.description || ''),
+      content: normalizeLegacyBranding(content),
       author: [
         {
-          name: post.author || "ZHalio",
+          name: normalizeLegacyBranding(post.author || "emmm"),
           email: "1992107794@qq.com",
           link: siteUrl,
         },
