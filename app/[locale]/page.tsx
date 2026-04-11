@@ -11,6 +11,7 @@ import { getSiteSettings } from "@/lib/site-settings";
 import { TypewriterEffect } from "@/shared/visuals/typewriter-effect";
 import { HandDrawnArrow, HandDrawnStar, HandDrawnCloud, HandDrawnSmiley, HandDrawnScribble } from "@/shared/visuals/doodles";
 import { CartoonBlob1, CartoonBlob2, CartoonBlob3, CartoonStarburst } from "@/shared/visuals/cartoon-shapes";
+import { Particles } from "@/shared/effects/particles";
 
 export const revalidate = 60;
 
@@ -42,6 +43,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
       <div className="w-full max-w-6xl mx-auto px-4 py-16 md:py-24 flex flex-col lg:flex-row items-center justify-between gap-16 relative z-10 min-h-[600px]">
         {/* Subtle dot pattern background for richness */}
         <div className="absolute inset-0 z-0 opacity-40 dark:opacity-20 pointer-events-none" style={{ backgroundImage: 'radial-gradient(#cbd5e1 1px, transparent 1px)', backgroundSize: '32px 32px' }}></div>
+        <Particles className="absolute inset-0 z-0 pointer-events-none opacity-50 dark:opacity-30" quantity={80} ease={80} size={1} />
         
         {/* 左侧文字与按钮区 */}
         <FadeIn className="flex-1 flex flex-col items-center lg:items-start text-center lg:text-left gap-8 mt-8 lg:mt-0 z-20">
