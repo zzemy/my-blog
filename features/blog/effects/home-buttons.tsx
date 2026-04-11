@@ -22,6 +22,6 @@ export function HomeButtons({
           <span className="truncate">GitHub</span>
         </Link>
       </Button>
-    </>  )
-}
+    </>
+  )
 }
