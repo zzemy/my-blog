@@ -8,12 +8,12 @@ import { PostData } from "@/lib/types";
 const DOODLES = [HandDrawnStar, HandDrawnSmiley, HandDrawnCloud];
 
 const CARD_COLORS = [
-  'bg-blue-100 dark:bg-blue-950',
-  'bg-emerald-100 dark:bg-emerald-950',
-  'bg-amber-100 dark:bg-amber-950',
-  'bg-indigo-100 dark:bg-indigo-950',
-  'bg-teal-100 dark:bg-teal-950',
-  'bg-violet-100 dark:bg-violet-950'
+  'bg-blue-100 dark:bg-blue-500/20',
+  'bg-emerald-100 dark:bg-emerald-500/20',
+  'bg-amber-100 dark:bg-amber-500/20',
+  'bg-indigo-100 dark:bg-indigo-500/20',
+  'bg-teal-100 dark:bg-teal-500/20',
+  'bg-violet-100 dark:bg-violet-500/20'
 ];
 
 const container = {
