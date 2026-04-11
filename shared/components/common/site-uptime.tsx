@@ -52,13 +52,12 @@ export function SiteUptimeBadge() {
     <button
       type="button"
       onClick={handleConfetti}
-      className="sketch-ui inline-flex items-center gap-3 bg-background px-4 py-2 text-left text-sm text-foreground border-2 border-foreground/10 hover:border-foreground/20 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-all outline-none font-bold active:scale-95 group font-handwriting-cjk"
+      className="inline-flex items-center gap-2 bg-[#ffeb3b] dark:bg-[#fbc02d] px-6 py-2.5 text-sm text-slate-800 dark:text-slate-900 border-[3px] border-slate-900 shadow-[4px_4px_0_0_rgb(15,23,42,1)] hover:shadow-[6px_6px_0_0_rgb(15,23,42,1)] hover:-translate-y-1 rounded-full transition-all outline-none font-bold active:scale-95 active:translate-y-1 active:shadow-none group font-heading tracking-wide mx-auto lg:mx-0 mt-4 duration-300 relative"
     >
-      <span className="flex flex-col leading-tight">
-        <span className="flex items-center justify-center gap-1.5">
-          <span className="text-foreground/90">本站已强行苟活</span>
-          <span className="font-black text-lg text-primary mx-1">{days}</span>
-          <span className="text-foreground/90">天</span>
+      <span className="flex items-center justify-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-slate-900 group-hover:animate-[spin_4s_linear_infinite]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20"></path><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+        <span>
+          本站安全运行 <span className="font-black text-lg text-slate-900 mx-1">{days}</span> 天
         </span>
       </span>
     </button>

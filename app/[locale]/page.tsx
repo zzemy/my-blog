@@ -36,10 +36,10 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
       {/* 丰富的卡通动态图形背景层 */}
       <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
          <CartoonBlob2 className="absolute -top-[10%] -left-[10%] w-[600px] h-[600px] text-sky-100 fill-sky-100 dark:text-sky-950/40 dark:fill-sky-950/40 animate-[spin_40s_linear_infinite]" />
-         <CartoonBlob3 className="absolute top-[30%] -right-[5%] w-[800px] h-[800px] text-indigo-100 fill-indigo-100 dark:text-indigo-950/40 dark:fill-indigo-950/40 animate-[spin_50s_linear_infinite_reverse]" />
-         <HandDrawnStar className="absolute top-[20%] right-[20%] w-20 h-20 text-amber-200 fill-amber-100 dark:text-amber-700/40 dark:fill-amber-700/40 animate-[bounce_5s_infinite]" />
-         <HandDrawnCloud className="absolute bottom-[20%] left-[10%] w-32 h-32 text-emerald-200 fill-emerald-100 dark:text-emerald-900/40 dark:fill-emerald-900/40 animate-[bounce_8s_infinite_reverse]" />
-         <HandDrawnScribble className="absolute top-[50%] left-[40%] w-24 h-24 text-teal-200 dark:text-teal-900/40 animate-[spin_20s_linear_infinite]" />
+         <CartoonBlob3 className="absolute top-[30%] -right-[5%] w-[800px] h-[800px] text-[#fcdec9] fill-[#fcdec9] dark:text-orange-950/40 dark:fill-orange-950/40 animate-[spin_50s_linear_infinite_reverse]" />
+         <HandDrawnStar className="absolute top-[20%] right-[20%] w-20 h-20 text-[#ffc66d] fill-[#ffe4b5] dark:text-amber-700/40 dark:fill-amber-700/40 animate-[bounce_5s_infinite]" />
+         <HandDrawnCloud className="absolute bottom-[20%] left-[10%] w-32 h-32 text-emerald-300 dark:text-emerald-900/50 stroke-[3px] animate-[bounce_8s_infinite_reverse]" />
+         <HandDrawnScribble className="absolute top-[50%] left-[40%] w-24 h-24 text-indigo-300 dark:text-indigo-900/50 animate-[spin_20s_linear_infinite]" />
       </div>
 
       {/* 内容区域 */}
