@@ -1,4 +1,5 @@
 import { Link } from "@/i18n/routing";
+import Image from "next/image";
 import { getPublishedPosts } from "@/lib/supabase/posts";
 import { getTranslations } from "next-intl/server";
 import { setRequestLocale } from 'next-intl/server';
@@ -77,19 +78,17 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
           <div className="relative w-full max-w-[360px] bg-white dark:bg-slate-800 p-8 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] dark:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.4)] hover:-translate-y-4 hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.15)] dark:hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] active:scale-95 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] z-20 rounded-[3.5rem] border border-slate-100 dark:border-slate-700 overflow-hidden cursor-crosshair group">
 
              {/* Decorative Top Pill */}
-             <div className="absolute top-6 right-8 px-5 py-2 bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 text-sm font-bold rounded-full shadow-sm">
+             <div className="absolute top-6 right-8 px-5 py-2 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30 text-emerald-600 dark:text-emerald-400 text-xs font-bold rounded-full border border-emerald-100 dark:border-emerald-800/30 shadow-sm backdrop-blur-sm z-30">
                  HELLO!
              </div>
 
              {/* Circular Avatar Container */}
-             <div className="w-full aspect-square mt-8 bg-sky-50 dark:bg-sky-900/30 overflow-hidden relative flex flex-col items-center justify-center rounded-[3rem] border border-sky-100 dark:border-sky-800/50 group-hover:scale-105 transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]">
-                <div className="relative z-20 flex flex-col items-center justify-center space-y-4">
-                   <HandDrawnSmiley className="w-40 h-40 text-sky-500 dark:text-sky-400 fill-white dark:fill-slate-800 stroke-[2px] group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]" />
-                </div>
+             <div className="w-full aspect-square mt-4 bg-slate-50 dark:bg-slate-900/50 overflow-hidden relative flex flex-col items-center justify-center rounded-[2.5rem] border border-slate-100 dark:border-slate-700/50 group-hover:shadow-inner transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]">
+                <Image src="/images/touxiang.jpg" alt="Avatar" fill priority sizes="(max-width: 768px) 100vw, 360px" className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out" />
              </div>
 
              {/* Content */}
-             <div className="mt-8 text-center flex flex-col gap-3">
+             <div className="mt-8 text-center flex flex-col gap-3 relative z-20">
                 <span className="text-3xl font-black text-slate-800 dark:text-white font-heading tracking-tight hover:text-sky-500 transition-colors">
                   Hi, I'm emmm!
                 </span>
@@ -103,18 +102,20 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
 
       {/* Posts Grid: 文章列表区域 */}
       <section className="w-full mt-32 max-w-[1280px] mx-auto px-4 md:px-8 space-y-12 relative z-20">
-        <FadeIn delay={0.2} className="flex items-center justify-between pb-8 gap-6 border-b-[6px] border-slate-200 dark:border-slate-800 rounded-b-3xl">
+        <FadeIn delay={0.2} className="flex items-center justify-between pb-8 gap-6 relative">
+          {/* Subtle separator line instead of heavy border */}
+          <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-slate-200 dark:via-slate-800 to-transparent"></div>
           
-          <h2 className="text-4xl lg:text-5xl font-black tracking-tight flex items-center gap-5 text-slate-800 dark:text-white z-10 font-heading">
-            <div className="relative flex items-center justify-center w-16 h-16 bg-pink-400 text-white rounded-[1.5rem] shadow-[0_10px_20px_rgb(244,114,182,0.5)] hover:scale-110 hover:rotate-12 transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] cursor-crosshair">
-               <svg xmlns="http://www.w3.org/2000/svg" className="size-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path></svg>
+          <h2 className="text-3xl lg:text-4xl font-black tracking-tight flex items-center gap-4 text-slate-800 dark:text-white z-10 font-heading">
+            <div className="relative flex items-center justify-center w-12 h-12 bg-gradient-to-br from-pink-400 to-rose-400 text-white rounded-2xl shadow-sm hover:scale-110 hover:rotate-12 transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] cursor-crosshair">
+               <svg xmlns="http://www.w3.org/2000/svg" className="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path></svg>
             </div>
             <span>{t('latestPosts')}</span>
           </h2>
 
-          <Link href="/posts" className="text-lg font-black bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-8 py-4 hover:-translate-y-2 active:translate-y-1 active:scale-95 group flex items-center gap-3 border-none shadow-[0_15px_30px_rgba(0,0,0,0.06)] hover:shadow-[0_25px_50px_rgba(0,0,0,0.12)] rounded-full transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] tracking-wide">
+          <Link href="/posts" className="text-sm md:text-base font-bold bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white px-6 py-2.5 group flex items-center gap-2 border border-slate-200 dark:border-slate-700/50 shadow-sm rounded-full transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] tracking-wide">
             {t('viewAll')} 
-            <svg xmlns="http://www.w3.org/2000/svg" className="size-6 text-slate-400 group-hover:text-pink-500 group-hover:translate-x-2 group-hover:scale-125 transition-all duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" className="size-4 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 group-hover:translate-x-1 transition-all duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
           </Link>
         </FadeIn>
         

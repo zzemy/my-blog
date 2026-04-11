@@ -10,7 +10,7 @@ export function HomeButtons({
 }) {
   return (
     <div className="flex flex-wrap items-center justify-start gap-4 lg:gap-5 w-full mt-4">
-      <Button asChild size="lg" className="h-12 md:h-14 px-8 text-base md:text-lg font-bold group bg-pink-500 hover:bg-pink-400 active:bg-pink-600 text-white transition-all rounded-full cursor-pointer border border-pink-600 shadow-sm hover:translate-y-[-2px] hover:shadow-md active:translate-y-0 active:shadow-sm duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] relative overflow-visible">
+      <Button asChild size="lg" className="h-12 md:h-14 px-8 text-base md:text-lg font-bold group bg-gradient-to-r from-pink-50 to-rose-50 dark:from-pink-900/20 dark:to-rose-900/20 hover:from-pink-100 hover:to-rose-100 dark:hover:from-pink-900/40 dark:hover:to-rose-900/40 text-pink-600 dark:text-pink-300 transition-all rounded-full cursor-pointer border border-pink-200 dark:border-pink-800/30 shadow-sm hover:translate-y-[-2px] hover:shadow-md active:translate-y-0 active:shadow-sm duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] relative overflow-visible">
         <Link href="/posts" className="flex items-center justify-center whitespace-nowrap">
           <span className="truncate mr-3 relative z-10">{viewPostsText}</span>  
           <svg xmlns="http://www.w3.org/2000/svg" className="size-5 relative z-10 group-hover:translate-x-1 group-hover:rotate-12 transition-transform stroke-[2.5px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
