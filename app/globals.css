@@ -186,31 +186,27 @@
   }
   body {
     @apply bg-background text-foreground;
-    background-color: #fdfbf7;
-    background-image: 
-      linear-gradient(rgba(0, 0, 0, 0.02) 2px, transparent 2px),
-      linear-gradient(90deg, rgba(0, 0, 0, 0.02) 2px, transparent 2px);
+    background-color: #faf8f5;
+    background-image: radial-gradient(#d4d0c8 2px, transparent 2px);
     background-size: 32px 32px;
-    background-position: center top;
     font-family: "Nunito", "Quicksand", system-ui, -apple-system, sans-serif;
   }
   .dark body {
-    background-color: #1a1a1a;
-    background-image: 
-      linear-gradient(rgba(255, 255, 255, 0.02) 2px, transparent 2px),
-      linear-gradient(90deg, rgba(255, 255, 255, 0.02) 2px, transparent 2px);
+    background-color: #171717;
+    background-image: radial-gradient(#333 2px, transparent 2px);
+    background-size: 32px 32px;
   }
   .font-heading {
-    font-family: "Cherry Bomb One", "MaShanZhengLocal", var(--font-heading);
+    font-family: inherit;
     letter-spacing: 0.04em;
   }
   .font-handwriting {
-    font-family: inherit; /* removed to unify fonts */
+    font-family: "MaShanZhengLocal", "Comic Sans MS", "Chalkboard SE", "Zhi Mang Xing", cursive;
     letter-spacing: 0.02em;
     font-weight: 700;
   }
   .font-handwriting-cjk {
-    font-family: inherit; /* removed to unify fonts */
+    font-family: "MaShanZhengLocal", "Comic Sans MS", "Chalkboard SE", "Zhi Mang Xing", cursive;
     letter-spacing: 0.02em;
     font-weight: 700;
   }
@@ -218,7 +214,7 @@
 
 @layer components {
   .sketch-ui {
-    border-radius: 12px;
+    border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px !important;
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
   .sketch-ui:not(.no-sketch-hover):hover, .group:hover .sketch-ui.group-hover-trigger {
