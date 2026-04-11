@@ -11,7 +11,6 @@ import { getSiteSettings } from "@/lib/site-settings";
 import { TypewriterEffect } from "@/shared/visuals/typewriter-effect";
 import { HandDrawnArrow, HandDrawnStar, HandDrawnCloud, HandDrawnSmiley, HandDrawnScribble } from "@/shared/visuals/doodles";
 import { CartoonBlob1, CartoonBlob2, CartoonBlob3, CartoonStarburst } from "@/shared/visuals/cartoon-shapes";
-import { Particles } from "@/shared/effects/particles";
 
 export const revalidate = 60;
 
@@ -33,17 +32,16 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
   return (
     <div className="relative min-h-[calc(100vh-4rem)] overflow-hidden flex flex-col justify-start pb-20">
       
-      {/* 丰富的卡通动态图形背景层 */}
+      {/* 极其丰富的绝对纯色无渐变 SVG 动画背景层 */}
       <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
-         <CartoonBlob2 className="absolute -top-[10%] -left-[10%] w-[600px] h-[600px] text-sky-100 fill-sky-100 dark:text-sky-950/40 dark:fill-sky-950/40 animate-[spin_40s_linear_infinite]" />
-         <CartoonBlob3 className="absolute top-[30%] -right-[5%] w-[800px] h-[800px] text-indigo-100 fill-indigo-100 dark:text-indigo-950/40 dark:fill-indigo-950/40 animate-[spin_50s_linear_infinite_reverse]" />
-         <HandDrawnStar className="absolute top-[20%] right-[20%] w-20 h-20 text-amber-200 fill-amber-100 dark:text-amber-700/40 dark:fill-amber-700/40 animate-[bounce_5s_infinite]" />
-         <HandDrawnCloud className="absolute bottom-[20%] left-[10%] w-32 h-32 text-emerald-200 fill-emerald-100 dark:text-emerald-900/40 dark:fill-emerald-900/40 animate-[bounce_8s_infinite_reverse]" />
-         <HandDrawnScribble className="absolute top-[50%] left-[40%] w-24 h-24 text-teal-200 dark:text-teal-900/40 animate-[spin_20s_linear_infinite]" />
+         <div className="absolute top-[10%] left-[5%] w-64 h-64 bg-emerald-500/5 dark:bg-emerald-500/10 rounded-full blur-3xl" />
+         <div className="absolute bottom-[20%] right-[10%] w-72 h-72 bg-sky-500/5 dark:bg-sky-500/10 rounded-full blur-3xl animate-pulse" />
       </div>
 
       {/* 内容区域 */}
       <div className="w-full max-w-6xl mx-auto px-4 py-16 md:py-24 flex flex-col lg:flex-row items-center justify-between gap-16 relative z-10 min-h-[600px]">
+        {/* Subtle dot pattern background for richness */}
+        <div className="absolute inset-0 z-0 opacity-40 dark:opacity-20 pointer-events-none" style={{ backgroundImage: 'radial-gradient(#cbd5e1 1px, transparent 1px)', backgroundSize: '32px 32px' }}></div>
         
         {/* 左侧文字与按钮区 */}
         <FadeIn className="flex-1 flex flex-col items-center lg:items-start text-center lg:text-left gap-8 mt-8 lg:mt-0 z-20">
@@ -66,15 +64,11 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
 
           <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 mt-8 w-full relative z-20">
             <HomeButtons viewPostsText={t('viewPosts')} />
-            <SiteUptimeBadge />
           </div>
         </FadeIn>
 
         {/* 右侧个人卡片 */}
         <FadeIn delay={0.2} className="w-full lg:w-[480px] flex justify-center relative my-12 lg:my-0 lg:pl-10">
-
-          <CartoonBlob1 className="absolute -top-20 -right-16 w-80 h-80 text-violet-100 fill-violet-100 dark:text-violet-900/30 dark:fill-violet-900/30 animate-[spin_25s_linear_infinite] z-10 hover:scale-105 transition-transform duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] scale-90" />
-          <HandDrawnStar className="absolute -bottom-10 -left-10 w-28 h-28 text-amber-300 fill-amber-200 dark:text-amber-600 dark:fill-amber-600/30 animate-[bounce_5s_infinite] z-30 drop-shadow-sm hover:rotate-12 hover:scale-110 transition-transform duration-500 cursor-crosshair opacity-80" />
 
           {/* Main Profile Card */}
           <div className="relative w-full max-w-[320px] bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl p-8 pb-10 shadow-[0_15px_40px_-15px_rgba(0,0,0,0.05)] dark:shadow-2xl z-20 rounded-[2.5rem] border border-white dark:border-slate-700/50 hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] group flex flex-col items-center">
@@ -110,13 +104,15 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
           <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-slate-200 dark:via-slate-800 to-transparent"></div>
           
           <h2 className="text-3xl lg:text-4xl font-black tracking-tight flex items-center gap-4 text-slate-800 dark:text-white z-10 font-heading">
-            <HandDrawnStar className="w-12 h-12 text-amber-400 fill-amber-200 dark:text-amber-600 dark:fill-amber-600/30 animate-[bounce_4s_infinite] hover:scale-110 hover:rotate-12 transition-transform cursor-pointer" />
+            <div className="relative flex items-center justify-center w-12 h-12 bg-gradient-to-br from-pink-400 to-rose-400 text-white rounded-2xl shadow-sm hover:scale-110 hover:rotate-12 transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] cursor-crosshair">
+               <svg xmlns="http://www.w3.org/2000/svg" className="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path></svg>
+            </div>
             <span>{t('latestPosts')}</span>
           </h2>
 
           <Link href="/posts" className="text-sm md:text-base font-bold bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white px-6 py-2.5 group flex items-center gap-2 border border-slate-200 dark:border-slate-700/50 shadow-sm rounded-full transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] tracking-wide">
             {t('viewAll')} 
-            <HandDrawnArrow className="w-5 h-5 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 group-hover:translate-x-1 group-hover:-translate-y-0.5 transition-all duration-300" />
+            <svg xmlns="http://www.w3.org/2000/svg" className="size-4 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 group-hover:translate-x-1 transition-all duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
           </Link>
         </FadeIn>
         

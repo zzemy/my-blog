@@ -2,18 +2,18 @@
 
 import { motion } from 'framer-motion';
 import { Link } from "@/i18n/routing";
-import { Sparkles, Code2, Coffee, Layers, Compass, Zap } from 'lucide-react';
+import { HandDrawnArrow, HandDrawnStar, HandDrawnSmiley, HandDrawnCloud } from "@/shared/visuals/doodles";
 import { PostData } from "@/lib/types";
 
-const ICONS = [Sparkles, Code2, Coffee, Layers, Compass, Zap];
+const DOODLES = [HandDrawnStar, HandDrawnSmiley, HandDrawnCloud];
 
 const CARD_COLORS = [
-  'from-blue-50/80 to-indigo-50/80 dark:from-blue-900/10 dark:to-indigo-900/10',
-  'from-emerald-50/80 to-teal-50/80 dark:from-emerald-900/10 dark:to-teal-900/10',
-  'from-rose-50/80 to-pink-50/80 dark:from-rose-900/10 dark:to-pink-900/10',
-  'from-amber-50/80 to-orange-50/80 dark:from-amber-900/10 dark:to-orange-900/10',
-  'from-violet-50/80 to-purple-50/80 dark:from-violet-900/10 dark:to-purple-900/10',
-  'from-sky-50/80 to-cyan-50/80 dark:from-sky-900/10 dark:to-cyan-900/10'
+  'bg-blue-100 dark:bg-blue-950',
+  'bg-emerald-100 dark:bg-emerald-950',
+  'bg-amber-100 dark:bg-amber-950',
+  'bg-indigo-100 dark:bg-indigo-950',
+  'bg-teal-100 dark:bg-teal-950',
+  'bg-violet-100 dark:bg-violet-950'
 ];
 
 const container = {
@@ -45,18 +45,18 @@ export function PostList({ posts, readMoreText }: PostListProps) {
       animate="show"
     >
       {posts.map((post, i) => {
-        const Icon = ICONS[i % ICONS.length];
+        const Icon = DOODLES[i % DOODLES.length];
         const thumbBg = CARD_COLORS[i % CARD_COLORS.length];
 
         return (
         <motion.article key={post.id} variants={item} className="h-full group">
-          <Link href={`/posts/${post.slug}`} className="block h-full outline-none focus-visible:ring-4 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-2xl bg-white dark:bg-slate-800/60 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-slate-200/50 dark:hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)] border border-slate-100 dark:border-slate-700/50 shadow-sm dark:shadow-none active:translate-y-0.5 relative flex flex-col overflow-hidden">
+          <Link href={`/posts/${post.slug}`} className="block h-full outline-none focus-visible:ring-4 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-3xl bg-white dark:bg-slate-800 transition-all duration-300 hover:-translate-y-2 hover:shadow-xl dark:hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)] border border-slate-100 dark:border-slate-700/50 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.08)] dark:shadow-none active:translate-y-1 relative flex flex-col overflow-hidden">
 
-            {/* Thumbnail Cover - Professional flat aesthetic */}
-            <div className={`h-32 w-full relative overflow-hidden flex items-center justify-center transition-colors border-b border-slate-100/50 dark:border-slate-700/30 bg-gradient-to-br ${thumbBg}`}>
-              <div className="absolute inset-0 bg-white/40 dark:bg-slate-900/40 backdrop-blur-[2px]"></div>
-              <div className="w-16 h-16 rounded-2xl bg-white/60 dark:bg-slate-800/60 shadow-sm border border-white/50 dark:border-slate-700/50 flex items-center justify-center relative z-10 group-hover:scale-110 group-hover:-rotate-3 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]">
-                 <Icon className="w-8 h-8 text-slate-600 dark:text-slate-300" strokeWidth={1.5} />
+            {/* Thumbnail Cover - Rich colorful blocks */}
+            <div className={`h-40 w-full relative overflow-hidden flex items-center justify-center transition-colors ${thumbBg}`}>
+              <div className="absolute inset-0 bg-white/20 dark:bg-slate-900/20 backdrop-blur-[2px]"></div>
+              <div className="w-20 h-20 bg-white/80 dark:bg-slate-800/80 rounded-3xl shadow-sm flex items-center justify-center relative z-10 group-hover:scale-110 group-hover:-rotate-6 transition-transform duration-500">
+                <Icon className="w-10 h-10 text-slate-800 dark:text-slate-100" />
               </div>
             </div>
 
