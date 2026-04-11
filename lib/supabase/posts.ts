@@ -42,7 +42,8 @@ export async function getPublishedPosts(locale: string = 'zh'): Promise<PostList
           error
         )
       } else {
-        console.error('Error fetching posts:', error)
+        // Using console.warn to avoid build-breaking console.errors during Turbopack's development mode when Supabase is not perfectly configured or empty.
+        console.warn('Warning: Could not fetch posts. Returning []', error)
       }
       return []
     }

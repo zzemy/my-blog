@@ -8,7 +8,7 @@ import { HomeButtons } from "@/features/blog/effects/home-buttons";
 import { SiteUptimeBadge } from "@/shared/components/common/site-uptime";
 import { getSiteSettings } from "@/lib/site-settings";
 import { TypewriterEffect } from "@/shared/visuals/typewriter-effect";
-import { HandDrawnStar, HandDrawnCloud, HandDrawnSmiley, HandDrawnScribble } from "@/shared/visuals/doodles";
+import { HandDrawnArrow, HandDrawnStar, HandDrawnCloud, HandDrawnSmiley, HandDrawnScribble } from "@/shared/visuals/doodles";
 import { CartoonBlob1, CartoonBlob2, CartoonBlob3, CartoonStarburst } from "@/shared/visuals/cartoon-shapes";
 
 export const revalidate = 60;
