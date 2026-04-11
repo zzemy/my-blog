@@ -31,20 +31,20 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
   const posts = await getPublishedPosts('zh');
 
   return (
-    <div className="relative min-h-[calc(100vh-4rem)] overflow-hidden flex flex-col justify-start pb-12 overflow-x-hidden w-full">
+    <div className="relative overflow-hidden flex flex-col justify-start pb-12 w-full">
       
       {/* 丰富的卡通动态图形背景层 */}
       <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
-         <CartoonBlob2 className="absolute -top-[5%] -left-[20%] md:-top-[10%] md:-left-[10%] w-[400px] h-[400px] md:w-[600px] md:h-[600px] text-sky-100 fill-sky-100 dark:text-sky-500/10 dark:fill-sky-500/10 animate-[spin_40s_linear_infinite]" />
-         <CartoonBlob3 className="absolute top-[30%] -right-[15%] md:-right-[5%] w-[400px] h-[400px] md:w-[800px] md:h-[800px] text-[#fcdec9] fill-[#fcdec9] dark:text-orange-500/10 dark:fill-orange-500/10 animate-[spin_50s_linear_infinite_reverse]" />
-         <HandDrawnStar className="absolute top-[10%] right-[10%] md:top-[20%] md:right-[20%] w-12 h-12 md:w-20 md:h-20 text-[#ffc66d] fill-[#ffe4b5] dark:text-amber-500/20 dark:fill-amber-500/20 animate-[bounce_5s_infinite]" />
-         <HandDrawnCloud className="absolute bottom-[25%] -left-[5%] md:bottom-[20%] md:left-[10%] w-24 h-24 md:w-32 md:h-32 text-emerald-200 fill-emerald-100 dark:text-emerald-500/20 dark:fill-emerald-500/20 animate-[bounce_8s_infinite_reverse]" />
-         <HandDrawnLeaf className="absolute top-[15%] left-[20%] md:left-[45%] w-10 h-10 md:w-16 md:h-16 text-rose-300 fill-rose-100 dark:text-rose-500/20 dark:fill-rose-500/20 animate-[spin_10s_linear_infinite]" />
-         <HandDrawnHeart className="absolute bottom-[35%] right-[20%] md:bottom-[30%] md:right-[30%] w-12 h-12 md:w-16 md:h-16 text-pink-300 fill-pink-100 dark:text-pink-500/20 dark:fill-pink-500/20 animate-[bounce_6s_infinite]" />
+         <CartoonBlob2 className="absolute -top-[5%] -left-[20%] md:-top-[5%] md:-left-[5%] w-[400px] h-[400px] md:w-[600px] md:h-[600px] text-sky-100 fill-sky-100 dark:text-sky-500/10 dark:fill-sky-500/10 animate-[spin_40s_linear_infinite]" />
+         <CartoonBlob3 className="absolute top-[20%] -right-[15%] md:top-[20%] md:-right-[5%] w-[400px] h-[400px] md:w-[700px] md:h-[700px] text-[#fcdec9] fill-[#fcdec9] dark:text-orange-500/10 dark:fill-orange-500/10 animate-[spin_50s_linear_infinite_reverse]" />
+         <HandDrawnStar className="absolute top-[10%] right-[10%] md:top-[15%] md:right-[20%] w-12 h-12 md:w-16 md:h-16 text-[#ffc66d] fill-[#ffe4b5] dark:text-amber-500/20 dark:fill-amber-500/20 animate-[bounce_5s_infinite]" />
+         <HandDrawnCloud className="absolute bottom-[40%] -left-[5%] md:bottom-[20%] md:left-[10%] w-24 h-24 md:w-32 md:h-32 text-emerald-200 fill-emerald-100 dark:text-emerald-500/20 dark:fill-emerald-500/20 animate-[bounce_8s_infinite_reverse]" />
+         <HandDrawnLeaf className="absolute top-[15%] left-[20%] md:left-[40%] w-10 h-10 md:w-14 md:h-14 text-rose-300 fill-rose-100 dark:text-rose-500/20 dark:fill-rose-500/20 animate-[spin_10s_linear_infinite]" />
+         <HandDrawnHeart className="absolute bottom-[35%] right-[20%] md:bottom-[25%] md:right-[25%] w-12 h-12 md:w-16 md:h-16 text-pink-300 fill-pink-100 dark:text-pink-500/20 dark:fill-pink-500/20 animate-[bounce_6s_infinite]" />
       </div>
 
       {/* 内容区域 */}
-      <div className="w-full max-w-6xl mx-auto px-4 py-8 sm:py-16 md:py-24 flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-16 relative z-10 min-h-auto md:min-h-[600px]">
+      <div className="w-full max-w-6xl mx-auto px-4 py-12 md:py-20 lg:py-24 flex flex-col lg:flex-row items-center justify-center lg:justify-between gap-12 lg:gap-16 relative z-10 lg:min-h-[calc(100vh-10rem)]">
         
         {/* 左侧文字与按钮区 */}
         <FadeIn className="flex-1 flex flex-col items-center lg:items-start text-center lg:text-left gap-6 md:gap-8 mt-4 md:mt-8 lg:mt-0 z-20 w-full">
@@ -113,7 +113,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
       </div>
 
       {/* Posts Grid: 文章列表区域 */}
-      <section className="w-full mt-32 max-w-[1280px] mx-auto px-4 md:px-8 space-y-12 relative z-20">
+      <section className="w-full mt-16 md:mt-24 lg:mt-32 max-w-[1280px] mx-auto px-4 md:px-8 space-y-10 md:space-y-12 relative z-20">
         <FadeIn delay={0.2} className="flex items-center justify-between pb-8 gap-6 relative">
           {/* Subtle separator line instead of heavy border */}
           <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-slate-200 dark:via-slate-800 to-transparent"></div>
