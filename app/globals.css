@@ -207,9 +207,9 @@
     font-weight: 800;
   }
   .font-handwriting-cjk {
-    font-family: var(--font-heading), "ZCOOL KuaiLe", "Yuanti SC", "RuiZi YunZi Ku XingKai GBK", system-ui, sans-serif;
+    font-family: var(--font-heading-cjk), var(--font-heading), "ZCOOL KuaiLe", "Yuanti SC", "RuiZi YunZi Ku XingKai GBK", system-ui, sans-serif;
     letter-spacing: 0;
-    font-weight: 800;
+    font-weight: 400; /* ZCOOL KuaiLe is a 400 weight font */
   }
 }
 

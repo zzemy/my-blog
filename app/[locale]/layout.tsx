@@ -1,5 +1,10 @@
-import { Nunito, Quicksand } from "next/font/google";
-import "@fontsource/zcool-kuaile";
+import { Nunito, Quicksand, ZCOOL_KuaiLe } from "next/font/google";
+
+const zcool = ZCOOL_KuaiLe({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-heading-cjk",
+});
 
 import "../globals.css";
 import "katex/dist/katex.min.css";
@@ -87,7 +92,7 @@ export default async function LocaleLayout({
     <html lang={locale} dir={isRtl ? 'rtl' : 'ltr'} suppressHydrationWarning>
       <head>
       </head>
-      <body className={`${nunito.variable} ${quicksand.variable} min-h-screen bg-background font-sans antialiased text-slate-800 dark:text-slate-200`}>
+      <body className={`${nunito.variable} ${quicksand.variable} ${zcool.variable} min-h-screen bg-background font-sans antialiased text-slate-800 dark:text-slate-200`}>
         <SmoothScroll>
           <NextIntlClientProvider messages={messages}>
             <ThemeProvider
