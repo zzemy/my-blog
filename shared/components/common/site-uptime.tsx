@@ -52,19 +52,14 @@ export function SiteUptimeBadge() {
     <button
       type="button"
       onClick={handleConfetti}
-      className="sketch-ui inline-flex items-center gap-3 rounded-full bg-background/80 px-6 py-3 text-left text-sm text-foreground backdrop-blur-md hover:bg-background transition-all outline-none font-bold active:scale-95"
+      className="sketch-ui inline-flex items-center gap-3 bg-background px-4 py-2 text-left text-sm text-foreground border-2 border-foreground/10 hover:border-foreground/20 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-all outline-none font-bold active:scale-95 group font-handwriting-cjk"
     >
-      <span className="inline-flex h-8 w-8 items-center justify-center rounded-full border-2 border-foreground/20 bg-background" aria-hidden>
-        <Cog className="h-5 w-5 animate-spin text-primary [animation-duration:3s]" />
-      </span>
-
       <span className="flex flex-col leading-tight">
         <span className="flex items-center justify-center gap-1.5">
-          <span className="text-foreground/90">本站已稳定运行</span>
-          <span className="font-black text-lg text-primary">{days}</span>
+          <span className="text-foreground/90">本站已强行苟活</span>
+          <span className="font-black text-lg text-primary mx-1">{days}</span>
           <span className="text-foreground/90">天</span>
         </span>
-        <span className="block w-full text-center text-[11px] text-muted-foreground font-semibold">since 2025.11.20</span>
       </span>
     </button>
   )

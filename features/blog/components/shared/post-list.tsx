@@ -2,19 +2,8 @@
 
 import { motion } from 'framer-motion';
 import { Link } from "@/i18n/routing";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { HandDrawnStar, HandDrawnArrow, HandDrawnSmiley, HandDrawnCloud } from "@/shared/visuals/doodles";
+import { HandDrawnArrow } from "@/shared/visuals/doodles";
 import { PostData } from "@/lib/types";
-
-const DOODLES = [HandDrawnStar, HandDrawnSmiley, HandDrawnCloud];
 
 const container = {
   hidden: { opacity: 0 },
@@ -27,8 +16,8 @@ const container = {
 };
 
 const item = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.2 } }
+  hidden: { opacity: 0, x: -20 },
+  show: { opacity: 1, x: 0, transition: { duration: 0.3 } }
 };
 
 interface PostListProps {
@@ -39,75 +28,53 @@ interface PostListProps {
 export function PostList({ posts, readMoreText }: PostListProps) {
   return (
     <motion.div 
-      className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
+      className="flex flex-col gap-12"
       variants={container}
       initial="hidden"
       animate="show"
     >
-      {posts.map((post, i) => {
-        const Icon = DOODLES[i % DOODLES.length];
-        return (
-        <motion.div key={post.id} variants={item} className="h-full group">
-          <Link href={`/posts/${post.slug}`} className="block h-full outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-xl">
-            <Card className="flex h-full flex-col p-4 md:p-6 relative overflow-visible bg-background/80 backdrop-blur-md transition-all group-hover:border-foreground/30 hover:shadow-[4px_4px_0_0_rgba(0,0,0,0.1)] dark:hover:shadow-[4px_4px_0_0_rgba(255,255,255,0.1)] group-hover:-translate-y-1">
-              
-              {/* Cute corner doodles hidden by default, visible on hover container */}
-              <div className="absolute -top-4 -right-3 size-10 md:size-12 text-primary transform rotate-[15deg] group-hover:rotate-[25deg] group-hover:scale-110 transition-all opacity-0 group-hover:opacity-100 z-20 pointer-events-none drop-shadow-sm">
-                <Icon className="fill-background stroke-[2.5px]" />
+      {posts.map((post) => (
+        <motion.article key={post.id} variants={item} className="group relative pl-4 md:pl-8 border-l-2 border-dashed border-border/50 hover:border-primary/50 transition-colors">
+          
+          {/* Handdrawn circle accent on the border */}
+          <div className="absolute -left-[5px] top-6 w-[8px] h-[8px] rounded-full bg-background border-2 border-primary sketch-ui group-hover:scale-150 transition-all" />
+
+          <Link href={`/posts/${post.slug}`} className="block outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-xl p-2 -ml-2">
+            <header className="mb-3">
+              <time dateTime={post.date} className="text-sm md:text-base font-bold text-muted-foreground/70 mb-2 block font-handwriting tracking-widest">
+                {new Date(post.date).toLocaleDateString(undefined, { 
+                  year: 'numeric', 
+                  month: '2-digit', 
+                  day: '2-digit' 
+                }).replace(/\//g, '.')}
+                {post.readingTime && <span className="ml-2">• {post.readingTime}</span>}
+              </time>
+              <h3 className="text-2xl md:text-3xl font-extrabold tracking-wide text-foreground group-hover:text-primary transition-colors decoration-wavy decoration-2 underline-offset-4 group-hover:underline decoration-primary/60">
+                {post.title}
+              </h3>
+            </header>
+
+            <p className="text-base md:text-lg leading-relaxed text-foreground/80 font-medium mb-4 max-w-3xl">
+              {post.summary || post.excerpt}
+            </p>
+
+            <div className="flex items-center justify-between">
+              <div className="flex flex-wrap gap-2.5">
+                {post.tags?.map((tag) => (
+                  <span key={tag} className="sketch-ui inline-flex items-center px-3 py-1 text-xs md:text-sm font-bold text-primary/80 bg-primary/10 border border-primary/20 group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                    # {tag}
+                  </span>
+                ))}
               </div>
 
-              <CardHeader className="space-y-3 pt-2 px-0">
-                <CardTitle className="line-clamp-2 text-xl md:text-2xl font-extrabold tracking-wide decoration-wavy decoration-2 underline-offset-4 group-hover:underline decoration-primary/60">
-                  {post.title}
-                </CardTitle>
-                <CardDescription className="flex items-center gap-3 text-sm md:text-base font-bold text-muted-foreground/70">
-                  <time dateTime={post.date}>
-                    {new Date(post.date).toLocaleDateString(undefined, { 
-                      year: 'numeric', 
-                      month: '2-digit', 
-                      day: '2-digit' 
-                    }).replace(/\//g, '.')}
-                  </time>
-                  {post.readingTime && (
-                    <>
-                      <span>•</span>
-                      <span>{post.readingTime}</span>
-                    </>
-                  )}
-                </CardDescription>
-              </CardHeader>
-
-              <CardContent className="flex-1 pb-4 px-0">
-                <p className="line-clamp-3 text-base leading-relaxed text-foreground/80 font-medium">
-                  {post.summary || post.excerpt}
-                </p>
-                {post.tags && post.tags.length > 0 && (
-                  <div className="mt-8 flex flex-wrap gap-2.5 relative z-10">
-                    {post.tags.slice(0, 3).map((tag, i) => (
-                      <span key={tag} className="sketch-ui relative z-10 inline-flex items-center px-3 py-1 text-xs md:text-sm font-bold text-primary/80 bg-primary/10 border-primary/20 hover:bg-primary hover:text-primary-foreground transition-colors cursor-pointer">
-                        {tag}
-                      </span>
-                    ))}
-                    {post.tags.length > 3 && (
-                      <span className="sketch-ui relative z-10 inline-flex items-center px-2 py-1 text-xs md:text-sm font-bold text-muted-foreground/70 bg-muted/30">
-                        +{post.tags.length - 3}
-                      </span>
-                    )}
-                  </div>
-                )}
-              </CardContent>
-
-              <CardFooter className="pb-2 pt-4 border-t-2 border-foreground/10 border-dashed mt-auto px-0">
-                <div className="flex w-full items-center justify-between font-bold text-lg md:text-xl text-primary/80 group-hover:text-primary transition-colors">
-                  <span>{readMoreText}</span>
-                  <HandDrawnArrow className="w-7 h-7 md:w-8 md:h-8 -rotate-6 group-hover:translate-x-1 group-hover:-rotate-2 transition-all stroke-[2.5px] fill-transparent" />
-                </div>
-              </CardFooter>
-            </Card>
+              <div className="flex items-center gap-2 font-bold text-lg text-primary/80 group-hover:text-primary transition-colors">
+                <span className="font-handwriting">{readMoreText}</span>
+                <HandDrawnArrow className="w-6 h-6 -rotate-6 group-hover:translate-x-2 group-hover:-rotate-12 transition-all stroke-[2.5px] fill-transparent" />
+              </div>
+            </div>
           </Link>
-        </motion.div>
-        );
-      })}
+        </motion.article>
+      ))}
     </motion.div>
   );
 }

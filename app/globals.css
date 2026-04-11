@@ -186,14 +186,19 @@
   }
   body {
     @apply bg-background text-foreground;
-    background-color: #faf8f5;
-    background-image: radial-gradient(#d1cfcb 2px, transparent 2px);
-    background-size: 32px 32px;
+    background-color: #fdfbf7;
+    background-image: 
+      linear-gradient(90deg, transparent 79px, #abced4 79px, #abced4 81px, transparent 81px),
+      linear-gradient(#eee .1em, transparent .1em);
+    background-size: 100% 1.8em;
     font-family: 'Comic Sans MS', "MaShanZhengLocal", "Ma Shan Zheng", "LXGW WenKai", "STKaiti", "KaiTi", "Source Han Sans SC", "Noto Sans SC", cursive, sans-serif !important;
   }
   .dark body {
-    background-color: #1c1c1c;
-    background-image: radial-gradient(#333333 2px, transparent 2px);
+    background-color: #1a1a1a;
+    background-image: 
+      linear-gradient(90deg, transparent 79px, #2c3e50 79px, #2c3e50 81px, transparent 81px),
+      linear-gradient(#333 .1em, transparent .1em);
+    background-size: 100% 1.8em;
   }
   .font-heading {
     font-family: var(--font-heading);
