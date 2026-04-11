@@ -69,6 +69,7 @@ export function PostList({ posts, readMoreText }: PostListProps) {
               <div className="absolute inset-0 bg-white/20 dark:bg-slate-900/20 backdrop-blur-[1px] transition-all duration-500 group-hover:backdrop-blur-sm"></div>
               <div className={`w-20 h-20 bg-white dark:bg-slate-800 rounded-3xl shadow-sm flex items-center justify-center relative z-10 group-hover:scale-110 group-hover:-rotate-6 transition-transform duration-500 border-2 border-white dark:border-slate-800 ring-4 ring-white/50 dark:ring-slate-800/50 ${thumbBg.text}`}>
                 <Icon className="w-10 h-10" />
+              </div>
             </div>
 
             {/* Card Body */}
