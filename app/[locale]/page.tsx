@@ -119,6 +119,27 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
         </FadeIn>
       </div>
 
+      {/* 趣味涂鸦分隔带 - 填补留白，增加交互丰富度 */}
+      <div className="w-full relative h-24 md:h-32 mt-4 md:mt-8 mb-4 md:-mb-8 overflow-hidden flex items-center justify-center opacity-90 group pointer-events-auto select-none z-10 hidden sm:flex">
+        {/* 手绘虚线波浪 */}
+        <div className="absolute w-[200%] h-0.5 border-t-[3px] border-dashed border-slate-200 dark:border-slate-800 top-1/2 -translate-y-1/2 z-0 hidden md:block opacity-50"></div>
+        
+        {/* 一组可以随着鼠标划过变大跳跃的悬浮涂鸦图标 */}
+        <div className="flex items-center justify-between w-full max-w-[900px] px-8 relative z-10 transition-transform">
+          <HandDrawnSmiley className="w-12 h-12 text-emerald-400 drop-shadow-sm hover:scale-[1.8] hover:-rotate-12 hover:-translate-y-4 hover:text-emerald-500 transition-all duration-300 cursor-grab active:cursor-grabbing hover:drop-shadow-lg" />
+          
+          <HandDrawnPlanet className="w-14 h-14 text-indigo-400 drop-shadow-sm hover:scale-[1.8] hover:rotate-[30deg] hover:-translate-y-4 hover:text-indigo-500 transition-all duration-300 cursor-grab active:cursor-grabbing hover:drop-shadow-lg" />
+          
+          <div className="px-6 py-2.5 border-[3px] border-dashed border-slate-300 dark:border-slate-600 rounded-[2rem] font-black text-slate-400 dark:text-slate-400 tracking-[0.25em] text-sm md:text-base uppercase hover:scale-110 hover:-rotate-[3deg] hover:border-sky-400 dark:hover:border-sky-400 hover:text-sky-500 dark:hover:text-sky-300 transition-all duration-300 font-heading bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm cursor-crosshair hover:shadow-[0_10px_30px_-10px_rgba(0,0,0,0.1)]">
+            Explore 🚀
+          </div>
+          
+          <HandDrawnStar className="w-12 h-12 text-amber-400 drop-shadow-sm hover:scale-[1.8] hover:rotate-[72deg] hover:-translate-y-4 hover:text-amber-500 transition-all duration-300 cursor-grab active:cursor-grabbing hover:drop-shadow-lg" />
+          
+          <HandDrawnSwirl className="w-12 h-12 text-rose-400 drop-shadow-sm hover:scale-[1.8] hover:-rotate-[45deg] hover:-translate-y-4 hover:text-rose-500 transition-all duration-300 cursor-grab active:cursor-grabbing hover:drop-shadow-lg" />
+        </div>
+      </div>
+
       {/* Posts Grid: 文章列表区域 */}
       <section className="w-full mt-8 md:mt-16 lg:mt-20 max-w-[1280px] mx-auto px-4 md:px-8 space-y-10 md:space-y-12 relative z-20">
         <FadeIn delay={0.2} className="flex items-center justify-between pb-8 gap-6 relative">

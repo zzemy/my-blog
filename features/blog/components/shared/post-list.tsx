@@ -2,18 +2,20 @@
 
 import { motion } from 'framer-motion';
 import { Link } from "@/i18n/routing";
-import { HandDrawnArrow, HandDrawnStar, HandDrawnSmiley, HandDrawnCloud } from "@/shared/visuals/doodles";
+import { HandDrawnArrow, HandDrawnStar, HandDrawnSmiley, HandDrawnCloud, HandDrawnPlanet, HandDrawnSparkle, HandDrawnSwirl } from "@/shared/visuals/doodles";
+import { CartoonBlob1, CartoonBlob2, CartoonBlob3 } from "@/shared/visuals/cartoon-shapes";
 import { PostData } from "@/lib/types";
 
-const DOODLES = [HandDrawnStar, HandDrawnSmiley, HandDrawnCloud];
+const DOODLES = [HandDrawnStar, HandDrawnSmiley, HandDrawnCloud, HandDrawnPlanet, HandDrawnSparkle, HandDrawnSwirl];
+const BLOBS = [CartoonBlob1, CartoonBlob2, CartoonBlob3];
 
 const CARD_COLORS = [
-  'bg-blue-100 dark:bg-blue-500/20',
-  'bg-emerald-100 dark:bg-emerald-500/20',
-  'bg-amber-100 dark:bg-amber-500/20',
-  'bg-indigo-100 dark:bg-indigo-500/20',
-  'bg-teal-100 dark:bg-teal-500/20',
-  'bg-violet-100 dark:bg-violet-500/20'
+  { bg: 'bg-blue-100 dark:bg-blue-500/20', text: 'text-blue-500 dark:text-blue-300', blob: 'text-blue-200 fill-blue-100 dark:text-blue-400/20 dark:fill-blue-500/10' },
+  { bg: 'bg-emerald-100 dark:bg-emerald-500/20', text: 'text-emerald-500 dark:text-emerald-300', blob: 'text-emerald-200 fill-emerald-100 dark:text-emerald-400/20 dark:fill-emerald-500/10' },
+  { bg: 'bg-amber-100 dark:bg-amber-500/20', text: 'text-amber-500 dark:text-amber-300', blob: 'text-amber-200 fill-amber-100 dark:text-amber-400/20 dark:fill-amber-500/10' },
+  { bg: 'bg-indigo-100 dark:bg-indigo-500/20', text: 'text-indigo-500 dark:text-indigo-300', blob: 'text-indigo-200 fill-indigo-100 dark:text-indigo-400/20 dark:fill-indigo-500/10' },
+  { bg: 'bg-rose-100 dark:bg-rose-500/20', text: 'text-rose-500 dark:text-rose-300', blob: 'text-rose-200 fill-rose-100 dark:text-rose-400/20 dark:fill-rose-500/10' },     
+  { bg: 'bg-violet-100 dark:bg-violet-500/20', text: 'text-violet-500 dark:text-violet-300', blob: 'text-violet-200 fill-violet-100 dark:text-violet-400/20 dark:fill-violet-500/10' }
 ];
 
 const container = {
