@@ -47,52 +47,52 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
         {/* 左侧文字与按钮区 */}
         <FadeIn className="flex-1 flex flex-col items-center lg:items-start text-center lg:text-left gap-8 mt-8 lg:mt-0 z-20">
           
-          <div className="inline-flex items-center gap-3 px-6 py-3 bg-amber-100 dark:bg-amber-900/30 shadow-[0_8px_15px_-3px_rgba(251,191,36,0.15)] dark:shadow-none border border-amber-200 dark:border-amber-800/50 rounded-full font-bold text-amber-800 dark:text-amber-200 transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] transform hover:scale-105 hover:-translate-y-1 active:scale-95 cursor-default group">
-            <HandDrawnStar className="w-5 h-5 text-amber-500 dark:text-amber-300 fill-amber-300/50 dark:fill-amber-300/20 group-hover:rotate-45 transition-transform duration-300" />
-            <span className="text-sm md:text-base tracking-wide font-heading">Welcome to my digital garden</span>
+          <div className="inline-flex items-center gap-3 px-5 py-2 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 shadow-sm border border-amber-100/50 dark:border-amber-800/30 rounded-full font-bold text-amber-600 dark:text-amber-400 transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] transform hover:scale-105 active:scale-95 cursor-default group backdrop-blur-sm">
+            <HandDrawnStar className="w-4 h-4 text-amber-400 dark:text-amber-500 fill-amber-400/30 dark:fill-amber-500/20 group-hover:rotate-45 transition-transform duration-500" />
+            <span className="text-xs md:text-sm tracking-wide font-heading uppercase">Welcome to my digital garden</span>
           </div>
 
-          <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-[5rem] font-black leading-tight lg:leading-[1.15] text-slate-800 dark:text-white tracking-tight mt-2 z-10 font-heading drop-shadow-sm hover:translate-y-[-2px] transition-transform duration-300">
+          <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-[4.5rem] font-extrabold leading-[1.1] lg:leading-[1.15] text-slate-800 dark:text-white tracking-tight mt-2 z-10 font-heading drop-shadow-sm transition-transform duration-500">
             {settings.site_title || t('title')}
           </h1>
 
-          <div className="relative w-full max-w-xl mx-auto lg:mx-0 mt-6 cursor-default">
-             <div className="text-xl md:text-2xl text-slate-700 dark:text-slate-300 font-bold leading-relaxed font-heading min-h-[4rem] flex items-center h-[4rem]">
+          <div className="relative w-full max-w-xl mx-auto lg:mx-0 mt-4 cursor-default">
+             <div className="text-lg md:text-xl text-slate-600 dark:text-slate-400 font-medium leading-relaxed font-heading min-h-[4rem] flex items-center h-[4rem]">
                <TypewriterEffect text={settings.site_description || t('description')} speed={100} waitBeforeDelete={3000} />
              </div>
-             <HandDrawnCloud className="absolute -top-12 -right-10 w-28 h-28 text-sky-500 dark:text-sky-400 fill-white dark:fill-sky-800 animate-[bounce_4s_infinite] transition-transform hover:scale-125 hover:rotate-12 cursor-grab" />
+             <HandDrawnCloud className="absolute -top-16 -right-4 w-20 h-20 text-sky-400 dark:text-sky-500 fill-sky-50 dark:fill-sky-900/20 animate-[bounce_4s_infinite] transition-transform hover:scale-110 hover:-rotate-6 cursor-grab opacity-80" />
           </div>
 
-          <div className="flex flex-wrap items-center justify-center lg:justify-start gap-5 mt-10 w-full relative z-20">
+          <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 mt-8 w-full relative z-20">
             <HomeButtons viewPostsText={t('viewPosts')} />
           </div>
         </FadeIn>
 
-        {/* 右侧极其活泼的纯色卡通悬浮卡 */}
+        {/* 右侧个人卡片 */}
         <FadeIn delay={0.2} className="w-full lg:w-[480px] flex justify-center relative my-12 lg:my-0 lg:pl-10">
 
-          <CartoonBlob1 className="absolute -top-14 -right-10 w-64 h-64 text-pink-200 fill-pink-200 dark:text-pink-900/40 dark:fill-pink-900/40 animate-[spin_15s_linear_infinite] z-10 hover:scale-110 transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]" />
-          <HandDrawnStar className="absolute -bottom-6 -left-6 w-36 h-36 text-yellow-300 fill-yellow-200 dark:text-yellow-600 dark:fill-yellow-600 animate-[bounce_3s_infinite] z-30 drop-shadow-md hover:rotate-45 hover:scale-110 transition-transform duration-500 cursor-crosshair" />
+          <CartoonBlob1 className="absolute -top-20 -right-16 w-80 h-80 text-pink-100 fill-pink-100 dark:text-pink-900/20 dark:fill-pink-900/20 animate-[spin_20s_linear_infinite] z-10 hover:scale-105 transition-transform duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] scale-90" />
+          <HandDrawnStar className="absolute -bottom-10 -left-10 w-28 h-28 text-yellow-300 fill-yellow-200/50 dark:text-yellow-600 dark:fill-yellow-600/30 animate-[bounce_5s_infinite] z-30 drop-shadow-sm hover:rotate-12 hover:scale-110 transition-transform duration-500 cursor-crosshair opacity-80" />
 
-          {/* Main Floating Card */}
-          <div className="relative w-full max-w-[360px] bg-white dark:bg-slate-800 p-8 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] dark:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.4)] hover:-translate-y-4 hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.15)] dark:hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] active:scale-95 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] z-20 rounded-[3.5rem] border border-slate-100 dark:border-slate-700 overflow-hidden cursor-crosshair group">
+          {/* Main Profile Card */}
+          <div className="relative w-full max-w-[320px] bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl p-8 pb-10 shadow-xl shadow-slate-200/50 dark:shadow-2xl z-20 rounded-[2.5rem] border border-white dark:border-slate-700/50 hover:-translate-y-2 hover:shadow-2xl hover:shadow-slate-200/50 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] group flex flex-col items-center">
 
              {/* Decorative Top Pill */}
-             <div className="absolute top-6 right-8 px-5 py-2 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30 text-emerald-600 dark:text-emerald-400 text-xs font-bold rounded-full border border-emerald-100 dark:border-emerald-800/30 shadow-sm backdrop-blur-sm z-30">
-                 HELLO!
+             <div className="absolute top-6 right-6 px-4 py-1.5 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30 text-emerald-600 dark:text-emerald-400 text-[10px] font-extrabold rounded-full border border-emerald-100 dark:border-emerald-800/30 shadow-sm backdrop-blur-md z-30 tracking-widest uppercase">
+                 HELLO
              </div>
 
-             {/* Circular Avatar Container */}
-             <div className="w-full aspect-square mt-4 bg-slate-50 dark:bg-slate-900/50 overflow-hidden relative flex flex-col items-center justify-center rounded-[2.5rem] border border-slate-100 dark:border-slate-700/50 group-hover:shadow-inner transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]">
-                <Image src="/images/touxiang.jpg" alt="Avatar" fill priority sizes="(max-width: 768px) 100vw, 360px" className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out" />
+             {/* Circular Avatar */}
+             <div className="w-36 h-36 mt-4 relative bg-slate-50 dark:bg-slate-800 rounded-full border-[6px] border-white dark:border-slate-700 shadow-md group-hover:scale-105 transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] overflow-hidden">
+                <Image src="/images/touxiang.jpg" alt="Avatar" fill priority sizes="144px" className="object-cover" />
              </div>
 
              {/* Content */}
-             <div className="mt-8 text-center flex flex-col gap-3 relative z-20">
-                <span className="text-3xl font-black text-slate-800 dark:text-white font-heading tracking-tight hover:text-sky-500 transition-colors">
+             <div className="mt-8 text-center flex flex-col gap-2 relative z-20 w-full">
+                <span className="text-2xl font-extrabold text-slate-800 dark:text-white font-heading tracking-tight hover:text-sky-500 transition-colors">
                   Hi, I'm emmm!
                 </span>
-                <span className="text-sm font-bold text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/80 px-5 py-2.5 rounded-full inline-block mx-auto border border-slate-100 dark:border-slate-700">
+                <span className="text-xs font-bold text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/80 px-4 py-2 mt-2 rounded-full inline-block mx-auto border border-slate-100 dark:border-slate-700 shadow-sm shadow-slate-100 dark:shadow-none">
                   Frontend Developer 🌈
                 </span>
              </div>
