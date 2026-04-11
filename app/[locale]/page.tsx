@@ -8,6 +8,8 @@ import { HomeButtons } from "@/features/blog/effects/home-buttons";
 import { SiteUptimeBadge } from "@/shared/components/common/site-uptime";
 import { getSiteSettings } from "@/lib/site-settings";
 import { TypewriterEffect } from "@/shared/visuals/typewriter-effect";
+import { Particles } from "@/shared/effects/particles";
+import { HeroIllustration } from "@/features/blog/effects/hero-illustration";
 
 export const revalidate = 60;
 
@@ -30,6 +32,15 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
 
   return (
     <div className="relative min-h-[calc(100vh-4rem)] overflow-hidden">
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <Particles
+          className="absolute inset-0"
+          quantity={80}
+          ease={80}
+          color="#38bdf8"
+          refresh
+        />
+      </div>
       <div className="relative z-10 container mx-auto px-4 py-6 md:py-10 flex flex-col items-center">
         {/* Hero Section: 网站欢迎区域 */}
         <FadeIn className="w-full max-w-4xl flex flex-col items-center gap-8 py-16 md:py-24 text-center relative mt-6">
@@ -60,25 +71,33 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
             </svg>
           </div>
 
-          <div className="relative inline-block mt-4">
-            <h1 className="text-6xl font-black leading-tight tracking-tight md:text-8xl lg:leading-[1.1] relative z-10 text-slate-800 dark:text-slate-100">
-              {settings.site_title || t('title')}
-            </h1>
-            <svg className="absolute -bottom-8 left-0 w-full h-16 text-amber-400/90 -z-10 animate-[pulse_3s_ease-in-out_infinite]" viewBox="0 0 200 20" preserveAspectRatio="none">
-              <path stroke="currentColor" strokeWidth="8" strokeLinecap="round" fill="none"
-                d="M5,15 Q50,0 100,10 T195,15" />
-            </svg>
-          </div>
-          
-          <div className="h-10 md:h-12 mt-4 md:mt-6 flex items-center justify-center">
-            <h2 className="text-xl md:text-3xl text-slate-600 dark:text-slate-300 relative font-bold inline-flex items-center">
-              <TypewriterEffect text={settings.site_description || t('description')} speed={80} loop={false} />
-            </h2>
-          </div>
+          <div className="flex flex-col-reverse md:flex-row items-center justify-center gap-8 w-full">
+            <div className="flex flex-col items-center md:items-start text-center md:text-left pt-6 relative z-10">
+              <div className="relative inline-block mt-4">
+                <h1 className="text-6xl font-black leading-tight tracking-tight md:text-8xl lg:leading-[1.1] relative z-10 text-slate-800 dark:text-slate-100">
+                  {settings.site_title || t('title')}
+                </h1>
+                <svg className="absolute -bottom-8 left-0 w-full h-16 text-amber-400/90 -z-10 animate-[pulse_3s_ease-in-out_infinite]" viewBox="0 0 200 20" preserveAspectRatio="none">
+                  <path stroke="currentColor" strokeWidth="8" strokeLinecap="round" fill="none"
+                    d="M5,15 Q50,0 100,10 T195,15" />
+                </svg>
+              </div>
+              
+              <div className="h-10 md:h-12 mt-4 md:mt-6 flex items-center justify-center md:justify-start overflow-hidden">
+                <h2 className="text-xl md:text-3xl text-slate-600 dark:text-slate-300 relative font-bold inline-flex items-center min-w-max">
+                  <TypewriterEffect text={settings.site_description || t('description')} speed={80} loop={false} />
+                </h2>
+              </div>
 
-          <div className="flex w-full max-w-lg flex-col items-center gap-8 mt-10">
-            <HomeButtons viewPostsText={t('viewPosts')} />
-            <SiteUptimeBadge />
+              <div className="flex w-full flex-col items-center md:items-start gap-8 mt-10">
+                <HomeButtons viewPostsText={t('viewPosts')} />
+                <SiteUptimeBadge />
+              </div>
+            </div>
+
+            <div className="hidden md:flex flex-1 justify-end ml-4 mt-10 relative z-10 opacity-90 hover:opacity-100 transition-opacity">
+              <HeroIllustration />
+            </div>
           </div>
         </FadeIn>
 
