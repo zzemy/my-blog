@@ -41,23 +41,6 @@ export function CartoonLandscape() {
         <div className="absolute inset-0 opacity-0 dark:opacity-[0.03]" style={{ backgroundImage: 'linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
       </div>
 
-      {/* 手绘感流动线条 (调整：往下移动至大概在标题 "emmm" 下方的位置，形成动态背景托底感) */}
-      <div className="absolute top-[32%] left-0 w-[200%] h-32 opacity-[0.15] dark:opacity-10 animate-[slide_30s_linear_infinite] z-0">
-        <svg viewBox="0 0 1200 120" preserveAspectRatio="none" className="w-full h-full">
-          <motion.path 
-            d="M 0,60 Q 150,-20 300,60 T 600,60 T 900,60 T 1200,60" 
-            fill="none" 
-            stroke="currentColor" 
-            strokeWidth="3" 
-            strokeDasharray="20 10" 
-            strokeLinecap="round" 
-            initial={{ pathLength: 0 }}
-            animate={{ pathLength: 1 }}
-            transition={{ duration: 5, ease: "easeInOut", repeat: Infinity, repeatType: "mirror" }}
-          />
-        </svg>
-      </div>
-
       {/* 统一风格的高颜值云朵 1 (左上方横穿) */}
       <div className="absolute top-[2%] left-[10%] w-48 md:w-56 h-24 md:h-28 animate-[slide_60s_linear_infinite]">
         <CloudSvg />

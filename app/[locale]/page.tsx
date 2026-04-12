@@ -34,13 +34,13 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
       <CartoonLandscape />
 
       {/* 内容区域 */}
-      <div className="w-full max-w-6xl mx-auto px-4 py-12 md:py-16 lg:py-24 flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-16 xl:gap-20 relative z-10">
+      <div className="w-full max-w-6xl mx-auto px-4 py-8 md:py-12 lg:py-16 flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-16 xl:gap-20 relative z-10">
         
         {/* 左侧文字与按钮区 */}
-        <FadeIn className="w-full lg:w-[55%] flex flex-col items-center lg:items-start text-center lg:text-left z-20">
+        <FadeIn className="flex-1 w-full flex flex-col items-center lg:items-start text-center lg:text-left z-20">
           
-          <div className="animate-float-slow pb-2">
-            <div className="inline-flex items-center gap-2 md:gap-3 px-4 md:px-5 py-2 bg-yellow-100 dark:bg-amber-950/40 shadow-[4px_4px_0px_#f59e0b] dark:shadow-[4px_4px_0px_#78350f] border-2 border-yellow-400 dark:border-amber-700/50 rounded-lg font-bold text-yellow-800 dark:text-amber-400 transition-all duration-300 transform hover:scale-105 active:scale-95 cursor-default group mb-6 md:mb-6 rotate-[-2deg]">
+          <div className="animate-float-slow w-full flex justify-center lg:justify-start">
+            <div className="inline-flex items-center gap-2 md:gap-3 px-4 md:px-5 py-2 bg-yellow-100 dark:bg-amber-950/40 shadow-[4px_4px_0px_#f59e0b] dark:shadow-[4px_4px_0px_#78350f] border-2 border-yellow-400 dark:border-amber-700/50 rounded-lg font-bold text-yellow-800 dark:text-amber-400 transition-all duration-300 transform hover:scale-105 active:scale-95 cursor-default group mb-6 md:mb-8 rotate-[-2deg]">
               <span className="text-[10px] sm:text-xs md:text-sm tracking-widest font-black uppercase">✨ Welcome to my digital garden</span>
             </div>
           </div>
@@ -64,7 +64,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
         </FadeIn>
 
         {/* 右侧个人卡片 */}
-        <FadeIn delay={0.2} className="w-full lg:w-[45%] flex justify-center lg:justify-end relative mt-16 sm:mt-24 lg:my-0">
+        <FadeIn delay={0.2} className="flex-1 w-full flex justify-center lg:justify-end relative mt-12 sm:mt-16 lg:my-0">
           
           <div className="animate-float-rotate relative w-full flex justify-center lg:justify-end">
             {/* Main Profile Card - Neo-Brutalism & Playful design */}
@@ -98,7 +98,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
       </div>
 
       {/* 纯CSS大色块涂鸦分隔带 - Comic 面板风格，不留碎片 */}
-      <div className="w-full relative py-12 md:py-24 flex flex-col items-center justify-center opacity-100 group pointer-events-auto select-none z-10">
+      <div className="w-full relative py-8 md:py-16 flex flex-col items-center justify-center opacity-100 group pointer-events-auto select-none z-10">
         
         <div className="relative group perspective-1000">
            {/* 背景阴影色块 */}
