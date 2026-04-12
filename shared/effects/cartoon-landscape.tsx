@@ -38,8 +38,8 @@ export function CartoonLandscape() {
       {/* 动画笔记本网格背景，营造随时可以涂鸦的纸张感 */}
       <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]" style={{ backgroundImage: 'linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
 
-      {/* 手绘感流动线条 (修复版：放置于极高处并降低透明度，作为纯粹的环境背景) */}
-      <div className="absolute top-[8%] left-0 w-[200%] h-32 opacity-[0.15] dark:opacity-10 animate-[slide_30s_linear_infinite] z-0">
+      {/* 手绘感流动线条 (调整：往下移动至大概在标题 "emmm" 下方的位置，形成动态背景托底感) */}
+      <div className="absolute top-[32%] left-0 w-[200%] h-32 opacity-[0.15] dark:opacity-10 animate-[slide_30s_linear_infinite] z-0">
         <svg viewBox="0 0 1200 120" preserveAspectRatio="none" className="w-full h-full">
           <motion.path 
             d="M 0,60 Q 150,-20 300,60 T 600,60 T 900,60 T 1200,60" 
