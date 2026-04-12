@@ -112,20 +112,20 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
       <section className="w-full mt-8 md:mt-16 lg:mt-20 max-w-[1280px] mx-auto px-4 md:px-8 space-y-10 md:space-y-12 relative z-20">
         <FadeIn delay={0.2} className="flex items-center justify-between pb-8 gap-6 relative">
           {/* Comic-style separator line */}
-          <div className="absolute bottom-0 left-0 w-full h-1 bg-black dark:bg-slate-700 rounded-full"></div>
+          <div className="absolute bottom-0 left-0 w-full h-[3px] bg-slate-200 dark:bg-slate-800 rounded-full"></div>
           
           <h2 className="text-3xl lg:text-4xl font-black tracking-tight flex items-center gap-4 text-slate-800 dark:text-white z-10 font-heading">
-            <div className="flex items-center justify-center w-12 h-12 bg-amber-300 dark:bg-amber-600 border-4 border-black rounded-full shadow-[4px_4px_0px_#000] rotate-[-5deg] animate-[bounce_4s_infinite]">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" stroke="black" strokeWidth="2" className="w-6 h-6">
+            <div className="flex items-center justify-center w-12 h-12 bg-amber-100 text-amber-500 dark:bg-amber-900/40 dark:text-amber-400 border-[3px] border-amber-300 dark:border-amber-700/50 rounded-full shadow-[4px_4px_0px_#fde68a] dark:shadow-[4px_4px_0px_#78350f] rotate-[-5deg] animate-[bounce_4s_infinite]">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="1" className="w-6 h-6">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
               </svg>
             </div>
             <span>{t('latestPosts')}</span>
           </h2>
 
-          <Link href="/posts" className="text-sm md:text-base font-bold bg-white hover:bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-100 px-6 py-2.5 group flex items-center gap-2 border-2 border-black dark:border-slate-500 shadow-[4px_4px_0px_#000] dark:shadow-[4px_4px_0px_#64748b] hover:shadow-[6px_6px_0px_#000] dark:hover:shadow-[6px_6px_0px_#64748b] hover:-translate-y-1 transition-all duration-300 ease-in-out cursor-pointer rounded-lg uppercase tracking-wider">
+          <Link href="/posts" className="text-sm md:text-base font-bold bg-white hover:bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 px-6 py-2.5 group flex items-center gap-2 border-2 border-slate-200 dark:border-slate-700 shadow-[4px_4px_0px_#e2e8f0] dark:shadow-[4px_4px_0px_#1e293b] hover:shadow-[6px_6px_0px_#cbd5e1] dark:hover:shadow-[6px_6px_0px_#0f172a] hover:-translate-y-1 transition-all duration-300 ease-in-out cursor-pointer rounded-lg uppercase tracking-wider">
             {t('viewAll')} 
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="3" stroke="currentColor" className="w-5 h-5 group-hover:translate-x-1 transition-transform">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-5 h-5 group-hover:translate-x-1 transition-transform">
               <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
             </svg>
           </Link>
