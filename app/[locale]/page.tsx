@@ -65,10 +65,10 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
         <FadeIn delay={0.2} className="w-full lg:w-[480px] xl:w-[500px] flex justify-center lg:justify-end xl:justify-center relative mt-16 sm:mt-24 lg:my-0 lg:pl-10">
 
           {/* Main Profile Card - Neo-Brutalism & Playful design */}
-          <div className="relative w-full max-w-[280px] sm:max-w-[320px] bg-[#fff9ed] dark:bg-slate-800 p-8 sm:p-10 pb-10 sm:pb-12 shadow-[12px_12px_0px_#000] dark:shadow-[12px_12px_0px_#0f172a] z-20 rounded-xl border-4 border-black dark:border-slate-700 hover:-translate-y-2 hover:-rotate-2 hover:shadow-[16px_16px_0px_#000] dark:hover:shadow-[16px_16px_0px_#0f172a] transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] group flex flex-col items-center rotate-1">
+          <div className="relative w-full max-w-[280px] sm:max-w-[320px] bg-[#fff9ed] dark:bg-slate-800 p-8 sm:p-10 pb-10 sm:pb-12 shadow-[8px_8px_0px_#e2e8f0] dark:shadow-[8px_8px_0px_#1e293b] z-20 rounded-xl border-2 border-slate-200 dark:border-slate-700 hover:-translate-y-2 hover:-rotate-2 hover:shadow-[14px_14px_0px_#cbd5e1] dark:hover:shadow-[14px_14px_0px_#0f172a] transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] group flex flex-col items-center rotate-1">
 
              {/* Decorative Top Pill */}
-             <div className="absolute -top-4 -right-4 px-4 py-2 bg-rose-400 dark:bg-rose-600 text-white font-black text-xs border-2 border-black rounded-lg shadow-[4px_4px_0px_#000] rotate-[10deg] tracking-widest uppercase">
+             <div className="absolute -top-4 -right-4 px-4 py-2 bg-sky-400 dark:bg-sky-500 text-white font-black text-xs border-2 border-sky-100 dark:border-slate-600 rounded-lg shadow-[4px_4px_0px_#bae6fd] dark:shadow-[4px_4px_0px_#0ea5e9] rotate-[10deg] tracking-widest uppercase">
                  HELLO!
              </div>
 
