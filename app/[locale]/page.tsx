@@ -46,27 +46,27 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
       <div className="w-full max-w-[1400px] mx-auto px-4 py-12 md:py-16 lg:py-20 xl:py-28 flex flex-col lg:flex-row items-center justify-center lg:justify-between gap-12 lg:gap-10 xl:gap-16 relative z-10">
         
         {/* 左侧文字与按钮区 */}
-        <FadeIn className="flex-1 flex flex-col items-center lg:items-start text-center lg:text-left gap-6 md:gap-8 mt-4 md:mt-8 lg:mt-0 z-20 w-full lg:pr-10 xl:pr-16">
+        <FadeIn className="flex-1 flex flex-col items-center lg:items-start text-center lg:text-left gap-8 md:gap-12 mt-8 md:mt-12 lg:mt-0 z-20 w-full lg:pr-10 xl:pr-16">
           
           <div className="inline-flex items-center gap-2 md:gap-3 px-4 md:px-5 py-2 bg-white dark:bg-slate-800 shadow-[4px_4px_0px_#e2e8f0] dark:shadow-[4px_4px_0px_#1e293b] border-2 border-slate-200 dark:border-slate-700 rounded-full font-bold text-slate-600 dark:text-slate-300 transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] transform hover:scale-105 active:scale-95 cursor-default group">
             <HandDrawnSparkle className="w-3.5 h-3.5 md:w-4 md:h-4 text-emerald-500 fill-emerald-200 animate-pulse" />
             <span className="text-[10px] sm:text-xs md:text-sm tracking-wide font-heading uppercase text-emerald-600 dark:text-emerald-400">Welcome to my digital garden</span>
           </div>
 
-          <h1 className="text-5xl sm:text-6xl md:text-[5.5rem] lg:text-[6rem] xl:text-[6.5rem] font-black leading-[1.1] text-slate-800 dark:text-slate-100 tracking-tight mt-2 md:mt-4 z-10 font-heading relative inline-block group">
+          <h1 className="text-5xl sm:text-6xl md:text-[5.5rem] lg:text-[6rem] xl:text-[6.5rem] font-black leading-[1.2] lg:leading-[1.1] text-slate-800 dark:text-slate-100 tracking-tight z-10 font-heading relative inline-block group">
             <span className="relative z-10 inline-block px-1">{settings.site_title || t('title')}</span>
-            <HandDrawnUnderline className="absolute bottom-1 -left-2 w-[110%] h-4 sm:h-5 text-sky-400/90 dark:text-sky-400/60 -rotate-2 z-[-1] transition-transform duration-300 group-hover:scale-105 group-hover:-rotate-3" />
-            <HandDrawnStar className="hidden md:block absolute -top-6 -right-10 w-10 h-10 md:w-14 md:h-14 text-yellow-400 fill-yellow-200 dark:text-yellow-500/80 dark:fill-yellow-500/40 animate-[spin_6s_linear_infinite] z-0 opacity-100 group-hover:scale-125 transition-transform" />
+            <HandDrawnUnderline className="absolute bottom-[-4px] sm:bottom-0 -left-2 w-[110%] h-4 sm:h-5 text-sky-400/90 dark:text-sky-400/60 -rotate-2 z-[-1] transition-transform duration-300 group-hover:scale-105 group-hover:-rotate-3" />
+            <HandDrawnStar className="hidden md:block absolute -top-8 -right-12 w-10 h-10 md:w-14 md:h-14 text-yellow-400 fill-yellow-200 dark:text-yellow-500/80 dark:fill-yellow-500/40 animate-[spin_6s_linear_infinite] z-0 opacity-100 group-hover:scale-125 transition-transform" />
           </h1>
 
-          <div className="relative w-full max-w-[90%] sm:max-w-md md:max-w-2xl mx-auto lg:mx-0 mt-6 md:mt-8 cursor-default">
-             <HandDrawnArrow className="hidden md:block absolute top-[25%] -translate-y-1/2 -left-12 lg:-left-20 w-14 h-14 md:w-16 md:h-16 text-emerald-400/80 dark:text-emerald-400/60 rotate-[130deg] opacity-100 hover:scale-110 hover:-translate-x-2 transition-all duration-300 z-10" />
-             <div className="relative min-h-[72px] sm:min-h-[84px] md:min-h-[96px] text-[15px] sm:text-lg md:text-xl lg:text-xl text-slate-500 dark:text-slate-400 leading-relaxed z-10 w-full max-w-xl text-center lg:text-left mx-auto lg:mx-0 transition-all duration-300 flex items-start justify-center lg:justify-start">
+          <div className="relative w-full max-w-[90%] sm:max-w-md md:max-w-2xl mx-auto lg:mx-0 cursor-default">
+             <HandDrawnArrow className="hidden md:block absolute top-[15%] -translate-y-1/2 -left-12 lg:-left-20 w-14 h-14 md:w-16 md:h-16 text-emerald-400/80 dark:text-emerald-400/60 rotate-[130deg] opacity-100 hover:scale-110 hover:-translate-x-2 transition-all duration-300 z-10" />
+             <div className="relative min-h-[80px] sm:min-h-[96px] text-base sm:text-lg md:text-xl lg:text-2xl text-slate-500 dark:text-slate-400 leading-relaxed sm:leading-loose z-10 w-full max-w-xl text-center lg:text-left mx-auto lg:mx-0 transition-all duration-300 flex items-start justify-center lg:justify-start">
                <TypewriterEffect text={settings.site_description || t('description')} speed={50} waitBeforeDelete={6000} />
              </div>
           </div>
 
-          <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 md:gap-5 mt-6 md:mt-10 relative z-20">
+          <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 md:gap-6 mt-4 md:mt-6 relative z-20">
              <HomeButtons viewPostsText={t('viewPosts')} />
              <SiteUptimeBadge />
           </div>
@@ -75,30 +75,30 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
         </FadeIn>
 
         {/* 右侧个人卡片 */}
-        <FadeIn delay={0.2} className="w-full lg:w-[480px] xl:w-[500px] flex justify-center lg:justify-end xl:justify-center relative mt-14 sm:my-12 lg:my-0 lg:pl-10">
+        <FadeIn delay={0.2} className="w-full lg:w-[480px] xl:w-[500px] flex justify-center lg:justify-end xl:justify-center relative mt-16 sm:mt-24 lg:my-0 lg:pl-10">
 
           <CartoonBlob1 className="absolute -top-12 -right-8 md:-top-16 md:-right-10 w-48 h-48 md:w-64 md:h-64 text-amber-200 fill-amber-100 dark:fill-amber-400 dark:stroke-none opacity-40 dark:opacity-10 animate-[spin_25s_linear_infinite] z-10 hover:scale-105 transition-transform duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] scale-90" />
 
           {/* Main Profile Card - Neo-Brutalism & Playful design */}
-          <div className="relative w-full max-w-[280px] sm:max-w-[320px] bg-white dark:bg-slate-800 p-6 sm:p-8 pb-8 sm:pb-10 shadow-[8px_8px_0px_#e2e8f0] dark:shadow-[8px_8px_0px_#1e293b] z-20 rounded-[2.5rem] border-2 border-slate-200 dark:border-slate-700 hover:-translate-y-2 hover:-rotate-1 hover:shadow-[14px_14px_0px_#cbd5e1] dark:hover:shadow-[14px_14px_0px_#0f172a] transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] group flex flex-col items-center">
+          <div className="relative w-full max-w-[280px] sm:max-w-[320px] bg-white dark:bg-slate-800 p-8 sm:p-10 pb-10 sm:pb-12 shadow-[8px_8px_0px_#e2e8f0] dark:shadow-[8px_8px_0px_#1e293b] z-20 rounded-[2.5rem] border-2 border-slate-200 dark:border-slate-700 hover:-translate-y-2 hover:-rotate-1 hover:shadow-[14px_14px_0px_#cbd5e1] dark:hover:shadow-[14px_14px_0px_#0f172a] transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] group flex flex-col items-center">
 
              {/* Decorative Top Pill */}
-             <div className="absolute top-4 right-5 sm:top-6 sm:right-6 px-3 sm:px-4 py-1 sm:py-1.5 bg-slate-100 dark:bg-slate-800/80 text-slate-500 dark:text-slate-300 text-[9px] sm:text-[10px] font-bold rounded-full border border-slate-200/50 dark:border-slate-600/50 shadow-sm backdrop-blur-md z-30 tracking-widest uppercase">
+             <div className="absolute top-5 right-6 sm:top-8 sm:right-8 px-3 sm:px-4 py-1 sm:py-1.5 bg-slate-100 dark:bg-slate-800/80 text-slate-500 dark:text-slate-300 text-[9px] sm:text-[10px] font-bold rounded-full border border-slate-200/50 dark:border-slate-600/50 shadow-sm backdrop-blur-md z-30 tracking-widest uppercase">
                  HELLO
              </div>
 
              {/* Circular Avatar */}
-             <div className="w-28 h-28 sm:w-36 sm:h-36 mt-4 relative bg-slate-50 dark:bg-slate-800/50 rounded-full border-[4px] sm:border-[6px] border-white dark:border-slate-700/80 shadow-md group-hover:scale-105 transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] overflow-hidden">
-                <Image src="/images/touxiang.jpg" alt="Avatar" fill priority sizes="(max-width: 640px) 112px, 144px" className="object-cover" />
+             <div className="w-32 h-32 sm:w-40 sm:h-40 mt-6 sm:mt-8 relative bg-slate-50 dark:bg-slate-800/50 rounded-full border-[4px] sm:border-[6px] border-white dark:border-slate-700/80 shadow-md group-hover:scale-105 transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] overflow-hidden">
+                <Image src="/images/touxiang.jpg" alt="Avatar" fill priority sizes="(max-width: 640px) 128px, 160px" className="object-cover" />
              </div>
 
              {/* Content */}
-             <div className="mt-6 sm:mt-8 text-center flex flex-col gap-1.5 sm:gap-2 relative z-20 w-full">
-                <span className="text-xl sm:text-2xl font-extrabold text-slate-800 dark:text-slate-100 font-heading tracking-tight hover:text-sky-500 transition-colors">
+             <div className="mt-8 sm:mt-10 text-center flex flex-col gap-2 relative z-20 w-full">
+                <span className="text-2xl sm:text-3xl font-extrabold text-slate-800 dark:text-slate-100 font-heading tracking-tight hover:text-sky-500 transition-colors mb-1">
                   Hi, I&apos;m emmm!
                 </span>
-                <span className="text-[10px] sm:text-xs font-bold text-slate-500 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/60 px-3 sm:px-4 py-1.5 sm:py-2 mt-1 sm:mt-2 rounded-full flex items-center justify-center gap-1 sm:gap-1.5 mx-auto border border-slate-100 dark:border-slate-700/80 shadow-sm shadow-slate-100 dark:shadow-none">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-sky-500 dark:text-sky-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m18 16 4-4-4-4"></path><path d="m6 8-4 4 4 4"></path><path d="m14.5 4-5 16"></path></svg>
+                <span className="text-xs sm:text-sm font-bold text-slate-500 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/60 px-4 py-2 sm:py-2.5 mt-2 rounded-full flex items-center justify-center gap-1.5 mx-auto border border-slate-100 dark:border-slate-700/80 shadow-sm shadow-slate-100 dark:shadow-none">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5 text-sky-500 dark:text-sky-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m18 16 4-4-4-4"></path><path d="m6 8-4 4 4 4"></path><path d="m14.5 4-5 16"></path></svg>
                   Frontend Developer
                 </span>
              </div>
