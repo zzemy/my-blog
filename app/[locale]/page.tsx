@@ -47,27 +47,26 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
       <div className="w-full max-w-[1400px] mx-auto px-4 py-12 md:py-20 lg:py-24 xl:py-32 flex flex-col lg:flex-row items-center justify-center lg:justify-between gap-16 md:gap-20 lg:gap-24 xl:gap-32 relative z-10">
         
         {/* 左侧文字与按钮区 */}
-        <FadeIn className="flex-1 flex flex-col items-center lg:items-start text-center lg:text-left gap-8 md:gap-12 mt-8 md:mt-12 lg:mt-0 z-20 w-full lg:pr-4 xl:pr-10">
+        <FadeIn className="flex-1 flex flex-col items-center lg:items-start text-center lg:text-left z-20 w-full lg:pr-4 xl:pr-10">
           
-          <div className="inline-flex items-center gap-2 md:gap-3 px-4 md:px-5 py-2 bg-white dark:bg-slate-800 shadow-[4px_4px_0px_#e2e8f0] dark:shadow-[4px_4px_0px_#1e293b] border-2 border-slate-200 dark:border-slate-700 rounded-full font-bold text-slate-600 dark:text-slate-300 transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] transform hover:scale-105 active:scale-95 cursor-default group">
+          <div className="inline-flex items-center gap-2 md:gap-3 px-4 md:px-5 py-2 bg-white dark:bg-slate-800 shadow-[4px_4px_0px_#e2e8f0] dark:shadow-[4px_4px_0px_#1e293b] border-2 border-slate-200 dark:border-slate-700 rounded-full font-bold text-slate-600 dark:text-slate-300 transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] transform hover:scale-105 active:scale-95 cursor-default group mb-6 md:mb-8">
             <HandDrawnSparkle className="w-3.5 h-3.5 md:w-4 md:h-4 text-emerald-500 fill-emerald-200 animate-pulse" />
             <span className="text-[10px] sm:text-xs md:text-sm tracking-wide font-heading uppercase text-emerald-600 dark:text-emerald-400">Welcome to my digital garden</span>
           </div>
 
-          <h1 className="text-5xl sm:text-6xl md:text-[5.5rem] lg:text-[6rem] xl:text-[6.5rem] font-black leading-[1.2] lg:leading-[1.1] text-slate-800 dark:text-slate-100 tracking-tight z-10 font-heading relative inline-block group">
+          <h1 className="text-5xl sm:text-6xl md:text-[5.5rem] lg:text-[6rem] xl:text-[6.5rem] font-black leading-[1.1] text-slate-800 dark:text-slate-100 tracking-tight z-10 font-heading relative inline-block group mb-6 md:mb-8">
             <span className="relative z-10 inline-block px-1">{settings.site_title || t('title')}</span>
             <HandDrawnUnderline className="absolute bottom-[-4px] sm:bottom-0 -left-2 w-[110%] h-4 sm:h-5 text-sky-400/90 dark:text-sky-400/60 -rotate-2 z-[-1] transition-transform duration-300 group-hover:scale-105 group-hover:-rotate-3" />
-            <HandDrawnStar className="hidden md:block absolute -top-8 -right-8 w-10 h-10 md:w-16 md:h-16 text-yellow-400 fill-yellow-200 dark:text-yellow-500/80 dark:fill-yellow-500/40 animate-[spin_6s_linear_infinite] z-0 opacity-100 group-hover:scale-125 transition-transform" />
+            <HandDrawnStar className="hidden md:block absolute -top-4 -right-16 w-10 h-10 md:w-14 md:h-14 text-yellow-400 fill-yellow-200 dark:text-yellow-500/80 dark:fill-yellow-500/40 animate-[spin_6s_linear_infinite] z-0 opacity-100 group-hover:scale-125 transition-transform" />
           </h1>
 
-          <div className="relative w-full max-w-[90%] sm:max-w-md md:max-w-2xl mx-auto lg:mx-0 cursor-default">
-             <HandDrawnArrow className="hidden md:block absolute -top-12 left-16 w-12 h-12 md:w-14 md:h-14 text-emerald-400/80 dark:text-emerald-400/60 rotate-[80deg] opacity-100 hover:scale-110 hover:-translate-x-2 transition-all duration-300 z-10" />
-             <div className="relative min-h-[80px] sm:min-h-[96px] text-base sm:text-lg md:text-xl lg:text-2xl text-slate-500 dark:text-slate-400 leading-relaxed sm:leading-loose z-10 w-full max-w-xl text-center lg:text-left mx-auto lg:mx-0 transition-all duration-300 flex items-start justify-center lg:justify-start">
+          <div className="relative w-full max-w-[90%] sm:max-w-md md:max-w-2xl mx-auto lg:mx-0 cursor-default mb-8 md:mb-12">
+             <div className="relative min-h-[60px] sm:min-h-[80px] text-base sm:text-lg md:text-xl lg:text-2xl text-slate-500 dark:text-slate-400 leading-relaxed sm:leading-relaxed z-10 w-full max-w-xl text-center lg:text-left mx-auto lg:mx-0 transition-all duration-300 flex items-start justify-center lg:justify-start">
                <TypewriterEffect text={settings.site_description || t('description')} speed={50} waitBeforeDelete={6000} />
              </div>
           </div>
 
-          <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 md:gap-6 mt-4 md:mt-6 relative z-20">
+          <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 md:gap-6 relative z-20">
              <HomeButtons viewPostsText={t('viewPosts')} />
              <SiteUptimeBadge />
           </div>
