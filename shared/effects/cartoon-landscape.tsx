@@ -31,20 +31,6 @@ export function CartoonLandscape() {
          </svg>
       </div>
 
-      {/* 远景飞鸟/海鸥组合 (居高空流动) */}
-      <div className="absolute top-[12%] right-[25%] w-16 h-8 text-slate-400 dark:text-slate-600 animate-[slide-reverse_25s_linear_infinite]">
-         <svg viewBox="0 0 100 50" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" className="w-full h-full opacity-60">
-            <path d="M10,25 Q25,10 50,25 Q75,10 90,25" />
-         </svg>
-      </div>
-      
-      {/* 远景飞鸟组合 2 */}
-      <div className="absolute top-[5%] left-[30%] w-12 h-6 text-slate-300 dark:text-slate-600 animate-[slide_35s_linear_infinite]">
-         <svg viewBox="0 0 100 50" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" className="w-full h-full opacity-40">
-            <path d="M10,35 Q25,15 50,35 Q75,15 90,35" />
-         </svg>
-      </div>
-
       {/* 卡通太阳/星球 (高处背景) */}
       <div className="absolute top-[4%] right-[5%] w-24 h-24 text-yellow-300 fill-yellow-100 dark:text-yellow-600/40 dark:fill-yellow-600/20 animate-[spin_40s_linear_infinite] opacity-80">
          <svg viewBox="0 0 100 100" className="w-full h-full">

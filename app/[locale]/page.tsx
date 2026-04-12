@@ -98,10 +98,10 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
         
         <div className="relative group perspective-1000">
            {/* 背景阴影色块 */}
-           <div className="absolute inset-0 bg-sky-100 dark:bg-sky-900/30 rounded-3xl rotate-[6deg] translate-x-2 translate-y-3"></div>
+           <div className="absolute inset-0 bg-sky-200 dark:bg-sky-900/40 rounded-3xl rotate-[6deg] translate-x-2 translate-y-3"></div>
            
            {/* 交互主体 */}
-           <div className="relative px-12 py-6 bg-white dark:bg-slate-800 rounded-2xl font-bold text-slate-700 dark:text-slate-200 tracking-widest text-lg md:text-2xl uppercase hover:scale-105 hover:-rotate-[2deg] hover:bg-slate-50 dark:hover:bg-slate-700 transition-all duration-300 font-heading cursor-grab active:cursor-grabbing z-20 shadow-md border border-slate-100 dark:border-slate-700 hover:shadow-lg">
+           <div className="relative px-12 py-6 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-2xl font-bold text-slate-700 dark:text-slate-200 tracking-widest text-lg md:text-2xl uppercase hover:scale-105 hover:-rotate-[2deg] hover:bg-slate-50 dark:hover:bg-slate-700 transition-all duration-300 font-heading cursor-grab active:cursor-grabbing z-20 shadow-[8px_8px_0px_#e2e8f0] dark:shadow-[8px_8px_0px_#1e293b] hover:shadow-[12px_12px_0px_#cbd5e1] dark:hover:shadow-[12px_12px_0px_#0f172a]">
              LET'S EXPLORE 🚀
            </div>
         </div>
