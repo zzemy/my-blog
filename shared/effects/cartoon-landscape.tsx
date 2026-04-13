@@ -94,15 +94,12 @@ export function CartoonLandscape() {
         <svg viewBox="0 0 1200 120" preserveAspectRatio="none" className="absolute bottom-0 w-full h-full">
           <path d="M0,40 C200,80 400,-20 600,40 C800,100 1000,0 1200,40 L1200,120 L0,120 Z" className="fill-emerald-100/50 dark:fill-emerald-950/40" />
           {/* Animated SVG line acting as handdrawn contour */}
-          <motion.path 
+          <path 
             d="M0,40 C200,80 400,-20 600,40 C800,100 1000,0 1200,40" 
             fill="none" 
             className="stroke-emerald-400 dark:stroke-emerald-800"
             strokeWidth="3"
             strokeDasharray="15 15"
-            initial={{ pathLength: 0 }}
-            animate={{ pathLength: 1 }}
-            transition={{ duration: 10, ease: "linear", repeat: Infinity }}
           />
         </svg>
       </div>
@@ -111,16 +108,13 @@ export function CartoonLandscape() {
         <svg viewBox="0 0 1200 120" preserveAspectRatio="none" className="absolute bottom-0 w-full h-full">
           <path d="M0,60 C300,10 400,120 700,50 C1000,-20 1100,90 1200,60 L1200,120 L0,120 Z" className="fill-sky-100/60 dark:fill-sky-950/50" />
           {/* Handdrawn contour */}
-          <motion.path 
+          <path 
             d="M0,60 C300,10 400,120 700,50 C1000,-20 1100,90 1200,60" 
             fill="none" 
-            className="stroke-sky-400 dark:stroke-sky-800"
+            className="stroke-sky-400 dark:stroke-sky-800 animate-[dash-flow_3s_linear_infinite]"
             strokeWidth="4"
             strokeDasharray="25 25"
             strokeLinecap="round"
-            initial={{ strokeDashoffset: 100 }}
-            animate={{ strokeDashoffset: 0 }}
-            transition={{ duration: 3, ease: "linear", repeat: Infinity }}
           />
         </svg>
       </div>
@@ -133,6 +127,10 @@ export function CartoonLandscape() {
         @keyframes slide-reverse {
           0% { transform: translateX(-50%); }
           100% { transform: translateX(0); }
+        }
+        @keyframes dash-flow {
+          0% { stroke-dashoffset: 100; }
+          100% { stroke-dashoffset: 0; }
         }
       `}</style>
     </div>

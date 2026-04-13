@@ -67,26 +67,6 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
              <div className="relative min-h-[60px] sm:min-h-[80px] text-base sm:text-lg md:text-xl lg:text-2xl font-medium text-slate-600 dark:text-slate-400 leading-relaxed sm:leading-relaxed z-10 w-full max-w-xl text-center lg:text-left mx-auto lg:mx-0 transition-all duration-300 flex items-start justify-center lg:justify-start">
                <TypewriterEffect text={settings.site_description || t('description')} speed={50} waitBeforeDelete={6000} />
              </div>
-             
-             {/* 纯手绘笔触展开动画：替换掉原来的丑线条 */}
-             <svg className="absolute -bottom-6 left-1/2 lg:left-0 -translate-x-1/2 lg:translate-x-0 w-32 md:w-48 h-6 text-sky-400/80 dark:text-sky-600/80 pointer-events-none" viewBox="0 0 200 20" preserveAspectRatio="none">
-               <path 
-                 d="M5,15 Q50,-5 100,10 T195,15" 
-                 fill="none" 
-                 stroke="currentColor" 
-                 strokeWidth="4" 
-                 strokeLinecap="round" 
-                 className="[stroke-dasharray:200] [stroke-dashoffset:200] group-hover:[stroke-dashoffset:0] transition-all duration-1000 ease-out" 
-               />
-               <path 
-                 d="M10,18 Q60,-2 110,13 T190,18" 
-                 fill="none" 
-                 stroke="currentColor" 
-                 strokeWidth="2" 
-                 strokeLinecap="round" 
-                 className="[stroke-dasharray:200] [stroke-dashoffset:200] group-hover:[stroke-dashoffset:0] transition-all duration-[1200ms] ease-out delay-100 opacity-60" 
-               />
-             </svg>
           </div>
 
           <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 md:gap-8 relative z-20 mt-4">
