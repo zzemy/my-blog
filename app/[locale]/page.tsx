@@ -33,8 +33,12 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
       {/* 动画笔记本网格与手绘动态涂鸦全局背景 */}
       <CartoonLandscape />
 
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[42rem] bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.85),transparent_35%),radial-gradient(circle_at_80%_10%,rgba(191,219,254,0.35),transparent_30%),linear-gradient(to_bottom,rgba(255,252,245,0.92),rgba(255,252,245,0.5),transparent)] dark:bg-[radial-gradient(circle_at_20%_20%,rgba(148,163,184,0.12),transparent_35%),radial-gradient(circle_at_80%_10%,rgba(56,189,248,0.08),transparent_30%),linear-gradient(to_bottom,rgba(15,23,42,0.28),rgba(15,23,42,0.08),transparent)]" />
+
       {/* 内容区域 */}
-      <div className="w-full max-w-6xl mx-auto px-4 py-8 md:py-12 lg:py-16 flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-16 xl:gap-20 relative z-10">
+      <div className="relative mx-auto w-full max-w-6xl px-4 py-8 md:py-12 lg:py-16">
+        <div className="absolute inset-x-4 top-4 bottom-0 rounded-[2.5rem] border border-white/60 bg-white/20 shadow-[0_30px_90px_rgba(148,163,184,0.16)] backdrop-blur-[1px] dark:border-slate-700/40 dark:bg-slate-900/10" />
+        <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-16 xl:gap-20">
         
         {/* 左侧文字与按钮区 */}
         <FadeIn className="flex-1 w-full flex flex-col items-center lg:items-start text-center lg:text-left z-20">
@@ -45,8 +49,9 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
             </div>
           </div>
 
-          <h1 className="text-5xl sm:text-6xl md:text-[5.5rem] lg:text-[6rem] xl:text-[6.5rem] font-black leading-[1.1] text-slate-800 dark:text-slate-100 tracking-tight z-10 relative inline-block group mb-6 md:mb-8 transition-colors duration-300 [text-shadow:4px_4px_0px_rgba(100,116,139,0.2)] dark:[text-shadow:4px_4px_0px_rgba(0,0,0,0.6)]">
+          <h1 className="max-w-3xl text-5xl sm:text-6xl md:text-[5.5rem] lg:text-[6rem] xl:text-[6.5rem] font-black leading-[1.05] text-slate-800 dark:text-slate-100 tracking-tight z-10 relative inline-block group mb-6 md:mb-8 transition-colors duration-300 [text-shadow:4px_4px_0px_rgba(100,116,139,0.16)] dark:[text-shadow:4px_4px_0px_rgba(0,0,0,0.6)]">
             <span className="relative z-10 inline-block px-1">{settings.site_title || t('title')}</span>
+            <span className="absolute -left-4 -top-4 h-10 w-10 rounded-full border-2 border-sky-300 bg-sky-100/80 shadow-[3px_3px_0px_#93c5fd] dark:border-sky-700 dark:bg-sky-950/40 dark:shadow-[3px_3px_0px_#0ea5e9] animate-float-slow" />
           </h1>
 
           <div className="relative w-full max-w-[90%] sm:max-w-md md:max-w-2xl mx-auto lg:mx-0 cursor-default mb-8 md:mb-12">
@@ -59,8 +64,12 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
              <HomeButtons viewPostsText={t('viewPosts')} />
              <SiteUptimeBadge />
           </div>
-          
-          {/* Removed decorative doodles below buttons to reduce visual noise */}
+
+          <div className="mt-6 md:mt-8 flex flex-wrap justify-center lg:justify-start gap-3 text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">
+            <span className="rounded-full border border-slate-200 bg-white/90 px-3 py-2 shadow-[3px_3px_0px_rgba(226,232,240,0.9)] dark:border-slate-700 dark:bg-slate-800/80 dark:shadow-[3px_3px_0px_rgba(15,23,42,0.7)]">清爽留白</span>
+            <span className="rounded-full border border-emerald-200 bg-emerald-50/90 px-3 py-2 shadow-[3px_3px_0px_rgba(167,243,208,0.8)] dark:border-emerald-700/50 dark:bg-emerald-950/30 dark:shadow-[3px_3px_0px_rgba(6,78,59,0.6)]">轻拟物层次</span>
+            <span className="rounded-full border border-amber-200 bg-amber-50/90 px-3 py-2 shadow-[3px_3px_0px_rgba(253,230,138,0.8)] dark:border-amber-700/50 dark:bg-amber-950/30 dark:shadow-[3px_3px_0px_rgba(120,53,15,0.6)]">插画感装饰</span>
+          </div>
         </FadeIn>
 
         {/* 右侧个人卡片 */}
@@ -68,7 +77,9 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
           
           <div className="animate-float-rotate relative w-full flex justify-center lg:justify-end">
             {/* Main Profile Card - Neo-Brutalism & Playful design */}
-            <div className="relative w-full max-w-[280px] sm:max-w-[320px] lg:max-w-[340px] bg-[#fff9ed] dark:bg-slate-800 p-8 sm:p-10 pb-10 sm:pb-12 shadow-[8px_8px_0px_#e2e8f0] dark:shadow-[8px_8px_0px_#1e293b] z-20 rounded-xl border-2 border-slate-200 dark:border-slate-700 hover:-translate-y-2 hover:-rotate-[4deg] hover:shadow-[14px_14px_0px_#cbd5e1] dark:hover:shadow-[14px_14px_0px_#0f172a] transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] group flex flex-col items-center rotate-1">
+            <div className="relative w-full max-w-[280px] sm:max-w-[320px] lg:max-w-[340px] bg-[#fff9ed] dark:bg-slate-800 p-8 sm:p-10 pb-10 sm:pb-12 shadow-[8px_8px_0px_#e2e8f0] dark:shadow-[8px_8px_0px_#1e293b] z-20 rounded-[1.75rem] border-2 border-slate-200 dark:border-slate-700 hover:-translate-y-2 hover:-rotate-[4deg] hover:shadow-[14px_14px_0px_#cbd5e1] dark:hover:shadow-[14px_14px_0px_#0f172a] transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] group flex flex-col items-center rotate-1 overflow-hidden">
+              <div className="absolute inset-x-6 top-6 h-24 rounded-full bg-sky-100/60 blur-3xl dark:bg-sky-500/10" />
+              <div className="absolute -bottom-6 left-1/2 h-24 w-36 -translate-x-1/2 rounded-full bg-amber-100/80 blur-3xl dark:bg-amber-500/10" />
 
                {/* Decorative Top Pill */}
                <div className="absolute -top-4 -right-4 px-4 py-2 bg-sky-400 dark:bg-sky-500 text-white font-black text-xs border-2 border-sky-100 dark:border-slate-600 rounded-lg shadow-[4px_4px_0px_#bae6fd] dark:shadow-[4px_4px_0px_#0ea5e9] rotate-[10deg] tracking-widest uppercase animate-float-slow">
@@ -120,7 +131,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
       <section className="w-full mt-8 lg:mt-12 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10 relative z-20">
         <FadeIn delay={0.2} className="flex items-center justify-between pb-8 gap-6 relative">
           {/* Comic-style separator line */}
-          <div className="absolute bottom-0 left-0 w-full h-[3px] bg-slate-200 dark:bg-slate-800 rounded-full"></div>
+          <div className="absolute bottom-0 left-0 w-full h-[3px] bg-gradient-to-r from-sky-200 via-emerald-200 to-amber-200 dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 rounded-full"></div>
           
           <h2 className="text-3xl lg:text-4xl font-black tracking-tight flex items-center gap-4 text-slate-800 dark:text-white z-10 font-heading">
             <div className="flex items-center justify-center w-12 h-12 bg-amber-100 text-amber-500 dark:bg-amber-900/40 dark:text-amber-400 border-[3px] border-amber-300 dark:border-amber-700/50 rounded-full shadow-[4px_4px_0px_#fde68a] dark:shadow-[4px_4px_0px_#78350f] rotate-[-5deg] animate-[bounce_4s_infinite]">
@@ -141,6 +152,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
         
         <PostList posts={posts.slice(0, 6)} readMoreText={tCommon('readMore')} />
       </section>
+      </div>
     </div>
   );
 }
