@@ -40,7 +40,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
         <FadeIn className="flex-1 w-full flex flex-col items-center lg:items-start text-center lg:text-left z-20 relative mt-4 md:mt-8">
 
           <div className="animate-float-slow w-full flex justify-center lg:justify-start relative">
-            <div className="inline-flex items-center gap-2 md:gap-3 px-4 md:px-5 py-2 bg-yellow-100 dark:bg-amber-950/40 shadow-[4px_4px_0px_#f59e0b] dark:shadow-[4px_4px_0px_#78350f] border-2 border-yellow-400 dark:border-amber-700/50 rounded-lg font-bold text-yellow-800 dark:text-amber-400 transition-all duration-300 transform hover:scale-105 active:scale-95 cursor-default group mb-6 md:mb-8 rotate-[-2deg]">
+            <div className="inline-flex items-center gap-2 md:gap-3 px-4 md:px-5 py-2 bg-yellow-100 dark:bg-amber-950/40 shadow-[4px_4px_0px_#f59e0b] dark:shadow-[4px_4px_0px_#78350f] border-2 border-yellow-400 dark:border-amber-700/50 rounded-lg font-bold text-yellow-800 dark:text-amber-400 transition-all duration-300 transform hover:scale-105 active:scale-95 cursor-default group mb-6 md:mb-8">
               <span className="text-[10px] sm:text-xs md:text-sm tracking-widest font-black uppercase">✨ Welcome to my digital garden</span>
             </div>
           </div>
@@ -58,7 +58,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
 
           <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 md:gap-8 relative z-20 mt-4">
              <HomeButtons viewPostsText={t('viewPosts')} />
-             <div className="rotate-2 transition-transform hover:-rotate-2">
+             <div className="transition-transform hover:-translate-y-1">
                <SiteUptimeBadge />
              </div>
           </div>

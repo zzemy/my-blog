@@ -42,27 +42,27 @@ export function CartoonLandscape() {
       </div>
 
       {/* 统一风格的高颜值云朵 1 (左上方横穿) */}
-      <div className="absolute top-[-2%] md:top-[8%] lg:top-[12%] left-[-10%] md:left-[5%] lg:left-[8%] w-32 md:w-48 lg:w-64 h-16 md:h-24 lg:h-32 animate-[slide_60s_linear_infinite] opacity-40 md:opacity-100">
+      <div className="absolute top-[-2%] md:top-[8%] lg:top-[12%] left-[-10%] md:left-[5%] lg:left-[8%] w-32 md:w-48 lg:w-64 h-16 md:h-24 lg:h-32 animate-[slide_60s_linear_infinite] opacity-20 md:opacity-30">
         <CloudSvg />
       </div>
 
       {/* 统一风格的高颜值云朵 2 (右上极高处) */}
-      <div className="absolute top-[-5%] md:top-[2%] lg:top-[5%] right-[-5%] md:right-[10%] lg:right-[15%] w-24 md:w-40 lg:w-56 h-12 md:h-20 lg:h-28 animate-[slide-reverse_70s_linear_infinite] opacity-40 md:opacity-100">
+      <div className="absolute top-[-5%] md:top-[2%] lg:top-[5%] right-[-5%] md:right-[10%] lg:right-[15%] w-24 md:w-40 lg:w-56 h-12 md:h-20 lg:h-28 animate-[slide-reverse_70s_linear_infinite] opacity-20 md:opacity-30">
         <CloudSvg />
       </div>
       
       {/* 统一风格的高颜值云朵 3 (顶部居中偏左) */}
-      <div className="absolute top-[10%] md:top-[18%] lg:top-[22%] left-[30%] md:left-[40%] lg:left-[45%] w-20 md:w-32 lg:w-48 h-10 md:h-16 lg:h-24 animate-[slide_55s_linear_infinite] delay-1000 opacity-30 md:opacity-90 hidden sm:block">
+      <div className="absolute top-[10%] md:top-[18%] lg:top-[22%] left-[30%] md:left-[40%] lg:left-[45%] w-20 md:w-32 lg:w-48 h-10 md:h-16 lg:h-24 animate-[slide_55s_linear_infinite] delay-1000 opacity-20 md:opacity-20 block">
         <CloudSvg />
       </div>
 
       {/* 填补中间空旷区域的云朵 4 */}
-      <div className="absolute top-[40%] md:top-[32%] lg:top-[38%] right-[30%] md:right-[40%] lg:right-[50%] w-24 md:w-36 h-12 md:h-18 animate-[slide-reverse_85s_linear_infinite] opacity-40 md:opacity-80 hidden md:block">
+      <div className="absolute top-[40%] md:top-[32%] lg:top-[38%] right-[30%] md:right-[40%] lg:right-[50%] w-24 md:w-36 h-12 md:h-18 animate-[slide-reverse_85s_linear_infinite] opacity-10 md:opacity-20 block">
         <CloudSvg />
       </div>
 
       {/* 添加了一朵低空的云朵 */}
-      <div className="absolute top-[60%] lg:top-[60%] right-[5%] md:right-[15%] lg:right-[20%] w-20 md:w-28 lg:w-40 h-10 md:h-14 lg:h-20 animate-[slide_90s_linear_infinite] opacity-30 md:opacity-50">
+      <div className="absolute top-[60%] lg:top-[60%] right-[5%] md:right-[15%] lg:right-[20%] w-20 md:w-28 lg:w-40 h-10 md:h-14 lg:h-20 animate-[slide_90s_linear_infinite] opacity-30 md:opacity-40">
         <CloudSvg />
       </div>
 
@@ -74,7 +74,7 @@ export function CartoonLandscape() {
       </div>
 
       {/* 涂鸦纸飞机 2 - 反向更高处，置于右侧空白区域 */}
-      <div className="absolute top-[20%] md:top-[25%] lg:top-[28%] right-[10%] md:right-[30%] lg:right-[38%] w-5 md:w-6 lg:w-10 h-5 md:h-6 lg:h-10 animate-[slide-reverse_35s_linear_infinite] delay-500 opacity-40 md:opacity-60 hover:opacity-100 transition-opacity hidden sm:block">
+      <div className="absolute top-[20%] md:top-[25%] lg:top-[28%] right-[10%] md:right-[30%] lg:right-[38%] w-5 md:w-6 lg:w-10 h-5 md:h-6 lg:h-10 animate-[slide-reverse_35s_linear_infinite] delay-500 opacity-40 md:opacity-60 hover:opacity-100 transition-opacity block">
          <svg viewBox="0 0 24 24" className="w-full h-full text-indigo-400 dark:text-indigo-600 -scale-x-100 -rotate-12">
             <path d="M22 2 L11 13 M22 2 l-7 20 -4-9 -9-4 20-7 z" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
          </svg>
@@ -93,7 +93,7 @@ export function CartoonLandscape() {
       </div>
 
       {/* 手绘热气球 */}
-      <div className="absolute top-[35%] md:top-[15%] lg:top-[22%] right-[2%] md:right-[5%] lg:right-[8%] w-8 md:w-12 lg:w-20 h-10 md:h-16 lg:h-24 animate-[slide-reverse_120s_linear_infinite] delay-1000 opacity-40 md:opacity-50 hover:opacity-100 transition-opacity z-0 hidden md:block">
+      <div className="absolute top-[35%] md:top-[15%] lg:top-[22%] right-[2%] md:right-[5%] lg:right-[8%] w-8 md:w-12 lg:w-20 h-10 md:h-16 lg:h-24 animate-[slide-reverse_120s_linear_infinite] delay-1000 opacity-40 md:opacity-50 hover:opacity-100 transition-opacity z-0 block">
          <svg viewBox="0 0 100 120" className="w-full h-full">
             {/* Balloon body */}
             <path d="M50 10 C20 10 10 40 10 60 C10 80 40 90 40 100 L60 100 C60 90 90 80 90 60 C90 40 80 10 50 10 Z" fill="none" className="stroke-rose-400 dark:stroke-rose-600" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
