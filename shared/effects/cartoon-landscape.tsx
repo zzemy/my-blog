@@ -42,12 +42,12 @@ export function CartoonLandscape() {
       </div>
 
       {/* 统一风格的高颜值云朵 1 (左上方横穿) */}
-      <div className="absolute top-[5vh] md:top-[8vh] lg:top-[12vh] left-[2%] md:left-[5%] lg:left-[8%] w-32 md:w-48 lg:w-64 h-16 md:h-24 lg:h-32 animate-[slide_60s_linear_infinite] opacity-40 md:opacity-30">
+      <div className="absolute top-[8vh] md:top-[12vh] lg:top-[15vh] left-[5%] md:left-[8%] lg:left-[12%] w-32 md:w-48 lg:w-64 h-16 md:h-24 lg:h-32 animate-[slide_60s_linear_infinite] opacity-40 md:opacity-30">
         <CloudSvg />
       </div>
 
       {/* 统一风格的高颜值云朵 2 (右上极高处) */}
-      <div className="absolute top-[8vh] md:top-[2vh] lg:top-[5vh] right-[2%] md:right-[10%] lg:right-[15%] w-24 md:w-40 lg:w-56 h-12 md:h-20 lg:h-28 animate-[slide-reverse_70s_linear_infinite] opacity-40 md:opacity-30">
+      <div className="absolute top-[10vh] md:top-[8vh] lg:top-[10vh] right-[8%] md:right-[15%] lg:right-[20%] w-24 md:w-40 lg:w-56 h-12 md:h-20 lg:h-28 animate-[slide-reverse_70s_linear_infinite] opacity-40 md:opacity-30">
         <CloudSvg />
       </div>
       
@@ -108,7 +108,7 @@ export function CartoonLandscape() {
       </div>
 
       {/* 卡通太阳/星球 (高处背景) */}
-      <div className="absolute top-[2vh] md:top-[5vh] lg:top-[8vh] right-[2%] md:right-[8%] lg:right-[12%] w-16 md:w-24 h-16 md:h-24 text-yellow-300 fill-yellow-100 dark:text-yellow-500/60 dark:fill-yellow-500/10 animate-[spin_40s_linear_infinite] opacity-40 md:opacity-60 z-[-1]">
+      <div className="absolute top-[5vh] md:top-[8vh] lg:top-[12vh] right-[5%] md:right-[10%] lg:right-[15%] w-16 md:w-24 h-16 md:h-24 text-yellow-300 fill-yellow-100 dark:text-yellow-500/60 dark:fill-yellow-500/10 animate-[spin_40s_linear_infinite] opacity-40 md:opacity-60 z-[-1]">
          <svg viewBox="0 0 100 100" className="w-full h-full">
             <circle cx="50" cy="50" r="30" fill="inherit" stroke="currentColor" strokeWidth="3" strokeDasharray="6 4" />
             <path d="M50 0 L50 10 M50 90 L50 100 M0 50 L10 50 M90 50 L100 50" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
