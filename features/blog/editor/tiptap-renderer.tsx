@@ -185,7 +185,7 @@ const CodeBlock = ({ node: { textContent } }: { node: { textContent: string } })
         <button
           onClick={onCopy}
           className="code-window-copy"
-          aria-label="Copy code"
+          aria-label="复制代码"
         >
           {copied ? (
             <Check className="w-3.5 h-3.5 text-green-400" />

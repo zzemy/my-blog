@@ -37,6 +37,15 @@ const calloutTones = ['note', 'quote', 'tip', 'info', 'warning', 'success'] as c
 
 type CalloutTone = (typeof calloutTones)[number]
 
+const calloutDefaults: Record<CalloutTone, { title: string; text: string }> = {
+  note: { title: '备注', text: '这是一条普通备注。' },
+  quote: { title: '引用', text: '这是一条引用型提示。' },
+  tip: { title: '技巧', text: '这是一条技巧提示。' },
+  info: { title: '信息', text: '这是一条信息提示。' },
+  warning: { title: '警告', text: '这是一条警告提示。' },
+  success: { title: '完成', text: '这是一条完成状态。' },
+}
+
 export function MenuBar({ editor }: MenuBarProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isUploading, setIsUploading] = useState(false)
@@ -88,12 +97,13 @@ export function MenuBar({ editor }: MenuBarProps) {
   }
 
   const insertCallout = () => {
-    const toneInput = window.prompt('Notice 类型：note / quote / tip / info / warning / success', 'note')
+    const toneInput = window.prompt('提示块类型：note / quote / tip / info / warning / success', 'note')
     if (toneInput === null) return
     const tone = normalizeCalloutTone(toneInput)
-    const title = window.prompt('标题:', tone[0].toUpperCase() + tone.slice(1))
+    const defaults = calloutDefaults[tone]
+    const title = window.prompt('标题:', defaults.title)
     if (title === null) return
-    const text = window.prompt('内容:', `This is a simple ${tone}.`)
+    const text = window.prompt('内容:', defaults.text)
     if (text === null) return
 
     editor
@@ -107,7 +117,7 @@ export function MenuBar({ editor }: MenuBarProps) {
   }
 
   const insertButton = () => {
-    const label = window.prompt('按钮文本:', 'Button')
+    const label = window.prompt('按钮文本:', '按钮')
     if (!label) return
     const href = window.prompt('按钮链接:', 'https://emmmxx.xyz')
     if (href === null) return
@@ -132,9 +142,9 @@ export function MenuBar({ editor }: MenuBarProps) {
         type: 'articleTabs',
         attrs: {
           panels: [
-            { title: 'Tab 1', text: 'Hey There, I am a tab' },
-            { title: 'Tab 2', text: 'At vero eos et accusam et justo duo dolores et ea rebum.' },
-            { title: 'Tab 3', text: 'Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.' },
+            { title: '结构', text: '第一组内容用于检查标签页结构。' },
+            { title: '样式', text: '第二组内容用于检查标签切换状态。' },
+            { title: '验证', text: '第三组内容用于检查移动端换行。' },
           ],
         },
       })
@@ -149,9 +159,9 @@ export function MenuBar({ editor }: MenuBarProps) {
         type: 'articleAccordion',
         attrs: {
           items: [
-            { title: 'Why should you need to do this?', text: '为了在同一页里提前看到真实文章会遇到的折叠内容状态。' },
-            { title: 'How can I adjust Horizontal centering', text: '正文容器负责宽度，组件只需要占满当前正文宽度。' },
-            { title: 'Should you use Negative margin?', text: '这里不使用负 margin，避免移动端出现横向滚动。' },
+            { title: '为什么需要折叠面板？', text: '为了在同一页里提前看到真实文章会遇到的折叠内容状态。' },
+            { title: '如何保持横向居中？', text: '正文容器负责宽度，组件只需要占满当前正文宽度。' },
+            { title: '是否应该使用负边距？', text: '这里不使用负 margin，避免移动端出现横向滚动。' },
           ],
         },
       })
@@ -175,7 +185,7 @@ export function MenuBar({ editor }: MenuBarProps) {
   }
 
   const insertYoutube = () => {
-    const value = window.prompt('YouTube URL:', 'https://www.youtube.com/watch?v=ysz5S6PUM-U')
+    const value = window.prompt('YouTube URL:', 'https://www.youtube.com/watch?v=LXb3EKWsInQ')
     if (!value) return
 
     editor
@@ -186,16 +196,16 @@ export function MenuBar({ editor }: MenuBarProps) {
         attrs: {
           kind: 'youtube',
           src: toYouTubeEmbed(value),
-          title: 'YouTube video',
+          title: 'YouTube 视频',
         },
       })
       .run()
   }
 
   const insertVideo = () => {
-    const src = window.prompt('Custom video URL:', 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4')
+    const src = window.prompt('自定义视频 URL:', 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4')
     if (!src) return
-    const poster = window.prompt('Poster URL（可留空）:', '') || ''
+    const poster = window.prompt('封面图 URL（可留空）:', '') || ''
 
     editor
       .chain()
@@ -206,7 +216,7 @@ export function MenuBar({ editor }: MenuBarProps) {
           kind: 'video',
           src,
           poster,
-          title: 'Custom video',
+          title: '自定义视频',
         },
       })
       .run()
@@ -219,11 +229,11 @@ export function MenuBar({ editor }: MenuBarProps) {
       .insertContent({
         type: 'articleFlow',
         attrs: {
-          start: 'Start',
-          question: 'Is it?',
-          yes: 'OK',
-          no: 'Rethink',
-          end: 'End',
+          start: '开始',
+          question: '内容完整？',
+          yes: '预览发布',
+          no: '继续修改',
+          end: '归档',
         },
       })
       .run()
@@ -378,23 +388,23 @@ export function MenuBar({ editor }: MenuBarProps) {
       <div className="w-px h-8 bg-gray-300 dark:bg-zinc-700 mx-1" />
 
       {/* 富文本块 */}
-      <Button variant="ghost" size="sm" onClick={insertCallout} title="Notice" className="hover:bg-gray-200 dark:hover:bg-zinc-800">
+      <Button variant="ghost" size="sm" onClick={insertCallout} title="提示块" className="hover:bg-gray-200 dark:hover:bg-zinc-800">
         <Info className="h-4 w-4" />
       </Button>
-      <Button variant="ghost" size="sm" onClick={insertButton} title="Button" className="hover:bg-gray-200 dark:hover:bg-zinc-800">
+      <Button variant="ghost" size="sm" onClick={insertButton} title="按钮" className="hover:bg-gray-200 dark:hover:bg-zinc-800">
         <LinkIcon className="h-4 w-4" />
       </Button>
-      <Button variant="ghost" size="sm" onClick={insertTabs} title="Tabs" className="hover:bg-gray-200 dark:hover:bg-zinc-800">
+      <Button variant="ghost" size="sm" onClick={insertTabs} title="标签页" className="hover:bg-gray-200 dark:hover:bg-zinc-800">
         <Table className="h-4 w-4" />
       </Button>
-      <Button variant="ghost" size="sm" onClick={insertAccordion} title="Accordion" className="hover:bg-gray-200 dark:hover:bg-zinc-800">
+      <Button variant="ghost" size="sm" onClick={insertAccordion} title="折叠面板" className="hover:bg-gray-200 dark:hover:bg-zinc-800">
         <List className="h-4 w-4" />
       </Button>
       <Button
         variant="ghost"
         size="sm"
         onClick={() => insertImageCollection('articleGallery')}
-        title="Gallery"
+        title="图集"
         className="hover:bg-gray-200 dark:hover:bg-zinc-800"
       >
         <ImageIcon className="h-4 w-4" />
@@ -403,7 +413,7 @@ export function MenuBar({ editor }: MenuBarProps) {
         variant="ghost"
         size="sm"
         onClick={() => insertImageCollection('articleSlider')}
-        title="Slider"
+        title="轮播"
         className="hover:bg-gray-200 dark:hover:bg-zinc-800"
       >
         <ImageIcon className="h-4 w-4" />
@@ -411,10 +421,10 @@ export function MenuBar({ editor }: MenuBarProps) {
       <Button variant="ghost" size="sm" onClick={insertYoutube} title="YouTube" className="hover:bg-gray-200 dark:hover:bg-zinc-800">
         <Play className="h-4 w-4" />
       </Button>
-      <Button variant="ghost" size="sm" onClick={insertVideo} title="Custom video" className="hover:bg-gray-200 dark:hover:bg-zinc-800">
+      <Button variant="ghost" size="sm" onClick={insertVideo} title="自定义视频" className="hover:bg-gray-200 dark:hover:bg-zinc-800">
         <Play className="h-4 w-4" />
       </Button>
-      <Button variant="ghost" size="sm" onClick={insertFlow} title="Flow" className="hover:bg-gray-200 dark:hover:bg-zinc-800">
+      <Button variant="ghost" size="sm" onClick={insertFlow} title="流程图" className="hover:bg-gray-200 dark:hover:bg-zinc-800">
         <CheckSquare className="h-4 w-4" />
       </Button>
 

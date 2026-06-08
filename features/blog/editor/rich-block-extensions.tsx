@@ -55,7 +55,7 @@ export function createImageItemsFromUrls(value: string): RichImageItem[] {
       return {
         src,
         file,
-        alt: `alt-text: ${file}`,
+        alt: `图片说明：${file}`,
       }
     })
 }
@@ -71,7 +71,7 @@ export function toYouTubeEmbed(value: string) {
           ? url.searchParams.get('v') || url.pathname.split('/').filter(Boolean).pop()
           : ''
 
-    return id ? `https://www.youtube.com/embed/${id}` : value
+    return id ? `https://www.youtube-nocookie.com/embed/${id}?rel=0` : value
   } catch {
     return value
   }
@@ -86,8 +86,8 @@ function createCalloutExtension() {
     addAttributes() {
       return {
         tone: { default: 'note' },
-        title: { default: 'Note' },
-        text: { default: 'This is a simple note.' },
+        title: { default: '备注' },
+        text: { default: '这是一条普通备注。' },
       }
     },
 
@@ -118,7 +118,7 @@ function createButtonExtension() {
 
     addAttributes() {
       return {
-        label: { default: 'Button' },
+        label: { default: '按钮' },
         href: { default: '#' },
         variant: { default: 'primary' },
       }
@@ -153,9 +153,9 @@ function createTabsExtension() {
       return {
         panels: {
           default: [
-            { title: 'Tab 1', text: 'Hey There, I am a tab' },
-            { title: 'Tab 2', text: 'At vero eos et accusam et justo duo dolores et ea rebum.' },
-            { title: 'Tab 3', text: 'Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.' },
+            { title: '结构', text: '第一组内容用于检查标签页结构。' },
+            { title: '样式', text: '第二组内容用于检查标签切换状态。' },
+            { title: '验证', text: '第三组内容用于检查移动端换行。' },
           ],
         },
       }
@@ -190,9 +190,9 @@ function createAccordionExtension() {
       return {
         items: {
           default: [
-            { title: 'Why should you need to do this?', text: '为了在同一页里提前看到真实文章会遇到的折叠内容状态。' },
-            { title: 'How can I adjust Horizontal centering', text: '正文容器负责宽度，组件只需要占满当前正文宽度。' },
-            { title: 'Should you use Negative margin?', text: '这里不使用负 margin，避免移动端出现横向滚动。' },
+            { title: '为什么需要折叠面板？', text: '为了在同一页里提前看到真实文章会遇到的折叠内容状态。' },
+            { title: '如何保持横向居中？', text: '正文容器负责宽度，组件只需要占满当前正文宽度。' },
+            { title: '是否应该使用负边距？', text: '这里不使用负 margin，避免移动端出现横向滚动。' },
           ],
         },
       }
@@ -289,7 +289,7 @@ function createEmbedExtension() {
       return {
         kind: { default: 'youtube' },
         src: { default: '' },
-        title: { default: 'Embedded media' },
+        title: { default: '嵌入媒体' },
         poster: { default: '' },
       }
     },
@@ -321,11 +321,11 @@ function createFlowExtension() {
 
     addAttributes() {
       return {
-        start: { default: 'Start' },
-        question: { default: 'Is it?' },
-        yes: { default: 'OK' },
-        no: { default: 'Rethink' },
-        end: { default: 'End' },
+        start: { default: '开始' },
+        question: { default: '内容完整？' },
+        yes: { default: '预览发布' },
+        no: { default: '继续修改' },
+        end: { default: '归档' },
       }
     },
 
@@ -350,8 +350,8 @@ function createFlowExtension() {
 
 function CalloutView({ node }: NodeViewProps) {
   const tone = getCalloutTone(node.attrs.tone)
-  const title = getString(node.attrs.title, 'Note')
-  const text = getString(node.attrs.text, 'This is a simple note.')
+  const title = getString(node.attrs.title, '备注')
+  const text = getString(node.attrs.text, '这是一条普通备注。')
   const Icon = getCalloutIcon(tone)
 
   return (
@@ -370,7 +370,7 @@ function CalloutView({ node }: NodeViewProps) {
 }
 
 function ButtonView({ node }: NodeViewProps) {
-  const label = getString(node.attrs.label, 'Button')
+  const label = getString(node.attrs.label, '按钮')
   const href = getString(node.attrs.href, '#')
   const variant = getString(node.attrs.variant, 'primary') === 'secondary' ? 'secondary' : 'primary'
 
@@ -390,7 +390,7 @@ function TabsView({ node }: NodeViewProps) {
 
   return (
     <NodeViewWrapper className="component-tabs not-prose" data-rich-block="tabs">
-      <div className="component-tabs-list" role="tablist" aria-label="Article tabs">
+      <div className="component-tabs-list" role="tablist" aria-label="正文标签页">
         {panels.map((panel, index) => (
           <button
             key={`${panel.title}-${index}`}
@@ -466,13 +466,13 @@ function SliderView({ node }: NodeViewProps) {
           <span>{activeImage.alt}</span>
         </figcaption>
       </figure>
-      <div className="component-slider-strip" aria-label="Slider thumbnails">
+      <div className="component-slider-strip" aria-label="轮播缩略图">
         {images.map((image, index) => (
           <button
             key={`${image.file}-${image.src}`}
             className={active === index ? 'is-active' : ''}
             type="button"
-            aria-label={`Preview ${image.file}`}
+            aria-label={`预览 ${image.file}`}
             onClick={() => setActive(index)}
           >
             <img src={image.src} alt="" referrerPolicy="no-referrer" />
@@ -487,7 +487,7 @@ function SliderView({ node }: NodeViewProps) {
 function EmbedView({ node }: NodeViewProps) {
   const kind = getString(node.attrs.kind, 'youtube')
   const src = getString(node.attrs.src)
-  const title = getString(node.attrs.title, kind === 'video' ? 'Custom video' : 'YouTube video')
+  const title = getString(node.attrs.title, kind === 'video' ? '自定义视频' : 'YouTube 视频')
   const poster = getString(node.attrs.poster)
 
   if (!src) return null
@@ -501,7 +501,7 @@ function EmbedView({ node }: NodeViewProps) {
         <>
           <video controls preload="metadata" poster={poster || undefined}>
             <source src={src} type="video/mp4" />
-            Your browser does not support the video tag.
+            当前浏览器不支持视频播放。
           </video>
           <div className="component-video-caption">
             <Play className="h-4 w-4 fill-current" />
@@ -523,27 +523,30 @@ function EmbedView({ node }: NodeViewProps) {
 
 function FlowView({ node }: NodeViewProps) {
   const flow: Record<keyof FlowAttrs, FlowNode> = {
-    start: { label: getString(node.attrs.start, 'Start') },
-    question: { label: getString(node.attrs.question, 'Is it?') },
-    yes: { label: getString(node.attrs.yes, 'OK') },
-    no: { label: getString(node.attrs.no, 'Rethink') },
-    end: { label: getString(node.attrs.end, 'End') },
+    start: { label: getString(node.attrs.start, '开始') },
+    question: { label: getString(node.attrs.question, '内容完整？') },
+    yes: { label: getString(node.attrs.yes, '预览发布') },
+    no: { label: getString(node.attrs.no, '继续修改') },
+    end: { label: getString(node.attrs.end, '归档') },
   }
 
   return (
-    <NodeViewWrapper className="component-flow not-prose" data-rich-block="flow" aria-label="Decision flow example">
+    <NodeViewWrapper className="component-flow not-prose" data-rich-block="flow" aria-label="正文发布流程示例">
       <div className="component-flow-node">{flow.start.label}</div>
+      <div className="component-flow-connector" aria-hidden="true" />
       <div className="component-flow-node component-flow-question">{flow.question.label}</div>
+      <div className="component-flow-branch-line" aria-hidden="true" />
       <div className="component-flow-branches">
         <div>
-          <span>Yes</span>
+          <span>是</span>
           <div className="component-flow-node">{flow.yes.label}</div>
         </div>
         <div>
-          <span>No</span>
+          <span>否</span>
           <div className="component-flow-node">{flow.no.label}</div>
         </div>
       </div>
+      <div className="component-flow-merge-line" aria-hidden="true" />
       <div className="component-flow-node">{flow.end.label}</div>
     </NodeViewWrapper>
   )
@@ -595,7 +598,7 @@ function getImageItems(value: unknown): RichImageItem[] {
       return {
         src,
         file,
-        alt: getString(record.alt, `alt-text: ${file}`),
+        alt: getString(record.alt, `图片说明：${file}`),
       }
     })
     .filter((item): item is RichImageItem => Boolean(item))

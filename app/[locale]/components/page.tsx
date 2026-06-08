@@ -5,126 +5,152 @@ import { renderToString } from 'katex'
 import {
   AlertTriangle,
   ArrowRight,
+  BarChart3,
+  Braces,
   CheckCircle2,
+  Copy,
   Download,
   ExternalLink,
   FileText,
   Info,
   Keyboard,
+  Layers3,
   Lightbulb,
   Music2,
+  Network,
   Play,
   Quote as QuoteIcon,
+  SmilePlus,
   Sigma,
 } from 'lucide-react'
 import { PostLayout } from '@/features/blog/components/client/post-layout'
+import { FadeIn } from '@/shared/visuals/fade-in'
 
 const locales = ['zh', 'en', 'fr', 'ja']
 
 const toc = [
-  { id: 'headings', text: 'Headings', depth: 2 },
-  { id: 'lead-separators', text: 'Lead & separators', depth: 2 },
-  { id: 'emphasis', text: 'Emphasis', depth: 2 },
-  { id: 'inline-patterns', text: 'Inline patterns', depth: 2 },
-  { id: 'buttons', text: 'Button', depth: 2 },
-  { id: 'links', text: 'Link', depth: 2 },
-  { id: 'paragraph', text: 'Paragraph', depth: 2 },
-  { id: 'lists', text: 'Lists', depth: 2 },
-  { id: 'definition-list', text: 'Definition list', depth: 2 },
-  { id: 'notice', text: 'Notice', depth: 2 },
-  { id: 'tabs', text: 'Tab', depth: 2 },
-  { id: 'accordions', text: 'Accordions', depth: 2 },
-  { id: 'code', text: 'Code', depth: 2 },
-  { id: 'math', text: 'Math', depth: 2 },
-  { id: 'flow', text: 'Flow', depth: 2 },
-  { id: 'timeline', text: 'Timeline', depth: 2 },
-  { id: 'blockquote', text: 'Blockquote', depth: 2 },
-  { id: 'tables', text: 'Tables', depth: 2 },
-  { id: 'wide-table', text: 'Wide table', depth: 2 },
-  { id: 'cards', text: 'Cards', depth: 2 },
-  { id: 'files', text: 'Files', depth: 2 },
-  { id: 'image', text: 'Image', depth: 2 },
-  { id: 'gallery', text: 'Gallery', depth: 2 },
-  { id: 'slider', text: 'Slider', depth: 2 },
-  { id: 'audio', text: 'Audio', depth: 2 },
-  { id: 'youtube', text: 'YouTube video', depth: 2 },
-  { id: 'custom-video', text: 'Custom video', depth: 2 },
-  { id: 'footnotes', text: 'Footnotes', depth: 2 },
+  { id: 'headings', text: '标题', depth: 2 },
+  { id: 'lead-separators', text: '导语与分隔线', depth: 2 },
+  { id: 'rich-content', text: '富文本内容', depth: 2 },
+  { id: 'emphasis', text: '强调', depth: 2 },
+  { id: 'inline-patterns', text: '行内元素', depth: 2 },
+  { id: 'buttons', text: '按钮', depth: 2 },
+  { id: 'links', text: '链接', depth: 2 },
+  { id: 'paragraph', text: '段落', depth: 2 },
+  { id: 'placeholder-text', text: '占位文本', depth: 2 },
+  { id: 'lists', text: '列表', depth: 2 },
+  { id: 'definition-list', text: '定义列表', depth: 2 },
+  { id: 'notice', text: '提示块', depth: 2 },
+  { id: 'tabs', text: '标签页', depth: 2 },
+  { id: 'accordions', text: '折叠面板', depth: 2 },
+  { id: 'code', text: '代码', depth: 2 },
+  { id: 'math', text: '数学公式', depth: 2 },
+  { id: 'charts', text: '图表', depth: 2 },
+  { id: 'flow', text: '流程图', depth: 2 },
+  { id: 'diagrams', text: '关系图', depth: 2 },
+  { id: 'emoji', text: '表情符号', depth: 2 },
+  { id: 'timeline', text: '时间线', depth: 2 },
+  { id: 'blockquote', text: '引用', depth: 2 },
+  { id: 'tables', text: '表格', depth: 2 },
+  { id: 'wide-table', text: '宽表', depth: 2 },
+  { id: 'cards', text: '卡片', depth: 2 },
+  { id: 'files', text: '文件', depth: 2 },
+  { id: 'image', text: '图片', depth: 2 },
+  { id: 'gallery', text: '图集', depth: 2 },
+  { id: 'slider', text: '轮播', depth: 2 },
+  { id: 'audio', text: '音频', depth: 2 },
+  { id: 'youtube', text: 'YouTube 视频', depth: 2 },
+  { id: 'custom-video', text: '自定义视频', depth: 2 },
+  { id: 'footnotes', text: '脚注', depth: 2 },
 ]
 
 const sampleImages = [
   {
     file: '06.jpg',
     src: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1400&q=80',
-    alt: 'alt-text: 山谷和雾气中的日出',
+    alt: '图片说明：山谷和雾气中的日出',
   },
   {
     file: '01.jpg',
     src: 'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=1000&q=80',
-    alt: 'alt-text: 山路和远处山脊',
+    alt: '图片说明：山路和远处山脊',
   },
   {
     file: '02.jpg',
     src: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1000&q=80',
-    alt: 'alt-text: 海岸线与浅色浪花',
+    alt: '图片说明：海岸线与浅色浪花',
   },
   {
     file: '03.jpg',
     src: 'https://images.unsplash.com/photo-1493246507139-91e8fad9978e?auto=format&fit=crop&w=1000&q=80',
-    alt: 'alt-text: 森林中的光线',
+    alt: '图片说明：森林中的光线',
   },
   {
     file: '04.jpg',
     src: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=1000&q=80',
-    alt: 'alt-text: 高树和林间小径',
+    alt: '图片说明：高树和林间小径',
   },
   {
     file: '05.jpg',
     src: 'https://images.unsplash.com/photo-1470770903676-69b98201ea1c?auto=format&fit=crop&w=1000&q=80',
-    alt: 'alt-text: 湖面、木屋和远山',
+    alt: '图片说明：湖面、木屋和远山',
   },
 ]
 
 const sampleFiles = [
   { name: 'article-style-guide.pdf', type: 'PDF', size: '284 KB' },
   { name: 'component-reference.md', type: 'Markdown', size: '18 KB' },
-  { name: 'gallery-assets.zip', type: 'Archive', size: '4.2 MB' },
+  { name: 'gallery-assets.zip', type: '压缩包', size: '4.2 MB' },
 ]
 
 const timelineItems = [
   {
-    label: 'Draft',
-    title: 'Collect content blocks',
+    label: '草稿',
+    title: '收集内容块',
     text: '先把真实文章里会出现的内容块列全，避免只优化一两个漂亮截图。',
   },
   {
-    label: 'Review',
-    title: 'Check reading rhythm',
+    label: '检查',
+    title: '校准阅读节奏',
     text: '重点看标题间距、列表层级、代码宽度、表格滚动和移动端是否稳定。',
   },
   {
-    label: 'Publish',
-    title: 'Reuse the same article surface',
+    label: '发布',
+    title: '复用正文体系',
     text: '组件页、文章详情页、About 页都应该走同一套正文变量和局部组件样式。',
   },
 ]
 
 const articleCards = [
   {
-    eyebrow: 'Pattern',
-    title: 'Compact summary card',
+    eyebrow: '模式',
+    title: '紧凑摘要卡片',
     text: '用于文章中的小型结论、资源组或阅读提示，不承担页面主布局。',
   },
   {
-    eyebrow: 'State',
-    title: 'Status comparison',
-    text: '可承载 Ready、Preview、Deprecated 等状态，和表格互补。',
+    eyebrow: '状态',
+    title: '状态对比',
+    text: '可承载就绪、预览、废弃等状态，和表格互补。',
   },
   {
-    eyebrow: 'Resource',
-    title: 'Related reading',
+    eyebrow: '资源',
+    title: '相关阅读',
     text: '适合链接到同系列文章、外部资料或下载内容。',
   },
+]
+
+const chartBars = [
+  { label: 'Markdown', value: 74 },
+  { label: '富文本块', value: 88 },
+  { label: '媒体', value: 63 },
+  { label: '代码', value: 92 },
+  { label: '表格', value: 58 },
+]
+
+const emojiGroups = [
+  ['📘', '🧪', '🧭', '🛠️', '🧩'],
+  ['🌊', '🌲', '🏔️', '✨', '🌙'],
+  ['✅', '⚠️', '💡', '🔗', '📎'],
 ]
 
 export function generateStaticParams() {
@@ -132,8 +158,8 @@ export function generateStaticParams() {
 }
 
 export const metadata = {
-  title: 'Components',
-  description: 'Article component and typography visual reference.',
+  title: '正文组件',
+  description: '文章正文组件与排版视觉参考。',
 }
 
 export default async function ComponentsPage({ params }: { params: Promise<{ locale: string }> }) {
@@ -142,60 +168,79 @@ export default async function ComponentsPage({ params }: { params: Promise<{ loc
 
   return (
     <PostLayout toc={toc}>
-      <article className="article-shell">
-        <div className="article-hero">
-          <h1 className="article-title text-4xl md:text-5xl">Components</h1>
-          <p className="article-description">
-            这是一篇完整的正文视觉验收页。它覆盖 Markdown 与富文本常见内容块，并保持和真实文章同一套目录、宽度、
-            字体、代码、表格和媒体样式。
-          </p>
-        </div>
+      <FadeIn>
+        <article className="article-shell">
+          <div className="article-hero">
+            <h1 className="article-title text-3xl md:text-4xl lg:text-5xl">正文组件</h1>
+            <p className="article-description">
+              这是一篇完整的正文视觉验收页。它覆盖 Markdown 与富文本常见内容块，并保持和真实文章同一套目录、宽度、
+              字体、代码、表格和媒体样式。
+            </p>
+          </div>
 
-        <div className="article-content prose dark:prose-invert max-w-none article-font mt-10">
-          <h2 id="headings">Headings</h2>
+          <div className="article-content prose dark:prose-invert max-w-none article-font mt-10">
+          <h2 id="headings">标题</h2>
           <p>
-            Here is an example of headings. You can use this heading by the following markdown rules. For example:
-            use <code>#</code> for heading 1 and use <code>######</code> for heading 6.
+            标题需要建立清楚的文章层级。Markdown 里可以用 <code>#</code> 表示一级标题，用 <code>######</code>
+            表示六级标题。
           </p>
-          <h1>Heading 1</h1>
-          <h2>Heading 2</h2>
-          <h3>Heading 3</h3>
-          <h4>Heading 4</h4>
-          <h5>Heading 5</h5>
-          <h6>Heading 6</h6>
+          <h1>一级标题</h1>
+          <h2>二级标题</h2>
+          <h3>三级标题</h3>
+          <h4>四级标题</h4>
+          <h5>五级标题</h5>
+          <h6>六级标题</h6>
 
-          <h2 id="lead-separators">Lead &amp; separators</h2>
+          <h2 id="lead-separators">导语与分隔线</h2>
           <p className="lead">
-            A lead paragraph should introduce a section with more presence than body copy, but it should still feel like
-            part of the article and not a marketing hero.
+            导语段落应该比普通正文更醒目，但仍然属于文章内容，不应该像营销页首屏一样抢走全部注意力。
           </p>
-          <p>
-            Separators are useful when a long post shifts from setup to examples. They should be visible without turning
-            every section into a boxed panel.
-          </p>
+          <p>分隔线用于长文章的语义转场，应该清楚但克制，不能把每个小节都切成独立卡片。</p>
           <hr />
 
-          <h2 id="emphasis">Emphasis</h2>
+          <h2 id="rich-content">富文本内容</h2>
+          <p>富文本块用于把图片、状态、链接和摘要合在同一段正文语境里，适合项目说明、资源推荐和版本说明。</p>
+          <div className="component-rich-showcase not-prose">
+            <figure>
+              <img src={sampleImages[3].src} alt={sampleImages[3].alt} referrerPolicy="no-referrer" />
+            </figure>
+            <div>
+              <span className="component-overline">
+                <Layers3 className="h-4 w-4" />
+                富文本块
+              </span>
+              <h3>混合正文模块</h3>
+              <p>
+                一个块里同时承载媒体、摘要、状态和操作入口，但仍然遵守正文宽度、正文间距和同一套色彩变量。
+              </p>
+              <div className="component-mini-actions">
+                <a href="#gallery">查看图集</a>
+                <a href="#files">查看文件</a>
+              </div>
+            </div>
+          </div>
+
+          <h2 id="emphasis">强调</h2>
           <p>
-            The emphasis, aka <em>italics</em>, with asterisks or underscores.
+            斜体用于轻量强调，例如 <em>需要被读者注意的短语</em>。
           </p>
           <p>
-            <strong>Strong emphasis, aka bold</strong>, with asterisks or underscores.
+            <strong>粗体用于更强的重点信息</strong>，不应该整段滥用。
           </p>
           <p>
-            The <strong>
-              <em>combined emphasis</em>
+            <strong>
+              <em>组合强调</em>
             </strong>{' '}
-            with asterisks and underscores.
+            用于极少数需要同时保留语气和重量的内容。
           </p>
           <p>
-            Strike through uses two tildes. <del>Scratch this.</del>
+            删除线用于修订痕迹。<del>这是一段被划掉的旧说法。</del>
           </p>
 
-          <h2 id="inline-patterns">Inline patterns</h2>
+          <h2 id="inline-patterns">行内元素</h2>
           <p>
-            Inline details include <mark>marked text</mark>, <kbd>Ctrl</kbd> + <kbd>K</kbd>, H<sub>2</sub>O, E = mc
-            <sup>2</sup>, <abbr title="Really Simple Syndication">RSS</abbr>, and a footnote reference
+            行内细节包括 <mark>高亮文本</mark>、<kbd>Ctrl</kbd> + <kbd>K</kbd>、H<sub>2</sub>O、E = mc
+            <sup>2</sup>、<abbr title="Really Simple Syndication">RSS</abbr>，以及脚注引用
             <sup>
               <a href="#footnote-1" id="footnote-ref-1">
                 1
@@ -206,86 +251,88 @@ export default async function ComponentsPage({ params }: { params: Promise<{ loc
           <div className="component-inline-grid not-prose">
             <div>
               <Keyboard className="h-4 w-4" />
-              <span>Keyboard</span>
+              <span>快捷键</span>
               <strong>
                 <kbd>⌘</kbd> <kbd>Enter</kbd>
               </strong>
             </div>
             <div>
               <Sigma className="h-4 w-4" />
-              <span>Notation</span>
+              <span>标记</span>
               <strong>
                 x<sub>n</sub> + y<sup>2</sup>
               </strong>
             </div>
             <div>
               <Info className="h-4 w-4" />
-              <span>Badge</span>
-              <strong className="component-badge">Stable</strong>
+              <span>状态</span>
+              <strong className="component-badge">稳定</strong>
             </div>
           </div>
 
-          <h2 id="buttons">Button</h2>
+          <h2 id="buttons">按钮</h2>
           <div className="component-button-row not-prose">
             <button className="component-button component-button-primary" type="button">
-              <span>Button</span>
+              <span>主要按钮</span>
               <ArrowRight className="h-4 w-4" />
             </button>
             <button className="component-button component-button-secondary" type="button">
-              <span>Button</span>
+              <span>次要按钮</span>
               <ExternalLink className="h-4 w-4" />
+            </button>
+            <button className="component-button component-button-secondary" type="button" disabled>
+              <span>不可用</span>
             </button>
           </div>
 
-          <h2 id="links">Link</h2>
+          <h2 id="links">链接</h2>
           <p>
-            <a href="https://emmmxx.xyz">I&apos;m an inline-style link</a>
+            <a href="https://emmmxx.xyz">这是一条行内链接</a>
           </p>
           <p>
             <a href="https://emmmxx.xyz" title="emmm Blog">
-              I&apos;m an inline-style link with title
+              这是一条带标题属性的链接
             </a>
           </p>
           <p>
-            <a href="/README.md">I&apos;m a relative reference to a repository file</a>
+            <a href="/README.md">这是一条指向仓库文件的相对链接</a>
           </p>
           <p>
-            URLs and URLs in angle brackets will automatically get turned into links.{' '}
-            <a href="http://www.example.com">http://www.example.com</a> or{' '}
-            <a href="http://www.example.com">http://www.example.com</a> and sometimes example.com.
+            普通 URL 也应该能被识别为可点击链接，例如{' '}
+            <a href="http://www.example.com">http://www.example.com</a>。
           </p>
-          <p>Some text to show that the reference links can follow later.</p>
+          <p>链接颜色要明显，但不能破坏正文阅读的连续性。</p>
 
-          <h2 id="paragraph">Paragraph</h2>
+          <h2 id="paragraph">段落</h2>
           <p>
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Quam nihil enim maxime corporis cumque totam
-            aliquid nam sint inventore optio modi neque laborum officiis necessitatibus, facilis placeat pariatur!
-            Voluptatem, sed harum pariatur adipisci voluptates voluptatum cumque, porro sint minima similique magni
-            perferendis fuga! Optio vel ipsum excepturi tempore reiciendis id quidem? Vel in, doloribus debitis
-            nesciunt fugit sequi magnam accusantium modi neque quis, vitae velit, pariatur harum autem a! Velit impedit
-            atque maiores animi possimus asperiores natus repellendus excepturi sint architecto eligendi non, omnis
-            nihil. Facilis, doloremque illum. Fugit optio laborum minus debitis natus illo perspiciatis corporis
-            voluptatum rerum laboriosam.
+            段落是正文的主体。长段落要保持稳定的行高、合适的字宽和足够清晰的灰度层级。读者连续阅读时，
+            文字不能被背景、边框、阴影或过强的装饰元素打断。这里用一段较长的中文内容检查换行、段间距、
+            标点密度和移动端排版是否自然。
           </p>
 
-          <h2 id="lists">Lists</h2>
-          <h3>Ordered List</h3>
+          <h2 id="placeholder-text">占位文本</h2>
+          <p>占位内容应该足够接近真实文章，用来提前暴露行高、换行和状态标签的问题。</p>
+          <div className="component-placeholder not-prose">
+            <span>草稿</span>
+            <p>
+              这是一段用于测试的正文占位内容。它不追求信息密度，而是检查普通段落、弱化标签和紧凑状态是否能在同一个块里保持秩序。
+            </p>
+          </div>
+
+          <h2 id="lists">列表</h2>
+          <h3>有序列表</h3>
           <ol>
-            <li>List item</li>
-            <li>List item</li>
-            <li>List item</li>
-            <li>List item</li>
-            <li>List item</li>
+            <li>先确认正文宽度。</li>
+            <li>再检查标题和段落节奏。</li>
+            <li>最后验证移动端滚动。</li>
           </ol>
-          <h3>Unordered List</h3>
+          <h3>无序列表</h3>
           <ul>
-            <li>List item</li>
-            <li>List item</li>
-            <li>List item</li>
-            <li>List item</li>
-            <li>List item</li>
+            <li>普通项目符号。</li>
+            <li>较长文本换行时保持缩进。</li>
+            <li>列表项之间不应该显得拥挤。</li>
           </ul>
-          <h3>Task List</h3>
+          <h3>任务列表</h3>
           <ul data-type="taskList">
             <li>
               <input type="checkbox" checked readOnly />
@@ -297,96 +344,93 @@ export default async function ComponentsPage({ params }: { params: Promise<{ loc
             </li>
           </ul>
 
-          <h2 id="definition-list">Definition list</h2>
+          <h2 id="definition-list">定义列表</h2>
           <dl>
-            <dt>Article surface</dt>
+            <dt>正文界面</dt>
             <dd>承载真实正文的排版、宽度、颜色变量、代码块、表格、图片和媒体样式。</dd>
-            <dt>Rich block</dt>
-            <dd>编辑器里以结构化 JSON 保存的可复用内容块，例如 Notice、Tabs、Gallery、Video。</dd>
-            <dt>Reference page</dt>
+            <dt>富文本块</dt>
+            <dd>编辑器里以结构化 JSON 保存的可复用内容块，例如提示块、标签页、图集和视频。</dd>
+            <dt>参考页面</dt>
             <dd>用来一次性验收所有正文视觉状态，后续新增组件也先放到这里检查。</dd>
           </dl>
 
-          <h2 id="notice">Notice</h2>
+          <h2 id="notice">提示块</h2>
           <div className="component-stack not-prose">
-            <Callout icon={<Info className="h-4 w-4" />} tone="note" title="Note">
-              This is a simple note.
+            <Callout icon={<Info className="h-4 w-4" />} tone="note" title="备注">
+              这是一条普通备注。
             </Callout>
-            <Callout icon={<QuoteIcon className="h-4 w-4" />} tone="quote" title="Quote">
-              This is a simple quote.
+            <Callout icon={<QuoteIcon className="h-4 w-4" />} tone="quote" title="引用">
+              这是一条引用型提示。
             </Callout>
-            <Callout icon={<Lightbulb className="h-4 w-4" />} tone="tip" title="Tip">
-              This is a simple tip.
+            <Callout icon={<Lightbulb className="h-4 w-4" />} tone="tip" title="技巧">
+              这是一条技巧提示。
             </Callout>
-            <Callout icon={<Info className="h-4 w-4" />} tone="info" title="Info">
-              This is a simple info.
+            <Callout icon={<Info className="h-4 w-4" />} tone="info" title="信息">
+              这是一条信息提示。
             </Callout>
-            <Callout icon={<AlertTriangle className="h-4 w-4" />} tone="warning" title="Warning">
-              This is a simple warning.
+            <Callout icon={<AlertTriangle className="h-4 w-4" />} tone="warning" title="警告">
+              这是一条警告提示。
             </Callout>
-            <Callout icon={<CheckCircle2 className="h-4 w-4" />} tone="success" title="Done">
-              This is a simple success state.
+            <Callout icon={<CheckCircle2 className="h-4 w-4" />} tone="success" title="完成">
+              这是一条完成状态。
             </Callout>
           </div>
 
-          <h2 id="tabs">Tab</h2>
+          <h2 id="tabs">标签页</h2>
           <div className="component-tabs not-prose">
             <input className="component-tab-input" defaultChecked id="component-tab-1" name="component-tabs" type="radio" />
             <input className="component-tab-input" id="component-tab-2" name="component-tabs" type="radio" />
             <input className="component-tab-input" id="component-tab-3" name="component-tabs" type="radio" />
-            <div className="component-tabs-list" role="tablist" aria-label="Component tabs">
-              <label htmlFor="component-tab-1">Tab 1</label>
-              <label htmlFor="component-tab-2">Tab 2</label>
-              <label htmlFor="component-tab-3">Tab 3</label>
+            <div className="component-tabs-list" role="tablist" aria-label="组件标签页">
+              <label htmlFor="component-tab-1">结构</label>
+              <label htmlFor="component-tab-2">样式</label>
+              <label htmlFor="component-tab-3">验证</label>
             </div>
             <div className="component-tab-panels">
               <section className="component-tab-panel component-tab-panel-1">
-                <h3>Hey There, I am a tab</h3>
-                <p>
-                  Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut
-                  labore et dolore magna aliquyam erat, sed diam voluptua.
-                </p>
+                <h3>内容结构</h3>
+                <p>标签页适合把同一主题下的几组短内容并列展示。</p>
               </section>
               <section className="component-tab-panel component-tab-panel-2">
-                <h3>Second tab content</h3>
-                <p>At vero eos et accusam et justo duo dolores et ea rebum.</p>
+                <h3>视觉样式</h3>
+                <p>切换按钮应该清楚可点，激活态不能只依赖颜色。</p>
               </section>
               <section className="component-tab-panel component-tab-panel-3">
-                <h3>Third tab content</h3>
-                <p>Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.</p>
+                <h3>状态验证</h3>
+                <p>移动端需要横向滚动或自然换行，不能撑破正文宽度。</p>
               </section>
             </div>
           </div>
 
-          <h2 id="accordions">Accordions</h2>
+          <h2 id="accordions">折叠面板</h2>
           <div className="component-accordions not-prose">
             <details open>
-              <summary>Why should you need to do this?</summary>
+              <summary>为什么需要折叠面板？</summary>
               <p>为了在同一页里提前看到真实文章会遇到的折叠内容状态。</p>
             </details>
             <details>
-              <summary>How can I adjust Horizontal centering</summary>
+              <summary>如何保持横向居中？</summary>
               <p>正文容器负责宽度，组件只需要占满当前正文宽度，不单独改变页面布局。</p>
             </details>
             <details>
-              <summary>Should you use Negative margin?</summary>
+              <summary>是否应该使用负边距？</summary>
               <p>这里不使用负 margin，避免移动端和目录布局出现不可预期的横向滚动。</p>
             </details>
           </div>
 
-          <h2 id="code">Code and Syntax Highlighting</h2>
+          <h2 id="code">代码与高亮</h2>
           <p>
-            This is an <code>Inline code</code> sample.
+            这是一个 <code>Inline code</code> 行内代码示例。
           </p>
           <div className="component-code-stack not-prose">
             <CodeWindow
               label="JavaScript"
-              code={`var s = "JavaScript syntax highlighting";
+              code={`var s = "代码高亮示例";
 alert(s);`}
             />
             <CodeWindow
               label="Python"
-              code={`s = "Python syntax highlighting"
+              code={`s = "代码高亮示例"
 print(s)`}
             />
             <CodeWindow
@@ -401,33 +445,88 @@ int main(void)
             />
           </div>
 
-          <h2 id="math">Math</h2>
+          <h2 id="math">数学公式</h2>
           <p>
-            Inline math should stay aligned with text, for example <MathInline tex={'e^{i\\pi} + 1 = 0'} />. Block math
-            needs enough breathing room and should not overflow on mobile.
+            行内公式要和正文基线对齐，例如 <MathInline tex={'e^{i\\pi} + 1 = 0'} />。块级公式需要保留呼吸感，
+            并且在移动端不能溢出屏幕。
           </p>
           <div className="component-math-card not-prose">
             <MathDisplay tex={'\\int_{-\\infty}^{\\infty} e^{-x^2}\\,dx = \\sqrt{\\pi}'} />
           </div>
 
-          <h2 id="flow">Flow</h2>
-          <div className="component-flow not-prose" aria-label="Decision flow example">
-            <div className="component-flow-node">Start</div>
-            <div className="component-flow-node component-flow-question">Is it?</div>
-            <div className="component-flow-branches">
-              <div>
-                <span>Yes</span>
-                <div className="component-flow-node">OK</div>
-              </div>
-              <div>
-                <span>No</span>
-                <div className="component-flow-node">Rethink</div>
-              </div>
+          <h2 id="charts">图表</h2>
+          <p>图表块需要能在正文里快速扫读，不应该像后台大屏组件一样压过文章层级。</p>
+          <div className="component-chart not-prose">
+            <div className="component-chart-header">
+              <span className="component-overline">
+                <BarChart3 className="h-4 w-4" />
+                正文覆盖度
+              </span>
+              <strong>92%</strong>
             </div>
-            <div className="component-flow-node">End</div>
+            <div className="component-chart-bars" aria-label="正文组件覆盖度图表">
+              {chartBars.map((item) => (
+                <div key={item.label}>
+                  <span>{item.label}</span>
+                  <div>
+                    <i style={{ width: `${item.value}%` }} />
+                  </div>
+                  <strong>{item.value}</strong>
+                </div>
+              ))}
+            </div>
           </div>
 
-          <h2 id="timeline">Timeline</h2>
+          <h2 id="flow">流程图</h2>
+          <div className="component-flow not-prose" aria-label="正文发布流程示例">
+            <div className="component-flow-node">开始</div>
+            <div className="component-flow-connector" aria-hidden="true" />
+            <div className="component-flow-node component-flow-question">内容完整？</div>
+            <div className="component-flow-branch-line" aria-hidden="true" />
+            <div className="component-flow-branches">
+              <div>
+                <span>是</span>
+                <div className="component-flow-node">预览发布</div>
+              </div>
+              <div>
+                <span>否</span>
+                <div className="component-flow-node">继续修改</div>
+              </div>
+            </div>
+            <div className="component-flow-merge-line" aria-hidden="true" />
+            <div className="component-flow-node">归档</div>
+          </div>
+
+          <h2 id="diagrams">关系图</h2>
+          <p>关系图用来表达模块关联，比决策流更适合架构、流程和数据方向说明。</p>
+          <div className="component-diagram not-prose" aria-label="内容渲染关系图">
+            <div>
+              <Braces className="h-4 w-4" />
+              <span>内容源</span>
+            </div>
+            <div>
+              <Network className="h-4 w-4" />
+              <span>渲染器</span>
+            </div>
+            <div>
+              <Layers3 className="h-4 w-4" />
+              <span>正文界面</span>
+            </div>
+          </div>
+
+          <h2 id="emoji">表情符号</h2>
+          <p>Emoji 要能和中文、英文、代码、链接共存，避免把行高撑乱或破坏正文节奏。</p>
+          <div className="component-emoji-board not-prose">
+            <span className="component-overline">
+              <SmilePlus className="h-4 w-4" />
+              表情分组
+            </span>
+            {emojiGroups.map((group, index) => (
+              <p key={`emoji-${index}`}>{group.join(' ')}</p>
+            ))}
+          </div>
+
+          <h2 id="timeline">时间线</h2>
           <ol className="component-timeline not-prose">
             {timelineItems.map((item) => (
               <li key={item.title}>
@@ -440,96 +539,95 @@ int main(void)
             ))}
           </ol>
 
-          <h2 id="blockquote">Blockquote</h2>
+          <h2 id="blockquote">引用</h2>
           <blockquote>
             <p>
-              Did you come here for something in particular or just general Riker-bashing? And blowing into maximum warp
-              speed, you appeared for an instant to be in two places at once.
+              好的引用应该像正文中的停顿点：它强调观点，但不把整篇文章带到另一套视觉系统里。
             </p>
           </blockquote>
 
-          <h2 id="tables">Tables</h2>
+          <h2 id="tables">表格</h2>
           <table>
             <thead>
               <tr>
-                <th>Block</th>
+                <th>内容块</th>
                 <th>用途</th>
                 <th>状态</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td>Typography</td>
+                <td>排版</td>
                 <td>正文阅读基础</td>
-                <td>Ready</td>
+                <td>就绪</td>
               </tr>
               <tr>
-                <td>Notice</td>
+                <td>提示块</td>
                 <td>提示、警告、补充信息</td>
-                <td>Preview</td>
+                <td>预览</td>
               </tr>
               <tr>
-                <td>Tabs</td>
+                <td>标签页</td>
                 <td>分组信息展示</td>
-                <td>Preview</td>
+                <td>预览</td>
               </tr>
               <tr>
-                <td>Gallery</td>
+                <td>图集</td>
                 <td>多图展示</td>
-                <td>Preview</td>
+                <td>预览</td>
               </tr>
               <tr>
-                <td>Video</td>
+                <td>视频</td>
                 <td>YouTube 与自定义视频嵌入</td>
-                <td>Preview</td>
+                <td>预览</td>
               </tr>
             </tbody>
           </table>
 
-          <h2 id="wide-table">Wide table</h2>
+          <h2 id="wide-table">宽表</h2>
           <p>宽表在移动端必须横向滚动，而不是把整篇正文撑出屏幕。</p>
           <div className="component-table-scroll not-prose">
             <table>
               <thead>
                 <tr>
-                  <th>Feature</th>
+                  <th>能力</th>
                   <th>Markdown</th>
-                  <th>Rich editor</th>
-                  <th>Renderer</th>
-                  <th>Mobile</th>
-                  <th>Notes</th>
+                  <th>富文本编辑器</th>
+                  <th>渲染方式</th>
+                  <th>移动端</th>
+                  <th>备注</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td>Code window</td>
-                  <td>Yes</td>
-                  <td>Yes</td>
-                  <td>Copy + lines</td>
-                  <td>Scroll</td>
-                  <td>Needs syntax theme in light and dark mode.</td>
+                  <td>代码窗口</td>
+                  <td>支持</td>
+                  <td>支持</td>
+                  <td>行号与复制</td>
+                  <td>横向滚动</td>
+                  <td>需要同时适配亮色和暗色模式。</td>
                 </tr>
                 <tr>
-                  <td>Gallery</td>
-                  <td>Manual HTML</td>
-                  <td>Structured block</td>
-                  <td>Grid</td>
-                  <td>Two columns</td>
-                  <td>Captions keep filenames visible.</td>
+                  <td>图集</td>
+                  <td>手写 HTML</td>
+                  <td>结构化块</td>
+                  <td>网格</td>
+                  <td>两列</td>
+                  <td>说明文字保留文件名。</td>
                 </tr>
                 <tr>
-                  <td>Video</td>
-                  <td>Embed URL</td>
-                  <td>Structured block</td>
+                  <td>视频</td>
+                  <td>嵌入地址</td>
+                  <td>结构化块</td>
                   <td>16:9</td>
-                  <td>Fluid</td>
-                  <td>Supports YouTube and custom MP4.</td>
+                  <td>自适应</td>
+                  <td>支持 YouTube 和自定义 MP4。</td>
                 </tr>
               </tbody>
             </table>
           </div>
 
-          <h2 id="cards">Cards</h2>
+          <h2 id="cards">卡片</h2>
           <p>正文里的卡片只用于局部重复信息，不作为外层页面容器。</p>
           <div className="component-card-grid not-prose">
             {articleCards.map((card) => (
@@ -541,7 +639,7 @@ int main(void)
             ))}
           </div>
 
-          <h2 id="files">Files</h2>
+          <h2 id="files">文件</h2>
           <p>附件、资源和下载入口需要像正文内容一样清楚，但不应该抢过标题和段落的层级。</p>
           <div className="component-file-list not-prose">
             {sampleFiles.map((file) => (
@@ -558,7 +656,7 @@ int main(void)
             ))}
           </div>
 
-          <h2 id="image">Image</h2>
+          <h2 id="image">图片</h2>
           <p>
             单图应该沿用文章图片样式：宽度跟随正文，边框和阴影克制，图片说明放在下方。alt text 用来描述图片内容，
             不应该只写文件名。
@@ -576,8 +674,8 @@ int main(void)
             </figcaption>
           </figure>
 
-          <h2 id="gallery">Gallery</h2>
-          <p>Gallery 用于多图浏览，视觉上应该像文章内容的一部分，而不是跳成独立相册应用。</p>
+          <h2 id="gallery">图集</h2>
+          <p>图集用于多图浏览，视觉上应该像文章内容的一部分，而不是跳成独立相册应用。</p>
           <div className="component-gallery not-prose">
             {sampleImages.map((image) => (
               <figure key={image.file}>
@@ -587,8 +685,8 @@ int main(void)
             ))}
           </div>
 
-          <h2 id="slider">Slider</h2>
-          <p>Slider 展示当前图片、文件名、alt text 和缩略图状态，用来检查切换控件与正文宽度是否协调。</p>
+          <h2 id="slider">轮播</h2>
+          <p>轮播展示当前图片、文件名、alt text 和缩略图状态，用来检查切换控件与正文宽度是否协调。</p>
           <div className="component-slider not-prose">
             <figure className="component-slider-stage">
               <img src={sampleImages[0].src} alt={sampleImages[0].alt} referrerPolicy="no-referrer" />
@@ -597,13 +695,13 @@ int main(void)
                 <span>{sampleImages[0].alt}</span>
               </figcaption>
             </figure>
-            <div className="component-slider-strip" aria-label="Slider thumbnails">
+            <div className="component-slider-strip" aria-label="轮播缩略图">
               {sampleImages.map((image) => (
                 <button
                   key={image.file}
                   className={image.file === sampleImages[0].file ? 'is-active' : ''}
                   type="button"
-                  aria-label={`Preview ${image.file}`}
+                  aria-label={`预览 ${image.file}`}
                 >
                   <img src={image.src} alt="" referrerPolicy="no-referrer" />
                   <span>{image.file}</span>
@@ -612,34 +710,34 @@ int main(void)
             </div>
           </div>
 
-          <h2 id="audio">Audio</h2>
+          <h2 id="audio">音频</h2>
           <p>音频控件用于访谈、采样和播客片段，宽度跟随正文，不额外制造背景动效。</p>
           <div className="component-audio not-prose">
             <div>
               <Music2 className="h-5 w-5" />
               <span>
-                <strong>Embedded audio</strong>
-                <small>MP3 · article-width media control</small>
+                <strong>嵌入音频</strong>
+                <small>MP3 · 正文宽度媒体控件</small>
               </span>
             </div>
             <audio controls preload="metadata" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3">
-              Your browser does not support the audio element.
+              当前浏览器不支持音频播放。
             </audio>
           </div>
 
-          <h2 id="youtube">YouTube video</h2>
-          <p>YouTube 嵌入需要固定 16:9 比例，和图片、代码块一样使用正文边框半径。</p>
+          <h2 id="youtube">YouTube 视频</h2>
+          <p>YouTube 嵌入需要固定 16:9 比例，这里使用风景视频检查画面、边框和暗色背景是否协调。</p>
           <div className="component-embed not-prose">
             <iframe
-              src="https://www.youtube.com/embed/ysz5S6PUM-U"
-              title="YouTube video"
+              src="https://www.youtube-nocookie.com/embed/LXb3EKWsInQ?rel=0"
+              title="风景视频"
               loading="lazy"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               allowFullScreen
             />
           </div>
 
-          <h2 id="custom-video">Custom video</h2>
+          <h2 id="custom-video">自定义视频</h2>
           <p>自定义视频使用同一套响应式容器，避免在移动端溢出正文宽度。</p>
           <div className="component-embed component-custom-video not-prose">
             <video controls preload="metadata" poster={sampleImages[1].src}>
@@ -647,27 +745,28 @@ int main(void)
                 src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4"
                 type="video/mp4"
               />
-              Your browser does not support the video tag.
+              当前浏览器不支持视频播放。
             </video>
             <div className="component-video-caption">
               <Play className="h-4 w-4 fill-current" />
-              <span>Custom video</span>
+              <span>自定义视频</span>
             </div>
           </div>
 
-          <h2 id="footnotes">Footnotes</h2>
+          <h2 id="footnotes">脚注</h2>
           <section className="component-footnotes">
             <ol>
               <li id="footnote-1">
-                Footnotes should stay quiet, readable, and easy to jump back from.{' '}
-                <a href="#footnote-ref-1" aria-label="Back to content">
+                脚注应该安静、易读，并且方便回到正文。{' '}
+                <a href="#footnote-ref-1" aria-label="返回正文">
                   ↩
                 </a>
               </li>
             </ol>
           </section>
-        </div>
-      </article>
+          </div>
+        </article>
+      </FadeIn>
     </PostLayout>
   )
 }
@@ -705,7 +804,12 @@ function CodeWindow({ label, code }: { label: string; code: string }) {
           <span className="h-3 w-3 rounded-full bg-[#ffbd2e]" />
           <span className="h-3 w-3 rounded-full bg-[#27c93f]" />
         </div>
-        <span className="component-code-label">{label}</span>
+        <div className="code-window-tools">
+          <span className="component-code-label">{label}</span>
+          <span className="code-window-copy" aria-hidden="true">
+            <Copy className="h-3.5 w-3.5" />
+          </span>
+        </div>
       </div>
       <div className="code-window-body">
         <div className="code-window-gutter" aria-hidden="true">
