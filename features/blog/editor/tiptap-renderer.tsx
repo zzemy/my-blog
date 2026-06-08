@@ -19,6 +19,7 @@ import { CodeBlockLowlight } from '@tiptap/extension-code-block-lowlight'
 import { Mathematics } from '@tiptap/extension-mathematics'
 import { common, createLowlight } from 'lowlight'
 import { Check, Copy } from 'lucide-react'
+import { articleRichBlockExtensions } from './rich-block-extensions'
 import { LinkPreview } from '@/shared/components/common/link-preview'
 
 const lowlight = createLowlight(common)
@@ -293,6 +294,7 @@ export function TipTapRenderer({ content, className = '', toc = [] }: TipTapRend
       Mathematics,
       Color,
       TextStyle,
+      ...articleRichBlockExtensions,
     ],
     content,
     editable: false,

@@ -25,6 +25,7 @@ import remarkMath from 'remark-math'
 import remarkRehype from 'remark-rehype'
 import rehypeStringify from 'rehype-stringify'
 import { MenuBar } from './menu-bar'
+import { articleRichBlockExtensions } from './rich-block-extensions'
 import { uploadImage } from '@/lib/upload-image'
 
 const lowlight = createLowlight(common)
@@ -173,6 +174,7 @@ export function TipTapEditor({
       CharacterCount,
       Color,
       TextStyle,
+      ...articleRichBlockExtensions,
     ],
     content,
     editable,
@@ -544,6 +546,20 @@ export function TipTapEditor({
           border-radius: 12px;
           border: 1px solid #e2e8f0;
           box-shadow: 0 12px 30px rgba(15,23,42,0.08);
+        }
+        .admin-editor .ProseMirror .component-gallery img,
+        .admin-editor .ProseMirror .component-slider img {
+          max-width: none;
+          margin: 0;
+          border: 0;
+          border-radius: 0;
+          box-shadow: none;
+        }
+        .admin-editor .ProseMirror .component-tabs h3,
+        .admin-editor .ProseMirror .component-tabs p,
+        .admin-editor .ProseMirror .component-accordions p,
+        .admin-editor .ProseMirror .component-callout p {
+          margin: 0;
         }
       `}</style>
     </div>

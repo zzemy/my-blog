@@ -295,6 +295,26 @@
   --article-accent: oklch(0.72 0.15 205);
 }
 
+.admin-editor {
+  --article-text: oklch(0.24 0.025 260);
+  --article-heading: oklch(0.16 0.025 260);
+  --article-muted: oklch(0.52 0.035 260);
+  --article-soft: oklch(0.97 0.006 260);
+  --article-panel: oklch(0.99 0.004 260);
+  --article-line: oklch(0.9 0.014 260);
+  --article-accent: oklch(0.52 0.16 245);
+}
+
+.dark .admin-editor {
+  --article-text: oklch(0.78 0.018 260);
+  --article-heading: oklch(0.97 0.006 260);
+  --article-muted: oklch(0.64 0.018 260);
+  --article-soft: oklch(0.2 0.006 260);
+  --article-panel: oklch(0.17 0.006 260);
+  --article-line: oklch(1 0 0 / 12%);
+  --article-accent: oklch(0.72 0.15 205);
+}
+
 .article-hero {
   display: flex;
   flex-direction: column;
@@ -843,12 +863,15 @@
   padding: 0.25rem;
 }
 
-.component-tabs-list label {
+.component-tabs-list label,
+.component-tabs-list button {
   display: inline-flex;
   min-height: 2.2rem;
   align-items: center;
   justify-content: center;
+  border: 0;
   border-radius: 6px;
+  background: transparent;
   color: var(--article-muted);
   cursor: pointer;
   padding: 0.45rem 0.85rem;
@@ -860,7 +883,8 @@
 
 #component-tab-1:checked ~ .component-tabs-list label[for="component-tab-1"],
 #component-tab-2:checked ~ .component-tabs-list label[for="component-tab-2"],
-#component-tab-3:checked ~ .component-tabs-list label[for="component-tab-3"] {
+#component-tab-3:checked ~ .component-tabs-list label[for="component-tab-3"],
+.component-tabs-list button.is-active {
   background: var(--article-panel);
   color: var(--article-heading);
   box-shadow: 0 1px 0 color-mix(in oklch, var(--foreground), transparent 92%);
@@ -880,7 +904,8 @@
 
 #component-tab-1:checked ~ .component-tab-panels .component-tab-panel-1,
 #component-tab-2:checked ~ .component-tab-panels .component-tab-panel-2,
-#component-tab-3:checked ~ .component-tab-panels .component-tab-panel-3 {
+#component-tab-3:checked ~ .component-tab-panels .component-tab-panel-3,
+.component-tab-panel.is-active {
   display: block;
 }
 
