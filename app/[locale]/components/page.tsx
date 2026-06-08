@@ -25,6 +25,7 @@ import {
 } from 'lucide-react'
 import { PostLayout } from '@/features/blog/components/client/post-layout'
 import { FadeIn } from '@/shared/visuals/fade-in'
+import { ReferenceSlider } from './reference-slider'
 
 const locales = ['zh', 'en', 'fr', 'ja']
 
@@ -67,33 +68,33 @@ const toc = [
 const sampleImages = [
   {
     file: '06.jpg',
-    src: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1400&q=80',
-    alt: '图片说明：山谷和雾气中的日出',
+    src: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
+    alt: '图片说明：浅色海岸线和清澈浪花',
   },
   {
     file: '01.jpg',
-    src: 'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=1000&q=80',
-    alt: '图片说明：山路和远处山脊',
+    src: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1000&q=80',
+    alt: '图片说明：湖泊、森林和远处山脊',
   },
   {
     file: '02.jpg',
-    src: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1000&q=80',
-    alt: '图片说明：海岸线与浅色浪花',
+    src: 'https://images.unsplash.com/photo-1439066615861-d1af74d74000?auto=format&fit=crop&w=1000&q=80',
+    alt: '图片说明：蓝色湖面和雪山',
   },
   {
     file: '03.jpg',
-    src: 'https://images.unsplash.com/photo-1493246507139-91e8fad9978e?auto=format&fit=crop&w=1000&q=80',
-    alt: '图片说明：森林中的光线',
+    src: 'https://images.unsplash.com/photo-1518837695005-2083093ee35b?auto=format&fit=crop&w=1000&q=80',
+    alt: '图片说明：平静海面和低饱和蓝色天空',
   },
   {
     file: '04.jpg',
-    src: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=1000&q=80',
-    alt: '图片说明：高树和林间小径',
+    src: 'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?auto=format&fit=crop&w=1000&q=80',
+    alt: '图片说明：绿色山坡和开阔天空',
   },
   {
     file: '05.jpg',
-    src: 'https://images.unsplash.com/photo-1470770903676-69b98201ea1c?auto=format&fit=crop&w=1000&q=80',
-    alt: '图片说明：湖面、木屋和远山',
+    src: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=1000&q=80',
+    alt: '图片说明：山地草甸和远处山峰',
   },
 ]
 
@@ -687,28 +688,7 @@ int main(void)
 
           <h2 id="slider">轮播</h2>
           <p>轮播展示当前图片、文件名、alt text 和缩略图状态，用来检查切换控件与正文宽度是否协调。</p>
-          <div className="component-slider not-prose">
-            <figure className="component-slider-stage">
-              <img src={sampleImages[0].src} alt={sampleImages[0].alt} referrerPolicy="no-referrer" />
-              <figcaption>
-                <strong>{sampleImages[0].file}</strong>
-                <span>{sampleImages[0].alt}</span>
-              </figcaption>
-            </figure>
-            <div className="component-slider-strip" aria-label="轮播缩略图">
-              {sampleImages.map((image) => (
-                <button
-                  key={image.file}
-                  className={image.file === sampleImages[0].file ? 'is-active' : ''}
-                  type="button"
-                  aria-label={`预览 ${image.file}`}
-                >
-                  <img src={image.src} alt="" referrerPolicy="no-referrer" />
-                  <span>{image.file}</span>
-                </button>
-              ))}
-            </div>
-          </div>
+          <ReferenceSlider images={sampleImages} />
 
           <h2 id="audio">音频</h2>
           <p>音频控件用于访谈、采样和播客片段，宽度跟随正文，不额外制造背景动效。</p>
@@ -729,7 +709,7 @@ int main(void)
           <p>YouTube 嵌入需要固定 16:9 比例，这里使用风景视频检查画面、边框和暗色背景是否协调。</p>
           <div className="component-embed not-prose">
             <iframe
-              src="https://www.youtube-nocookie.com/embed/LXb3EKWsInQ?rel=0"
+              src="https://www.youtube-nocookie.com/embed/linlz7-Pnvw?rel=0"
               title="风景视频"
               loading="lazy"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"

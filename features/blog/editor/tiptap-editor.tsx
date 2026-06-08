@@ -26,9 +26,55 @@ import remarkRehype from 'remark-rehype'
 import rehypeStringify from 'rehype-stringify'
 import { MenuBar } from './menu-bar'
 import { articleRichBlockExtensions } from './rich-block-extensions'
+import { hasArticleShortcodes, splitArticleMarkdown } from './markdown-shortcodes'
+import { MarkdownShortcodeGuide } from './markdown-shortcode-guide'
 import { uploadImage } from '@/lib/upload-image'
 
 const lowlight = createLowlight(common)
+
+async function markdownToHtml(markdown: string) {
+  try {
+    const file = await remark()
+      .use(remarkMath)
+      .use(remarkGfm)
+      .use(remarkRehype, {
+        handlers: {
+          math: (_state: unknown, node: { value?: string }) => ({
+            type: 'element',
+            tagName: 'div',
+            properties: {
+              'data-type': 'block-math',
+              'data-latex': node.value || '',
+            },
+            children: [{ type: 'text', value: node.value || '' }],
+          }),
+          inlineMath: (_state: unknown, node: { value?: string }) => ({
+            type: 'element',
+            tagName: 'span',
+            properties: {
+              'data-type': 'inline-math',
+              'data-latex': node.value || '',
+            },
+            children: [{ type: 'text', value: node.value || '' }],
+          }),
+        },
+      })
+      .use(rehypeStringify)
+      .process(markdown)
+
+    return String(file)
+  } catch (error) {
+    console.warn('Math parsing failed, retrying without math...', error)
+  }
+
+  const file = await remark()
+    .use(remarkGfm)
+    .use(remarkRehype)
+    .use(rehypeStringify)
+    .process(markdown)
+
+  return String(file)
+}
 
 // Dual Theme Syntax Highlighting (Light & Dark)
 const syntaxThemeCss = `
@@ -216,67 +262,30 @@ export function TipTapEditor({
           // Include all common markdown triggers: math, tables, headers, lists, quotes, code, formatting, html, footnotes
           const looksMarkdown = /(^|\n)\s{0,3}(#{1,6}\s|[-*+]\s|\d+\.\s|>|```|~~|[*_](?!\s)|`|[-*_]{3,}|!\[|\[|\||\$\$?|\\|<\/?[a-z]|\[\^)/i.test(text)
           
-          if (text && looksMarkdown) {
+          if (text && (looksMarkdown || hasArticleShortcodes(text))) {
              event.preventDefault()
              ;(async () => {
-               // Strategy 1: Try full parse with Math
                try {
-                 const file = await remark()
-                   .use(remarkMath)
-                   .use(remarkGfm)
-                   .use(remarkRehype, {
-                     handlers: {
-                       math: (_state: unknown, node: { value?: string }) => {
-                         // Build HAST node directly (mdast-util-to-hast 13+ passes state as first arg)
-                         return {
-                           type: 'element',
-                           tagName: 'div',
-                           properties: { 
-                             'data-type': 'block-math', 
-                             'data-latex': node.value || '' 
-                           },
-                           children: [{ type: 'text', value: node.value || '' }]
-                         }
-                       },
-                       inlineMath: (_state: unknown, node: { value?: string }) => {
-                         return {
-                           type: 'element',
-                           tagName: 'span',
-                           properties: { 
-                             'data-type': 'inline-math', 
-                             'data-latex': node.value || '' 
-                           },
-                           children: [{ type: 'text', value: node.value || '' }]
-                         }
-                       }
+                 if (hasArticleShortcodes(text)) {
+                   const segments = splitArticleMarkdown(text)
+                   for (const segment of segments) {
+                     if (segment.kind === 'markdown') {
+                       const html = await markdownToHtml(segment.text)
+                       editorRef.current?.chain().focus().insertContent(html).run()
+                     } else {
+                       editorRef.current?.chain().focus().insertContent(segment.content).run()
                      }
-                    })
-                   .use(rehypeStringify)
-                   .process(text)
-                 
-                 const html = String(file)
-                 editorRef.current?.chain().focus().insertContent(html).run()
-                 return
-               } catch (error) {
-                 console.warn('Math parsing failed, retrying without math...', error)
-               }
+                   }
+                   return
+                 }
 
-               // Strategy 2: Try basic GFM parse (restore previous functionality)
-               try {
-                 const file = await remark()
-                   .use(remarkGfm)
-                   .use(remarkRehype)
-                   .use(rehypeStringify)
-                   .process(text)
-                 
-                 const html = String(file)
+                 const html = await markdownToHtml(text)
                  editorRef.current?.chain().focus().insertContent(html).run()
                  return
                } catch (error) {
                  console.error('Markdown processing completely failed', error)
                }
 
-               // Strategy 3: Fallback to plain text
                editorRef.current?.chain().focus().insertContent(text).run()
              })()
              return true
@@ -328,6 +337,7 @@ export function TipTapEditor({
         </div>
       )}
       {editable && <MenuBar editor={editor} />}
+      {editable && <MarkdownShortcodeGuide />}
       <style>{syntaxThemeCss}</style>
       <EditorContent editor={editor} />
       {editable && editor && (

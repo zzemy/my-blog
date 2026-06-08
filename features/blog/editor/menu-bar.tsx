@@ -25,6 +25,11 @@ import {
   Minus,
   Loader2,
   Info,
+  LayoutGrid,
+  Network,
+  Clock3,
+  Layers3,
+  Music2,
   Play,
 } from 'lucide-react'
 import { createImageItemsFromUrls, toYouTubeEmbed } from './rich-block-extensions'
@@ -185,7 +190,7 @@ export function MenuBar({ editor }: MenuBarProps) {
   }
 
   const insertYoutube = () => {
-    const value = window.prompt('YouTube URL:', 'https://www.youtube.com/watch?v=LXb3EKWsInQ')
+    const value = window.prompt('YouTube URL:', 'https://www.youtube.com/watch?v=linlz7-Pnvw')
     if (!value) return
 
     editor
@@ -234,6 +239,95 @@ export function MenuBar({ editor }: MenuBarProps) {
           yes: '预览发布',
           no: '继续修改',
           end: '归档',
+        },
+      })
+      .run()
+  }
+
+  const insertCards = () => {
+    editor
+      .chain()
+      .focus()
+      .insertContent({
+        type: 'articleCards',
+        attrs: {
+          cards: [
+            { eyebrow: '模式', title: '紧凑摘要卡片', text: '用于文章中的小型结论、资源组或阅读提示。' },
+            { eyebrow: '状态', title: '状态对比', text: '可承载就绪、预览、废弃等状态。' },
+            { eyebrow: '资源', title: '相关阅读', text: '适合链接到同系列文章、外部资料或下载内容。' },
+          ],
+        },
+      })
+      .run()
+  }
+
+  const insertDiagram = () => {
+    editor
+      .chain()
+      .focus()
+      .insertContent({
+        type: 'articleDiagram',
+        attrs: {
+          items: [{ label: '内容源' }, { label: '渲染器' }, { label: '正文界面' }],
+        },
+      })
+      .run()
+  }
+
+  const insertTimeline = () => {
+    editor
+      .chain()
+      .focus()
+      .insertContent({
+        type: 'articleTimeline',
+        attrs: {
+          items: [
+            { label: '草稿', title: '收集内容块', text: '先把真实文章里会出现的内容块列全。' },
+            { label: '检查', title: '校准阅读节奏', text: '检查标题、列表、代码、表格和媒体是否稳定。' },
+            { label: '发布', title: '复用正文体系', text: '组件页和文章详情页使用同一套正文变量。' },
+          ],
+        },
+      })
+      .run()
+  }
+
+  const insertRichShowcase = () => {
+    const image = window.prompt('图片 URL（可留空）:', '')
+    if (image === null) return
+
+    editor
+      .chain()
+      .focus()
+      .insertContent({
+        type: 'articleRichShowcase',
+        attrs: {
+          image,
+          alt: '图片说明',
+          eyebrow: '富文本块',
+          title: '混合正文模块',
+          text: '一个块里同时承载媒体、摘要、状态和操作入口。',
+          primaryLabel: '查看图集',
+          primaryHref: '#gallery',
+          secondaryLabel: '查看文件',
+          secondaryHref: '#files',
+        },
+      })
+      .run()
+  }
+
+  const insertAudio = () => {
+    const src = window.prompt('音频 URL:', 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3')
+    if (!src) return
+
+    editor
+      .chain()
+      .focus()
+      .insertContent({
+        type: 'articleAudio',
+        attrs: {
+          src,
+          title: '嵌入音频',
+          caption: '音频 · 正文宽度媒体控件',
         },
       })
       .run()
@@ -426,6 +520,21 @@ export function MenuBar({ editor }: MenuBarProps) {
       </Button>
       <Button variant="ghost" size="sm" onClick={insertFlow} title="流程图" className="hover:bg-gray-200 dark:hover:bg-zinc-800">
         <CheckSquare className="h-4 w-4" />
+      </Button>
+      <Button variant="ghost" size="sm" onClick={insertCards} title="卡片" className="hover:bg-gray-200 dark:hover:bg-zinc-800">
+        <LayoutGrid className="h-4 w-4" />
+      </Button>
+      <Button variant="ghost" size="sm" onClick={insertDiagram} title="关系图" className="hover:bg-gray-200 dark:hover:bg-zinc-800">
+        <Network className="h-4 w-4" />
+      </Button>
+      <Button variant="ghost" size="sm" onClick={insertTimeline} title="时间线" className="hover:bg-gray-200 dark:hover:bg-zinc-800">
+        <Clock3 className="h-4 w-4" />
+      </Button>
+      <Button variant="ghost" size="sm" onClick={insertRichShowcase} title="富文本块" className="hover:bg-gray-200 dark:hover:bg-zinc-800">
+        <Layers3 className="h-4 w-4" />
+      </Button>
+      <Button variant="ghost" size="sm" onClick={insertAudio} title="音频" className="hover:bg-gray-200 dark:hover:bg-zinc-800">
+        <Music2 className="h-4 w-4" />
       </Button>
 
       <div className="w-px h-8 bg-gray-300 dark:bg-zinc-700 mx-1" />
