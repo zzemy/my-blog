@@ -41,8 +41,7 @@
 - **TipTap 3** - 富文本编辑器（基于 ProseMirror）
   - 支持扩展：代码块、表格、任务列表、字数统计、排版优化等
 - **lowlight** - 代码高亮（集成到 TipTap）
-- **shiki** - VS Code 同款语法高亮
-- **rehype-pretty-code** - Markdown 代码美化
+- **Supabase posts.content** - 以 TipTap JSON 保存文章正文
 - **外链预览** - 自动将外部链接替换为 Hover 预览卡片，可点击新开
 - **自动识别 URL** - 正文纯文本内的 `https://` 自动变为可点击链接
 - **图片放大与代码复制** - medium-zoom 预览图片，代码块一键复制
@@ -59,12 +58,9 @@
 
 ### 内容处理
 
-- **gray-matter** - Markdown Frontmatter 解析
-- **remark** / **rehype** - Markdown/HTML 处理管道
+- **remark** / **rehype** - 后台编辑器粘贴 Markdown 时转换为可插入 HTML
   - remark-gfm (GitHub Flavored Markdown)
-  - remark-math + rehype-katex (数学公式)
-  - rehype-slug (标题锚点)
-- **reading-time** - 阅读时长估算
+  - remark-math (数学公式输入)
 - **pinyin-pro** - 中文转拼音（自动生成 URL slug）
 
 ### 国际化与搜索
@@ -118,7 +114,7 @@
   - GitHub 风格创作热力图（52 周活跃度）
   - 实时统计：文章数、草稿数、总阅读量
   - 草稿快速访问
-- **实时预览**：编辑时同步渲染 Markdown 效果
+- **实时预览**：编辑时同步渲染富文本效果
 
 ### 🛡️ 数据自主与安全
 
@@ -276,7 +272,6 @@ pnpm dev
 │   ├── site-settings.ts
 │   └── utils.ts
 ├── messages/                 # i18n 文案
-├── content/posts/            # Markdown 内容源
 ├── public/                   # 静态资源 + RSS
 ├── scripts/                  # 构建脚本（如 RSS 生成）
 ├── supabase/                 # schema 与 migrations

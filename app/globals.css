@@ -230,18 +230,6 @@
   content: "";
 }
 
-/* Code Block Figure Container */
-.prose figure[data-rehype-pretty-code-figure] {
-  background-color: #1e1e1e;
-  border-radius: 0.5rem;
-  overflow: hidden;
-  margin: 1.5rem 0;
-}
-
-.dark .prose figure[data-rehype-pretty-code-figure] {
-  background-color: #1e1e1e;
-}
-
 /* Code Block Styling */
 .prose pre {
   background-color: transparent !important;
@@ -284,31 +272,5 @@
   font-size: inherit;
   display: block;
 }
-
-/* Sugar High Syntax Highlighting CSS Variables */
-:root {
-  --sh-class: #4ec9b0;
-  --sh-identifier: #9cdcfe;
-  --sh-sign: #d4d4d4;
-  --sh-string: #ce9178;
-  --sh-keyword: #c586c0;
-  --sh-comment: #6a9955;
-  --sh-jsxliterals: #4fc1ff;
-  --sh-property: #9cdcfe;
-  --sh-entity: #4ec9b0;
-}
-
-.dark {
-  --sh-class: #4ec9b0;
-  --sh-identifier: #9cdcfe;
-  --sh-sign: #d4d4d4;
-  --sh-string: #ce9178;
-  --sh-keyword: #c586c0;
-  --sh-comment: #6a9955;
-  --sh-jsxliterals: #4fc1ff;
-  --sh-property: #9cdcfe;
-  --sh-entity: #4ec9b0;
-}
-
 
 
