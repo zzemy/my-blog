@@ -82,18 +82,18 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
 
   return (
     <PostLayout toc={toc}>
-      <article className="prose dark:prose-invert max-w-none">
-        <div className="space-y-4 border-b pb-8">
-          <h1 className="text-4xl font-bold tracking-tight lg:text-5xl">{post.title}</h1>
+      <article className="article-shell">
+        <div className="article-hero">
+          <h1 className="article-title text-4xl lg:text-5xl">{post.title}</h1>
           {post.description && (
-            <p className="text-xl text-muted-foreground">
+            <p className="article-description">
               {post.description}
             </p>
           )}
         </div>
 
         <TipTapRenderer
-          className="mt-8 leading-7 text-base md:text-lg"
+          className="mt-10"
           content={post.content}
           toc={toc}
         />

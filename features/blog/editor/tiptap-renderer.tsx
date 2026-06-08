@@ -165,7 +165,7 @@ const CodeBlock = ({ node: { textContent } }: { node: { textContent: string } })
 
   return (
     <NodeViewWrapper 
-      className="code-window my-4 relative group rounded-xl overflow-hidden shadow-sm dark:shadow-2xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-[#1e1e1e]"
+      className="code-window not-prose group relative"
       style={{
         fontSize: '14px',
         lineHeight: '1.5',
@@ -174,7 +174,7 @@ const CodeBlock = ({ node: { textContent } }: { node: { textContent: string } })
     >
       {/* Header / Title Bar */}
       <div 
-        className="flex items-center justify-between px-4 py-1.5 bg-white dark:bg-[#1e1e1e]"
+        className="code-window-header"
       >
         <div className="flex gap-2">
           <div className="w-3 h-3 rounded-full bg-[#ff5f56]" />
@@ -183,7 +183,7 @@ const CodeBlock = ({ node: { textContent } }: { node: { textContent: string } })
         </div>
         <button
           onClick={onCopy}
-          className="p-1.5 hover:bg-black/5 dark:hover:bg-white/10 rounded-md transition-colors text-gray-400 dark:text-gray-400 hover:text-gray-600 dark:hover:text-white opacity-0 group-hover:opacity-100"
+          className="code-window-copy"
           aria-label="Copy code"
         >
           {copied ? (
@@ -194,10 +194,10 @@ const CodeBlock = ({ node: { textContent } }: { node: { textContent: string } })
         </button>
       </div>
 
-      <div className="relative flex overflow-x-auto pt-1 pb-0">
+      <div className="code-window-body">
         {/* Line Numbers */}
         <div 
-          className="flex-shrink-0 flex flex-col items-end pr-4 pl-2 select-none text-[#237893] dark:text-[#858585] min-w-[3.5rem]"
+          className="code-window-gutter"
           aria-hidden="true"
           style={{ fontFamily: 'inherit', fontSize: 'inherit', lineHeight: 'inherit' }}
         >
@@ -208,7 +208,7 @@ const CodeBlock = ({ node: { textContent } }: { node: { textContent: string } })
 
         {/* Code Content */}
         <pre 
-          className="flex-1 pl-6 pr-4 pb-0 !m-0 !bg-transparent overflow-visible scrollbar-hide !text-[#24292e] dark:!text-[#d4d4d4]"
+          className="code-window-pre"
           style={{ fontFamily: 'inherit', fontSize: 'inherit', lineHeight: 'inherit' }}
         >
           <NodeViewContent className="!bg-transparent !p-0 !whitespace-pre !font-inherit !text-inherit" />
@@ -241,14 +241,16 @@ export function TipTapRenderer({ content, className = '', toc = [] }: TipTapRend
       Link.configure({
         openOnClick: true,
         HTMLAttributes: {
-          class: 'text-blue-500 hover:text-blue-600 underline cursor-pointer',
+          class: 'article-link',
           target: '_blank',
           rel: 'noopener noreferrer',
         },
       }),
       Image.configure({
         HTMLAttributes: {
-          class: 'rounded-lg max-w-full h-auto my-4',          referrerPolicy: 'no-referrer',        },
+          class: 'article-image',
+          referrerPolicy: 'no-referrer',
+        },
       }),
       CodeBlockLowlight.configure({
         lowlight,
@@ -260,23 +262,22 @@ export function TipTapRenderer({ content, className = '', toc = [] }: TipTapRend
       Table.configure({
         resizable: false,
         HTMLAttributes: {
-          class: 'border-collapse table-auto w-full my-4',
+          class: 'article-table',
         },
       }),
       TableRow.configure({
         HTMLAttributes: {
-          class: 'border border-gray-300 dark:border-gray-700',
+          class: '',
         },
       }),
       TableCell.configure({
         HTMLAttributes: {
-          class: 'border border-gray-300 dark:border-gray-700 px-4 py-2',
+          class: '',
         },
       }),
       TableHeader.configure({
         HTMLAttributes: {
-          class:
-            'border border-gray-300 dark:border-gray-700 px-4 py-2 bg-gray-100 dark:bg-gray-800 font-bold',
+          class: '',
         },
       }),
       TaskList.configure({
@@ -297,7 +298,7 @@ export function TipTapRenderer({ content, className = '', toc = [] }: TipTapRend
     editable: false,
     editorProps: {
       attributes: {
-        class: `prose prose-xl dark:prose-invert max-w-none leading-relaxed article-font prose-headings:font-bold prose-headings:tracking-tight prose-p:my-6 prose-li:my-1.5 prose-li:leading-relaxed prose-code:text-sm prose-code:px-1.5 prose-code:py-0.5 ${className}`,
+        class: `article-content prose dark:prose-invert max-w-none article-font ${className}`,
       },
     },
   })
@@ -362,7 +363,7 @@ export function TipTapRenderer({ content, className = '', toc = [] }: TipTapRend
           a.textContent = part
           a.rel = 'noopener noreferrer'
           a.target = '_blank'
-          a.className = 'text-blue-500 hover:text-blue-600 underline cursor-pointer'
+          a.className = 'article-link'
           frag.appendChild(a)
         } else {
           frag.appendChild(document.createTextNode(part))
