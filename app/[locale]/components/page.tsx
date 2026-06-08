@@ -1,15 +1,21 @@
 /* eslint-disable @next/next/no-img-element */
 import { setRequestLocale } from 'next-intl/server'
 import type { ReactNode } from 'react'
+import { renderToString } from 'katex'
 import {
   AlertTriangle,
   ArrowRight,
   CheckCircle2,
+  Download,
   ExternalLink,
+  FileText,
   Info,
+  Keyboard,
   Lightbulb,
+  Music2,
   Play,
   Quote as QuoteIcon,
+  Sigma,
 } from 'lucide-react'
 import { PostLayout } from '@/features/blog/components/client/post-layout'
 
@@ -17,23 +23,33 @@ const locales = ['zh', 'en', 'fr', 'ja']
 
 const toc = [
   { id: 'headings', text: 'Headings', depth: 2 },
+  { id: 'lead-separators', text: 'Lead & separators', depth: 2 },
   { id: 'emphasis', text: 'Emphasis', depth: 2 },
+  { id: 'inline-patterns', text: 'Inline patterns', depth: 2 },
   { id: 'buttons', text: 'Button', depth: 2 },
   { id: 'links', text: 'Link', depth: 2 },
   { id: 'paragraph', text: 'Paragraph', depth: 2 },
   { id: 'lists', text: 'Lists', depth: 2 },
+  { id: 'definition-list', text: 'Definition list', depth: 2 },
   { id: 'notice', text: 'Notice', depth: 2 },
   { id: 'tabs', text: 'Tab', depth: 2 },
   { id: 'accordions', text: 'Accordions', depth: 2 },
   { id: 'code', text: 'Code', depth: 2 },
+  { id: 'math', text: 'Math', depth: 2 },
   { id: 'flow', text: 'Flow', depth: 2 },
+  { id: 'timeline', text: 'Timeline', depth: 2 },
   { id: 'blockquote', text: 'Blockquote', depth: 2 },
   { id: 'tables', text: 'Tables', depth: 2 },
+  { id: 'wide-table', text: 'Wide table', depth: 2 },
+  { id: 'cards', text: 'Cards', depth: 2 },
+  { id: 'files', text: 'Files', depth: 2 },
   { id: 'image', text: 'Image', depth: 2 },
   { id: 'gallery', text: 'Gallery', depth: 2 },
   { id: 'slider', text: 'Slider', depth: 2 },
+  { id: 'audio', text: 'Audio', depth: 2 },
   { id: 'youtube', text: 'YouTube video', depth: 2 },
   { id: 'custom-video', text: 'Custom video', depth: 2 },
+  { id: 'footnotes', text: 'Footnotes', depth: 2 },
 ]
 
 const sampleImages = [
@@ -66,6 +82,48 @@ const sampleImages = [
     file: '05.jpg',
     src: 'https://images.unsplash.com/photo-1470770903676-69b98201ea1c?auto=format&fit=crop&w=1000&q=80',
     alt: 'alt-text: 湖面、木屋和远山',
+  },
+]
+
+const sampleFiles = [
+  { name: 'article-style-guide.pdf', type: 'PDF', size: '284 KB' },
+  { name: 'component-reference.md', type: 'Markdown', size: '18 KB' },
+  { name: 'gallery-assets.zip', type: 'Archive', size: '4.2 MB' },
+]
+
+const timelineItems = [
+  {
+    label: 'Draft',
+    title: 'Collect content blocks',
+    text: '先把真实文章里会出现的内容块列全，避免只优化一两个漂亮截图。',
+  },
+  {
+    label: 'Review',
+    title: 'Check reading rhythm',
+    text: '重点看标题间距、列表层级、代码宽度、表格滚动和移动端是否稳定。',
+  },
+  {
+    label: 'Publish',
+    title: 'Reuse the same article surface',
+    text: '组件页、文章详情页、About 页都应该走同一套正文变量和局部组件样式。',
+  },
+]
+
+const articleCards = [
+  {
+    eyebrow: 'Pattern',
+    title: 'Compact summary card',
+    text: '用于文章中的小型结论、资源组或阅读提示，不承担页面主布局。',
+  },
+  {
+    eyebrow: 'State',
+    title: 'Status comparison',
+    text: '可承载 Ready、Preview、Deprecated 等状态，和表格互补。',
+  },
+  {
+    eyebrow: 'Resource',
+    title: 'Related reading',
+    text: '适合链接到同系列文章、外部资料或下载内容。',
   },
 ]
 
@@ -106,6 +164,17 @@ export default async function ComponentsPage({ params }: { params: Promise<{ loc
           <h5>Heading 5</h5>
           <h6>Heading 6</h6>
 
+          <h2 id="lead-separators">Lead &amp; separators</h2>
+          <p className="lead">
+            A lead paragraph should introduce a section with more presence than body copy, but it should still feel like
+            part of the article and not a marketing hero.
+          </p>
+          <p>
+            Separators are useful when a long post shifts from setup to examples. They should be visible without turning
+            every section into a boxed panel.
+          </p>
+          <hr />
+
           <h2 id="emphasis">Emphasis</h2>
           <p>
             The emphasis, aka <em>italics</em>, with asterisks or underscores.
@@ -122,6 +191,39 @@ export default async function ComponentsPage({ params }: { params: Promise<{ loc
           <p>
             Strike through uses two tildes. <del>Scratch this.</del>
           </p>
+
+          <h2 id="inline-patterns">Inline patterns</h2>
+          <p>
+            Inline details include <mark>marked text</mark>, <kbd>Ctrl</kbd> + <kbd>K</kbd>, H<sub>2</sub>O, E = mc
+            <sup>2</sup>, <abbr title="Really Simple Syndication">RSS</abbr>, and a footnote reference
+            <sup>
+              <a href="#footnote-1" id="footnote-ref-1">
+                1
+              </a>
+            </sup>
+            .
+          </p>
+          <div className="component-inline-grid not-prose">
+            <div>
+              <Keyboard className="h-4 w-4" />
+              <span>Keyboard</span>
+              <strong>
+                <kbd>⌘</kbd> <kbd>Enter</kbd>
+              </strong>
+            </div>
+            <div>
+              <Sigma className="h-4 w-4" />
+              <span>Notation</span>
+              <strong>
+                x<sub>n</sub> + y<sup>2</sup>
+              </strong>
+            </div>
+            <div>
+              <Info className="h-4 w-4" />
+              <span>Badge</span>
+              <strong className="component-badge">Stable</strong>
+            </div>
+          </div>
 
           <h2 id="buttons">Button</h2>
           <div className="component-button-row not-prose">
@@ -194,6 +296,16 @@ export default async function ComponentsPage({ params }: { params: Promise<{ loc
               <span>下一步接入可编辑的 Notice 块。</span>
             </li>
           </ul>
+
+          <h2 id="definition-list">Definition list</h2>
+          <dl>
+            <dt>Article surface</dt>
+            <dd>承载真实正文的排版、宽度、颜色变量、代码块、表格、图片和媒体样式。</dd>
+            <dt>Rich block</dt>
+            <dd>编辑器里以结构化 JSON 保存的可复用内容块，例如 Notice、Tabs、Gallery、Video。</dd>
+            <dt>Reference page</dt>
+            <dd>用来一次性验收所有正文视觉状态，后续新增组件也先放到这里检查。</dd>
+          </dl>
 
           <h2 id="notice">Notice</h2>
           <div className="component-stack not-prose">
@@ -289,6 +401,15 @@ int main(void)
             />
           </div>
 
+          <h2 id="math">Math</h2>
+          <p>
+            Inline math should stay aligned with text, for example <MathInline tex={'e^{i\\pi} + 1 = 0'} />. Block math
+            needs enough breathing room and should not overflow on mobile.
+          </p>
+          <div className="component-math-card not-prose">
+            <MathDisplay tex={'\\int_{-\\infty}^{\\infty} e^{-x^2}\\,dx = \\sqrt{\\pi}'} />
+          </div>
+
           <h2 id="flow">Flow</h2>
           <div className="component-flow not-prose" aria-label="Decision flow example">
             <div className="component-flow-node">Start</div>
@@ -305,6 +426,19 @@ int main(void)
             </div>
             <div className="component-flow-node">End</div>
           </div>
+
+          <h2 id="timeline">Timeline</h2>
+          <ol className="component-timeline not-prose">
+            {timelineItems.map((item) => (
+              <li key={item.title}>
+                <span>{item.label}</span>
+                <div>
+                  <h3>{item.title}</h3>
+                  <p>{item.text}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
 
           <h2 id="blockquote">Blockquote</h2>
           <blockquote>
@@ -351,6 +485,78 @@ int main(void)
               </tr>
             </tbody>
           </table>
+
+          <h2 id="wide-table">Wide table</h2>
+          <p>宽表在移动端必须横向滚动，而不是把整篇正文撑出屏幕。</p>
+          <div className="component-table-scroll not-prose">
+            <table>
+              <thead>
+                <tr>
+                  <th>Feature</th>
+                  <th>Markdown</th>
+                  <th>Rich editor</th>
+                  <th>Renderer</th>
+                  <th>Mobile</th>
+                  <th>Notes</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Code window</td>
+                  <td>Yes</td>
+                  <td>Yes</td>
+                  <td>Copy + lines</td>
+                  <td>Scroll</td>
+                  <td>Needs syntax theme in light and dark mode.</td>
+                </tr>
+                <tr>
+                  <td>Gallery</td>
+                  <td>Manual HTML</td>
+                  <td>Structured block</td>
+                  <td>Grid</td>
+                  <td>Two columns</td>
+                  <td>Captions keep filenames visible.</td>
+                </tr>
+                <tr>
+                  <td>Video</td>
+                  <td>Embed URL</td>
+                  <td>Structured block</td>
+                  <td>16:9</td>
+                  <td>Fluid</td>
+                  <td>Supports YouTube and custom MP4.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h2 id="cards">Cards</h2>
+          <p>正文里的卡片只用于局部重复信息，不作为外层页面容器。</p>
+          <div className="component-card-grid not-prose">
+            {articleCards.map((card) => (
+              <article key={card.title} className="component-card">
+                <span>{card.eyebrow}</span>
+                <h3>{card.title}</h3>
+                <p>{card.text}</p>
+              </article>
+            ))}
+          </div>
+
+          <h2 id="files">Files</h2>
+          <p>附件、资源和下载入口需要像正文内容一样清楚，但不应该抢过标题和段落的层级。</p>
+          <div className="component-file-list not-prose">
+            {sampleFiles.map((file) => (
+              <a key={file.name} href="#files">
+                <FileText className="h-5 w-5" />
+                <span>
+                  <strong>{file.name}</strong>
+                  <small>
+                    {file.type} · {file.size}
+                  </small>
+                </span>
+                <Download className="h-4 w-4" />
+              </a>
+            ))}
+          </div>
 
           <h2 id="image">Image</h2>
           <p>
@@ -406,6 +612,21 @@ int main(void)
             </div>
           </div>
 
+          <h2 id="audio">Audio</h2>
+          <p>音频控件用于访谈、采样和播客片段，宽度跟随正文，不额外制造背景动效。</p>
+          <div className="component-audio not-prose">
+            <div>
+              <Music2 className="h-5 w-5" />
+              <span>
+                <strong>Embedded audio</strong>
+                <small>MP3 · article-width media control</small>
+              </span>
+            </div>
+            <audio controls preload="metadata" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3">
+              Your browser does not support the audio element.
+            </audio>
+          </div>
+
           <h2 id="youtube">YouTube video</h2>
           <p>YouTube 嵌入需要固定 16:9 比例，和图片、代码块一样使用正文边框半径。</p>
           <div className="component-embed not-prose">
@@ -433,6 +654,18 @@ int main(void)
               <span>Custom video</span>
             </div>
           </div>
+
+          <h2 id="footnotes">Footnotes</h2>
+          <section className="component-footnotes">
+            <ol>
+              <li id="footnote-1">
+                Footnotes should stay quiet, readable, and easy to jump back from.{' '}
+                <a href="#footnote-ref-1" aria-label="Back to content">
+                  ↩
+                </a>
+              </li>
+            </ol>
+          </section>
         </div>
       </article>
     </PostLayout>
@@ -485,5 +718,32 @@ function CodeWindow({ label, code }: { label: string; code: string }) {
         </pre>
       </div>
     </div>
+  )
+}
+
+function MathInline({ tex }: { tex: string }) {
+  return (
+    <span
+      className="component-math-inline"
+      dangerouslySetInnerHTML={{
+        __html: renderToString(tex, {
+          throwOnError: false,
+        }),
+      }}
+    />
+  )
+}
+
+function MathDisplay({ tex }: { tex: string }) {
+  return (
+    <div
+      className="component-math-display"
+      dangerouslySetInnerHTML={{
+        __html: renderToString(tex, {
+          displayMode: true,
+          throwOnError: false,
+        }),
+      }}
+    />
   )
 }
