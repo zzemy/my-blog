@@ -407,7 +407,9 @@ export function TipTapRenderer({ content, className = '', toc = [] }: TipTapRend
     })
 
     return () => {
-      roots.forEach((root) => root.unmount())
+      window.setTimeout(() => {
+        roots.forEach((root) => root.unmount())
+      }, 0)
     }
   }, [editor, content])
 
