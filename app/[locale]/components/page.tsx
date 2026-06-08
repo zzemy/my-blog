@@ -3,24 +3,33 @@ import { setRequestLocale } from 'next-intl/server'
 import type { ReactNode } from 'react'
 import {
   AlertTriangle,
+  ArrowRight,
   CheckCircle2,
+  ExternalLink,
   Info,
   Lightbulb,
   Play,
+  Quote as QuoteIcon,
 } from 'lucide-react'
 import { PostLayout } from '@/features/blog/components/client/post-layout'
 
 const locales = ['zh', 'en', 'fr', 'ja']
 
 const toc = [
-  { id: 'typography', text: '标题与段落', depth: 2 },
-  { id: 'inline', text: '行内内容', depth: 2 },
-  { id: 'lists', text: '列表', depth: 2 },
-  { id: 'callouts', text: '提示块', depth: 2 },
-  { id: 'quote', text: '引用', depth: 2 },
-  { id: 'table', text: '表格', depth: 2 },
-  { id: 'code', text: '代码', depth: 2 },
-  { id: 'image', text: '单图与 alt', depth: 2 },
+  { id: 'headings', text: 'Headings', depth: 2 },
+  { id: 'emphasis', text: 'Emphasis', depth: 2 },
+  { id: 'buttons', text: 'Button', depth: 2 },
+  { id: 'links', text: 'Link', depth: 2 },
+  { id: 'paragraph', text: 'Paragraph', depth: 2 },
+  { id: 'lists', text: 'Lists', depth: 2 },
+  { id: 'notice', text: 'Notice', depth: 2 },
+  { id: 'tabs', text: 'Tab', depth: 2 },
+  { id: 'accordions', text: 'Accordions', depth: 2 },
+  { id: 'code', text: 'Code', depth: 2 },
+  { id: 'flow', text: 'Flow', depth: 2 },
+  { id: 'blockquote', text: 'Blockquote', depth: 2 },
+  { id: 'tables', text: 'Tables', depth: 2 },
+  { id: 'image', text: 'Image', depth: 2 },
   { id: 'gallery', text: 'Gallery', depth: 2 },
   { id: 'slider', text: 'Slider', depth: 2 },
   { id: 'youtube', text: 'YouTube video', depth: 2 },
@@ -79,36 +88,102 @@ export default async function ComponentsPage({ params }: { params: Promise<{ loc
         <div className="article-hero">
           <h1 className="article-title text-4xl md:text-5xl">Components</h1>
           <p className="article-description">
-            这是一篇用来验收文章正文视觉的静态页面。它和真实文章使用同一套目录、宽度、标题层级、代码块、表格和媒体样式。
+            这是一篇完整的正文视觉验收页。它覆盖 Markdown 与富文本常见内容块，并保持和真实文章同一套目录、宽度、
+            字体、代码、表格和媒体样式。
           </p>
         </div>
 
         <div className="article-content prose dark:prose-invert max-w-none article-font mt-10">
-          <h2 id="typography">标题与段落</h2>
+          <h2 id="headings">Headings</h2>
           <p>
-            正文段落需要在长时间阅读中保持稳定节奏。页面主标题由上方的文章标题承担，正文区域从二级标题开始展开，
-            这样目录、滚动定位和阅读层级会和真实文章一致。
+            Here is an example of headings. You can use this heading by the following markdown rules. For example:
+            use <code>#</code> for heading 1 and use <code>######</code> for heading 6.
           </p>
-          <p>
-            中文和 English words 混排时，字重和行距都应该自然。段落不追求装饰感，优先让读者快速扫读、回看和复制。
-          </p>
-          <h3>三级标题用于小节</h3>
-          <p>小节标题需要明显，但不能抢过二级标题。间距应该让内容自然分组。</p>
-          <h4>四级标题用于更细的说明</h4>
-          <p>如果一段内容需要继续拆分，四级标题应保持克制，不改变正文的整体阅读重心。</p>
+          <h1>Heading 1</h1>
+          <h2>Heading 2</h2>
+          <h3>Heading 3</h3>
+          <h4>Heading 4</h4>
+          <h5>Heading 5</h5>
+          <h6>Heading 6</h6>
 
-          <h2 id="inline">行内内容</h2>
+          <h2 id="emphasis">Emphasis</h2>
           <p>
-            这里有一个 <a href="https://emmmxx.xyz">外部链接</a>、<strong>强调文本</strong>、普通英文
-            words 和 <code>inline code</code>，用于检查行内元素的颜色、粗细、下划线与中英文混排。
+            The emphasis, aka <em>italics</em>, with asterisks or underscores.
+          </p>
+          <p>
+            <strong>Strong emphasis, aka bold</strong>, with asterisks or underscores.
+          </p>
+          <p>
+            The <strong>
+              <em>combined emphasis</em>
+            </strong>{' '}
+            with asterisks and underscores.
+          </p>
+          <p>
+            Strike through uses two tildes. <del>Scratch this.</del>
           </p>
 
-          <h2 id="lists">列表</h2>
+          <h2 id="buttons">Button</h2>
+          <div className="component-button-row not-prose">
+            <button className="component-button component-button-primary" type="button">
+              <span>Button</span>
+              <ArrowRight className="h-4 w-4" />
+            </button>
+            <button className="component-button component-button-secondary" type="button">
+              <span>Button</span>
+              <ExternalLink className="h-4 w-4" />
+            </button>
+          </div>
+
+          <h2 id="links">Link</h2>
+          <p>
+            <a href="https://emmmxx.xyz">I&apos;m an inline-style link</a>
+          </p>
+          <p>
+            <a href="https://emmmxx.xyz" title="emmm Blog">
+              I&apos;m an inline-style link with title
+            </a>
+          </p>
+          <p>
+            <a href="/README.md">I&apos;m a relative reference to a repository file</a>
+          </p>
+          <p>
+            URLs and URLs in angle brackets will automatically get turned into links.{' '}
+            <a href="http://www.example.com">http://www.example.com</a> or{' '}
+            <a href="http://www.example.com">http://www.example.com</a> and sometimes example.com.
+          </p>
+          <p>Some text to show that the reference links can follow later.</p>
+
+          <h2 id="paragraph">Paragraph</h2>
+          <p>
+            Lorem ipsum dolor sit amet consectetur adipisicing elit. Quam nihil enim maxime corporis cumque totam
+            aliquid nam sint inventore optio modi neque laborum officiis necessitatibus, facilis placeat pariatur!
+            Voluptatem, sed harum pariatur adipisci voluptates voluptatum cumque, porro sint minima similique magni
+            perferendis fuga! Optio vel ipsum excepturi tempore reiciendis id quidem? Vel in, doloribus debitis
+            nesciunt fugit sequi magnam accusantium modi neque quis, vitae velit, pariatur harum autem a! Velit impedit
+            atque maiores animi possimus asperiores natus repellendus excepturi sint architecto eligendi non, omnis
+            nihil. Facilis, doloremque illum. Fugit optio laborum minus debitis natus illo perspiciatis corporis
+            voluptatum rerum laboriosam.
+          </p>
+
+          <h2 id="lists">Lists</h2>
+          <h3>Ordered List</h3>
           <ol>
-            <li>确认内容结构和可观察结果。</li>
-            <li>实现最小样式改动。</li>
-            <li>用真实页面验证桌面端和移动端。</li>
+            <li>List item</li>
+            <li>List item</li>
+            <li>List item</li>
+            <li>List item</li>
+            <li>List item</li>
           </ol>
+          <h3>Unordered List</h3>
+          <ul>
+            <li>List item</li>
+            <li>List item</li>
+            <li>List item</li>
+            <li>List item</li>
+            <li>List item</li>
+          </ul>
+          <h3>Task List</h3>
           <ul data-type="taskList">
             <li>
               <input type="checkbox" checked readOnly />
@@ -120,28 +195,126 @@ export default async function ComponentsPage({ params }: { params: Promise<{ loc
             </li>
           </ul>
 
-          <h2 id="callouts">提示块</h2>
+          <h2 id="notice">Notice</h2>
           <div className="component-stack not-prose">
-            <Callout icon={<Info className="h-4 w-4" />} tone="info" title="Info">
-              用于补充背景、环境要求、版本差异和上下文。
+            <Callout icon={<Info className="h-4 w-4" />} tone="note" title="Note">
+              This is a simple note.
+            </Callout>
+            <Callout icon={<QuoteIcon className="h-4 w-4" />} tone="quote" title="Quote">
+              This is a simple quote.
             </Callout>
             <Callout icon={<Lightbulb className="h-4 w-4" />} tone="tip" title="Tip">
-              用于给出推荐做法、效率技巧或更稳妥的操作路径。
+              This is a simple tip.
+            </Callout>
+            <Callout icon={<Info className="h-4 w-4" />} tone="info" title="Info">
+              This is a simple info.
             </Callout>
             <Callout icon={<AlertTriangle className="h-4 w-4" />} tone="warning" title="Warning">
-              用于提醒破坏性操作、不可逆变更或容易忽略的边界。
+              This is a simple warning.
             </Callout>
             <Callout icon={<CheckCircle2 className="h-4 w-4" />} tone="success" title="Done">
-              用于标记验证完成、迁移完成或某个阶段已经收敛。
+              This is a simple success state.
             </Callout>
           </div>
 
-          <h2 id="quote">引用</h2>
+          <h2 id="tabs">Tab</h2>
+          <div className="component-tabs not-prose">
+            <input className="component-tab-input" defaultChecked id="component-tab-1" name="component-tabs" type="radio" />
+            <input className="component-tab-input" id="component-tab-2" name="component-tabs" type="radio" />
+            <input className="component-tab-input" id="component-tab-3" name="component-tabs" type="radio" />
+            <div className="component-tabs-list" role="tablist" aria-label="Component tabs">
+              <label htmlFor="component-tab-1">Tab 1</label>
+              <label htmlFor="component-tab-2">Tab 2</label>
+              <label htmlFor="component-tab-3">Tab 3</label>
+            </div>
+            <div className="component-tab-panels">
+              <section className="component-tab-panel component-tab-panel-1">
+                <h3>Hey There, I am a tab</h3>
+                <p>
+                  Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut
+                  labore et dolore magna aliquyam erat, sed diam voluptua.
+                </p>
+              </section>
+              <section className="component-tab-panel component-tab-panel-2">
+                <h3>Second tab content</h3>
+                <p>At vero eos et accusam et justo duo dolores et ea rebum.</p>
+              </section>
+              <section className="component-tab-panel component-tab-panel-3">
+                <h3>Third tab content</h3>
+                <p>Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.</p>
+              </section>
+            </div>
+          </div>
+
+          <h2 id="accordions">Accordions</h2>
+          <div className="component-accordions not-prose">
+            <details open>
+              <summary>Why should you need to do this?</summary>
+              <p>为了在同一页里提前看到真实文章会遇到的折叠内容状态。</p>
+            </details>
+            <details>
+              <summary>How can I adjust Horizontal centering</summary>
+              <p>正文容器负责宽度，组件只需要占满当前正文宽度，不单独改变页面布局。</p>
+            </details>
+            <details>
+              <summary>Should you use Negative margin?</summary>
+              <p>这里不使用负 margin，避免移动端和目录布局出现不可预期的横向滚动。</p>
+            </details>
+          </div>
+
+          <h2 id="code">Code and Syntax Highlighting</h2>
+          <p>
+            This is an <code>Inline code</code> sample.
+          </p>
+          <div className="component-code-stack not-prose">
+            <CodeWindow
+              label="JavaScript"
+              code={`var s = "JavaScript syntax highlighting";
+alert(s);`}
+            />
+            <CodeWindow
+              label="Python"
+              code={`s = "Python syntax highlighting"
+print(s)`}
+            />
+            <CodeWindow
+              label="C"
+              code={`#include <stdio.h>
+
+int main(void)
+{
+    printf("hello, world\\n");
+    return 0;
+}`}
+            />
+          </div>
+
+          <h2 id="flow">Flow</h2>
+          <div className="component-flow not-prose" aria-label="Decision flow example">
+            <div className="component-flow-node">Start</div>
+            <div className="component-flow-node component-flow-question">Is it?</div>
+            <div className="component-flow-branches">
+              <div>
+                <span>Yes</span>
+                <div className="component-flow-node">OK</div>
+              </div>
+              <div>
+                <span>No</span>
+                <div className="component-flow-node">Rethink</div>
+              </div>
+            </div>
+            <div className="component-flow-node">End</div>
+          </div>
+
+          <h2 id="blockquote">Blockquote</h2>
           <blockquote>
-            <p>“好的文章视觉不是把所有东西做得醒目，而是让重要的东西自然浮出来。”</p>
+            <p>
+              Did you come here for something in particular or just general Riker-bashing? And blowing into maximum warp
+              speed, you appeared for an instant to be in two places at once.
+            </p>
           </blockquote>
 
-          <h2 id="table">表格</h2>
+          <h2 id="tables">Tables</h2>
           <table>
             <thead>
               <tr>
@@ -157,9 +330,14 @@ export default async function ComponentsPage({ params }: { params: Promise<{ loc
                 <td>Ready</td>
               </tr>
               <tr>
-                <td>Callout</td>
+                <td>Notice</td>
                 <td>提示、警告、补充信息</td>
-                <td>Next</td>
+                <td>Preview</td>
+              </tr>
+              <tr>
+                <td>Tabs</td>
+                <td>分组信息展示</td>
+                <td>Preview</td>
               </tr>
               <tr>
                 <td>Gallery</td>
@@ -174,33 +352,7 @@ export default async function ComponentsPage({ params }: { params: Promise<{ loc
             </tbody>
           </table>
 
-          <h2 id="code">代码</h2>
-          <div className="code-window not-prose">
-            <div className="code-window-header">
-              <div className="flex gap-2">
-                <span className="h-3 w-3 rounded-full bg-[#ff5f56]" />
-                <span className="h-3 w-3 rounded-full bg-[#ffbd2e]" />
-                <span className="h-3 w-3 rounded-full bg-[#27c93f]" />
-              </div>
-              <span className="component-code-label">app/[locale]/components/page.tsx</span>
-            </div>
-            <div className="code-window-body">
-              <div className="code-window-gutter" aria-hidden="true">
-                <span>1</span>
-                <span>2</span>
-                <span>3</span>
-                <span>4</span>
-              </div>
-              <pre className="code-window-pre">
-                <code>{`const status = "ready"
-if (status === "ready") {
-  console.log("ship the article system")
-}`}</code>
-              </pre>
-            </div>
-          </div>
-
-          <h2 id="image">单图与 alt</h2>
+          <h2 id="image">Image</h2>
           <p>
             单图应该沿用文章图片样式：宽度跟随正文，边框和阴影克制，图片说明放在下方。alt text 用来描述图片内容，
             不应该只写文件名。
@@ -294,7 +446,7 @@ function Callout({
   children,
 }: {
   icon: ReactNode
-  tone: 'info' | 'tip' | 'warning' | 'success'
+  tone: 'note' | 'quote' | 'tip' | 'info' | 'warning' | 'success'
   title: string
   children: ReactNode
 }) {
@@ -304,6 +456,33 @@ function Callout({
       <div>
         <p className="component-callout-title">{title}</p>
         <p>{children}</p>
+      </div>
+    </div>
+  )
+}
+
+function CodeWindow({ label, code }: { label: string; code: string }) {
+  const lines = code.trimEnd().split('\n')
+
+  return (
+    <div className="code-window not-prose">
+      <div className="code-window-header">
+        <div className="flex gap-2">
+          <span className="h-3 w-3 rounded-full bg-[#ff5f56]" />
+          <span className="h-3 w-3 rounded-full bg-[#ffbd2e]" />
+          <span className="h-3 w-3 rounded-full bg-[#27c93f]" />
+        </div>
+        <span className="component-code-label">{label}</span>
+      </div>
+      <div className="code-window-body">
+        <div className="code-window-gutter" aria-hidden="true">
+          {lines.map((_, index) => (
+            <span key={`${label}-${index}`}>{index + 1}</span>
+          ))}
+        </div>
+        <pre className="code-window-pre">
+          <code>{code}</code>
+        </pre>
       </div>
     </div>
   )

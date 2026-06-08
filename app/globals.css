@@ -481,6 +481,12 @@
   font-weight: 750;
 }
 
+.article-content.prose del {
+  color: var(--article-muted);
+  text-decoration-color: color-mix(in oklch, var(--article-muted), transparent 18%);
+  text-decoration-thickness: 0.08em;
+}
+
 .article-content.prose hr {
   margin: 3rem 0;
   border-color: var(--article-line);
@@ -717,6 +723,14 @@
   --callout-icon: oklch(0.68 0.16 230);
 }
 
+.component-callout-note {
+  --callout-icon: oklch(0.62 0.08 265);
+}
+
+.component-callout-quote {
+  --callout-icon: oklch(0.58 0.1 305);
+}
+
 .component-callout-tip {
   --callout-icon: oklch(0.7 0.15 165);
 }
@@ -755,6 +769,226 @@
 .component-code-label {
   color: var(--article-muted);
   font-size: 0.75rem;
+}
+
+.component-button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin: 1.3rem 0 2rem;
+}
+
+.component-button {
+  display: inline-flex;
+  min-height: 2.5rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: 1px solid var(--article-line);
+  border-radius: 8px;
+  padding: 0.55rem 0.9rem;
+  font-size: 0.92rem;
+  font-weight: 750;
+  line-height: 1;
+  transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease, transform 160ms ease;
+}
+
+.component-button:hover,
+.component-button:focus-visible {
+  transform: translateY(-1px);
+}
+
+.component-button:focus-visible {
+  outline: 2px solid color-mix(in oklch, var(--article-accent), transparent 35%);
+  outline-offset: 2px;
+}
+
+.component-button-primary {
+  border-color: color-mix(in oklch, var(--article-accent), transparent 28%);
+  background: var(--article-heading);
+  color: var(--background);
+}
+
+.component-button-secondary {
+  background: var(--article-panel);
+  color: var(--article-heading);
+}
+
+.component-button-secondary:hover,
+.component-button-secondary:focus-visible {
+  border-color: color-mix(in oklch, var(--article-accent), transparent 28%);
+  background: color-mix(in oklch, var(--article-accent), var(--article-panel) 92%);
+}
+
+.component-tabs,
+.component-accordions,
+.component-code-stack,
+.component-flow {
+  margin: 2rem 0;
+}
+
+.component-tab-input {
+  position: absolute;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.component-tabs-list {
+  display: inline-flex;
+  max-width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--article-line);
+  border-radius: 8px;
+  background: var(--article-soft);
+  padding: 0.25rem;
+}
+
+.component-tabs-list label {
+  display: inline-flex;
+  min-height: 2.2rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  color: var(--article-muted);
+  cursor: pointer;
+  padding: 0.45rem 0.85rem;
+  font-size: 0.9rem;
+  font-weight: 750;
+  white-space: nowrap;
+  transition: background-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
+}
+
+#component-tab-1:checked ~ .component-tabs-list label[for="component-tab-1"],
+#component-tab-2:checked ~ .component-tabs-list label[for="component-tab-2"],
+#component-tab-3:checked ~ .component-tabs-list label[for="component-tab-3"] {
+  background: var(--article-panel);
+  color: var(--article-heading);
+  box-shadow: 0 1px 0 color-mix(in oklch, var(--foreground), transparent 92%);
+}
+
+.component-tab-panels {
+  margin-top: 0.85rem;
+  border: 1px solid var(--article-line);
+  border-radius: 8px;
+  background: var(--article-panel);
+  padding: 1rem;
+}
+
+.component-tab-panel {
+  display: none;
+}
+
+#component-tab-1:checked ~ .component-tab-panels .component-tab-panel-1,
+#component-tab-2:checked ~ .component-tab-panels .component-tab-panel-2,
+#component-tab-3:checked ~ .component-tab-panels .component-tab-panel-3 {
+  display: block;
+}
+
+.component-tab-panel h3 {
+  margin: 0 0 0.5rem;
+  color: var(--article-heading);
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  font-weight: 800;
+  line-height: 1.3;
+}
+
+.component-tab-panel p {
+  margin: 0;
+  color: var(--article-text);
+  line-height: 1.75;
+}
+
+.component-accordions {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.component-accordions details {
+  overflow: hidden;
+  border: 1px solid var(--article-line);
+  border-radius: 8px;
+  background: var(--article-panel);
+}
+
+.component-accordions summary {
+  cursor: pointer;
+  color: var(--article-heading);
+  font-weight: 800;
+  line-height: 1.4;
+  padding: 0.85rem 1rem;
+}
+
+.component-accordions summary:focus-visible {
+  outline: 2px solid color-mix(in oklch, var(--article-accent), transparent 35%);
+  outline-offset: -2px;
+}
+
+.component-accordions details[open] summary {
+  border-bottom: 1px solid var(--article-line);
+}
+
+.component-accordions p {
+  margin: 0;
+  color: var(--article-text);
+  line-height: 1.75;
+  padding: 0.9rem 1rem 1rem;
+}
+
+.component-code-stack {
+  display: grid;
+  gap: 1rem;
+}
+
+.component-flow {
+  display: grid;
+  justify-items: center;
+  gap: 0.75rem;
+  border: 1px solid var(--article-line);
+  border-radius: 8px;
+  background: var(--article-panel);
+  padding: 1.2rem;
+}
+
+.component-flow-node {
+  display: inline-flex;
+  min-height: 2.25rem;
+  min-width: 6rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--article-line);
+  border-radius: 8px;
+  background: var(--article-soft);
+  color: var(--article-heading);
+  font-size: 0.9rem;
+  font-weight: 800;
+  line-height: 1;
+  padding: 0.55rem 0.85rem;
+}
+
+.component-flow-question {
+  border-color: color-mix(in oklch, var(--article-accent), transparent 34%);
+  background: color-mix(in oklch, var(--article-accent), var(--article-panel) 90%);
+}
+
+.component-flow-branches {
+  display: grid;
+  width: min(100%, 28rem);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.component-flow-branches > div {
+  display: grid;
+  justify-items: center;
+  gap: 0.45rem;
+}
+
+.component-flow-branches span {
+  color: var(--article-muted);
+  font-size: 0.78rem;
+  font-weight: 750;
+  text-transform: uppercase;
 }
 
 .component-image,
