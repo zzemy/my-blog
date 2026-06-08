@@ -16,7 +16,6 @@ import { VantaBackground } from "@/shared/effects/vanta-background";
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Analytics } from "@vercel/analytics/react"
 import { getSiteSettings } from "@/lib/site-settings";
-import { SiteFooter } from "@/shared/layout/site-footer";
 
 export const revalidate = 60;
 
@@ -76,7 +75,6 @@ export default async function LocaleLayout({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  const settings = await getSiteSettings();
 
   // Ensure that the incoming `locale` is valid
   if (!routing.locales.includes(locale as (typeof routing.locales)[number])) {
@@ -114,9 +112,6 @@ export default async function LocaleLayout({
                     <main className="flex-1">
                       {children}
                     </main>
-                    {settings.feature_flags?.enable_footer !== false && (
-                      <SiteFooter text={settings.footer_text || '© 2026 My Blog'} />
-                    )}
                     <ScrollToTopButton />
                   </div>
                   <SpeedInsights />
