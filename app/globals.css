@@ -741,21 +741,16 @@
   width: 2.25rem;
   align-items: center;
   justify-content: center;
-  border: 1px solid transparent;
+  border: 1px solid color-mix(in oklch, var(--article-line), transparent 35%);
   border-radius: 6px;
+  background: color-mix(in oklch, var(--article-panel), transparent 18%);
   color: var(--article-muted);
-  opacity: 0;
+  opacity: 1;
   transition:
     background-color 180ms var(--article-motion),
     border-color 180ms var(--article-motion),
     color 180ms var(--article-motion),
-    opacity 180ms var(--article-motion),
     transform 180ms var(--article-motion);
-}
-
-.article-content .code-window:hover .code-window-copy,
-.article-content .code-window-copy:focus-visible {
-  opacity: 1;
 }
 
 .article-content .code-window-copy:hover {
@@ -777,12 +772,6 @@
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-}
-
-@media (hover: none) {
-  .article-content .code-window-copy {
-    opacity: 1;
-  }
 }
 
 .article-content .code-window-body {
