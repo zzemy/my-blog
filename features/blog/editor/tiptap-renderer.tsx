@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { createRoot } from 'react-dom/client'
 import { EditorContent, useEditor, NodeViewContent, NodeViewWrapper, ReactNodeViewRenderer } from '@tiptap/react'
-import type { Content } from '@tiptap/react'
+import type { Content, NodeViewProps } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { Link } from '@tiptap/extension-link'
 import { Image } from '@tiptap/extension-image'
@@ -148,8 +148,10 @@ const syntaxThemeCss = `
 }
 `
 
-const CodeBlock = ({ node: { textContent } }: { node: { textContent: string } }) => {
+const CodeBlock = ({ node }: NodeViewProps) => {
   const [copied, setCopied] = useState(false)
+  const textContent = node.textContent
+  const language = formatCodeLanguage(node.attrs.language)
 
   const onCopy = () => {
     navigator.clipboard.writeText(textContent)
@@ -165,58 +167,64 @@ const CodeBlock = ({ node: { textContent } }: { node: { textContent: string } })
   }
 
   return (
-    <NodeViewWrapper 
-      className="code-window not-prose group relative"
-      style={{
-        fontSize: '14px',
-        lineHeight: '1.5',
-        fontFamily: '"Menlo", "Monaco", "Consolas", "Courier New", monospace'
-      }}
-    >
+    <NodeViewWrapper className="code-window not-prose group relative">
       {/* Header / Title Bar */}
-      <div 
-        className="code-window-header"
-      >
+      <div className="code-window-header">
         <div className="flex gap-2">
           <div className="w-3 h-3 rounded-full bg-[#ff5f56]" />
           <div className="w-3 h-3 rounded-full bg-[#ffbd2e]" />
           <div className="w-3 h-3 rounded-full bg-[#27c93f]" />
         </div>
-        <button
-          onClick={onCopy}
-          className="code-window-copy"
-          aria-label="复制代码"
-        >
-          {copied ? (
-            <Check className="w-3.5 h-3.5 text-green-400" />
-          ) : (
-            <Copy className="w-3.5 h-3.5" />
-          )}
-        </button>
+        <div className="code-window-tools">
+          <span className="component-code-label">{language}</span>
+          <button type="button" onClick={onCopy} className="code-window-copy" aria-label="复制代码">
+            {copied ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5" />}
+          </button>
+        </div>
       </div>
 
       <div className="code-window-body">
         {/* Line Numbers */}
-        <div 
-          className="code-window-gutter"
-          aria-hidden="true"
-          style={{ fontFamily: 'inherit', fontSize: 'inherit', lineHeight: 'inherit' }}
-        >
+        <div className="code-window-gutter" aria-hidden="true">
           {lines.map((_, i) => (
             <span key={i} className="block">{i + 1}</span>
           ))}
         </div>
 
         {/* Code Content */}
-        <pre 
-          className="code-window-pre"
-          style={{ fontFamily: 'inherit', fontSize: 'inherit', lineHeight: 'inherit' }}
-        >
+        <pre className="code-window-pre">
           <NodeViewContent className="!bg-transparent !p-0 !whitespace-pre !font-inherit !text-inherit" />
         </pre>
       </div>
     </NodeViewWrapper>
   )
+}
+
+function formatCodeLanguage(value: unknown) {
+  if (typeof value !== 'string' || !value.trim()) return 'Code'
+  const language = value.trim().toLowerCase()
+
+  const labels: Record<string, string> = {
+    c: 'C',
+    cpp: 'C++',
+    css: 'CSS',
+    html: 'HTML',
+    js: 'JavaScript',
+    javascript: 'JavaScript',
+    json: 'JSON',
+    jsx: 'JSX',
+    md: 'Markdown',
+    markdown: 'Markdown',
+    py: 'Python',
+    python: 'Python',
+    sh: 'Shell',
+    shell: 'Shell',
+    ts: 'TypeScript',
+    tsx: 'TSX',
+    typescript: 'TypeScript',
+  }
+
+  return labels[language] || value.trim()
 }
 
 interface TocItem {
