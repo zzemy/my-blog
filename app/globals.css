@@ -112,11 +112,11 @@
   --border: oklch(0.929 0.013 255.508);
   --input: oklch(0.929 0.013 255.508);
   --ring: oklch(0.704 0.04 256.788);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
+  --chart-1: oklch(0.58 0.14 224);
+  --chart-2: oklch(0.63 0.12 184);
+  --chart-3: oklch(0.48 0.08 248);
+  --chart-4: oklch(0.7 0.1 198);
+  --chart-5: oklch(0.66 0.1 156);
   --sidebar: oklch(0.984 0.003 247.858);
   --sidebar-foreground: oklch(0.129 0.042 264.695);
   --sidebar-primary: oklch(0.208 0.042 265.755);
@@ -165,11 +165,11 @@
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.551 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
+  --chart-1: oklch(0.68 0.13 224);
+  --chart-2: oklch(0.72 0.12 184);
+  --chart-3: oklch(0.62 0.09 248);
+  --chart-4: oklch(0.76 0.1 198);
+  --chart-5: oklch(0.7 0.11 156);
   --sidebar: oklch(0.208 0 0);
   --sidebar-foreground: oklch(0.984 0 0);
   --sidebar-primary: oklch(0.488 0.243 264.376);
@@ -298,8 +298,8 @@
   --article-panel: oklch(0.145 0.005 220);
   --article-line: oklch(1 0 0 / 14%);
   --article-accent: oklch(0.72 0.13 188);
-  --article-code-surface: oklch(0.115 0.005 220);
-  --article-code-header: oklch(0.16 0.006 220);
+  --article-code-surface: oklch(0.17 0.012 245);
+  --article-code-header: oklch(0.205 0.014 245);
   --article-table-header: oklch(0.18 0.006 220);
   --article-motion: cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -714,16 +714,16 @@
 }
 
 .article-content .code-window {
-  margin: 1.6rem 0 2.15rem;
+  margin: 1.65rem 0 2.25rem;
   overflow: hidden;
-  border: 1px solid color-mix(in oklch, var(--article-line), var(--article-accent) 7%);
+  border: 1px solid color-mix(in oklch, var(--article-line), var(--article-accent) 12%);
   border-radius: 8px;
   background: var(--article-code-surface);
-  box-shadow: 0 12px 28px color-mix(in oklch, var(--foreground), transparent 97%);
+  box-shadow: 0 16px 38px color-mix(in oklch, var(--foreground), transparent 96%);
 }
 
 .dark .article-content .code-window {
-  box-shadow: 0 16px 34px rgb(0 0 0 / 20%);
+  box-shadow: 0 18px 44px rgb(0 0 0 / 24%);
 }
 
 .article-content .code-window-header {
@@ -732,13 +732,48 @@
   justify-content: space-between;
   border-bottom: 1px solid var(--article-line);
   background: var(--article-code-header);
-  padding: 0.5rem 0.65rem 0.5rem 0.9rem;
+  padding: 0.58rem 0.72rem 0.58rem 0.9rem;
+}
+
+.article-content .code-window-titlebar {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.article-content .code-window-dots {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.article-content .code-window-dots i {
+  display: block;
+  height: 0.72rem;
+  width: 0.72rem;
+  border: 1px solid rgb(0 0 0 / 18%);
+  border-radius: 999px;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 18%);
+}
+
+.article-content .code-window-dots i:nth-child(1) {
+  background: #ff5f57;
+}
+
+.article-content .code-window-dots i:nth-child(2) {
+  background: #febc2e;
+}
+
+.article-content .code-window-dots i:nth-child(3) {
+  background: #28c840;
 }
 
 .article-content .code-window-copy {
   display: inline-flex;
-  height: 1.85rem;
-  width: 1.85rem;
+  height: 2rem;
+  width: 2rem;
   align-items: center;
   justify-content: center;
   border: 1px solid transparent;
@@ -772,31 +807,28 @@
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
-  min-height: 2.15rem;
-  border: 1px solid color-mix(in oklch, var(--article-line), transparent 18%);
-  border-radius: 8px;
-  background: color-mix(in oklch, var(--article-panel), transparent 24%);
-  padding: 0.14rem;
+  min-height: 2rem;
 }
 
 .article-content .code-window-body {
   display: flex;
+  min-width: max-content;
   overflow-x: auto;
-  padding: 0.78rem 0 0.9rem;
+  padding: 1rem 0 1.05rem;
 }
 
 .article-content .code-window-gutter {
   display: flex;
-  min-width: 2.85rem;
+  min-width: 3.1rem;
   flex-shrink: 0;
   flex-direction: column;
   align-items: flex-end;
   border-right: 1px solid var(--article-line);
-  color: color-mix(in oklch, var(--article-muted), transparent 24%);
-  padding: 0 0.72rem 0 0.5rem;
+  color: color-mix(in oklch, var(--article-muted), transparent 30%);
+  padding: 0 0.72rem 0 0.55rem;
   font-family: "JetBrains Mono", "Menlo", "Consolas", monospace;
-  font-size: 0.82rem;
-  line-height: 1.72;
+  font-size: 0.78rem;
+  line-height: 1.78;
   user-select: none;
 }
 
@@ -810,7 +842,7 @@
   color: var(--article-text) !important;
   font-family: "JetBrains Mono", "Menlo", "Consolas", monospace;
   font-size: 0.92rem;
-  line-height: 1.72;
+  line-height: 1.78;
 }
 
 .article-content .code-window-pre code {
@@ -858,27 +890,27 @@
 }
 
 .component-callout-info {
-  --callout-icon: oklch(0.68 0.16 230);
+  --callout-icon: oklch(0.66 0.13 224);
 }
 
 .component-callout-note {
-  --callout-icon: oklch(0.62 0.08 265);
+  --callout-icon: oklch(0.6 0.07 248);
 }
 
 .component-callout-quote {
-  --callout-icon: oklch(0.58 0.1 305);
+  --callout-icon: oklch(0.56 0.045 238);
 }
 
 .component-callout-tip {
-  --callout-icon: oklch(0.7 0.15 165);
+  --callout-icon: oklch(0.68 0.12 178);
 }
 
 .component-callout-warning {
-  --callout-icon: oklch(0.66 0.18 22);
+  --callout-icon: oklch(0.72 0.11 112);
 }
 
 .component-callout-success {
-  --callout-icon: oklch(0.66 0.16 145);
+  --callout-icon: oklch(0.66 0.12 156);
 }
 
 .component-callout-icon {
@@ -906,16 +938,30 @@
 
 .component-code-label {
   display: inline-flex;
-  min-height: 1.85rem;
+  min-width: 0;
+  min-height: 1.4rem;
   align-items: center;
   border: 0;
   border-radius: 6px;
   background: transparent;
-  color: var(--article-muted);
-  padding: 0 0.42rem;
-  font-size: 0.72rem;
+  color: color-mix(in oklch, var(--article-muted), var(--article-heading) 18%);
+  padding: 0;
+  font-size: 0.74rem;
   font-weight: 800;
   line-height: 1;
+  text-transform: uppercase;
+}
+
+.article-content .code-window-file {
+  overflow: hidden;
+  max-width: 12rem;
+  color: color-mix(in oklch, var(--article-muted), transparent 16%);
+  font-family: "JetBrains Mono", "Menlo", "Consolas", monospace;
+  font-size: 0.74rem;
+  font-weight: 650;
+  line-height: 1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .component-inline-grid {

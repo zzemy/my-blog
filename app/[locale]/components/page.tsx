@@ -775,17 +775,21 @@ function Callout({
 
 function CodeWindow({ label, code }: { label: string; code: string }) {
   const lines = code.trimEnd().split('\n')
+  const fileName = getCodeExampleFileName(label)
 
   return (
     <div className="code-window not-prose">
       <div className="code-window-header">
-        <div className="flex gap-2">
-          <span className="h-3 w-3 rounded-full bg-[#ff5f56]" />
-          <span className="h-3 w-3 rounded-full bg-[#ffbd2e]" />
-          <span className="h-3 w-3 rounded-full bg-[#27c93f]" />
+        <div className="code-window-titlebar">
+          <span className="code-window-dots" aria-hidden="true">
+            <i />
+            <i />
+            <i />
+          </span>
+          <span className="component-code-label">{label}</span>
+          <span className="code-window-file">{fileName}</span>
         </div>
         <div className="code-window-tools">
-          <span className="component-code-label">{label}</span>
           <span className="code-window-copy" aria-hidden="true">
             <Copy className="h-3.5 w-3.5" />
           </span>
@@ -803,6 +807,16 @@ function CodeWindow({ label, code }: { label: string; code: string }) {
       </div>
     </div>
   )
+}
+
+function getCodeExampleFileName(label: string) {
+  const files: Record<string, string> = {
+    C: 'example.c',
+    JavaScript: 'example.js',
+    Python: 'example.py',
+  }
+
+  return files[label] || 'example.txt'
 }
 
 function MathInline({ tex }: { tex: string }) {

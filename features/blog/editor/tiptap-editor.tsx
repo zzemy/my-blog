@@ -78,63 +78,63 @@ async function markdownToHtml(markdown: string) {
 
 // Dual Theme Syntax Highlighting (Light & Dark)
 const syntaxThemeCss = `
-/* Light Theme (VS Code Light+) */
+/* Light Theme */
 .hljs-comment,
-.hljs-quote { color: #008000; font-style: italic; }
+.hljs-quote { color: #4f7d6b; font-style: italic; }
 .hljs-keyword,
 .hljs-selector-tag,
 .hljs-literal,
 .hljs-section,
-.hljs-link { color: #0000ff; }
-.hljs-name { color: #800000; }
+.hljs-link { color: #1d5fd1; }
+.hljs-name { color: #175e8f; }
 .hljs-string,
-.hljs-meta-string { color: #a31515; }
-.hljs-attr { color: #ff0000; }
+.hljs-meta-string { color: #2b7a78; }
+.hljs-attr { color: #0f6b9f; }
 .hljs-variable,
 .hljs-template-variable,
 .hljs-template-tag,
-.hljs-property { color: #001080; }
+.hljs-property { color: #355c9d; }
 .hljs-title,
 .hljs-title.function_,
-.hljs-doctag { color: #795e26; }
+.hljs-doctag { color: #2f6f8f; }
 .hljs-type,
 .hljs-built_in,
 .hljs-class .hljs-title { color: #267f99; }
 .hljs-number,
 .hljs-symbol,
-.hljs-bullet { color: #098658; }
-.hljs-regexp { color: #811f3f; }
+.hljs-bullet { color: #0f766e; }
+.hljs-regexp { color: #3c6f9f; }
 .hljs-emphasis { font-style: italic; }
 .hljs-strong { font-weight: bold; }
-.hljs-meta { color: #0000ff; }
+.hljs-meta { color: #1d5fd1; }
 
-/* Dark Theme Overrides (VS Code Dark+) */
+/* Dark Theme Overrides */
 .dark .hljs-comment,
-.dark .hljs-quote { color: #6a9955; }
+.dark .hljs-quote { color: #7aa397; }
 .dark .hljs-keyword,
 .dark .hljs-selector-tag,
 .dark .hljs-literal,
 .dark .hljs-section,
-.dark .hljs-link { color: #569cd6; }
-.dark .hljs-name { color: #569cd6; }
+.dark .hljs-link { color: #8ab4f8; }
+.dark .hljs-name { color: #7dcfff; }
 .dark .hljs-string,
-.dark .hljs-meta-string { color: #ce9178; }
+.dark .hljs-meta-string { color: #8bd5ca; }
 .dark .hljs-attr,
 .dark .hljs-variable,
 .dark .hljs-template-variable,
 .dark .hljs-template-tag,
-.dark .hljs-property { color: #9cdcfe; }
+.dark .hljs-property { color: #89ddff; }
 .dark .hljs-title,
 .dark .hljs-title.function_,
-.dark .hljs-doctag { color: #dcdcaa; }
+.dark .hljs-doctag { color: #b4cafe; }
 .dark .hljs-type,
 .dark .hljs-built_in,
 .dark .hljs-class .hljs-title { color: #4ec9b0; }
 .dark .hljs-number,
 .dark .hljs-symbol,
 .dark .hljs-bullet { color: #b5cea8; }
-.dark .hljs-regexp { color: #d16969; }
-.dark .hljs-meta { color: #569cd6; }
+.dark .hljs-regexp { color: #7aa2f7; }
+.dark .hljs-meta { color: #8ab4f8; }
 `
 
 interface TipTapEditorProps {

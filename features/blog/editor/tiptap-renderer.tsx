@@ -26,10 +26,10 @@ const lowlight = createLowlight(common)
 
 // Dual Theme Syntax Highlighting (Light & Dark)
 const syntaxThemeCss = `
-/* Light Theme (VS Code Light+) */
+/* Light Theme */
 .hljs-comment,
 .hljs-quote {
-  color: #008000;
+  color: #4f7d6b;
   font-style: italic;
 }
 .hljs-keyword,
@@ -37,28 +37,28 @@ const syntaxThemeCss = `
 .hljs-literal,
 .hljs-section,
 .hljs-link {
-  color: #0000ff;
+  color: #1d5fd1;
 }
 .hljs-name {
-  color: #800000;
+  color: #175e8f;
 }
 .hljs-string,
 .hljs-meta-string {
-  color: #a31515;
+  color: #2b7a78;
 }
 .hljs-attr {
-  color: #ff0000;
+  color: #0f6b9f;
 }
 .hljs-variable,
 .hljs-template-variable,
 .hljs-template-tag,
 .hljs-property {
-  color: #001080;
+  color: #355c9d;
 }
 .hljs-title,
 .hljs-title.function_,
 .hljs-doctag {
-  color: #795e26;
+  color: #2f6f8f;
 }
 .hljs-type,
 .hljs-built_in,
@@ -68,10 +68,10 @@ const syntaxThemeCss = `
 .hljs-number,
 .hljs-symbol,
 .hljs-bullet {
-  color: #098658;
+  color: #0f766e;
 }
 .hljs-regexp {
-  color: #811f3f;
+  color: #3c6f9f;
 }
 .hljs-emphasis {
   font-style: italic;
@@ -80,39 +80,39 @@ const syntaxThemeCss = `
   font-weight: bold;
 }
 .hljs-meta {
-  color: #0000ff;
+  color: #1d5fd1;
 }
 
-/* Dark Theme Overrides (VS Code Dark+) */
+/* Dark Theme Overrides */
 .dark .hljs-comment,
 .dark .hljs-quote {
-  color: #6a9955;
+  color: #7aa397;
 }
 .dark .hljs-keyword,
 .dark .hljs-selector-tag,
 .dark .hljs-literal,
 .dark .hljs-section,
 .dark .hljs-link {
-  color: #569cd6;
+  color: #8ab4f8;
 }
 .dark .hljs-name {
-  color: #569cd6;
+  color: #7dcfff;
 }
 .dark .hljs-string,
 .dark .hljs-meta-string {
-  color: #ce9178;
+  color: #8bd5ca;
 }
 .dark .hljs-attr,
 .dark .hljs-variable,
 .dark .hljs-template-variable,
 .dark .hljs-template-tag,
 .dark .hljs-property {
-  color: #9cdcfe;
+  color: #89ddff;
 }
 .dark .hljs-title,
 .dark .hljs-title.function_,
 .dark .hljs-doctag {
-  color: #dcdcaa;
+  color: #b4cafe;
 }
 .dark .hljs-type,
 .dark .hljs-built_in,
@@ -125,10 +125,10 @@ const syntaxThemeCss = `
   color: #b5cea8;
 }
 .dark .hljs-regexp {
-  color: #d16969;
+  color: #7aa2f7;
 }
 .dark .hljs-meta {
-  color: #569cd6;
+  color: #8ab4f8;
 }
 
 /* Scrollbar Styling - Adaptive */
@@ -152,6 +152,7 @@ const CodeBlock = ({ node }: NodeViewProps) => {
   const [copied, setCopied] = useState(false)
   const textContent = node.textContent
   const language = formatCodeLanguage(node.attrs.language)
+  const fileName = getCodeFileName(node.attrs.language)
 
   const onCopy = () => {
     navigator.clipboard.writeText(textContent)
@@ -170,13 +171,16 @@ const CodeBlock = ({ node }: NodeViewProps) => {
     <NodeViewWrapper className="code-window not-prose group relative">
       {/* Header / Title Bar */}
       <div className="code-window-header">
-        <div className="flex gap-2">
-          <div className="w-3 h-3 rounded-full bg-[#ff5f56]" />
-          <div className="w-3 h-3 rounded-full bg-[#ffbd2e]" />
-          <div className="w-3 h-3 rounded-full bg-[#27c93f]" />
+        <div className="code-window-titlebar">
+          <span className="code-window-dots" aria-hidden="true">
+            <i />
+            <i />
+            <i />
+          </span>
+          <span className="component-code-label">{language}</span>
+          <span className="code-window-file">{fileName}</span>
         </div>
         <div className="code-window-tools">
-          <span className="component-code-label">{language}</span>
           <button type="button" onClick={onCopy} className="code-window-copy" aria-label="复制代码">
             {copied ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5" />}
           </button>
@@ -225,6 +229,33 @@ function formatCodeLanguage(value: unknown) {
   }
 
   return labels[language] || value.trim()
+}
+
+function getCodeFileName(value: unknown) {
+  if (typeof value !== 'string' || !value.trim()) return 'example.txt'
+  const language = value.trim().toLowerCase()
+
+  const extensions: Record<string, string> = {
+    c: 'c',
+    cpp: 'cpp',
+    css: 'css',
+    html: 'html',
+    js: 'js',
+    javascript: 'js',
+    json: 'json',
+    jsx: 'jsx',
+    md: 'md',
+    markdown: 'md',
+    py: 'py',
+    python: 'py',
+    sh: 'sh',
+    shell: 'sh',
+    ts: 'ts',
+    tsx: 'tsx',
+    typescript: 'ts',
+  }
+
+  return `example.${extensions[language] || language}`
 }
 
 interface TocItem {
