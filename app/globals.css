@@ -2171,3 +2171,326 @@
   color: var(--article-muted);
   font-size: 0.85rem;
 }
+
+/* Reimu-inspired body skin, scoped to rendered article content only. */
+.article-content {
+  --article-reimu-glow: color-mix(in oklch, var(--article-accent), transparent 58%);
+  --article-reimu-soft: color-mix(in oklch, var(--article-accent), var(--article-panel) 94%);
+  --article-reimu-softer: color-mix(in oklch, var(--article-accent), var(--article-panel) 97%);
+  --article-reimu-shadow: 0 0 10px 2px color-mix(in oklch, var(--article-heading), transparent 88%);
+  --article-reimu-shadow-hover: 0 0 10px 4px color-mix(in oklch, var(--article-accent), transparent 82%);
+}
+
+.dark .article-content {
+  --article-reimu-soft: color-mix(in oklch, var(--article-accent), var(--article-panel) 88%);
+  --article-reimu-softer: color-mix(in oklch, var(--article-accent), var(--article-panel) 94%);
+  --article-reimu-shadow: 0 0 12px 2px rgb(0 0 0 / 26%);
+  --article-reimu-shadow-hover: 0 0 14px 4px color-mix(in oklch, var(--article-accent), transparent 84%);
+}
+
+.article-content.prose h2 {
+  position: relative;
+  margin-top: 3.25rem;
+  margin-bottom: 2.15rem;
+  border-top: 0;
+  padding-top: 0;
+}
+
+.article-content.prose h2::before {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: -0.85rem;
+  left: 0;
+  border-bottom: 1px solid var(--article-line);
+}
+
+.article-content.prose h2::after {
+  content: "";
+  position: absolute;
+  bottom: -1rem;
+  left: 0;
+  width: 1.25em;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--article-accent);
+  box-shadow: 0 0 8px var(--article-reimu-glow);
+  transition: width 240ms var(--article-motion), box-shadow 240ms var(--article-motion);
+}
+
+.article-content.prose h2:hover::after {
+  width: 3em;
+  box-shadow: 0 0 12px var(--article-reimu-glow);
+}
+
+.article-content.prose h1,
+.article-content.prose h3,
+.article-content.prose h4,
+.article-content.prose h5,
+.article-content.prose h6 {
+  scroll-margin-top: 96px;
+}
+
+.article-content.prose hr,
+.article-content.prose .component-footnotes {
+  border-top: 0;
+}
+
+.article-content.prose hr,
+.article-content.prose .component-footnotes::before {
+  display: block;
+  height: 4px;
+  border: 0;
+  background-image: linear-gradient(to right, var(--article-accent) 50%, transparent 0%);
+  background-repeat: repeat-x;
+  background-size: 50px 4px;
+  filter: drop-shadow(0 0 2px var(--article-accent));
+  opacity: 0.34;
+  transition: opacity 180ms var(--article-motion);
+}
+
+.article-content.prose hr {
+  margin: 2.8rem 0;
+}
+
+.article-content.prose hr:hover,
+.article-content.prose .component-footnotes:hover::before {
+  opacity: 0.56;
+}
+
+.article-content.prose .component-footnotes::before {
+  content: "";
+  margin-bottom: 1rem;
+}
+
+.article-content.prose a,
+.article-content .article-link {
+  color: var(--article-accent);
+  text-decoration: none;
+}
+
+.article-content.prose a:hover,
+.article-content .article-link:hover {
+  color: color-mix(in oklch, var(--article-accent), var(--article-heading) 24%);
+  text-decoration: underline;
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.22em;
+}
+
+.article-content.prose :not(pre) > code,
+.article-content.prose kbd {
+  background: var(--article-reimu-soft);
+  color: var(--article-accent);
+  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--article-accent), transparent 74%);
+}
+
+.article-content.prose blockquote,
+.article-content.prose details,
+.article-content .component-callout,
+.article-content .component-placeholder,
+.article-content .component-tabs-list,
+.article-content .component-tab-panels,
+.article-content .component-accordions details,
+.article-content .component-math-card,
+.article-content .component-chart,
+.article-content .component-diagram,
+.article-content .component-emoji-board,
+.article-content .component-table-scroll,
+.article-content .component-card,
+.article-content .component-file-list a,
+.article-content .component-audio,
+.article-content .component-embed,
+.article-content .component-slider-stage,
+.article-content .component-gallery figure,
+.article-content .component-rich-showcase {
+  border-color: color-mix(in oklch, var(--article-accent), var(--article-line) 72%);
+  border-radius: 10px;
+  background: var(--article-reimu-softer);
+  box-shadow: var(--article-reimu-shadow);
+  transition:
+    background-color 220ms var(--article-motion),
+    border-color 220ms var(--article-motion),
+    box-shadow 220ms var(--article-motion),
+    transform 220ms var(--article-motion);
+}
+
+.article-content.prose blockquote:hover,
+.article-content.prose details:hover,
+.article-content .component-callout:hover,
+.article-content .component-placeholder:hover,
+.article-content .component-tab-panels:hover,
+.article-content .component-accordions details:hover,
+.article-content .component-math-card:hover,
+.article-content .component-chart:hover,
+.article-content .component-diagram:hover,
+.article-content .component-emoji-board:hover,
+.article-content .component-table-scroll:hover,
+.article-content .component-card:hover,
+.article-content .component-file-list a:hover,
+.article-content .component-audio:hover,
+.article-content .component-embed:hover,
+.article-content .component-slider-stage:hover,
+.article-content .component-gallery figure:hover,
+.article-content .component-rich-showcase:hover {
+  border-color: color-mix(in oklch, var(--article-accent), var(--article-line) 42%);
+  box-shadow: var(--article-reimu-shadow-hover);
+}
+
+.article-content.prose blockquote {
+  border-left-color: color-mix(in oklch, var(--article-accent), white 12%);
+  border-left-width: 6px;
+  padding: 1.05rem 1.15rem;
+}
+
+.article-content.prose details {
+  margin: 1.35rem 0 1.8rem;
+  padding: 1rem 0.9rem;
+}
+
+.article-content.prose summary {
+  border-radius: 8px;
+  color: var(--article-heading);
+  cursor: pointer;
+  font-weight: 800;
+  padding: 0.55rem 0.65rem;
+  transition: background-color 180ms var(--article-motion);
+}
+
+.article-content.prose summary:hover,
+.article-content.prose details[open] summary,
+.article-content .component-accordions summary:hover,
+.article-content .component-accordions details[open] summary {
+  background: var(--article-reimu-soft);
+}
+
+.article-content.prose details > :not(summary) {
+  margin-right: 0.65rem;
+  margin-left: 0.65rem;
+}
+
+.article-content.prose table {
+  box-shadow: var(--article-reimu-shadow);
+}
+
+.article-content.prose th {
+  border-bottom: 3px solid color-mix(in oklch, var(--article-accent), var(--article-line) 44%);
+}
+
+.article-content.prose th,
+.article-content.prose td {
+  border-color: color-mix(in oklch, var(--article-accent), var(--article-line) 68%);
+}
+
+.article-content.prose img,
+.article-content.prose .article-image {
+  border-color: color-mix(in oklch, var(--article-accent), var(--article-line) 76%);
+  border-radius: 10px;
+  box-shadow: 0 18px 44px color-mix(in oklch, var(--article-heading), transparent 88%);
+  transition:
+    border-color 220ms var(--article-motion),
+    box-shadow 220ms var(--article-motion),
+    transform 220ms var(--article-motion);
+}
+
+.article-content.prose img:hover,
+.article-content.prose .article-image:hover {
+  border-color: color-mix(in oklch, var(--article-accent), var(--article-line) 36%);
+  box-shadow: 0 20px 54px color-mix(in oklch, var(--article-accent), transparent 78%);
+}
+
+.article-content .code-window {
+  border-radius: 10px;
+  background: var(--article-code-surface);
+  box-shadow: var(--article-reimu-shadow);
+  transition:
+    border-color 220ms var(--article-motion),
+    box-shadow 220ms var(--article-motion),
+    transform 220ms var(--article-motion);
+}
+
+.article-content .code-window:hover {
+  border-color: color-mix(in oklch, var(--article-accent), var(--article-line) 38%);
+  box-shadow: var(--article-reimu-shadow-hover);
+}
+
+.article-content .code-window-header {
+  min-height: 2.65rem;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    var(--article-code-header) 18%,
+    var(--article-code-header) 82%,
+    transparent 100%
+  );
+}
+
+.article-content .code-window-copy,
+.article-content .component-slider-controls button {
+  filter: none;
+}
+
+.article-content .code-window-copy:hover,
+.article-content .component-slider-controls button:hover,
+.article-content .component-slider-strip button:hover,
+.article-content .component-slider-strip button.is-active {
+  border-color: color-mix(in oklch, var(--article-accent), transparent 28%);
+  background: var(--article-reimu-soft);
+  color: var(--article-accent);
+}
+
+.article-content .component-button,
+.article-content .component-mini-actions a,
+.article-content .component-badge,
+.article-content .component-timeline li > span {
+  border-color: color-mix(in oklch, var(--article-accent), transparent 58%);
+  background: var(--article-reimu-soft);
+  color: var(--article-accent);
+  box-shadow: 0 0 5px 1px color-mix(in oklch, var(--article-accent), transparent 88%);
+}
+
+.article-content .component-button-primary {
+  background: var(--article-accent);
+  color: oklch(0.99 0.004 255);
+}
+
+.article-content .component-button-primary:hover,
+.article-content .component-button-primary:focus-visible {
+  background: color-mix(in oklch, var(--article-accent), var(--article-heading) 14%);
+  color: oklch(0.99 0.004 255);
+}
+
+.article-content .component-tabs-list label:hover,
+.article-content .component-tabs-list button:hover,
+.article-content .component-tabs-list button.is-active {
+  background: var(--article-reimu-soft);
+  color: var(--article-accent);
+}
+
+.article-content .component-flow {
+  background: var(--article-reimu-softer);
+  box-shadow: var(--article-reimu-shadow);
+}
+
+.article-content .component-flow-node,
+.article-content .component-diagram > div {
+  border-color: color-mix(in oklch, var(--article-accent), var(--article-line) 64%);
+  background: color-mix(in oklch, var(--article-accent), var(--article-panel) 95%);
+}
+
+.article-content .component-gallery figcaption,
+.article-content .component-slider-stage figcaption,
+.article-content .component-video-caption {
+  background: color-mix(in oklch, var(--article-panel), transparent 10%);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .article-content.prose h2::after,
+  .article-content.prose hr,
+  .article-content .code-window,
+  .article-content .component-callout,
+  .article-content .component-card,
+  .article-content .component-file-list a,
+  .article-content .component-gallery figure {
+    will-change: box-shadow, border-color;
+  }
+}
