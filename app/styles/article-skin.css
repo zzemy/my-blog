@@ -1,44 +1,37 @@
-/* Reimu-inspired body skin, scoped to rendered article content only. */
+/* Article body skin, scoped to rendered article content only. */
 .article-content {
-  --article-reimu-glow: color-mix(in oklch, var(--article-accent), transparent 78%);
-  --article-reimu-soft: color-mix(in oklch, var(--article-accent), var(--article-panel) 97%);
-  --article-reimu-softer: color-mix(in oklch, var(--article-accent), var(--article-panel) 99%);
-  --article-reimu-shadow: 0 10px 26px color-mix(in oklch, var(--article-heading), transparent 95%);
-  --article-reimu-shadow-hover: 0 12px 30px color-mix(in oklch, var(--article-heading), transparent 94%);
-}
-
-.dark .article-content {
-  --article-reimu-soft: color-mix(in oklch, var(--article-accent), var(--article-panel) 95%);
-  --article-reimu-softer: color-mix(in oklch, var(--article-accent), var(--article-panel) 98%);
-  --article-reimu-shadow: 0 12px 30px rgb(0 0 0 / 18%);
-  --article-reimu-shadow-hover: 0 14px 34px rgb(0 0 0 / 24%);
+  --article-skin-glow: var(--article-rule-glow);
+  --article-skin-soft: var(--article-block-bg-hover);
+  --article-skin-softer: var(--article-block-bg);
+  --article-skin-shadow: var(--article-block-shadow);
+  --article-skin-shadow-hover: var(--article-block-shadow-hover);
 }
 
 .article-content.prose h2 {
   position: relative;
-  margin-top: 3rem;
-  margin-bottom: 1.25rem;
+  margin-bottom: 22px;
   border-top: 0;
-  border-bottom: 1px solid var(--article-line);
+  border-bottom: 1px solid var(--article-h2-line);
   padding-top: 0;
-  padding-bottom: 0.68rem;
+  padding-bottom: 18px;
+  transition: border-color 1s var(--article-motion);
 }
 
 .article-content.prose h2::after {
   content: "";
   position: absolute;
-  bottom: -0.16rem;
+  bottom: -4px;
   left: 0;
-  width: 1.05em;
-  height: 4px;
-  border-radius: 999px;
+  width: 1em;
+  height: 7px;
+  border-radius: 8px;
   background: var(--article-accent);
-  box-shadow: 0 0 4px var(--article-reimu-glow);
+  box-shadow: 0 0 8px var(--article-skin-glow);
   transition: width 220ms var(--article-motion);
 }
 
 .article-content.prose h2:hover::after {
-  width: 1.6em;
+  width: 3em;
 }
 
 .article-content.prose h1,
@@ -70,29 +63,29 @@
   border-top: 0;
 }
 
-.article-content.prose hr,
 .article-content.prose .component-footnotes::before {
   display: block;
-  height: 2px;
+  height: 4px;
   border: 0;
   background-image: linear-gradient(
     to right,
-    color-mix(in oklch, var(--article-accent), transparent 22%) 44%,
+    var(--article-rule-color) 50%,
     transparent 0%
   );
   background-repeat: repeat-x;
-  background-size: 42px 2px;
-  opacity: 0.22;
+  background-size: 50px 4px;
+  opacity: 0.3;
+  filter: drop-shadow(0 0 2px var(--article-rule-glow));
   transition: opacity 180ms var(--article-motion);
 }
 
 .article-content.prose hr {
-  margin: 2.8rem 0;
+  margin: 12px 0;
 }
 
 .article-content.prose hr:hover,
 .article-content.prose .component-footnotes:hover::before {
-  opacity: 0.34;
+  opacity: 0.5;
 }
 
 .article-content.prose .component-footnotes::before {
@@ -106,6 +99,17 @@
   text-decoration: none;
 }
 
+.article-content.prose p > a:not([href^="#"]):not(:has(code))::after,
+.article-content.prose li > a:not([href^="#"]):not(:has(code))::after,
+.article-content.prose td > a:not([href^="#"]):not(:has(code))::after {
+  content: "↗";
+  display: inline-block;
+  margin: 0 0.35em;
+  font-size: 0.68em;
+  line-height: 1;
+  vertical-align: middle;
+}
+
 .article-content.prose a:hover,
 .article-content .article-link:hover {
   color: color-mix(in oklch, var(--article-accent), var(--article-heading) 24%);
@@ -116,9 +120,9 @@
 
 .article-content.prose :not(pre) > code,
 .article-content.prose kbd {
-  background: var(--article-reimu-soft);
+  background: var(--article-code-inline);
   color: var(--article-accent);
-  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--article-accent), transparent 78%);
+  box-shadow: none;
 }
 
 .article-content.prose blockquote,
@@ -141,8 +145,8 @@
 .article-content .component-rich-showcase {
   border-color: var(--article-line);
   border-radius: 10px;
-  background: var(--article-reimu-softer);
-  box-shadow: var(--article-reimu-shadow);
+  background: var(--article-skin-softer);
+  box-shadow: var(--article-skin-shadow);
   transition:
     background-color 220ms var(--article-motion),
     border-color 220ms var(--article-motion),
@@ -168,7 +172,7 @@
 .article-content .component-gallery figure:hover,
 .article-content .component-rich-showcase:hover {
   border-color: color-mix(in oklch, var(--article-line), var(--article-heading) 12%);
-  box-shadow: var(--article-reimu-shadow-hover);
+  box-shadow: var(--article-skin-shadow-hover);
 }
 
 .article-content .component-callout {
@@ -190,22 +194,34 @@
 }
 
 .article-content.prose blockquote {
-  border-left-color: color-mix(in oklch, var(--article-accent), var(--article-line) 34%);
+  margin: 28px 0;
+  border: 0;
+  border-left-color: var(--article-block-border);
   border-left-width: 6px;
-  padding: 1.05rem 1.15rem;
+  border-left-style: solid;
+  border-radius: 10px;
+  background: var(--article-block-bg);
+  color: var(--article-text);
+  padding: 0 12px;
+  box-shadow: var(--article-block-shadow);
 }
 
 .article-content.prose details {
-  margin: 1.35rem 0 1.8rem;
-  padding: 1rem 0.9rem;
+  margin: 16px 0;
+  border: 0;
+  border-radius: 10px;
+  background: var(--article-block-bg);
+  padding: 16px 12px;
+  box-shadow: var(--article-block-shadow);
 }
 
 .article-content.prose summary {
   border-radius: 8px;
   color: var(--article-heading);
   cursor: pointer;
-  font-weight: 800;
-  padding: 0.55rem 0.65rem;
+  font-size: 1.1em;
+  font-weight: 700;
+  padding: 8px;
   transition: background-color 180ms var(--article-motion);
 }
 
@@ -213,20 +229,20 @@
 .article-content.prose details[open] summary,
 .article-content .component-accordions summary:hover,
 .article-content .component-accordions details[open] summary {
-  background: var(--article-reimu-soft);
+  background: var(--article-skin-soft);
 }
 
 .article-content.prose details > :not(summary) {
-  margin-right: 0.65rem;
-  margin-left: 0.65rem;
+  margin-right: 12px;
+  margin-left: 12px;
 }
 
 .article-content.prose table {
-  box-shadow: var(--article-reimu-shadow);
+  box-shadow: none;
 }
 
 .article-content.prose th {
-  border-bottom: 2px solid var(--article-line);
+  border-bottom: 3px solid var(--article-line);
 }
 
 .article-content.prose th,
@@ -236,19 +252,16 @@
 
 .article-content.prose img,
 .article-content.prose .article-image {
-  border-color: var(--article-line);
   border-radius: 10px;
-  box-shadow: 0 16px 34px color-mix(in oklch, var(--article-heading), transparent 92%);
+  box-shadow: none;
   transition:
-    border-color 220ms var(--article-motion),
-    box-shadow 220ms var(--article-motion),
-    transform 220ms var(--article-motion);
+    opacity 220ms var(--article-motion),
+    filter 220ms var(--article-motion);
 }
 
 .article-content.prose img:hover,
 .article-content.prose .article-image:hover {
-  border-color: color-mix(in oklch, var(--article-line), var(--article-heading) 14%);
-  box-shadow: 0 18px 40px color-mix(in oklch, var(--article-heading), transparent 90%);
+  box-shadow: none;
 }
 
 .article-content .code-window {
@@ -281,7 +294,7 @@
 .article-content .component-slider-strip button:hover,
 .article-content .component-slider-strip button.is-active {
   border-color: color-mix(in oklch, var(--article-accent), transparent 28%);
-  background: var(--article-reimu-soft);
+  background: var(--article-skin-soft);
   color: var(--article-accent);
 }
 
@@ -302,7 +315,7 @@
 .article-content .component-badge,
 .article-content .component-timeline li > span {
   border-color: color-mix(in oklch, var(--article-accent), transparent 58%);
-  background: var(--article-reimu-soft);
+  background: var(--article-skin-soft);
   color: var(--article-accent);
   box-shadow: none;
 }
@@ -321,14 +334,14 @@
 .article-content .component-tabs-list label:hover,
 .article-content .component-tabs-list button:hover,
 .article-content .component-tabs-list button.is-active {
-  background: var(--article-reimu-soft);
+  background: var(--article-skin-soft);
   color: var(--article-accent);
 }
 
 .article-content .component-flow {
   border-color: var(--article-line);
-  background: var(--article-reimu-softer);
-  box-shadow: var(--article-reimu-shadow);
+  background: var(--article-skin-softer);
+  box-shadow: var(--article-skin-shadow);
 }
 
 .article-content .component-flow-question {
