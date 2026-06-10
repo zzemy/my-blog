@@ -34,7 +34,8 @@
 
 .codeWindowLine {
   display: block;
-  min-height: 1.74em;
+  min-height: var(--article-code-line-height, 1.6rem);
+  line-height: var(--article-code-line-height, 1.6rem);
 }
 
 .codeWindowLine:nth-child(15) {

@@ -680,6 +680,7 @@
 }
 
 .article-content .code-window {
+  --article-code-line-height: 1.6rem;
   margin: 1.55rem 0 2.15rem;
   overflow: hidden;
   border: 1px solid var(--article-line);
@@ -812,8 +813,12 @@
   padding: 0 0.65rem 0 0.5rem;
   font-family: "JetBrains Mono", "Menlo", "Consolas", monospace;
   font-size: 0.78rem;
-  line-height: 1.74;
+  line-height: var(--article-code-line-height);
   user-select: none;
+}
+
+.article-content .code-window-gutter span {
+  min-height: var(--article-code-line-height);
 }
 
 .article-content .code-window-pre {
@@ -826,7 +831,7 @@
   color: var(--article-code-text) !important;
   font-family: "JetBrains Mono", "Menlo", "Consolas", monospace;
   font-size: 0.92rem;
-  line-height: 1.74;
+  line-height: var(--article-code-line-height);
 }
 
 .article-content .code-window-pre code {
@@ -835,6 +840,7 @@
   font-family: inherit;
   font-size: inherit;
   font-weight: 500;
+  line-height: inherit;
 }
 
 .article-content .code-window ::-webkit-scrollbar {
