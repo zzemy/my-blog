@@ -6,13 +6,12 @@ import { useState } from 'react'
 import { Node, mergeAttributes, NodeViewWrapper, ReactNodeViewRenderer } from '@tiptap/react'
 import type { NodeViewProps } from '@tiptap/react'
 import {
-  AlertTriangle,
   ChevronLeft,
   ChevronRight,
   CheckCircle2,
+  CircleAlert,
   Info,
   Layers3,
-  Lightbulb,
   MousePointerClick,
   Music2,
   Network,
@@ -562,13 +561,13 @@ function CalloutView({ node }: NodeViewProps) {
   return (
     <NodeViewWrapper className="component-stack not-prose" data-rich-block="callout">
       <div className={`component-callout component-callout-${tone}`}>
-        <div className="component-callout-icon">
-          <Icon className="h-4 w-4" />
-        </div>
-        <div>
+        <div className="component-callout-heading">
+          <div className="component-callout-icon">
+            <Icon className="h-4 w-4" />
+          </div>
           <p className="component-callout-title">{title}</p>
-          <p>{text}</p>
         </div>
+        <p>{text}</p>
       </div>
     </NodeViewWrapper>
   )
@@ -911,14 +910,13 @@ function getCalloutIcon(tone: CalloutTone) {
     case 'quote':
       return Quote
     case 'tip':
-      return Lightbulb
+    case 'success':
+      return CheckCircle2
     case 'important':
       return Info
     case 'warning':
     case 'caution':
-      return AlertTriangle
-    case 'success':
-      return CheckCircle2
+      return CircleAlert
     case 'info':
     case 'note':
     default:

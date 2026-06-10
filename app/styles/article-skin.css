@@ -172,19 +172,21 @@
 }
 
 .article-content .component-callout {
-  border-color: color-mix(in oklch, var(--callout-icon), var(--article-line) 88%);
-  border-left-color: color-mix(in oklch, var(--callout-icon), transparent 16%);
-  background: color-mix(in oklch, var(--callout-icon), var(--article-panel) 98%);
-  box-shadow: none;
+  border-color: transparent;
+  border-left-color: var(--callout-icon);
+  background: var(--callout-bg);
+  box-shadow: 0 0 5px 2px var(--callout-shadow);
   transition:
     background-color 180ms var(--article-motion),
-    border-color 180ms var(--article-motion);
+    border-color 180ms var(--article-motion),
+    box-shadow 180ms var(--article-motion);
 }
 
 .article-content .component-callout:hover {
-  border-color: color-mix(in oklch, var(--callout-icon), var(--article-line) 82%);
-  border-left-color: color-mix(in oklch, var(--callout-icon), transparent 10%);
-  background: color-mix(in oklch, var(--callout-icon), var(--article-panel) 97%);
+  border-color: transparent;
+  border-left-color: var(--callout-icon);
+  background: var(--callout-bg);
+  box-shadow: 0 0 7px 3px var(--callout-shadow);
 }
 
 .article-content.prose blockquote {
@@ -250,10 +252,10 @@
 }
 
 .article-content .code-window {
-  border-color: color-mix(in oklch, var(--article-line), var(--article-heading) 4%);
-  border-radius: 8px;
+  border-color: color-mix(in oklch, var(--article-line), transparent 24%);
+  border-radius: 12px;
   background: var(--article-code-surface);
-  box-shadow: none;
+  box-shadow: 0 18px 42px rgb(0 0 0 / 34%);
   transition:
     border-color 220ms var(--article-motion),
     background-color 220ms var(--article-motion);
@@ -261,14 +263,16 @@
 
 .article-content .code-window:hover {
   border-color: color-mix(in oklch, var(--article-line), var(--article-heading) 10%);
+  box-shadow: 0 20px 48px rgb(0 0 0 / 38%);
 }
 
 .article-content .code-window-header {
-  min-height: 2.75rem;
+  min-height: 3rem;
   background: var(--article-code-header);
 }
 
 .article-content .code-window-copy,
+.article-content .code-window-toggle,
 .article-content .component-slider-controls button {
   filter: none;
 }
@@ -282,6 +286,12 @@
 }
 
 .article-content .code-window-copy:hover {
+  border-color: color-mix(in oklch, var(--article-line), var(--article-heading) 10%);
+  background: color-mix(in oklch, var(--article-heading), transparent 94%);
+  color: var(--article-heading);
+}
+
+.article-content .code-window-toggle:hover {
   border-color: color-mix(in oklch, var(--article-line), var(--article-heading) 10%);
   background: color-mix(in oklch, var(--article-heading), transparent 94%);
   color: var(--article-heading);

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, type ReactNode } from 'react'
-import { AlertTriangle, Check, CheckCircle2, Copy, Info, Lightbulb, Network, Quote } from 'lucide-react'
+import { Check, CheckCircle2, ChevronDown, CircleAlert, Copy, Info, Network, Quote } from 'lucide-react'
 import styles from './components-page.module.css'
 
 type CalloutTone = 'note' | 'quote' | 'tip' | 'info' | 'important' | 'warning' | 'success' | 'caution'
@@ -115,13 +115,13 @@ function Callout({
 
   return (
     <div className={`component-callout component-callout-${tone}`}>
-      <div className="component-callout-icon">
-        <Icon className="h-4 w-4" />
-      </div>
-      <div>
+      <div className="component-callout-heading">
+        <div className="component-callout-icon">
+          <Icon className="h-4 w-4" />
+        </div>
         <p className="component-callout-title">{title}</p>
-        <p>{children}</p>
       </div>
+      <p>{children}</p>
     </div>
   )
 }
@@ -131,12 +131,11 @@ function getCalloutIcon(tone: CalloutTone) {
     case 'quote':
       return Quote
     case 'tip':
-      return Lightbulb
-    case 'warning':
-    case 'caution':
-      return AlertTriangle
     case 'success':
       return CheckCircle2
+    case 'warning':
+    case 'caution':
+      return CircleAlert
     case 'important':
     case 'info':
     case 'note':
@@ -161,6 +160,7 @@ function CodeWindow({
   startLine?: number
 }) {
   const [copied, setCopied] = useState(false)
+  const [collapsed, setCollapsed] = useState(false)
   const lines = code.trimEnd().split('\n')
   const resolvedFileName = fileName === undefined ? getCodeExampleFileName(label) : fileName
   const onCopy = async () => {
@@ -170,7 +170,7 @@ function CodeWindow({
   }
 
   return (
-    <div className="code-window not-prose">
+    <div className={`code-window not-prose ${collapsed ? 'is-collapsed' : ''}`}>
       <div className="code-window-header">
         <div className="code-window-titlebar">
           <span className="code-window-dots" aria-hidden="true">
@@ -184,6 +184,15 @@ function CodeWindow({
         <div className="code-window-tools">
           <button type="button" className="code-window-copy" aria-label="复制代码" onClick={onCopy}>
             {copied ? <Check className="h-3.5 w-3.5 text-green-400" /> : <Copy className="h-3.5 w-3.5" />}
+          </button>
+          <button
+            type="button"
+            className="code-window-toggle"
+            aria-label={collapsed ? '展开代码' : '折叠代码'}
+            aria-expanded={!collapsed}
+            onClick={() => setCollapsed((value) => !value)}
+          >
+            <ChevronDown className="h-3.5 w-3.5" />
           </button>
         </div>
       </div>

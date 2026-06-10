@@ -18,7 +18,7 @@ import { TextStyle } from '@tiptap/extension-text-style'
 import { CodeBlockLowlight } from '@tiptap/extension-code-block-lowlight'
 import { Mathematics } from '@tiptap/extension-mathematics'
 import { common, createLowlight } from 'lowlight'
-import { Check, Copy } from 'lucide-react'
+import { Check, ChevronDown, Copy } from 'lucide-react'
 import { articleRichBlockExtensions } from './rich-block-extensions'
 import { LinkPreview } from '@/shared/components/common/link-preview'
 
@@ -26,6 +26,7 @@ const lowlight = createLowlight(common)
 
 const CodeBlock = ({ node }: NodeViewProps) => {
   const [copied, setCopied] = useState(false)
+  const [collapsed, setCollapsed] = useState(false)
   const textContent = node.textContent
   const language = formatCodeLanguage(node.attrs.language)
   const fileName = getCodeFileName(node.attrs.language)
@@ -44,7 +45,7 @@ const CodeBlock = ({ node }: NodeViewProps) => {
   }
 
   return (
-    <NodeViewWrapper className="code-window not-prose group relative">
+    <NodeViewWrapper className={`code-window not-prose group relative ${collapsed ? 'is-collapsed' : ''}`}>
       {/* Header / Title Bar */}
       <div className="code-window-header">
         <div className="code-window-titlebar">
@@ -59,6 +60,15 @@ const CodeBlock = ({ node }: NodeViewProps) => {
         <div className="code-window-tools">
           <button type="button" onClick={onCopy} className="code-window-copy" aria-label="复制代码">
             {copied ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5" />}
+          </button>
+          <button
+            type="button"
+            onClick={() => setCollapsed((value) => !value)}
+            className="code-window-toggle"
+            aria-label={collapsed ? '展开代码' : '折叠代码'}
+            aria-expanded={!collapsed}
+          >
+            <ChevronDown className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>

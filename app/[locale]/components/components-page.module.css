@@ -3,13 +3,13 @@
 }
 
 .alertStack {
-  gap: 0.95rem;
-  margin: 1.1rem 0 1.55rem;
+  gap: 2rem;
+  margin: 1.2rem 0 2.2rem;
 }
 
 .alertPair {
   display: grid;
-  gap: 0.56rem;
+  gap: 1.35rem;
 }
 
 .alertPair > :global(.code-window),
@@ -23,8 +23,8 @@
 
 .codeStack {
   display: grid;
-  gap: 1rem;
-  margin: 1.35rem 0 1.8rem;
+  gap: 1.25rem;
+  margin: 1.5rem 0 2rem;
 }
 
 .alertPair > :global(.code-window),
@@ -34,11 +34,11 @@
 
 .codeWindowLine {
   display: block;
-  min-height: 1.68em;
+  min-height: 1.74em;
 }
 
 .codeWindowLine:nth-child(15) {
-  background: rgb(255 255 255 / 5%);
+  background: rgb(255 255 255 / 7%);
 }
 
 .tokenAttr {

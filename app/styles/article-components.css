@@ -7,70 +7,151 @@
 
 .component-callout {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: 0.58rem;
+  gap: 0.72rem;
+  --callout-bg: hsl(210 90% 96%);
+  --callout-icon: hsl(210 100% 40%);
+  --callout-shadow: hsl(210 100% 98%);
+  --callout-text: hsl(210 100% 40%);
   border: 1px solid var(--article-line);
-  border-left: 3px solid var(--callout-icon);
-  border-radius: 8px;
-  background: color-mix(in oklch, var(--callout-icon), var(--article-panel) 98%);
-  padding: 0.68rem 0.82rem;
-  color: var(--article-text);
+  border-left: 6px solid var(--callout-icon);
+  border-radius: 12px;
+  background: var(--callout-bg);
+  color: var(--callout-text);
+  padding: 0.9rem 1.15rem 0.95rem;
+  box-shadow: 0 0 5px 2px var(--callout-shadow);
 }
 
 .component-callout-info {
-  --callout-icon: oklch(0.66 0.13 224);
+  --callout-bg: hsl(210 90% 96%);
+  --callout-icon: hsl(210 100% 40%);
+  --callout-shadow: hsl(210 100% 98%);
+  --callout-text: hsl(210 100% 40%);
 }
 
 .component-callout-note {
-  --callout-icon: oklch(0.6 0.07 248);
+  --callout-bg: hsl(210 90% 96%);
+  --callout-icon: hsl(210 100% 40%);
+  --callout-shadow: hsl(210 100% 98%);
+  --callout-text: hsl(210 100% 40%);
 }
 
 .component-callout-quote {
-  --callout-icon: oklch(0.56 0.045 238);
+  --callout-bg: hsl(210 90% 96%);
+  --callout-icon: hsl(210 100% 40%);
+  --callout-shadow: hsl(210 100% 98%);
+  --callout-text: hsl(210 100% 40%);
 }
 
 .component-callout-tip {
-  --callout-icon: oklch(0.68 0.12 178);
+  --callout-bg: hsl(138 76% 96%);
+  --callout-icon: hsl(152 95% 28%);
+  --callout-shadow: hsl(138 100% 98%);
+  --callout-text: hsl(152 95% 28%);
 }
 
 .component-callout-warning {
-  --callout-icon: oklch(0.72 0.11 112);
+  --callout-bg: hsl(40 100% 94%);
+  --callout-icon: hsl(34 94% 35%);
+  --callout-shadow: hsl(40 100% 98%);
+  --callout-text: hsl(34 94% 35%);
 }
 
 .component-callout-success {
-  --callout-icon: oklch(0.66 0.12 156);
+  --callout-bg: hsl(138 76% 96%);
+  --callout-icon: hsl(152 95% 28%);
+  --callout-shadow: hsl(138 100% 98%);
+  --callout-text: hsl(152 95% 28%);
 }
 
 .component-callout-important {
-  --callout-icon: oklch(0.68 0.13 292);
+  --callout-bg: hsl(270 80% 96%);
+  --callout-icon: hsl(270 80% 45%);
+  --callout-shadow: hsl(270 80% 98%);
+  --callout-text: hsl(270 80% 45%);
 }
 
 .component-callout-caution {
-  --callout-icon: oklch(0.68 0.13 28);
+  --callout-bg: hsl(0 100% 97%);
+  --callout-icon: hsl(356 72% 45%);
+  --callout-shadow: hsl(0 100% 98%);
+  --callout-text: hsl(356 72% 45%);
+}
+
+.dark .component-callout-info,
+.dark .component-callout-note,
+.dark .component-callout-quote {
+  --callout-bg: hsl(210 30% 25%);
+  --callout-icon: hsl(210 80% 70%);
+  --callout-shadow: hsl(210 30% 16%);
+  --callout-text: hsl(210 80% 70%);
+}
+
+.dark .component-callout-tip,
+.dark .component-callout-success {
+  --callout-bg: hsl(138 30% 25%);
+  --callout-icon: hsl(138 80% 70%);
+  --callout-shadow: hsl(138 30% 16%);
+  --callout-text: hsl(138 80% 70%);
+}
+
+.dark .component-callout-warning {
+  --callout-bg: hsl(40 30% 25%);
+  --callout-icon: hsl(40 80% 70%);
+  --callout-shadow: hsl(40 30% 16%);
+  --callout-text: hsl(40 80% 70%);
+}
+
+.dark .component-callout-important {
+  --callout-bg: hsl(270 30% 25%);
+  --callout-icon: hsl(270 80% 70%);
+  --callout-shadow: hsl(270 30% 16%);
+  --callout-text: hsl(270 80% 70%);
+}
+
+.dark .component-callout-caution {
+  --callout-bg: hsl(0 30% 25%);
+  --callout-icon: hsl(0 80% 70%);
+  --callout-shadow: hsl(0 30% 16%);
+  --callout-text: hsl(0 80% 70%);
+}
+
+.component-callout-heading {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .component-callout-icon {
   display: inline-flex;
-  height: 1.35rem;
-  width: 1.35rem;
+  height: 1.55rem;
+  width: 1.55rem;
+  flex: 0 0 auto;
   align-items: center;
   justify-content: center;
   color: var(--callout-icon);
-  margin-top: 0.06rem;
-  opacity: 0.84;
+  margin: 0;
 }
 
 .component-callout-title {
-  margin: 0 0 0.08rem;
-  color: var(--article-heading);
+  margin: 0;
+  color: var(--callout-text);
+  font-size: 1rem;
   font-weight: 800;
-  line-height: 1.25;
+  line-height: 1.22;
 }
 
+.article-content .component-callout p,
 .component-callout p {
   margin: 0;
-  color: var(--article-text);
-  line-height: 1.52;
+  color: var(--callout-text);
+  line-height: 1.55;
+}
+
+.article-content .component-callout-title {
+  margin: 0;
+  color: var(--callout-text);
+  line-height: 1.22;
 }
 
 .component-code-label {
@@ -83,8 +164,8 @@
   background: transparent;
   color: color-mix(in oklch, var(--article-muted), var(--article-heading) 18%);
   padding: 0;
-  font-size: 0.74rem;
-  font-weight: 800;
+  font-size: 0.86rem;
+  font-weight: 850;
   line-height: 1;
   text-transform: uppercase;
 }
