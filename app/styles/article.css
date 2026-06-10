@@ -1,0 +1,666 @@
+.article-font {
+  font-family: var(--article-font);
+  font-size: var(--article-font-size);
+  line-height: var(--article-line-height);
+}
+
+/* Custom Typography Overrides */
+
+/* 1. 行内代码样式 (不包含代码块) */
+.prose :not(pre) > code {
+  background-color: #eff1f3;
+  color: #24292e;
+  padding: 0.2em 0.4em;
+  border-radius: 0.25rem;
+  font-weight: 500;
+}
+
+.dark .prose :not(pre) > code {
+  background-color: #0d1117;
+  color: #c9d1d9;
+  border: 1px solid var(--border);
+}
+
+.prose :not(pre) > code::before,
+.prose :not(pre) > code::after {
+  content: "";
+}
+
+/* Code Block Styling */
+.prose pre {
+  background-color: transparent !important;
+  padding: 0 0 1.5rem 0 !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  border: none !important;
+  position: relative;
+  overflow-x: auto;
+}
+
+/* Scrollbar styling for pre */
+.prose pre::-webkit-scrollbar {
+  height: 8px;
+}
+
+.prose pre::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+.prose pre::-webkit-scrollbar-thumb {
+  background-color: #404040;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.prose pre::-webkit-scrollbar-thumb:hover {
+  background-color: #505050;
+}
+
+.dark .prose pre {
+  background-color: transparent !important;
+}
+
+.prose pre code {
+  background-color: transparent;
+  border: none;
+  padding: 0;
+  color: inherit; /* This makes code color inherit from parent pre, fixing light/dark mode switch */
+  font-size: inherit;
+  display: block;
+}
+
+/* Article reading surface */
+.article-shell {
+  --article-text: oklch(0.24 0.025 260);
+  --article-heading: oklch(0.16 0.025 260);
+  --article-muted: oklch(0.52 0.035 260);
+  --article-soft: oklch(0.97 0.006 260);
+  --article-panel: oklch(0.99 0.004 260);
+  --article-line: oklch(0.9 0.014 260);
+  --article-accent: oklch(0.58 0.14 198);
+  --article-code-surface: oklch(0.985 0.004 255);
+  --article-code-header: oklch(0.965 0.006 255);
+  --article-table-header: oklch(0.955 0.008 230);
+  --article-motion: cubic-bezier(0.22, 1, 0.36, 1);
+  color: var(--article-text);
+}
+
+.dark .article-shell {
+  --article-text: oklch(0.8 0.018 255);
+  --article-heading: oklch(0.97 0.006 260);
+  --article-muted: oklch(0.64 0.018 260);
+  --article-soft: oklch(0.19 0.006 220);
+  --article-panel: oklch(0.145 0.005 220);
+  --article-line: oklch(1 0 0 / 14%);
+  --article-accent: oklch(0.72 0.13 188);
+  --article-code-surface: oklch(0.17 0.012 245);
+  --article-code-header: oklch(0.205 0.014 245);
+  --article-table-header: oklch(0.18 0.006 220);
+  --article-motion: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.admin-editor {
+  --article-text: oklch(0.24 0.025 260);
+  --article-heading: oklch(0.16 0.025 260);
+  --article-muted: oklch(0.52 0.035 260);
+  --article-soft: oklch(0.97 0.006 260);
+  --article-panel: oklch(0.99 0.004 260);
+  --article-line: oklch(0.9 0.014 260);
+  --article-accent: oklch(0.52 0.16 245);
+}
+
+.dark .admin-editor {
+  --article-text: oklch(0.78 0.018 260);
+  --article-heading: oklch(0.97 0.006 260);
+  --article-muted: oklch(0.64 0.018 260);
+  --article-soft: oklch(0.19 0.006 220);
+  --article-panel: oklch(0.145 0.005 220);
+  --article-line: oklch(1 0 0 / 12%);
+  --article-accent: oklch(0.72 0.15 205);
+}
+
+.article-hero {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid var(--article-line);
+}
+
+.article-title {
+  margin: 0;
+  color: var(--article-heading);
+  font-family: var(--font-heading);
+  font-weight: 800;
+  line-height: 1.12;
+  letter-spacing: 0;
+  text-wrap: balance;
+}
+
+.article-description {
+  margin: 0;
+  max-width: 48rem;
+  color: var(--article-muted);
+  font-size: 1.125rem;
+  line-height: 1.75;
+}
+
+.article-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  color: var(--article-muted);
+}
+
+.article-tag {
+  display: inline-flex;
+  min-height: 1.75rem;
+  align-items: center;
+  border: 1px solid var(--article-line);
+  border-radius: 999px;
+  background: var(--article-soft);
+  padding: 0.25rem 0.7rem;
+  color: var(--article-muted);
+  font-size: 0.875rem;
+  line-height: 1;
+  transition: border-color 160ms ease, color 160ms ease, background-color 160ms ease;
+}
+
+.article-tag:hover {
+  border-color: color-mix(in oklch, var(--article-accent), transparent 45%);
+  background: color-mix(in oklch, var(--article-accent), transparent 92%);
+  color: var(--article-heading);
+}
+
+.article-content.prose {
+  --tw-prose-body: var(--article-text);
+  --tw-prose-headings: var(--article-heading);
+  --tw-prose-lead: var(--article-muted);
+  --tw-prose-links: var(--article-heading);
+  --tw-prose-bold: var(--article-heading);
+  --tw-prose-counters: var(--article-muted);
+  --tw-prose-bullets: var(--article-accent);
+  --tw-prose-hr: var(--article-line);
+  --tw-prose-quotes: var(--article-heading);
+  --tw-prose-quote-borders: var(--article-accent);
+  --tw-prose-captions: var(--article-muted);
+  --tw-prose-code: var(--article-heading);
+  --tw-prose-pre-code: var(--article-text);
+  --tw-prose-pre-bg: transparent;
+  --tw-prose-th-borders: var(--article-line);
+  --tw-prose-td-borders: var(--article-line);
+  color: var(--article-text);
+  font-size: 1rem;
+  line-height: 1.86;
+}
+
+@media (min-width: 768px) {
+  .article-content.prose {
+    font-size: 1.0625rem;
+  }
+}
+
+.article-content.prose h1,
+.article-content.prose h2,
+.article-content.prose h3,
+.article-content.prose h4,
+.article-content.prose h5,
+.article-content.prose h6 {
+  color: var(--article-heading);
+  font-family: var(--font-heading);
+  font-weight: 800;
+  letter-spacing: 0;
+  text-wrap: balance;
+}
+
+.article-content.prose h1 {
+  margin-top: 3rem;
+  margin-bottom: 1rem;
+  font-size: 2.25rem;
+  line-height: 1.16;
+}
+
+.article-content.prose h2 {
+  margin-top: 3.5rem;
+  margin-bottom: 1rem;
+  padding-top: 1.75rem;
+  border-top: 1px solid var(--article-line);
+  font-size: 1.9rem;
+  line-height: 1.2;
+}
+
+.article-content.prose h3 {
+  margin-top: 2.5rem;
+  margin-bottom: 0.75rem;
+  font-size: 1.5rem;
+  line-height: 1.25;
+}
+
+.article-content.prose h4 {
+  margin-top: 2rem;
+  margin-bottom: 0.65rem;
+  font-size: 1.2rem;
+  line-height: 1.35;
+}
+
+.article-content.prose h5,
+.article-content.prose h6 {
+  margin-top: 1.75rem;
+  margin-bottom: 0.5rem;
+  color: var(--article-muted);
+  font-size: 1rem;
+  line-height: 1.45;
+}
+
+@media (min-width: 768px) {
+  .article-content.prose h1 {
+    font-size: 2.75rem;
+  }
+
+  .article-content.prose h2 {
+    font-size: 2.15rem;
+  }
+
+  .article-content.prose h3 {
+    font-size: 1.65rem;
+  }
+}
+
+.article-content.prose h1:first-child,
+.article-content.prose h2:first-child,
+.article-content.prose h3:first-child {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.article-content.prose p {
+  margin-top: 1.15rem;
+  margin-bottom: 1.15rem;
+  color: var(--article-text);
+}
+
+.article-content.prose .lead {
+  color: var(--article-heading);
+  font-size: 1.2em;
+  line-height: 1.75;
+}
+
+.article-content.prose a,
+.article-link {
+  color: var(--article-heading);
+  font-weight: 650;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in oklch, var(--article-accent), transparent 52%);
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.22em;
+  transition: color 180ms var(--article-motion), text-decoration-color 180ms var(--article-motion);
+}
+
+.article-content.prose a:hover,
+.article-link:hover {
+  color: var(--article-accent);
+  text-decoration-color: var(--article-accent);
+}
+
+.article-content.prose a:focus-visible,
+.article-link:focus-visible {
+  border-radius: 4px;
+  outline: 2px solid color-mix(in oklch, var(--article-accent), transparent 35%);
+  outline-offset: 3px;
+}
+
+.article-content.prose strong {
+  color: var(--article-heading);
+  font-weight: 750;
+}
+
+.article-content.prose del {
+  color: var(--article-muted);
+  text-decoration-color: color-mix(in oklch, var(--article-muted), transparent 18%);
+  text-decoration-thickness: 0.08em;
+}
+
+.article-content.prose mark {
+  border: 1px solid color-mix(in oklch, var(--article-accent), transparent 72%);
+  border-radius: 6px;
+  background: color-mix(in oklch, var(--article-accent), transparent 86%);
+  color: var(--article-heading);
+  padding: 0.1em 0.3em;
+}
+
+.article-content.prose kbd {
+  display: inline-flex;
+  min-width: 1.8em;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--article-line);
+  border-bottom-width: 2px;
+  border-radius: 6px;
+  background: var(--article-panel);
+  color: var(--article-heading);
+  padding: 0.08em 0.38em;
+  font-family: "JetBrains Mono", "Menlo", "Consolas", monospace;
+  font-size: 0.82em;
+  font-weight: 750;
+  line-height: 1.5;
+}
+
+.article-content.prose abbr[title] {
+  cursor: help;
+  text-decoration: underline dotted color-mix(in oklch, var(--article-accent), transparent 35%);
+  text-underline-offset: 0.18em;
+}
+
+.article-content.prose sub,
+.article-content.prose sup {
+  line-height: 0;
+}
+
+.article-content.prose hr {
+  margin: 3rem 0;
+  border-color: var(--article-line);
+}
+
+.article-content.prose ul,
+.article-content.prose ol {
+  margin-top: 1.2rem;
+  margin-bottom: 1.2rem;
+  padding-left: 1.45rem;
+}
+
+.article-content.prose li {
+  margin-top: 0.45rem;
+  margin-bottom: 0.45rem;
+  padding-left: 0.2rem;
+}
+
+.article-content.prose li::marker {
+  color: var(--article-accent);
+  font-weight: 650;
+}
+
+.article-content.prose ul[data-type="taskList"] {
+  padding-left: 0;
+  list-style: none;
+}
+
+.article-content.prose ul[data-type="taskList"] li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  padding-left: 0;
+}
+
+.article-content.prose input[type="checkbox"] {
+  margin-top: 0.45em;
+  accent-color: var(--article-accent);
+}
+
+.article-content.prose dl {
+  margin: 1.6rem 0 2rem;
+  border-top: 1px solid var(--article-line);
+  border-bottom: 1px solid var(--article-line);
+  padding: 0.35rem 0;
+}
+
+.article-content.prose dt {
+  margin-top: 1rem;
+  color: var(--article-heading);
+  font-weight: 800;
+}
+
+.article-content.prose dd {
+  margin: 0.25rem 0 1rem;
+  color: var(--article-text);
+  padding-left: 1rem;
+  border-left: 3px solid color-mix(in oklch, var(--article-accent), transparent 62%);
+}
+
+.article-content.prose :not(pre) > code {
+  border: 1px solid color-mix(in oklch, var(--article-line), transparent 15%);
+  border-radius: 6px;
+  background: var(--article-soft);
+  color: var(--article-heading);
+  padding: 0.16em 0.42em;
+  font-size: 0.9em;
+  font-weight: 650;
+}
+
+.article-content.prose blockquote {
+  margin: 2rem 0;
+  border: 1px solid var(--article-line);
+  border-left: 6px solid var(--article-accent);
+  border-radius: 8px;
+  background: var(--article-panel);
+  padding: 1.2rem 1.35rem;
+  color: var(--article-heading);
+  font-style: normal;
+  box-shadow: 0 14px 32px color-mix(in oklch, var(--foreground), transparent 94%);
+}
+
+.dark .article-content.prose blockquote {
+  box-shadow: 0 18px 38px rgb(0 0 0 / 24%);
+}
+
+.article-content.prose blockquote p {
+  margin: 0;
+}
+
+.article-content.prose .article-table,
+.article-content.prose table {
+  width: 100%;
+  margin: 2rem 0;
+  overflow: hidden;
+  border: 1px solid var(--article-line);
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 8px;
+  background: var(--article-panel);
+}
+
+.article-content.prose th,
+.article-content.prose td {
+  border-bottom: 1px solid var(--article-line);
+  padding: 0.9rem 1rem;
+  vertical-align: top;
+}
+
+.article-content.prose th {
+  background: var(--article-table-header);
+  color: var(--article-heading);
+  font-weight: 750;
+}
+
+.article-content.prose tr:last-child td {
+  border-bottom: 0;
+}
+
+.article-content.prose tr:nth-child(even) td {
+  background: color-mix(in oklch, var(--article-soft), transparent 55%);
+}
+
+@media (max-width: 640px) {
+  .article-content.prose .article-table,
+  .article-content.prose table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}
+
+.article-content.prose img,
+.article-content.prose .article-image {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 2rem auto;
+  border: 1px solid var(--article-line);
+  border-radius: 8px;
+  box-shadow: 0 18px 42px color-mix(in oklch, var(--foreground), transparent 91%);
+}
+
+.dark .article-content.prose img,
+.dark .article-content.prose .article-image {
+  box-shadow: 0 22px 52px rgb(0 0 0 / 32%);
+}
+
+.article-content .code-window {
+  margin: 1.65rem 0 2.25rem;
+  overflow: hidden;
+  border: 1px solid color-mix(in oklch, var(--article-line), var(--article-accent) 12%);
+  border-radius: 8px;
+  background: var(--article-code-surface);
+  box-shadow: 0 16px 38px color-mix(in oklch, var(--foreground), transparent 96%);
+}
+
+.dark .article-content .code-window {
+  box-shadow: 0 18px 44px rgb(0 0 0 / 24%);
+}
+
+.article-content .code-window-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--article-line);
+  background: var(--article-code-header);
+  padding: 0.58rem 0.72rem 0.58rem 0.9rem;
+}
+
+.article-content .code-window-titlebar {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.article-content .code-window-dots {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.article-content .code-window-dots i {
+  display: block;
+  height: 0.72rem;
+  width: 0.72rem;
+  border: 1px solid rgb(0 0 0 / 18%);
+  border-radius: 999px;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 18%);
+}
+
+.article-content .code-window-dots i:nth-child(1) {
+  background: #ff5f57;
+}
+
+.article-content .code-window-dots i:nth-child(2) {
+  background: #febc2e;
+}
+
+.article-content .code-window-dots i:nth-child(3) {
+  background: #28c840;
+}
+
+.article-content .code-window-copy {
+  display: inline-flex;
+  height: 2rem;
+  width: 2rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--article-muted);
+  opacity: 1;
+  transition:
+    background-color 180ms var(--article-motion),
+    border-color 180ms var(--article-motion),
+    color 180ms var(--article-motion),
+    transform 180ms var(--article-motion);
+}
+
+.article-content .code-window-copy:hover {
+  border-color: color-mix(in oklch, var(--article-line), transparent 18%);
+  background: color-mix(in oklch, var(--article-soft), transparent 28%);
+  color: var(--article-heading);
+}
+
+.article-content .code-window-copy:focus-visible {
+  outline: 2px solid color-mix(in oklch, var(--article-accent), transparent 35%);
+  outline-offset: 2px;
+}
+
+.article-content .code-window-copy:active {
+  transform: scale(0.96);
+}
+
+.article-content .code-window-tools {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-height: 2rem;
+}
+
+.article-content .code-window-body {
+  display: flex;
+  min-width: max-content;
+  overflow-x: auto;
+  padding: 1rem 0 1.05rem;
+}
+
+.article-content .code-window-gutter {
+  display: flex;
+  min-width: 3.1rem;
+  flex-shrink: 0;
+  flex-direction: column;
+  align-items: flex-end;
+  border-right: 1px solid var(--article-line);
+  color: color-mix(in oklch, var(--article-muted), transparent 30%);
+  padding: 0 0.72rem 0 0.55rem;
+  font-family: "JetBrains Mono", "Menlo", "Consolas", monospace;
+  font-size: 0.78rem;
+  line-height: 1.78;
+  user-select: none;
+}
+
+.article-content .code-window-pre {
+  flex: 1;
+  min-width: max-content;
+  margin: 0 !important;
+  padding: 0 1.1rem !important;
+  overflow: visible;
+  background: transparent !important;
+  color: var(--article-text) !important;
+  font-family: "JetBrains Mono", "Menlo", "Consolas", monospace;
+  font-size: 0.92rem;
+  line-height: 1.78;
+}
+
+.article-content .code-window-pre code {
+  background: transparent;
+  color: inherit;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: 500;
+}
+
+.article-content.prose .component-footnotes {
+  margin: 3rem 0 0;
+  border-top: 1px solid var(--article-line);
+  padding-top: 1rem;
+  color: var(--article-muted);
+  font-size: 0.9rem;
+}
+
+.article-content.prose .component-footnotes ol {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.article-content.prose .component-footnotes li {
+  color: var(--article-muted);
+}
