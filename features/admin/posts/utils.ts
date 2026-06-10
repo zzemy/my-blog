@@ -12,6 +12,10 @@ export function isoToLocalInput(iso: string) {
   return `${yyyy}-${MM}-${dd}T${hh}:${mm}`
 }
 
+export function nowLocalInput() {
+  return isoToLocalInput(new Date().toISOString())
+}
+
 export function filterAndSortPosts(
   posts: AdminPost[],
   searchQuery: string,

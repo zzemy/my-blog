@@ -1,3 +1,5 @@
+import type { Content } from '@tiptap/react'
+
 export interface AdminPost {
   id: string
   title: string
@@ -22,6 +24,22 @@ export interface QuickEditForm {
   featured: boolean
   published_at: string
   tags: string[]
+}
+
+export interface PostFormData {
+  title: string
+  slug: string
+  description: string
+  cover_image: string
+  tags: string[]
+  content: Content | undefined
+  published: boolean
+  featured: boolean
+  reading_time: number
+  locale: string
+  published_at: string
+  seo_title: string
+  seo_description: string
 }
 
 export interface PostStats {
