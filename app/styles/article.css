@@ -306,6 +306,10 @@
   word-wrap: break-word;
 }
 
+.article-content.prose .mermaid {
+  background: transparent;
+}
+
 .article-content.prose .lead {
   color: var(--article-heading);
   font-size: 1.2em;
@@ -444,6 +448,11 @@
 .article-content.prose dl {
   margin: 0 20px;
   line-height: 1.67;
+  word-wrap: break-word;
+}
+
+.article-content.prose ul {
+  word-wrap: break-word;
 }
 
 .article-content.prose li {
@@ -493,6 +502,9 @@
   padding: 1px 4px;
   font-size: 1em;
   font-weight: 500;
+  transition:
+    background-color 180ms var(--article-motion),
+    color 180ms var(--article-motion);
   word-break: break-word;
 }
 
