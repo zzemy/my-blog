@@ -1,50 +1,52 @@
 .referencePage {
-  --reference-code-bg: #171a22;
-  --reference-code-header: linear-gradient(90deg, #20272f 0%, #20262e 32%, #181c24 100%);
-  --reference-code-muted: rgb(255 255 255 / 48%);
+  --reference-code-bg: oklch(0.165 0.01 250);
+  --reference-code-header: oklch(0.205 0.012 248);
+  --reference-code-muted: rgb(255 255 255 / 54%);
 }
 
 .alertStack {
-  gap: 2rem;
+  gap: 1.4rem;
 }
 
 .alertPair {
   display: grid;
-  gap: 1.25rem;
+  gap: 0.75rem;
 }
 
 .alertPair > .codeWindow,
 .alertPair > .callout,
 .codeStack > .codeWindow,
 .diagramPanel {
-  width: min(72rem, calc(100vw - 34rem));
-  max-width: calc(100vw - 2rem);
+  width: 100%;
+  max-width: 100%;
   margin-right: auto;
   margin-left: auto;
 }
 
 .codeStack {
   display: grid;
-  gap: 3.5rem;
+  gap: 1.25rem;
   margin: 1.5rem 0 2rem;
 }
 
 .callout {
-  --callout-icon: #62aeff;
+  --callout-icon: oklch(0.72 0.1 224);
+  --callout-bg: color-mix(in oklch, var(--callout-icon), oklch(0.17 0.01 250) 82%);
+  --callout-text: color-mix(in oklch, var(--callout-icon), white 8%);
   display: block;
-  min-height: 6.9rem;
-  border: 0;
-  border-left: 6px solid var(--callout-icon);
+  min-height: 0;
+  border: 1px solid color-mix(in oklch, var(--callout-icon), transparent 58%);
+  border-left-width: 4px;
   border-radius: 8px;
-  background: color-mix(in oklch, var(--callout-icon), #1f2630 72%);
-  box-shadow: 0 16px 28px rgb(0 0 0 / 18%);
-  padding: 1.35rem 1.45rem;
-  color: var(--callout-icon);
+  background: var(--callout-bg);
+  box-shadow: 0 12px 28px rgb(0 0 0 / 14%);
+  color: var(--callout-text);
+  padding: 1rem 1.1rem;
 }
 
 .callout > div {
   display: grid;
-  gap: 1.35rem;
+  gap: 0.85rem;
 }
 
 .calloutTitle {
@@ -52,8 +54,8 @@
   align-items: center;
   gap: 0.6rem;
   margin: 0;
-  color: var(--callout-icon);
-  font-size: 1.18rem;
+  color: var(--callout-text);
+  font-size: 0.98rem;
   font-weight: 850;
   line-height: 1.2;
 }
@@ -66,24 +68,24 @@
   place-items: center;
   border-radius: 999px;
   background: var(--callout-icon);
-  color: #20262e;
+  color: oklch(0.16 0.01 250);
   font-family: var(--font-mono);
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   font-weight: 900;
   line-height: 1;
 }
 
 .callout p:not(.calloutTitle) {
   margin: 0;
-  color: var(--callout-icon);
-  font-size: 1rem;
+  color: color-mix(in oklch, var(--callout-text), white 10%);
+  font-size: 0.94rem;
   line-height: 1.65;
 }
 
 .calloutNote,
 .calloutInfo {
-  --callout-icon: #62aeff;
-  background: #2b435c;
+  --callout-icon: oklch(0.72 0.1 224);
+  --callout-bg: oklch(0.28 0.04 235);
 }
 
 .calloutNote .calloutTitle::before,
@@ -93,8 +95,8 @@
 
 .calloutTip,
 .calloutSuccess {
-  --callout-icon: #6bf58d;
-  background: #285635;
+  --callout-icon: oklch(0.76 0.12 152);
+  --callout-bg: oklch(0.29 0.055 152);
 }
 
 .calloutTip .calloutTitle::before,
@@ -103,8 +105,8 @@
 }
 
 .calloutImportant {
-  --callout-icon: #a96cff;
-  background: #432d5f;
+  --callout-icon: oklch(0.72 0.13 292);
+  --callout-bg: oklch(0.27 0.05 292);
 }
 
 .calloutImportant .calloutTitle::before {
@@ -112,8 +114,8 @@
 }
 
 .calloutWarning {
-  --callout-icon: #ffd166;
-  background: #574923;
+  --callout-icon: oklch(0.79 0.12 86);
+  --callout-bg: oklch(0.3 0.05 84);
 }
 
 .calloutWarning .calloutTitle::before {
@@ -121,8 +123,8 @@
 }
 
 .calloutCaution {
-  --callout-icon: #ff6b6b;
-  background: #5a292b;
+  --callout-icon: oklch(0.72 0.14 28);
+  --callout-bg: oklch(0.28 0.055 28);
 }
 
 .calloutCaution .calloutTitle::before {
@@ -130,8 +132,8 @@
 }
 
 .calloutQuote {
-  --callout-icon: #9ba3af;
-  background: #343942;
+  --callout-icon: oklch(0.72 0.02 250);
+  --callout-bg: oklch(0.26 0.012 250);
 }
 
 .calloutQuote .calloutTitle::before {
@@ -140,27 +142,27 @@
 
 .codeWindow {
   overflow: hidden;
-  border: 0;
-  border-radius: 10px;
+  border: 1px solid rgb(255 255 255 / 8%);
+  border-radius: 8px;
   background: var(--reference-code-bg);
-  box-shadow: 0 18px 34px rgb(0 0 0 / 24%);
+  box-shadow: 0 14px 32px rgb(0 0 0 / 18%);
 }
 
 .codeWindowHeader {
   display: flex;
-  min-height: 4rem;
+  min-height: 3rem;
   align-items: center;
   justify-content: space-between;
   border-bottom: 0;
   background: var(--reference-code-header);
-  padding: 0 1.75rem;
+  padding: 0 1rem;
 }
 
 .codeWindowTitlebar {
   display: inline-flex;
   min-width: 0;
   align-items: center;
-  gap: 1.15rem;
+  gap: 0.8rem;
 }
 
 .codeWindowDots {
@@ -172,8 +174,8 @@
 
 .codeWindowDots i {
   display: block;
-  width: 1rem;
-  height: 1rem;
+  width: 0.72rem;
+  height: 0.72rem;
   border: 0;
   border-radius: 999px;
   box-shadow: inset 0 1px 0 rgb(255 255 255 / 18%);
@@ -193,7 +195,7 @@
 
 .codeLabel {
   color: var(--reference-code-muted);
-  font-size: 1.18rem;
+  font-size: 0.85rem;
   font-weight: 850;
   line-height: 1;
   text-transform: uppercase;
@@ -203,7 +205,7 @@
   display: inline-flex;
   min-height: 2rem;
   align-items: center;
-  gap: 0.65rem;
+  gap: 0.45rem;
 }
 
 .codeWindowCopy,
@@ -222,7 +224,7 @@
 .codeWindowAnchor {
   color: #f1b2a4;
   font-family: var(--font-mono);
-  font-size: 1rem;
+  font-size: 0.82rem;
   font-style: italic;
 }
 
@@ -232,9 +234,9 @@
   max-width: 16rem;
   margin: 0;
   color: var(--reference-code-muted);
-  padding: 1.05rem 1.75rem 0;
+  padding: 0.85rem 1rem 0;
   font-family: var(--font-mono);
-  font-size: 1rem;
+  font-size: 0.82rem;
   font-style: italic;
   line-height: 1;
   text-overflow: ellipsis;
@@ -246,21 +248,21 @@
   display: flex;
   min-width: 0;
   overflow-x: auto;
-  padding: 1.35rem 0 1.8rem;
+  padding: 0.95rem 0 1.15rem;
 }
 
 .codeWindowGutter {
   display: flex;
-  min-width: 4.75rem;
+  min-width: 3.7rem;
   flex-shrink: 0;
   flex-direction: column;
   align-items: flex-end;
   border-right: 0;
-  color: rgb(255 255 255 / 34%);
-  padding: 0 1.2rem 0 1.75rem;
+  color: rgb(255 255 255 / 30%);
+  padding: 0 0.8rem 0 1rem;
   font-family: "JetBrains Mono", "Menlo", "Consolas", monospace;
-  font-size: 1rem;
-  line-height: 1.8;
+  font-size: 0.82rem;
+  line-height: 1.72;
   user-select: none;
 }
 
@@ -270,16 +272,16 @@
   margin: 0;
   overflow: visible;
   background: transparent;
-  color: #9ba3af;
-  padding: 0 1.75rem 0 0.55rem;
+  color: oklch(0.78 0.025 250);
+  padding: 0 1rem 0 0.4rem;
   font-family: "JetBrains Mono", "Menlo", "Consolas", monospace;
-  font-size: 1.08rem;
+  font-size: 0.9rem;
   font-weight: 500;
-  line-height: 1.8;
+  line-height: 1.72;
 }
 
 .codeWindowBody:not(:has(.codeWindowGutter)) .codeWindowPre {
-  padding-left: 1.75rem;
+  padding-left: 1rem;
 }
 
 .codeWindowPre code {
@@ -296,7 +298,7 @@
 
 .codeWindowLine {
   display: block;
-  min-height: 1.8em;
+  min-height: 1.72em;
 }
 
 .codeWindowLine:nth-child(15) {
@@ -340,24 +342,25 @@
 
 .diagramPanel {
   overflow: auto;
-  margin-top: 1.8rem;
-  margin-bottom: 2.4rem;
-  border-radius: 0;
+  margin-top: 1.25rem;
+  margin-bottom: 2rem;
+  border: 1px solid rgb(255 255 255 / 10%);
+  border-radius: 8px;
   padding: 0;
-  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 4%);
+  box-shadow: 0 12px 28px rgb(0 0 0 / 14%);
 }
 
 .sequencePanel {
-  background: #22272e;
+  background: oklch(0.22 0.011 250);
 }
 
 .socketPanel {
-  background: #3f4a56;
+  background: oklch(0.37 0.025 245);
 }
 
 .diagramPanel svg {
   display: block;
-  min-width: 60rem;
+  min-width: 46rem;
   width: 100%;
   height: auto;
 }
@@ -383,14 +386,14 @@
 .diagramPanel text {
   fill: #e8edf4;
   font-family: var(--article-font);
-  font-size: 17px;
+  font-size: 13px;
   font-weight: 760;
   text-anchor: middle;
 }
 
 .diagramLabels text {
   fill: #d5d9de;
-  font-size: 16px;
+  font-size: 12px;
   font-weight: 760;
 }
 
@@ -404,16 +407,16 @@
 
 .diagramArrows text {
   fill: #e2e6ec;
-  font-size: 16px;
+  font-size: 12px;
   font-weight: 760;
 }
 
 .socketPanel text {
-  font-size: 17px;
+  font-size: 13px;
 }
 
 .socketPanel .diagramLabels text {
-  font-size: 16px;
+  font-size: 12px;
 }
 
 @media (max-width: 1180px) {

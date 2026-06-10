@@ -1,23 +1,23 @@
 /* Reimu-inspired body skin, scoped to rendered article content only. */
 .article-content {
-  --article-reimu-glow: color-mix(in oklch, var(--article-accent), transparent 58%);
-  --article-reimu-soft: color-mix(in oklch, var(--article-accent), var(--article-panel) 94%);
-  --article-reimu-softer: color-mix(in oklch, var(--article-accent), var(--article-panel) 97%);
-  --article-reimu-shadow: 0 0 10px 2px color-mix(in oklch, var(--article-heading), transparent 88%);
-  --article-reimu-shadow-hover: 0 0 10px 4px color-mix(in oklch, var(--article-accent), transparent 82%);
+  --article-reimu-glow: color-mix(in oklch, var(--article-accent), transparent 78%);
+  --article-reimu-soft: color-mix(in oklch, var(--article-accent), var(--article-panel) 97%);
+  --article-reimu-softer: color-mix(in oklch, var(--article-accent), var(--article-panel) 99%);
+  --article-reimu-shadow: 0 10px 26px color-mix(in oklch, var(--article-heading), transparent 95%);
+  --article-reimu-shadow-hover: 0 12px 30px color-mix(in oklch, var(--article-heading), transparent 94%);
 }
 
 .dark .article-content {
-  --article-reimu-soft: color-mix(in oklch, var(--article-accent), var(--article-panel) 88%);
-  --article-reimu-softer: color-mix(in oklch, var(--article-accent), var(--article-panel) 94%);
-  --article-reimu-shadow: 0 0 12px 2px rgb(0 0 0 / 26%);
-  --article-reimu-shadow-hover: 0 0 14px 4px color-mix(in oklch, var(--article-accent), transparent 84%);
+  --article-reimu-soft: color-mix(in oklch, var(--article-accent), var(--article-panel) 95%);
+  --article-reimu-softer: color-mix(in oklch, var(--article-accent), var(--article-panel) 98%);
+  --article-reimu-shadow: 0 12px 30px rgb(0 0 0 / 18%);
+  --article-reimu-shadow-hover: 0 14px 34px rgb(0 0 0 / 24%);
 }
 
 .article-content.prose h2 {
   position: relative;
-  margin-top: 3.25rem;
-  margin-bottom: 2.15rem;
+  margin-top: 3rem;
+  margin-bottom: 1.55rem;
   border-top: 0;
   padding-top: 0;
 }
@@ -26,7 +26,7 @@
   content: "";
   position: absolute;
   right: 0;
-  bottom: -0.85rem;
+  bottom: -0.64rem;
   left: 0;
   border-bottom: 1px solid var(--article-line);
 }
@@ -34,19 +34,18 @@
 .article-content.prose h2::after {
   content: "";
   position: absolute;
-  bottom: -1rem;
+  bottom: -0.78rem;
   left: 0;
-  width: 1.25em;
-  height: 7px;
+  width: 1.05em;
+  height: 4px;
   border-radius: 999px;
   background: var(--article-accent);
-  box-shadow: 0 0 8px var(--article-reimu-glow);
-  transition: width 240ms var(--article-motion), box-shadow 240ms var(--article-motion);
+  box-shadow: 0 0 4px var(--article-reimu-glow);
+  transition: width 220ms var(--article-motion);
 }
 
 .article-content.prose h2:hover::after {
-  width: 3em;
-  box-shadow: 0 0 12px var(--article-reimu-glow);
+  width: 1.6em;
 }
 
 .article-content.prose h1,
@@ -65,13 +64,16 @@
 .article-content.prose hr,
 .article-content.prose .component-footnotes::before {
   display: block;
-  height: 4px;
+  height: 2px;
   border: 0;
-  background-image: linear-gradient(to right, var(--article-accent) 50%, transparent 0%);
+  background-image: linear-gradient(
+    to right,
+    color-mix(in oklch, var(--article-accent), transparent 22%) 44%,
+    transparent 0%
+  );
   background-repeat: repeat-x;
-  background-size: 50px 4px;
-  filter: drop-shadow(0 0 2px var(--article-accent));
-  opacity: 0.34;
+  background-size: 42px 2px;
+  opacity: 0.22;
   transition: opacity 180ms var(--article-motion);
 }
 
@@ -81,7 +83,7 @@
 
 .article-content.prose hr:hover,
 .article-content.prose .component-footnotes:hover::before {
-  opacity: 0.56;
+  opacity: 0.34;
 }
 
 .article-content.prose .component-footnotes::before {
@@ -107,7 +109,7 @@
 .article-content.prose kbd {
   background: var(--article-reimu-soft);
   color: var(--article-accent);
-  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--article-accent), transparent 74%);
+  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--article-accent), transparent 78%);
 }
 
 .article-content.prose blockquote,
@@ -211,7 +213,7 @@
 .article-content.prose .article-image {
   border-color: color-mix(in oklch, var(--article-accent), var(--article-line) 76%);
   border-radius: 10px;
-  box-shadow: 0 18px 44px color-mix(in oklch, var(--article-heading), transparent 88%);
+  box-shadow: 0 16px 34px color-mix(in oklch, var(--article-heading), transparent 92%);
   transition:
     border-color 220ms var(--article-motion),
     box-shadow 220ms var(--article-motion),
@@ -221,7 +223,7 @@
 .article-content.prose img:hover,
 .article-content.prose .article-image:hover {
   border-color: color-mix(in oklch, var(--article-accent), var(--article-line) 36%);
-  box-shadow: 0 20px 54px color-mix(in oklch, var(--article-accent), transparent 78%);
+  box-shadow: 0 18px 40px color-mix(in oklch, var(--article-heading), transparent 90%);
 }
 
 .article-content .code-window {
@@ -241,13 +243,7 @@
 
 .article-content .code-window-header {
   min-height: 2.65rem;
-  background: linear-gradient(
-    to right,
-    transparent 0%,
-    var(--article-code-header) 18%,
-    var(--article-code-header) 82%,
-    transparent 100%
-  );
+  background: var(--article-code-header);
 }
 
 .article-content .code-window-copy,
@@ -271,7 +267,7 @@
   border-color: color-mix(in oklch, var(--article-accent), transparent 58%);
   background: var(--article-reimu-soft);
   color: var(--article-accent);
-  box-shadow: 0 0 5px 1px color-mix(in oklch, var(--article-accent), transparent 88%);
+  box-shadow: none;
 }
 
 .article-content .component-button-primary {
