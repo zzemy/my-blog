@@ -17,24 +17,17 @@
 .article-content.prose h2 {
   position: relative;
   margin-top: 3rem;
-  margin-bottom: 1.55rem;
+  margin-bottom: 1.25rem;
   border-top: 0;
-  padding-top: 0;
-}
-
-.article-content.prose h2::before {
-  content: "";
-  position: absolute;
-  right: 0;
-  bottom: -0.64rem;
-  left: 0;
   border-bottom: 1px solid var(--article-line);
+  padding-top: 0;
+  padding-bottom: 0.68rem;
 }
 
 .article-content.prose h2::after {
   content: "";
   position: absolute;
-  bottom: -0.78rem;
+  bottom: -0.16rem;
   left: 0;
   width: 1.05em;
   height: 4px;
@@ -49,11 +42,27 @@
 }
 
 .article-content.prose h1,
+.article-content.prose h2,
 .article-content.prose h3,
 .article-content.prose h4,
 .article-content.prose h5,
 .article-content.prose h6 {
   scroll-margin-top: 96px;
+}
+
+.article-content.prose h1::before,
+.article-content.prose h2::before,
+.article-content.prose h3::before,
+.article-content.prose h4::before,
+.article-content.prose h5::before,
+.article-content.prose h6::before {
+  content: "#";
+  margin-right: 0.42em;
+  color: var(--article-accent);
+  font-family: var(--font-mono);
+  font-size: 1em;
+  font-weight: 850;
+  opacity: 0.78;
 }
 
 .article-content.prose hr,
@@ -131,7 +140,7 @@
 .article-content .component-slider-stage,
 .article-content .component-gallery figure,
 .article-content .component-rich-showcase {
-  border-color: color-mix(in oklch, var(--article-accent), var(--article-line) 72%);
+  border-color: var(--article-line);
   border-radius: 10px;
   background: var(--article-reimu-softer);
   box-shadow: var(--article-reimu-shadow);
@@ -160,12 +169,23 @@
 .article-content .component-slider-stage:hover,
 .article-content .component-gallery figure:hover,
 .article-content .component-rich-showcase:hover {
-  border-color: color-mix(in oklch, var(--article-accent), var(--article-line) 42%);
+  border-color: color-mix(in oklch, var(--article-line), var(--article-heading) 12%);
   box-shadow: var(--article-reimu-shadow-hover);
 }
 
+.article-content .component-callout {
+  border-color: color-mix(in oklch, var(--callout-icon), var(--article-line) 82%);
+  border-left-color: var(--callout-icon);
+  background: color-mix(in oklch, var(--callout-icon), var(--article-panel) 96%);
+}
+
+.article-content .component-callout:hover {
+  border-color: color-mix(in oklch, var(--callout-icon), var(--article-line) 74%);
+  border-left-color: var(--callout-icon);
+}
+
 .article-content.prose blockquote {
-  border-left-color: color-mix(in oklch, var(--article-accent), white 12%);
+  border-left-color: color-mix(in oklch, var(--article-accent), var(--article-line) 34%);
   border-left-width: 6px;
   padding: 1.05rem 1.15rem;
 }
@@ -201,17 +221,17 @@
 }
 
 .article-content.prose th {
-  border-bottom: 3px solid color-mix(in oklch, var(--article-accent), var(--article-line) 44%);
+  border-bottom: 2px solid var(--article-line);
 }
 
 .article-content.prose th,
 .article-content.prose td {
-  border-color: color-mix(in oklch, var(--article-accent), var(--article-line) 68%);
+  border-color: var(--article-line);
 }
 
 .article-content.prose img,
 .article-content.prose .article-image {
-  border-color: color-mix(in oklch, var(--article-accent), var(--article-line) 76%);
+  border-color: var(--article-line);
   border-radius: 10px;
   box-shadow: 0 16px 34px color-mix(in oklch, var(--article-heading), transparent 92%);
   transition:
@@ -222,7 +242,7 @@
 
 .article-content.prose img:hover,
 .article-content.prose .article-image:hover {
-  border-color: color-mix(in oklch, var(--article-accent), var(--article-line) 36%);
+  border-color: color-mix(in oklch, var(--article-line), var(--article-heading) 14%);
   box-shadow: 0 18px 40px color-mix(in oklch, var(--article-heading), transparent 90%);
 }
 
@@ -237,7 +257,7 @@
 }
 
 .article-content .code-window:hover {
-  border-color: color-mix(in oklch, var(--article-accent), var(--article-line) 38%);
+  border-color: color-mix(in oklch, var(--article-line), var(--article-heading) 14%);
   box-shadow: var(--article-reimu-shadow-hover);
 }
 
@@ -289,13 +309,19 @@
 }
 
 .article-content .component-flow {
+  border-color: var(--article-line);
   background: var(--article-reimu-softer);
   box-shadow: var(--article-reimu-shadow);
 }
 
+.article-content .component-flow-question {
+  border-color: var(--article-line);
+  box-shadow: none;
+}
+
 .article-content .component-flow-node,
 .article-content .component-diagram > div {
-  border-color: color-mix(in oklch, var(--article-accent), var(--article-line) 64%);
+  border-color: var(--article-line);
   background: color-mix(in oklch, var(--article-accent), var(--article-panel) 95%);
 }
 

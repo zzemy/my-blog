@@ -18,8 +18,10 @@ const shortcodeNames = new Set([
   'quote',
   'tip',
   'info',
+  'important',
   'warning',
   'success',
+  'caution',
   'button',
   'tabs',
   'accordion',
@@ -41,14 +43,16 @@ const calloutTitles = {
   quote: '引用',
   tip: '技巧',
   info: '信息',
+  important: '重要',
   warning: '警告',
   success: '完成',
+  caution: '风险',
 } as const
 
 type CalloutTone = keyof typeof calloutTitles
 
 export function hasArticleShortcodes(text: string) {
-  return /(^|\n):::\s*(note|quote|tip|info|warning|success|button|tabs|accordion|image|gallery|slider|youtube|video|flow|cards|diagram|timeline|rich|audio)\b/i.test(
+  return /(^|\n):::\s*(note|quote|tip|info|important|warning|success|caution|button|tabs|accordion|image|gallery|slider|youtube|video|flow|cards|diagram|timeline|rich|audio)\b/i.test(
     text,
   )
 }

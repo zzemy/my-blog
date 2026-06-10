@@ -38,7 +38,7 @@ interface MenuBarProps {
   editor: Editor
 }
 
-const calloutTones = ['note', 'quote', 'tip', 'info', 'warning', 'success'] as const
+const calloutTones = ['note', 'quote', 'tip', 'info', 'important', 'warning', 'success', 'caution'] as const
 
 type CalloutTone = (typeof calloutTones)[number]
 
@@ -47,8 +47,10 @@ const calloutDefaults: Record<CalloutTone, { title: string; text: string }> = {
   quote: { title: '引用', text: '这是一条引用型提示。' },
   tip: { title: '技巧', text: '这是一条技巧提示。' },
   info: { title: '信息', text: '这是一条信息提示。' },
+  important: { title: '重要', text: '这是一条重要信息。' },
   warning: { title: '警告', text: '这是一条警告提示。' },
   success: { title: '完成', text: '这是一条完成状态。' },
+  caution: { title: '风险', text: '这是一条风险提示。' },
 }
 
 export function MenuBar({ editor }: MenuBarProps) {
@@ -102,7 +104,7 @@ export function MenuBar({ editor }: MenuBarProps) {
   }
 
   const insertCallout = () => {
-    const toneInput = window.prompt('提示块类型：note / quote / tip / info / warning / success', 'note')
+    const toneInput = window.prompt('提示块类型：note / quote / tip / info / important / warning / success / caution', 'note')
     if (toneInput === null) return
     const tone = normalizeCalloutTone(toneInput)
     const defaults = calloutDefaults[tone]

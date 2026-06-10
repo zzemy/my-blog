@@ -18,7 +18,7 @@ import {
 import { PostLayout } from '@/features/blog/components/client/post-layout'
 import { FadeIn } from '@/shared/visuals/fade-in'
 import { ReferenceSlider } from './reference-slider'
-import { ReferenceAlerts, ReferenceCodeExamples, SequenceDiagram, SocketDiagram } from './reference-showcase'
+import { ReferenceAlerts, ReferenceCodeExamples, ReferenceDiagram, ReferenceFlow } from './reference-showcase'
 import styles from './components-page.module.css'
 
 const locales = ['zh', 'en', 'fr', 'ja']
@@ -433,11 +433,11 @@ export default async function ComponentsPage({ params }: { params: Promise<{ loc
           </div>
 
           <h2 id="flow">流程图</h2>
-          <SequenceDiagram />
+          <ReferenceFlow />
 
           <h2 id="diagrams">关系图</h2>
           <p>关系图用来表达模块关联，比决策流更适合架构、流程和数据方向说明。</p>
-          <SocketDiagram />
+          <ReferenceDiagram />
 
           <h2 id="emoji">表情符号</h2>
           <p>Emoji 要能和中文、英文、代码、链接共存，避免把行高撑乱或破坏正文节奏。</p>

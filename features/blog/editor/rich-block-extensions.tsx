@@ -26,7 +26,7 @@ export type RichImageItem = {
   file: string
 }
 
-type CalloutTone = 'note' | 'quote' | 'tip' | 'info' | 'warning' | 'success'
+type CalloutTone = 'note' | 'quote' | 'tip' | 'info' | 'important' | 'warning' | 'success' | 'caution'
 
 type PanelItem = {
   title: string
@@ -53,7 +53,7 @@ type FlowNode = {
   label: string
 }
 
-const calloutTones: CalloutTone[] = ['note', 'quote', 'tip', 'info', 'warning', 'success']
+const calloutTones: CalloutTone[] = ['note', 'quote', 'tip', 'info', 'important', 'warning', 'success', 'caution']
 
 export const articleRichBlockExtensions = [
   createCalloutExtension(),
@@ -912,7 +912,10 @@ function getCalloutIcon(tone: CalloutTone) {
       return Quote
     case 'tip':
       return Lightbulb
+    case 'important':
+      return Info
     case 'warning':
+    case 'caution':
       return AlertTriangle
     case 'success':
       return CheckCircle2
