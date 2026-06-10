@@ -339,6 +339,15 @@
   font-weight: 700;
 }
 
+.article-content.prose em,
+.article-content.prose cite {
+  font-style: italic;
+}
+
+.article-content.prose small {
+  font-size: 0.85em;
+}
+
 .article-content.prose del {
   color: var(--article-muted);
   text-decoration-color: color-mix(in oklch, var(--article-muted), transparent 18%);
@@ -365,16 +374,16 @@
   color: var(--article-accent);
   padding: 1px 4px;
   font-family: "JetBrains Mono", "Menlo", "Consolas", monospace;
-  font-size: 0.9em;
+  font-size: 1em;
   font-weight: 500;
   line-height: 1.67;
 }
 
-.article-content.prose abbr[title] {
+.article-content.prose acronym,
+.article-content.prose abbr {
   cursor: help;
   border-bottom: 1px dotted currentColor;
   text-decoration: none;
-  text-underline-offset: 0.18em;
 }
 
 .article-content.prose sub,
@@ -414,6 +423,22 @@
   margin: 0 20px;
   line-height: 1.67;
   padding-left: 1.45rem;
+}
+
+.article-content.prose ul {
+  list-style: disc;
+}
+
+.article-content.prose ol {
+  list-style: decimal;
+}
+
+.article-content.prose ul ul,
+.article-content.prose ul ol,
+.article-content.prose ol ul,
+.article-content.prose ol ol {
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
 .article-content.prose dl {
@@ -466,7 +491,7 @@
   background: var(--article-code-inline);
   color: var(--article-accent);
   padding: 1px 4px;
-  font-size: 0.9em;
+  font-size: 1em;
   font-weight: 500;
   word-break: break-word;
 }
@@ -495,6 +520,24 @@
 
 .article-content.prose blockquote p {
   margin: 16px 0;
+}
+
+.article-content.prose blockquote footer {
+  margin: 24px 0;
+  font-size: 1em;
+}
+
+.article-content.prose blockquote footer cite::before {
+  content: "\2014";
+  padding: 0 8px;
+}
+
+.article-content.prose details .details-content {
+  margin: 20px 0 0;
+  border-radius: 8px;
+  background: color-mix(in oklch, var(--article-panel), var(--article-soft) 42%);
+  padding: 12px;
+  transition: background-color 180ms var(--article-motion);
 }
 
 .article-content.prose .article-table,
@@ -531,6 +574,18 @@
   background: transparent;
 }
 
+.article-content.prose .table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  scrollbar-color: var(--article-code-scrollbar) transparent;
+  scrollbar-width: thin;
+}
+
+.article-content.prose .table-wrapper table {
+  width: max-content;
+  min-width: 100%;
+}
+
 @media (max-width: 640px) {
   .article-content.prose .article-table,
   .article-content.prose table {
@@ -541,6 +596,7 @@
 }
 
 .article-content.prose img,
+.article-content.prose video,
 .article-content.prose .article-image {
   display: block;
   max-width: 100%;
@@ -549,12 +605,66 @@
   border: 0;
   border-radius: 10px;
   box-shadow: none;
-  transition: opacity 180ms var(--article-motion), filter 180ms var(--article-motion);
+  transition: opacity 180ms var(--article-motion);
 }
 
-.dark .article-content.prose img,
-.dark .article-content.prose .article-image {
-  filter: brightness(70%);
+.article-content.prose iframe,
+.article-content.prose embed {
+  max-width: 100%;
+  border: 0;
+  border-radius: 10px;
+}
+
+.article-content.prose figure {
+  margin: 16px 0;
+}
+
+.article-content.prose figcaption {
+  margin-top: 0.7rem;
+  color: var(--article-muted);
+  font-size: 0.85em;
+  line-height: 1.6;
+  text-align: center;
+}
+
+.article-content.prose .katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.article-content.prose .katex-display::-webkit-scrollbar,
+.article-content.prose mjx-container::-webkit-scrollbar {
+  display: none;
+}
+
+.article-content.prose .katex {
+  width: calc(100% - 2px);
+}
+
+.article-content.prose .katex-html {
+  padding: 4px;
+}
+
+.article-content.prose .katex-html .base {
+  margin: 0 auto;
+}
+
+.article-content.prose .katex-html:has(span.tag) {
+  display: flex !important;
+}
+
+.article-content.prose .katex-display > .katex > .katex-html > .tag {
+  position: relative !important;
+  float: right;
+  margin-left: 0.25rem;
+}
+
+.article-content.prose mjx-container {
+  display: inline-grid;
+  max-width: 100%;
+  min-width: auto !important;
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 
 .article-content .code-window {

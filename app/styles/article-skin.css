@@ -58,6 +58,16 @@
   opacity: 0.78;
 }
 
+.article-content.prose .paragraph-anchor {
+  opacity: 0;
+  text-decoration: none !important;
+  transition: opacity 180ms var(--article-motion);
+}
+
+.article-content.prose :is(p, li, dd, dt, td, th, blockquote, details, figure, figcaption):hover > .paragraph-anchor {
+  opacity: 0.4;
+}
+
 .article-content.prose hr,
 .article-content.prose .component-footnotes {
   border-top: 0;
@@ -99,9 +109,18 @@
   text-decoration: none;
 }
 
-.article-content.prose p > a:not([href^="#"]):not(:has(code))::after,
-.article-content.prose li > a:not([href^="#"]):not(:has(code))::after,
-.article-content.prose td > a:not([href^="#"]):not(:has(code))::after {
+.article-content.prose :where(p, li, dd, dt, td, th, blockquote, figcaption) > a:not([href^="#"]):not(:has(code))::after,
+.article-content.prose :where(p, li, dd, dt, td, th, blockquote, figcaption) .article-link:not([href^="#"]):not(:has(code))::after {
+  content: "↗";
+  display: inline-block;
+  margin: 0 0.35em;
+  font-size: 0.68em;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+.article-content.prose :where(p, li, dd, dt, td, th, blockquote, figcaption) > a:not([href^="#"]) code::after,
+.article-content.prose :where(p, li, dd, dt, td, th, blockquote, figcaption) .article-link:not([href^="#"]) code::after {
   content: "↗";
   display: inline-block;
   margin: 0 0.35em;
@@ -251,15 +270,15 @@
 }
 
 .article-content.prose img,
+.article-content.prose video,
 .article-content.prose .article-image {
   border-radius: 10px;
   box-shadow: none;
-  transition:
-    opacity 220ms var(--article-motion),
-    filter 220ms var(--article-motion);
+  transition: opacity 220ms var(--article-motion);
 }
 
 .article-content.prose img:hover,
+.article-content.prose video:hover,
 .article-content.prose .article-image:hover {
   box-shadow: none;
 }
