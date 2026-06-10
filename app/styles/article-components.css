@@ -8,73 +8,73 @@
 .component-callout {
   display: grid;
   gap: 0.72rem;
-  --callout-bg: hsl(210 90% 96%);
-  --callout-icon: hsl(210 100% 40%);
-  --callout-shadow: hsl(210 100% 98%);
-  --callout-text: hsl(210 100% 40%);
+  --callout-bg: #f6f8fa;
+  --callout-icon: #4b6875;
+  --callout-shadow: transparent;
+  --callout-text: #334155;
   border: 1px solid var(--article-line);
-  border-left: 6px solid var(--callout-icon);
+  border-left: 4px solid var(--callout-icon);
   border-radius: 12px;
   background: var(--callout-bg);
   color: var(--callout-text);
   padding: 0.9rem 1.15rem 0.95rem;
-  box-shadow: 0 0 5px 2px var(--callout-shadow);
+  box-shadow: none;
 }
 
 .component-callout-info {
-  --callout-bg: hsl(210 90% 96%);
-  --callout-icon: hsl(210 100% 40%);
-  --callout-shadow: hsl(210 100% 98%);
-  --callout-text: hsl(210 100% 40%);
+  --callout-bg: #f6f8fa;
+  --callout-icon: #4b6875;
+  --callout-shadow: transparent;
+  --callout-text: #334155;
 }
 
 .component-callout-note {
-  --callout-bg: hsl(210 90% 96%);
-  --callout-icon: hsl(210 100% 40%);
-  --callout-shadow: hsl(210 100% 98%);
-  --callout-text: hsl(210 100% 40%);
+  --callout-bg: #f6f8fa;
+  --callout-icon: #4b6875;
+  --callout-shadow: transparent;
+  --callout-text: #334155;
 }
 
 .component-callout-quote {
-  --callout-bg: hsl(210 90% 96%);
-  --callout-icon: hsl(210 100% 40%);
-  --callout-shadow: hsl(210 100% 98%);
-  --callout-text: hsl(210 100% 40%);
+  --callout-bg: #f6f8fa;
+  --callout-icon: #5f6975;
+  --callout-shadow: transparent;
+  --callout-text: #334155;
 }
 
 .component-callout-tip {
-  --callout-bg: hsl(138 76% 96%);
-  --callout-icon: hsl(152 95% 28%);
-  --callout-shadow: hsl(138 100% 98%);
-  --callout-text: hsl(152 95% 28%);
+  --callout-bg: #f4f8f5;
+  --callout-icon: #4f765f;
+  --callout-shadow: transparent;
+  --callout-text: #355a44;
 }
 
 .component-callout-warning {
-  --callout-bg: hsl(40 100% 94%);
-  --callout-icon: hsl(34 94% 35%);
-  --callout-shadow: hsl(40 100% 98%);
-  --callout-text: hsl(34 94% 35%);
+  --callout-bg: #faf6ee;
+  --callout-icon: #8a6424;
+  --callout-shadow: transparent;
+  --callout-text: #6f5527;
 }
 
 .component-callout-success {
-  --callout-bg: hsl(138 76% 96%);
-  --callout-icon: hsl(152 95% 28%);
-  --callout-shadow: hsl(138 100% 98%);
-  --callout-text: hsl(152 95% 28%);
+  --callout-bg: #f4f8f5;
+  --callout-icon: #4f765f;
+  --callout-shadow: transparent;
+  --callout-text: #355a44;
 }
 
 .component-callout-important {
-  --callout-bg: hsl(270 80% 96%);
-  --callout-icon: hsl(270 80% 45%);
-  --callout-shadow: hsl(270 80% 98%);
-  --callout-text: hsl(270 80% 45%);
+  --callout-bg: #f7f5fb;
+  --callout-icon: #665b8f;
+  --callout-shadow: transparent;
+  --callout-text: #4f496b;
 }
 
 .component-callout-caution {
-  --callout-bg: hsl(0 100% 97%);
-  --callout-icon: hsl(356 72% 45%);
-  --callout-shadow: hsl(0 100% 98%);
-  --callout-text: hsl(356 72% 45%);
+  --callout-bg: #fbf3f3;
+  --callout-icon: #9a4b4b;
+  --callout-shadow: transparent;
+  --callout-text: #733d3d;
 }
 
 .dark .component-callout-info,
@@ -144,7 +144,7 @@
 .article-content .component-callout p,
 .component-callout p {
   margin: 0;
-  color: var(--callout-text);
+  color: var(--article-text);
   line-height: 1.55;
 }
 

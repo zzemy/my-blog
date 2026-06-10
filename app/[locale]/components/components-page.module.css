@@ -1,24 +1,13 @@
 .referencePage {
   color: var(--article-text);
-  --reference-code-attr: #64748b;
-  --reference-code-keyword: #7c3aed;
-  --reference-code-type: #b45309;
-  --reference-code-string: #047857;
-  --reference-code-js-keyword: #2563eb;
-  --reference-code-js-string: #0f766e;
-  --reference-code-js-comment: #4f7d6b;
-  --reference-code-highlight: rgb(15 23 42 / 6%);
-}
-
-:global(.dark) .referencePage {
-  --reference-code-attr: #9ba3af;
-  --reference-code-keyword: #d9b3ff;
-  --reference-code-type: #ffb454;
-  --reference-code-string: #71f39a;
-  --reference-code-js-keyword: #8eb7ff;
-  --reference-code-js-string: #74f3e5;
-  --reference-code-js-comment: #7bb09d;
-  --reference-code-highlight: rgb(255 255 255 / 7%);
+  --reference-code-attr: var(--article-syntax-attr);
+  --reference-code-keyword: var(--article-syntax-keyword);
+  --reference-code-type: var(--article-syntax-type);
+  --reference-code-string: var(--article-syntax-string);
+  --reference-code-js-keyword: var(--article-syntax-keyword);
+  --reference-code-js-string: var(--article-syntax-string);
+  --reference-code-js-comment: var(--article-syntax-comment);
+  --reference-code-highlight: var(--article-code-highlight);
 }
 
 .alertStack {

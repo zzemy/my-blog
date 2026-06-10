@@ -71,26 +71,27 @@
 
 /* Article reading surface */
 .article-shell {
-  --article-text: oklch(0.24 0.025 260);
-  --article-heading: oklch(0.16 0.025 260);
-  --article-muted: oklch(0.52 0.035 260);
-  --article-soft: oklch(0.97 0.006 260);
-  --article-panel: oklch(0.99 0.004 260);
-  --article-line: oklch(0.9 0.014 260);
-  --article-accent: oklch(0.58 0.14 198);
+  --article-text: #334155;
+  --article-heading: #111827;
+  --article-muted: #667085;
+  --article-soft: #f6f8fa;
+  --article-panel: #ffffff;
+  --article-line: #dde3ea;
+  --article-accent: #4b6875;
   --article-code-inline: var(--article-soft);
-  --article-code-surface: oklch(0.955 0.008 255);
-  --article-code-header: oklch(0.925 0.01 255);
-  --article-code-scrollbar: rgb(0 0 0 / 20%);
-  --article-code-text: oklch(0.18 0.025 260);
+  --article-code-surface: #f6f8fa;
+  --article-code-header: #eef1f4;
+  --article-code-scrollbar: rgb(36 41 47 / 20%);
+  --article-code-text: #24292f;
+  --article-code-highlight: rgb(36 41 47 / 5%);
   --article-h2-line: var(--article-line);
-  --article-rule-color: var(--article-accent);
-  --article-rule-glow: color-mix(in oklch, var(--article-accent), transparent 40%);
-  --article-block-border: color-mix(in oklch, var(--article-accent), var(--article-line) 66%);
-  --article-block-bg: color-mix(in oklch, var(--article-accent), var(--article-panel) 97%);
-  --article-block-bg-hover: color-mix(in oklch, var(--article-accent), var(--article-panel) 92%);
-  --article-block-shadow: 0 0 5px 2px color-mix(in oklch, var(--article-accent), transparent 86%);
-  --article-block-shadow-hover: 0 0 6px 4px color-mix(in oklch, var(--article-accent), transparent 84%);
+  --article-rule-color: #6f8791;
+  --article-rule-glow: rgb(75 104 117 / 14%);
+  --article-block-border: var(--article-line);
+  --article-block-bg: #f8fafc;
+  --article-block-bg-hover: #f1f5f9;
+  --article-block-shadow: none;
+  --article-block-shadow-hover: none;
   --article-table-header: transparent;
   --article-motion: cubic-bezier(0.22, 1, 0.36, 1);
   color: var(--article-text);
@@ -109,6 +110,7 @@
   --article-code-header: #222830;
   --article-code-scrollbar: rgb(255 255 255 / 14%);
   --article-code-text: #c9d1d9;
+  --article-code-highlight: rgb(255 255 255 / 7%);
   --article-h2-line: color-mix(in oklch, var(--article-line), transparent 10%);
   --article-rule-color: var(--article-accent);
   --article-rule-glow: color-mix(in oklch, var(--article-accent), transparent 40%);
@@ -122,13 +124,13 @@
 }
 
 .admin-editor {
-  --article-text: oklch(0.24 0.025 260);
-  --article-heading: oklch(0.16 0.025 260);
-  --article-muted: oklch(0.52 0.035 260);
-  --article-soft: oklch(0.97 0.006 260);
-  --article-panel: oklch(0.99 0.004 260);
-  --article-line: oklch(0.9 0.014 260);
-  --article-accent: oklch(0.52 0.16 245);
+  --article-text: #334155;
+  --article-heading: #111827;
+  --article-muted: #667085;
+  --article-soft: #f6f8fa;
+  --article-panel: #ffffff;
+  --article-line: #dde3ea;
+  --article-accent: #4b6875;
 }
 
 .dark .admin-editor {
@@ -139,6 +141,34 @@
   --article-panel: oklch(0.145 0.005 220);
   --article-line: oklch(1 0 0 / 12%);
   --article-accent: oklch(0.72 0.15 205);
+}
+
+.article-shell,
+.admin-editor {
+  --article-syntax-comment: #68707d;
+  --article-syntax-keyword: #5b4f93;
+  --article-syntax-name: #2f5f8f;
+  --article-syntax-string: #2f6f4e;
+  --article-syntax-attr: #5d6778;
+  --article-syntax-variable: #2f5f8f;
+  --article-syntax-title: #2f5f8f;
+  --article-syntax-type: #8a5a2b;
+  --article-syntax-number: #6f6532;
+  --article-syntax-regexp: #566b8f;
+}
+
+.dark .article-shell,
+.dark .admin-editor {
+  --article-syntax-comment: #7aa397;
+  --article-syntax-keyword: #8ab4f8;
+  --article-syntax-name: #7dcfff;
+  --article-syntax-string: #8bd5ca;
+  --article-syntax-attr: #89ddff;
+  --article-syntax-variable: #89ddff;
+  --article-syntax-title: #b4cafe;
+  --article-syntax-type: #4ec9b0;
+  --article-syntax-number: #b5cea8;
+  --article-syntax-regexp: #7aa2f7;
 }
 
 .article-hero {
@@ -414,7 +444,7 @@
   background-repeat: repeat-x;
   background-size: 50px 4px;
   opacity: 0.3;
-  filter: drop-shadow(0 0 2px var(--article-rule-glow));
+  filter: none;
   transition: opacity 180ms var(--article-motion);
 }
 

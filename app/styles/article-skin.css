@@ -26,7 +26,7 @@
   height: 7px;
   border-radius: 8px;
   background: var(--article-accent);
-  box-shadow: 0 0 8px var(--article-skin-glow);
+  box-shadow: none;
   transition: width 220ms var(--article-motion);
 }
 
@@ -85,7 +85,7 @@
   background-repeat: repeat-x;
   background-size: 50px 4px;
   opacity: 0.3;
-  filter: drop-shadow(0 0 2px var(--article-rule-glow));
+  filter: none;
   transition: opacity 180ms var(--article-motion);
 }
 
@@ -195,10 +195,10 @@
 }
 
 .article-content .component-callout {
-  border-color: transparent;
+  border-color: var(--article-line);
   border-left-color: var(--callout-icon);
   background: var(--callout-bg);
-  box-shadow: 0 0 5px 2px var(--callout-shadow);
+  box-shadow: none;
   transition:
     background-color 180ms var(--article-motion),
     border-color 180ms var(--article-motion),
@@ -206,10 +206,10 @@
 }
 
 .article-content .component-callout:hover {
-  border-color: transparent;
+  border-color: var(--article-line);
   border-left-color: var(--callout-icon);
   background: var(--callout-bg);
-  box-shadow: 0 0 7px 3px var(--callout-shadow);
+  box-shadow: none;
 }
 
 .article-content.prose blockquote {
@@ -371,7 +371,7 @@
 .article-content .component-flow-node,
 .article-content .component-diagram > div {
   border-color: var(--article-line);
-  background: color-mix(in oklch, var(--article-accent), var(--article-panel) 95%);
+  background: var(--article-soft);
 }
 
 .article-content .component-gallery figcaption,
