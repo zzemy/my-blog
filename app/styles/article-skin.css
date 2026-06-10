@@ -123,7 +123,6 @@
 
 .article-content.prose blockquote,
 .article-content.prose details,
-.article-content .component-callout,
 .article-content .component-placeholder,
 .article-content .component-tabs-list,
 .article-content .component-tab-panels,
@@ -153,7 +152,6 @@
 
 .article-content.prose blockquote:hover,
 .article-content.prose details:hover,
-.article-content .component-callout:hover,
 .article-content .component-placeholder:hover,
 .article-content .component-tab-panels:hover,
 .article-content .component-accordions details:hover,
@@ -174,14 +172,19 @@
 }
 
 .article-content .component-callout {
-  border-color: color-mix(in oklch, var(--callout-icon), var(--article-line) 82%);
-  border-left-color: var(--callout-icon);
-  background: color-mix(in oklch, var(--callout-icon), var(--article-panel) 96%);
+  border-color: color-mix(in oklch, var(--callout-icon), var(--article-line) 88%);
+  border-left-color: color-mix(in oklch, var(--callout-icon), transparent 16%);
+  background: color-mix(in oklch, var(--callout-icon), var(--article-panel) 98%);
+  box-shadow: none;
+  transition:
+    background-color 180ms var(--article-motion),
+    border-color 180ms var(--article-motion);
 }
 
 .article-content .component-callout:hover {
-  border-color: color-mix(in oklch, var(--callout-icon), var(--article-line) 74%);
-  border-left-color: var(--callout-icon);
+  border-color: color-mix(in oklch, var(--callout-icon), var(--article-line) 82%);
+  border-left-color: color-mix(in oklch, var(--callout-icon), transparent 10%);
+  background: color-mix(in oklch, var(--callout-icon), var(--article-panel) 97%);
 }
 
 .article-content.prose blockquote {
@@ -247,22 +250,21 @@
 }
 
 .article-content .code-window {
-  border-radius: 10px;
+  border-color: color-mix(in oklch, var(--article-line), var(--article-heading) 4%);
+  border-radius: 8px;
   background: var(--article-code-surface);
-  box-shadow: var(--article-reimu-shadow);
+  box-shadow: none;
   transition:
     border-color 220ms var(--article-motion),
-    box-shadow 220ms var(--article-motion),
-    transform 220ms var(--article-motion);
+    background-color 220ms var(--article-motion);
 }
 
 .article-content .code-window:hover {
-  border-color: color-mix(in oklch, var(--article-line), var(--article-heading) 14%);
-  box-shadow: var(--article-reimu-shadow-hover);
+  border-color: color-mix(in oklch, var(--article-line), var(--article-heading) 10%);
 }
 
 .article-content .code-window-header {
-  min-height: 2.65rem;
+  min-height: 2.75rem;
   background: var(--article-code-header);
 }
 
@@ -271,13 +273,18 @@
   filter: none;
 }
 
-.article-content .code-window-copy:hover,
 .article-content .component-slider-controls button:hover,
 .article-content .component-slider-strip button:hover,
 .article-content .component-slider-strip button.is-active {
   border-color: color-mix(in oklch, var(--article-accent), transparent 28%);
   background: var(--article-reimu-soft);
   color: var(--article-accent);
+}
+
+.article-content .code-window-copy:hover {
+  border-color: color-mix(in oklch, var(--article-line), var(--article-heading) 10%);
+  background: color-mix(in oklch, var(--article-heading), transparent 94%);
+  color: var(--article-heading);
 }
 
 .article-content .component-button,
@@ -334,8 +341,6 @@
 @media (prefers-reduced-motion: no-preference) {
   .article-content.prose h2::after,
   .article-content.prose hr,
-  .article-content .code-window,
-  .article-content .component-callout,
   .article-content .component-card,
   .article-content .component-file-list a,
   .article-content .component-gallery figure {
