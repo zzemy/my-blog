@@ -1,6 +1,7 @@
 @import "katex/dist/katex.min.css";
 @import "tailwindcss";
 @import "./styles/article.css";
+@import "./styles/tiptap-syntax.css";
 @import "./styles/article-components.css";
 @import "./styles/article-skin.css";
 /* @import "tw-animate-css"; */
@@ -205,4 +206,3 @@
     font-weight: 400;
   }
 }
-

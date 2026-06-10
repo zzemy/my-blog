@@ -648,6 +648,24 @@
   font-weight: 500;
 }
 
+.article-content .code-window ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.article-content .code-window ::-webkit-scrollbar-thumb {
+  border-radius: 9999px;
+  background-color: rgb(0 0 0 / 20%);
+}
+
+.dark .article-content .code-window ::-webkit-scrollbar-thumb {
+  background-color: rgb(255 255 255 / 14%);
+}
+
+.article-content .code-window ::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
 .article-content.prose .component-footnotes {
   margin: 3rem 0 0;
   border-top: 1px solid var(--article-line);

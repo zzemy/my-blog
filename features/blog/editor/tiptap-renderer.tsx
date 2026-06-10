@@ -24,130 +24,6 @@ import { LinkPreview } from '@/shared/components/common/link-preview'
 
 const lowlight = createLowlight(common)
 
-// Dual Theme Syntax Highlighting (Light & Dark)
-const syntaxThemeCss = `
-/* Light Theme */
-.hljs-comment,
-.hljs-quote {
-  color: #4f7d6b;
-  font-style: italic;
-}
-.hljs-keyword,
-.hljs-selector-tag,
-.hljs-literal,
-.hljs-section,
-.hljs-link {
-  color: #1d5fd1;
-}
-.hljs-name {
-  color: #175e8f;
-}
-.hljs-string,
-.hljs-meta-string {
-  color: #2b7a78;
-}
-.hljs-attr {
-  color: #0f6b9f;
-}
-.hljs-variable,
-.hljs-template-variable,
-.hljs-template-tag,
-.hljs-property {
-  color: #355c9d;
-}
-.hljs-title,
-.hljs-title.function_,
-.hljs-doctag {
-  color: #2f6f8f;
-}
-.hljs-type,
-.hljs-built_in,
-.hljs-class .hljs-title {
-  color: #267f99;
-}
-.hljs-number,
-.hljs-symbol,
-.hljs-bullet {
-  color: #0f766e;
-}
-.hljs-regexp {
-  color: #3c6f9f;
-}
-.hljs-emphasis {
-  font-style: italic;
-}
-.hljs-strong {
-  font-weight: bold;
-}
-.hljs-meta {
-  color: #1d5fd1;
-}
-
-/* Dark Theme Overrides */
-.dark .hljs-comment,
-.dark .hljs-quote {
-  color: #7aa397;
-}
-.dark .hljs-keyword,
-.dark .hljs-selector-tag,
-.dark .hljs-literal,
-.dark .hljs-section,
-.dark .hljs-link {
-  color: #8ab4f8;
-}
-.dark .hljs-name {
-  color: #7dcfff;
-}
-.dark .hljs-string,
-.dark .hljs-meta-string {
-  color: #8bd5ca;
-}
-.dark .hljs-attr,
-.dark .hljs-variable,
-.dark .hljs-template-variable,
-.dark .hljs-template-tag,
-.dark .hljs-property {
-  color: #89ddff;
-}
-.dark .hljs-title,
-.dark .hljs-title.function_,
-.dark .hljs-doctag {
-  color: #b4cafe;
-}
-.dark .hljs-type,
-.dark .hljs-built_in,
-.dark .hljs-class .hljs-title {
-  color: #4ec9b0;
-}
-.dark .hljs-number,
-.dark .hljs-symbol,
-.dark .hljs-bullet {
-  color: #b5cea8;
-}
-.dark .hljs-regexp {
-  color: #7aa2f7;
-}
-.dark .hljs-meta {
-  color: #8ab4f8;
-}
-
-/* Scrollbar Styling - Adaptive */
-.code-window ::-webkit-scrollbar {
-  height: 8px;
-  width: 8px;
-}
-.code-window ::-webkit-scrollbar-thumb {
-  background-color: rgba(0,0,0,0.2);
-  border-radius: 9999px;
-}
-.dark .code-window ::-webkit-scrollbar-thumb {
-  background-color: rgba(255,255,255,0.14);
-}
-.code-window ::-webkit-scrollbar-track {
-  background-color: transparent;
-}
-`
-
 const CodeBlock = ({ node }: NodeViewProps) => {
   const [copied, setCopied] = useState(false)
   const textContent = node.textContent
@@ -484,7 +360,6 @@ export function TipTapRenderer({ content, className = '', toc = [] }: TipTapRend
 
   return (
     <>
-      <style>{syntaxThemeCss}</style>
       <EditorContent editor={editor} />
       {previewSrc && (
         <div

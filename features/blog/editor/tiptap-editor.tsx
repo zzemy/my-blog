@@ -76,67 +76,6 @@ async function markdownToHtml(markdown: string) {
   return String(file)
 }
 
-// Dual Theme Syntax Highlighting (Light & Dark)
-const syntaxThemeCss = `
-/* Light Theme */
-.hljs-comment,
-.hljs-quote { color: #4f7d6b; font-style: italic; }
-.hljs-keyword,
-.hljs-selector-tag,
-.hljs-literal,
-.hljs-section,
-.hljs-link { color: #1d5fd1; }
-.hljs-name { color: #175e8f; }
-.hljs-string,
-.hljs-meta-string { color: #2b7a78; }
-.hljs-attr { color: #0f6b9f; }
-.hljs-variable,
-.hljs-template-variable,
-.hljs-template-tag,
-.hljs-property { color: #355c9d; }
-.hljs-title,
-.hljs-title.function_,
-.hljs-doctag { color: #2f6f8f; }
-.hljs-type,
-.hljs-built_in,
-.hljs-class .hljs-title { color: #267f99; }
-.hljs-number,
-.hljs-symbol,
-.hljs-bullet { color: #0f766e; }
-.hljs-regexp { color: #3c6f9f; }
-.hljs-emphasis { font-style: italic; }
-.hljs-strong { font-weight: bold; }
-.hljs-meta { color: #1d5fd1; }
-
-/* Dark Theme Overrides */
-.dark .hljs-comment,
-.dark .hljs-quote { color: #7aa397; }
-.dark .hljs-keyword,
-.dark .hljs-selector-tag,
-.dark .hljs-literal,
-.dark .hljs-section,
-.dark .hljs-link { color: #8ab4f8; }
-.dark .hljs-name { color: #7dcfff; }
-.dark .hljs-string,
-.dark .hljs-meta-string { color: #8bd5ca; }
-.dark .hljs-attr,
-.dark .hljs-variable,
-.dark .hljs-template-variable,
-.dark .hljs-template-tag,
-.dark .hljs-property { color: #89ddff; }
-.dark .hljs-title,
-.dark .hljs-title.function_,
-.dark .hljs-doctag { color: #b4cafe; }
-.dark .hljs-type,
-.dark .hljs-built_in,
-.dark .hljs-class .hljs-title { color: #4ec9b0; }
-.dark .hljs-number,
-.dark .hljs-symbol,
-.dark .hljs-bullet { color: #b5cea8; }
-.dark .hljs-regexp { color: #7aa2f7; }
-.dark .hljs-meta { color: #8ab4f8; }
-`
-
 interface TipTapEditorProps {
   content?: Content
   onChange?: (content: Content) => void
@@ -338,7 +277,6 @@ export function TipTapEditor({
       )}
       {editable && <MenuBar editor={editor} />}
       {editable && <MarkdownShortcodeGuide />}
-      <style>{syntaxThemeCss}</style>
       <EditorContent editor={editor} />
       {editable && editor && (
         <div className="border-t px-4 py-2 text-xs text-gray-500 flex justify-between">

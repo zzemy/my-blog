@@ -6,6 +6,7 @@ This project uses Tailwind CSS, global CSS, and CSS modules together. Do not tre
 
 - `app/globals.css`: Tailwind entry, theme tokens, font faces, root variables, and base layer only.
 - `app/styles/article.css`: base rendered-article typography and article shell primitives.
+- `app/styles/tiptap-syntax.css`: shared Lowlight syntax colors for rendered articles and the admin editor.
 - `app/styles/article-components.css`: reusable article-body blocks such as callouts, tabs, code windows, galleries, media, and tables.
 - `app/styles/article-skin.css`: visual skin overrides for rendered article content. Keep it scoped to `.article-content`.
 - `*.module.css`: page-specific or complex component-specific styling. Use this when selectors, pseudo-elements, SVG internals, or local variants would make Tailwind class strings unreadable.
