@@ -79,10 +79,10 @@
   --article-line: oklch(0.9 0.014 260);
   --article-accent: oklch(0.58 0.14 198);
   --article-code-inline: var(--article-soft);
-  --article-code-surface: oklch(0.985 0.004 255);
-  --article-code-header: oklch(0.965 0.006 255);
+  --article-code-surface: oklch(0.955 0.008 255);
+  --article-code-header: oklch(0.925 0.01 255);
   --article-code-scrollbar: rgb(0 0 0 / 20%);
-  --article-code-text: var(--article-text);
+  --article-code-text: oklch(0.18 0.025 260);
   --article-h2-line: var(--article-line);
   --article-rule-color: var(--article-accent);
   --article-rule-glow: color-mix(in oklch, var(--article-accent), transparent 40%);

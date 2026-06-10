@@ -1,5 +1,24 @@
 .referencePage {
   color: var(--article-text);
+  --reference-code-attr: #64748b;
+  --reference-code-keyword: #7c3aed;
+  --reference-code-type: #b45309;
+  --reference-code-string: #047857;
+  --reference-code-js-keyword: #2563eb;
+  --reference-code-js-string: #0f766e;
+  --reference-code-js-comment: #4f7d6b;
+  --reference-code-highlight: rgb(15 23 42 / 6%);
+}
+
+:global(.dark) .referencePage {
+  --reference-code-attr: #9ba3af;
+  --reference-code-keyword: #d9b3ff;
+  --reference-code-type: #ffb454;
+  --reference-code-string: #71f39a;
+  --reference-code-js-keyword: #8eb7ff;
+  --reference-code-js-string: #74f3e5;
+  --reference-code-js-comment: #7bb09d;
+  --reference-code-highlight: rgb(255 255 255 / 7%);
 }
 
 .alertStack {
@@ -39,41 +58,41 @@
 }
 
 .codeWindowLine:nth-child(15) {
-  background: rgb(255 255 255 / 7%);
+  background: var(--reference-code-highlight);
 }
 
 .tokenAttr {
-  color: #9ba3af;
+  color: var(--reference-code-attr);
 }
 
 .tokenKeyword {
-  color: #d9b3ff;
+  color: var(--reference-code-keyword);
   font-weight: 720;
 }
 
 .tokenType {
-  color: #ffb454;
+  color: var(--reference-code-type);
   font-weight: 720;
 }
 
 .tokenString {
-  color: #71f39a;
+  color: var(--reference-code-string);
   font-weight: 720;
 }
 
 .tokenJsKeyword,
 .tokenJsFunction {
-  color: #8eb7ff;
+  color: var(--reference-code-js-keyword);
   font-weight: 760;
 }
 
 .tokenJsString {
-  color: #74f3e5;
+  color: var(--reference-code-js-string);
   font-weight: 650;
 }
 
 .tokenJsComment {
-  color: #7bb09d;
+  color: var(--reference-code-js-comment);
   font-style: italic;
 }
 
