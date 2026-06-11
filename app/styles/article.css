@@ -101,13 +101,13 @@
   --article-text: oklch(0.84 0.012 255);
   --article-heading: oklch(0.94 0.006 260);
   --article-muted: oklch(0.68 0.014 260);
-  --article-soft: oklch(0.27 0.004 170);
-  --article-panel: oklch(0.21 0.004 170);
+  --article-soft: #292d2b;
+  --article-panel: #202321;
   --article-line: oklch(1 0 0 / 12%);
   --article-accent: oklch(0.68 0.095 188);
   --article-code-inline: var(--article-soft);
-  --article-code-surface: oklch(0.29 0.006 230);
-  --article-code-header: oklch(0.32 0.006 230);
+  --article-code-surface: #252927;
+  --article-code-header: #2c302e;
   --article-code-scrollbar: rgb(255 255 255 / 14%);
   --article-code-text: #c9d1d9;
   --article-code-highlight: rgb(255 255 255 / 7%);
