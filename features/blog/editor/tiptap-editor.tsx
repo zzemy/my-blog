@@ -27,6 +27,7 @@ import rehypeStringify from 'rehype-stringify'
 import { MenuBar, SelectionBubbleMenu } from './menu-bar'
 import { articleRichBlockExtensions } from './rich-block-extensions'
 import { CodeBlockView } from './code-block-view'
+import { BlockControls } from './block-controls-extension'
 import { hasArticleShortcodes, splitArticleMarkdown } from './markdown-shortcodes'
 import { MarkdownShortcodeGuide } from './markdown-shortcode-guide'
 import styles from './tiptap-editor.module.css'
@@ -164,6 +165,7 @@ export function TipTapEditor({
       CharacterCount,
       Color,
       TextStyle,
+      ...(editable ? [BlockControls] : []),
       ...articleRichBlockExtensions,
     ],
     content,
