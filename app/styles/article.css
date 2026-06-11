@@ -98,13 +98,13 @@
 }
 
 .dark .article-shell {
-  --article-text: oklch(0.89 0.012 255);
-  --article-heading: oklch(0.97 0.006 260);
-  --article-muted: oklch(0.74 0.014 260);
-  --article-soft: oklch(0.19 0.006 220);
-  --article-panel: oklch(0.145 0.005 220);
-  --article-line: oklch(1 0 0 / 14%);
-  --article-accent: oklch(0.72 0.13 188);
+  --article-text: oklch(0.84 0.012 255);
+  --article-heading: oklch(0.94 0.006 260);
+  --article-muted: oklch(0.68 0.014 260);
+  --article-soft: oklch(0.18 0.006 220);
+  --article-panel: oklch(0.13 0.006 220);
+  --article-line: oklch(1 0 0 / 12%);
+  --article-accent: oklch(0.68 0.095 188);
   --article-code-inline: var(--article-soft);
   --article-code-surface: #1e2027;
   --article-code-header: #222830;
