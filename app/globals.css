@@ -77,8 +77,8 @@
   --article-font: var(--font-wenkai);
   --article-font-size: 1.0625rem;
   --article-line-height: 1.82;
-  --article-font-size-desktop: 1.1875rem;
-  --article-line-height-desktop: 1.9;
+  --article-font-size-desktop: 1.15625rem;
+  --article-line-height-desktop: 1.88;
   --article-motion: cubic-bezier(0.22, 1, 0.36, 1);
   --background: oklch(1 0 0);
   --foreground: oklch(0.129 0.042 264.695);
