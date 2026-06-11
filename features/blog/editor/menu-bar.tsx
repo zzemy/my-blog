@@ -1,571 +1,488 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import type { ChangeEvent, ComponentType } from 'react'
 import { Editor } from '@tiptap/react'
 import { BubbleMenu } from '@tiptap/react/menus'
-import { Button } from '@/components/ui/button'
-import { uploadImage } from '@/lib/upload-image'
 import {
   Bold,
-  Italic,
-  Strikethrough,
+  CheckSquare,
   Code,
+  CodeSquare,
+  Columns3,
+  FileText,
   Heading1,
   Heading2,
   Heading3,
+  Image as ImageIcon,
+  Info,
+  Italic,
+  Layers3,
+  Link as LinkIcon,
   List,
   ListOrdered,
+  Loader2,
+  Minus,
+  Music2,
+  Network,
+  PanelTop,
+  Play,
+  Plus,
   Quote,
+  Rows3,
+  Table,
   Undo,
   Redo,
-  Link as LinkIcon,
-  Image as ImageIcon,
-  Table,
-  CheckSquare,
-  CodeSquare,
-  Minus,
-  Loader2,
-  Info,
-  LayoutGrid,
-  Network,
-  Clock3,
-  Layers3,
-  Music2,
-  Play,
 } from 'lucide-react'
-import { createImageItemsFromUrls, toYouTubeEmbed } from './rich-block-extensions'
+import { Button } from '@/components/ui/button'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { uploadImage } from '@/lib/upload-image'
+import { toYouTubeEmbed } from './rich-block-extensions'
 
 interface MenuBarProps {
   editor: Editor
 }
 
-const calloutTones = ['note', 'quote', 'tip', 'info', 'important', 'warning', 'success', 'caution'] as const
+type InsertItem = {
+  title: string
+  description: string
+  icon: ComponentType<{ className?: string }>
+  action: () => void
+}
 
-type CalloutTone = (typeof calloutTones)[number]
-
-const calloutDefaults: Record<CalloutTone, { title: string; text: string }> = {
-  note: { title: '备注', text: '这是一条普通备注。' },
-  quote: { title: '引用', text: '这是一条引用型提示。' },
-  tip: { title: '技巧', text: '这是一条技巧提示。' },
-  info: { title: '信息', text: '这是一条信息提示。' },
-  important: { title: '重要', text: '这是一条重要信息。' },
-  warning: { title: '警告', text: '这是一条警告提示。' },
-  success: { title: '完成', text: '这是一条完成状态。' },
-  caution: { title: '风险', text: '这是一条风险提示。' },
+type InsertGroup = {
+  title: string
+  items: InsertItem[]
 }
 
 export function MenuBar({ editor }: MenuBarProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isUploading, setIsUploading] = useState(false)
+  const [open, setOpen] = useState(false)
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-        setIsUploading(true)
-        uploadImage(file).then((url) => {
-            if (url) {
-                editor.chain().focus().setImage({ src: url }).run()
-            } else {
-                alert('图片上传失败，请确保 Supabase Storage 已配置 Policies 允许上传。')
-            }
-        }).finally(() => {
-            setIsUploading(false)
-            // Reset input so valid change events trigger even if same file is selected again
-            if (fileInputRef.current) fileInputRef.current.value = ''
-        })
-    }
-  }
+  useEffect(() => {
+    const dom = editor.view.dom
+    const openWithSlash = (event: KeyboardEvent) => {
+      if (event.key !== '/') return
+      if (event.altKey || event.ctrlKey || event.metaKey) return
 
-  const addImage = () => {
-    fileInputRef.current?.click()
-  }
-
-  const setLink = () => {
-    const previousUrl = editor.getAttributes('link').href
-    const url = window.prompt('链接 URL:', previousUrl)
-
-    if (url === null) {
-      return
+      event.preventDefault()
+      setOpen(true)
     }
 
-    if (url === '') {
-      editor.chain().focus().extendMarkRange('link').unsetLink().run()
-      return
-    }
+    dom.addEventListener('keydown', openWithSlash)
+    return () => dom.removeEventListener('keydown', openWithSlash)
+  }, [editor])
 
-    editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run()
-  }
+  const uploadInlineImage = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
 
-  const insertTable = () => {
-    editor
-      .chain()
-      .focus()
-      .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
-      .run()
-  }
-
-  const insertCallout = () => {
-    const toneInput = window.prompt('提示块类型：note / quote / tip / info / important / warning / success / caution', 'note')
-    if (toneInput === null) return
-    const tone = normalizeCalloutTone(toneInput)
-    const defaults = calloutDefaults[tone]
-    const title = window.prompt('标题:', defaults.title)
-    if (title === null) return
-    const text = window.prompt('内容:', defaults.text)
-    if (text === null) return
-
-    editor
-      .chain()
-      .focus()
-      .insertContent({
-        type: 'articleCallout',
-        attrs: { tone, title, text },
+    setIsUploading(true)
+    uploadImage(file)
+      .then((url) => {
+        if (url) {
+          editor.chain().focus().setImage({ src: url }).run()
+        } else {
+          alert('图片上传失败，请确保 Supabase Storage 已配置 Policies 允许上传。')
+        }
       })
-      .run()
-  }
-
-  const insertButton = () => {
-    const label = window.prompt('按钮文本:', '按钮')
-    if (!label) return
-    const href = window.prompt('按钮链接:', 'https://emmmxx.xyz')
-    if (href === null) return
-    const variantInput = window.prompt('按钮样式：primary / secondary', 'primary')
-    const variant = variantInput === 'secondary' ? 'secondary' : 'primary'
-
-    editor
-      .chain()
-      .focus()
-      .insertContent({
-        type: 'articleButton',
-        attrs: { label, href, variant },
+      .finally(() => {
+        setIsUploading(false)
+        if (fileInputRef.current) fileInputRef.current.value = ''
       })
-      .run()
   }
 
-  const insertTabs = () => {
-    editor
-      .chain()
-      .focus()
-      .insertContent({
-        type: 'articleTabs',
-        attrs: {
-          panels: [
-            { title: '结构', text: '第一组内容用于检查标签页结构。' },
-            { title: '样式', text: '第二组内容用于检查标签切换状态。' },
-            { title: '验证', text: '第三组内容用于检查移动端换行。' },
-          ],
+  const run = (action: () => void) => {
+    action()
+    setOpen(false)
+  }
+
+  const insertGroups: InsertGroup[] = [
+    {
+      title: '基础',
+      items: [
+        {
+          title: '一级标题',
+          description: '插入 H1 标题块',
+          icon: Heading1,
+          action: () => editor.chain().focus().toggleHeading({ level: 1 }).run(),
         },
-      })
-      .run()
-  }
-
-  const insertAccordion = () => {
-    editor
-      .chain()
-      .focus()
-      .insertContent({
-        type: 'articleAccordion',
-        attrs: {
-          items: [
-            { title: '为什么需要折叠面板？', text: '为了在同一页里提前看到真实文章会遇到的折叠内容状态。' },
-            { title: '如何保持横向居中？', text: '正文容器负责宽度，组件只需要占满当前正文宽度。' },
-            { title: '是否应该使用负边距？', text: '这里不使用负 margin，避免移动端出现横向滚动。' },
-          ],
+        {
+          title: '二级标题',
+          description: '插入 H2 标题块',
+          icon: Heading2,
+          action: () => editor.chain().focus().toggleHeading({ level: 2 }).run(),
         },
-      })
-      .run()
-  }
-
-  const insertImageCollection = (type: 'articleGallery' | 'articleSlider') => {
-    const value = window.prompt('图片 URL，多个用英文逗号分隔:', '')
-    if (!value) return
-    const images = createImageItemsFromUrls(value)
-    if (images.length === 0) return
-
-    editor
-      .chain()
-      .focus()
-      .insertContent({
-        type,
-        attrs: { images },
-      })
-      .run()
-  }
-
-  const insertYoutube = () => {
-    const value = window.prompt('YouTube URL:', 'https://www.youtube.com/watch?v=linlz7-Pnvw')
-    if (!value) return
-
-    editor
-      .chain()
-      .focus()
-      .insertContent({
-        type: 'articleEmbed',
-        attrs: {
-          kind: 'youtube',
-          src: toYouTubeEmbed(value),
-          title: 'YouTube 视频',
+        {
+          title: '三级标题',
+          description: '插入 H3 标题块',
+          icon: Heading3,
+          action: () => editor.chain().focus().toggleHeading({ level: 3 }).run(),
         },
-      })
-      .run()
-  }
-
-  const insertVideo = () => {
-    const src = window.prompt('自定义视频 URL:', 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4')
-    if (!src) return
-    const poster = window.prompt('封面图 URL（可留空）:', '') || ''
-
-    editor
-      .chain()
-      .focus()
-      .insertContent({
-        type: 'articleEmbed',
-        attrs: {
-          kind: 'video',
-          src,
-          poster,
-          title: '自定义视频',
+        {
+          title: '无序列表',
+          description: '项目符号列表',
+          icon: List,
+          action: () => editor.chain().focus().toggleBulletList().run(),
         },
-      })
-      .run()
-  }
-
-  const insertFlow = () => {
-    editor
-      .chain()
-      .focus()
-      .insertContent({
-        type: 'articleFlow',
-        attrs: {
-          start: '开始',
-          question: '内容完整？',
-          yes: '预览发布',
-          no: '继续修改',
-          end: '归档',
+        {
+          title: '有序列表',
+          description: '编号列表',
+          icon: ListOrdered,
+          action: () => editor.chain().focus().toggleOrderedList().run(),
         },
-      })
-      .run()
-  }
-
-  const insertCards = () => {
-    editor
-      .chain()
-      .focus()
-      .insertContent({
-        type: 'articleCards',
-        attrs: {
-          cards: [
-            { eyebrow: '模式', title: '紧凑摘要卡片', text: '用于文章中的小型结论、资源组或阅读提示。' },
-            { eyebrow: '状态', title: '状态对比', text: '可承载就绪、预览、废弃等状态。' },
-            { eyebrow: '资源', title: '相关阅读', text: '适合链接到同系列文章、外部资料或下载内容。' },
-          ],
+        {
+          title: '任务',
+          description: '待办事项列表',
+          icon: CheckSquare,
+          action: () => editor.chain().focus().toggleTaskList().run(),
         },
-      })
-      .run()
-  }
-
-  const insertDiagram = () => {
-    editor
-      .chain()
-      .focus()
-      .insertContent({
-        type: 'articleDiagram',
-        attrs: {
-          items: [{ label: '内容源' }, { label: '渲染器' }, { label: '正文界面' }],
+        {
+          title: '引用',
+          description: '正文引用块',
+          icon: Quote,
+          action: () => editor.chain().focus().toggleBlockquote().run(),
         },
-      })
-      .run()
-  }
-
-  const insertTimeline = () => {
-    editor
-      .chain()
-      .focus()
-      .insertContent({
-        type: 'articleTimeline',
-        attrs: {
-          items: [
-            { label: '草稿', title: '收集内容块', text: '先把真实文章里会出现的内容块列全。' },
-            { label: '检查', title: '校准阅读节奏', text: '检查标题、列表、代码、表格和媒体是否稳定。' },
-            { label: '发布', title: '复用正文体系', text: '组件页和文章详情页使用同一套正文变量。' },
-          ],
+        {
+          title: '代码块',
+          description: '与发布页一致的代码窗口',
+          icon: CodeSquare,
+          action: () => editor.chain().focus().toggleCodeBlock().run(),
         },
-      })
-      .run()
-  }
-
-  const insertRichShowcase = () => {
-    const image = window.prompt('图片 URL（可留空）:', '')
-    if (image === null) return
-
-    editor
-      .chain()
-      .focus()
-      .insertContent({
-        type: 'articleRichShowcase',
-        attrs: {
-          image,
-          alt: '图片说明',
-          eyebrow: '富文本块',
-          title: '混合正文模块',
-          text: '一个块里同时承载媒体、摘要、状态和操作入口。',
-          primaryLabel: '查看图集',
-          primaryHref: '#gallery',
-          secondaryLabel: '查看文件',
-          secondaryHref: '#files',
+        {
+          title: '分割线',
+          description: '插入水平分割线',
+          icon: Minus,
+          action: () => editor.chain().focus().setHorizontalRule().run(),
         },
-      })
-      .run()
-  }
-
-  const insertAudio = () => {
-    const src = window.prompt('音频 URL:', 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3')
-    if (!src) return
-
-    editor
-      .chain()
-      .focus()
-      .insertContent({
-        type: 'articleAudio',
-        attrs: {
-          src,
-          title: '嵌入音频',
-          caption: '音频 · 正文宽度媒体控件',
+      ],
+    },
+    {
+      title: '媒体',
+      items: [
+        {
+          title: '图片',
+          description: '上传并插入单张图片',
+          icon: ImageIcon,
+          action: () => fileInputRef.current?.click(),
         },
-      })
-      .run()
-  }
+        {
+          title: '图集',
+          description: '插入可编辑图片网格',
+          icon: Rows3,
+          action: () =>
+            editor
+              .chain()
+              .focus()
+              .insertContent({
+                type: 'articleGallery',
+                attrs: { images: [] },
+              })
+              .run(),
+        },
+        {
+          title: '轮播',
+          description: '插入可编辑图片轮播',
+          icon: Columns3,
+          action: () =>
+            editor
+              .chain()
+              .focus()
+              .insertContent({
+                type: 'articleSlider',
+                attrs: { images: [] },
+              })
+              .run(),
+        },
+        {
+          title: 'YouTube',
+          description: '插入视频嵌入块',
+          icon: Play,
+          action: () =>
+            editor
+              .chain()
+              .focus()
+              .insertContent({
+                type: 'articleEmbed',
+                attrs: {
+                  kind: 'youtube',
+                  src: toYouTubeEmbed('https://www.youtube.com/watch?v=linlz7-Pnvw'),
+                  title: 'YouTube 视频',
+                },
+              })
+              .run(),
+        },
+        {
+          title: '音频',
+          description: '插入音频播放器',
+          icon: Music2,
+          action: () =>
+            editor
+              .chain()
+              .focus()
+              .insertContent({
+                type: 'articleAudio',
+                attrs: {
+                  src: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+                  title: '嵌入音频',
+                  caption: '音频 · 正文宽度媒体控件',
+                },
+              })
+              .run(),
+        },
+      ],
+    },
+    {
+      title: '文章组件',
+      items: [
+        {
+          title: '提示块',
+          description: 'Callout / Note / Warning',
+          icon: Info,
+          action: () =>
+            editor
+              .chain()
+              .focus()
+              .insertContent({
+                type: 'articleCallout',
+                attrs: { tone: 'note', title: '备注', text: '这是一条普通备注。' },
+              })
+              .run(),
+        },
+        {
+          title: '按钮',
+          description: '插入正文操作按钮',
+          icon: LinkIcon,
+          action: () =>
+            editor
+              .chain()
+              .focus()
+              .insertContent({
+                type: 'articleButton',
+                attrs: { label: '按钮', href: 'https://emmmxx.xyz', variant: 'primary' },
+              })
+              .run(),
+        },
+        {
+          title: '标签页',
+          description: '多组内容切换',
+          icon: PanelTop,
+          action: () =>
+            editor
+              .chain()
+              .focus()
+              .insertContent({
+                type: 'articleTabs',
+                attrs: {
+                  panels: [
+                    { title: '结构', text: '第一组内容用于检查标签页结构。' },
+                    { title: '样式', text: '第二组内容用于检查标签切换状态。' },
+                    { title: '验证', text: '第三组内容用于检查移动端换行。' },
+                  ],
+                },
+              })
+              .run(),
+        },
+        {
+          title: '折叠面板',
+          description: '可展开的问答或说明',
+          icon: FileText,
+          action: () =>
+            editor
+              .chain()
+              .focus()
+              .insertContent({
+                type: 'articleAccordion',
+                attrs: {
+                  items: [
+                    { title: '为什么需要折叠面板？', text: '为了在同一页里展示可折叠内容。' },
+                    { title: '如何编辑？', text: '选中组件后在编辑入口中修改内容。' },
+                  ],
+                },
+              })
+              .run(),
+        },
+        {
+          title: '展示块',
+          description: '媒体、摘要和操作入口',
+          icon: Layers3,
+          action: () =>
+            editor
+              .chain()
+              .focus()
+              .insertContent({
+                type: 'articleRichShowcase',
+                attrs: {
+                  image: '',
+                  alt: '图片说明',
+                  eyebrow: '富文本块',
+                  title: '混合正文模块',
+                  text: '一个块里同时承载媒体、摘要、状态和操作入口。',
+                  primaryLabel: '查看图集',
+                  primaryHref: '#gallery',
+                  secondaryLabel: '查看文件',
+                  secondaryHref: '#files',
+                },
+              })
+              .run(),
+        },
+      ],
+    },
+    {
+      title: '结构',
+      items: [
+        {
+          title: '表格',
+          description: '3 x 3 表格',
+          icon: Table,
+          action: () => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run(),
+        },
+        {
+          title: '流程图',
+          description: '简易流程节点',
+          icon: CheckSquare,
+          action: () =>
+            editor
+              .chain()
+              .focus()
+              .insertContent({
+                type: 'articleFlow',
+                attrs: {
+                  start: '开始',
+                  question: '内容完整？',
+                  yes: '预览发布',
+                  no: '继续修改',
+                  end: '归档',
+                },
+              })
+              .run(),
+        },
+        {
+          title: '卡片',
+          description: '三列摘要卡片',
+          icon: Columns3,
+          action: () =>
+            editor
+              .chain()
+              .focus()
+              .insertContent({
+                type: 'articleCards',
+                attrs: {
+                  cards: [
+                    { eyebrow: '模式', title: '紧凑摘要卡片', text: '用于文章中的小型结论或阅读提示。' },
+                    { eyebrow: '状态', title: '状态对比', text: '可承载就绪、预览、废弃等状态。' },
+                    { eyebrow: '资源', title: '相关阅读', text: '适合链接到同系列文章或外部资料。' },
+                  ],
+                },
+              })
+              .run(),
+        },
+        {
+          title: '关系图',
+          description: '节点关系展示',
+          icon: Network,
+          action: () =>
+            editor
+              .chain()
+              .focus()
+              .insertContent({
+                type: 'articleDiagram',
+                attrs: { items: [{ label: '内容源' }, { label: '渲染器' }, { label: '正文界面' }] },
+              })
+              .run(),
+        },
+        {
+          title: '时间线',
+          description: '阶段式说明',
+          icon: Rows3,
+          action: () =>
+            editor
+              .chain()
+              .focus()
+              .insertContent({
+                type: 'articleTimeline',
+                attrs: {
+                  items: [
+                    { label: '草稿', title: '收集内容块', text: '先把真实文章里会出现的内容块列全。' },
+                    { label: '发布', title: '复用正文体系', text: '组件页和文章详情页使用同一套正文变量。' },
+                  ],
+                },
+              })
+              .run(),
+        },
+      ],
+    },
+  ]
 
   return (
-    <div className="doc-editor-toolbar">
-      <input 
-        type="file" 
-        ref={fileInputRef} 
-        onChange={handleImageUpload} 
-        accept="image/*" 
-        className="hidden" 
-      />
-      {/* 文本格式 */}
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => editor.chain().focus().toggleBold().run()}
-        className={editor.isActive('bold') ? 'bg-gray-200 dark:bg-zinc-700' : 'hover:bg-gray-200 dark:hover:bg-zinc-800'}
-      >
-        <Bold className="h-4 w-4" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => editor.chain().focus().toggleItalic().run()}
-        className={editor.isActive('italic') ? 'bg-gray-200 dark:bg-zinc-700' : 'hover:bg-gray-200 dark:hover:bg-zinc-800'}
-      >
-        <Italic className="h-4 w-4" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => editor.chain().focus().toggleStrike().run()}
-        className={editor.isActive('strike') ? 'bg-gray-200 dark:bg-zinc-700' : 'hover:bg-gray-200 dark:hover:bg-zinc-800'}
-      >
-        <Strikethrough className="h-4 w-4" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => editor.chain().focus().toggleCode().run()}
-        className={editor.isActive('code') ? 'bg-gray-200 dark:bg-zinc-700' : 'hover:bg-gray-200 dark:hover:bg-zinc-800'}
-      >
-        <Code className="h-4 w-4" />
-      </Button>
+    <div className="doc-editor-toolbar" aria-label="插入内容块">
+      <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={uploadInlineImage} />
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button type="button" variant="ghost" size="sm" className="doc-insert-trigger" aria-label="插入内容块">
+            {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+            <span>插入</span>
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent align="start" className="doc-insert-menu">
+          {insertGroups.map((group) => (
+            <section key={group.title} className="doc-insert-group">
+              <h3>{group.title}</h3>
+              <div>
+                {group.items.map((item) => {
+                  const Icon = item.icon
 
-      <div className="w-px h-8 bg-gray-300 dark:bg-zinc-700 mx-1" />
-
-      {/* 标题 */}
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-        className={editor.isActive('heading', { level: 1 }) ? 'bg-gray-200 dark:bg-zinc-700' : 'hover:bg-gray-200 dark:hover:bg-zinc-800'}
-      >
-        <Heading1 className="h-4 w-4" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-        className={editor.isActive('heading', { level: 2 }) ? 'bg-gray-200 dark:bg-zinc-700' : 'hover:bg-gray-200 dark:hover:bg-zinc-800'}
-      >
-        <Heading2 className="h-4 w-4" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-        className={editor.isActive('heading', { level: 3 }) ? 'bg-gray-200 dark:bg-zinc-700' : 'hover:bg-gray-200 dark:hover:bg-zinc-800'}
-      >
-        <Heading3 className="h-4 w-4" />
-      </Button>
-
-      <div className="w-px h-8 bg-gray-300 dark:bg-zinc-700 mx-1" />
-
-      {/* 列表 */}
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => editor.chain().focus().toggleBulletList().run()}
-        className={editor.isActive('bulletList') ? 'bg-gray-200 dark:bg-zinc-700' : 'hover:bg-gray-200 dark:hover:bg-zinc-800'}
-      >
-        <List className="h-4 w-4" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => editor.chain().focus().toggleOrderedList().run()}
-        className={editor.isActive('orderedList') ? 'bg-gray-200 dark:bg-zinc-700' : 'hover:bg-gray-200 dark:hover:bg-zinc-800'}
-      >
-        <ListOrdered className="h-4 w-4" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => editor.chain().focus().toggleTaskList().run()}
-        className={editor.isActive('taskList') ? 'bg-gray-200 dark:bg-zinc-700' : 'hover:bg-gray-200 dark:hover:bg-zinc-800'}
-      >
-        <CheckSquare className="h-4 w-4" />
-      </Button>
-
-      <div className="w-px h-8 bg-gray-300 dark:bg-zinc-700 mx-1" />
-
-      {/* 其他格式 */}
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => editor.chain().focus().toggleBlockquote().run()}
-        className={editor.isActive('blockquote') ? 'bg-gray-200 dark:bg-zinc-700' : 'hover:bg-gray-200 dark:hover:bg-zinc-800'}
-      >
-        <Quote className="h-4 w-4" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => editor.chain().focus().toggleCodeBlock().run()}
-        className={editor.isActive('codeBlock') ? 'bg-gray-200 dark:bg-zinc-700' : 'hover:bg-gray-200 dark:hover:bg-zinc-800'}
-      >
-        <CodeSquare className="h-4 w-4" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => editor.chain().focus().setHorizontalRule().run()}
-        className="hover:bg-gray-200 dark:hover:bg-zinc-800"
-      >
-        <Minus className="h-4 w-4" />
-      </Button>
-
-      <div className="w-px h-8 bg-gray-300 dark:bg-zinc-700 mx-1" />
-
-      {/* 插入 */}
-      <Button variant="ghost" size="sm" onClick={setLink} className="hover:bg-gray-200 dark:hover:bg-zinc-800">
-        <LinkIcon className="h-4 w-4" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={addImage}
-        disabled={isUploading}
-        className="hover:bg-gray-200 dark:hover:bg-zinc-800"
-      >
-        {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImageIcon className="h-4 w-4" />}
-      </Button>
-      <Button variant="ghost" size="sm" onClick={insertTable} className="hover:bg-gray-200 dark:hover:bg-zinc-800">
-        <Table className="h-4 w-4" />
-      </Button>
-
-      <div className="w-px h-8 bg-gray-300 dark:bg-zinc-700 mx-1" />
-
-      {/* 富文本块 */}
-      <Button variant="ghost" size="sm" onClick={insertCallout} title="提示块" className="hover:bg-gray-200 dark:hover:bg-zinc-800">
-        <Info className="h-4 w-4" />
-      </Button>
-      <Button variant="ghost" size="sm" onClick={insertButton} title="按钮" className="hover:bg-gray-200 dark:hover:bg-zinc-800">
-        <LinkIcon className="h-4 w-4" />
-      </Button>
-      <Button variant="ghost" size="sm" onClick={insertTabs} title="标签页" className="hover:bg-gray-200 dark:hover:bg-zinc-800">
-        <Table className="h-4 w-4" />
-      </Button>
-      <Button variant="ghost" size="sm" onClick={insertAccordion} title="折叠面板" className="hover:bg-gray-200 dark:hover:bg-zinc-800">
-        <List className="h-4 w-4" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => insertImageCollection('articleGallery')}
-        title="图集"
-        className="hover:bg-gray-200 dark:hover:bg-zinc-800"
-      >
-        <ImageIcon className="h-4 w-4" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => insertImageCollection('articleSlider')}
-        title="轮播"
-        className="hover:bg-gray-200 dark:hover:bg-zinc-800"
-      >
-        <ImageIcon className="h-4 w-4" />
-      </Button>
-      <Button variant="ghost" size="sm" onClick={insertYoutube} title="YouTube" className="hover:bg-gray-200 dark:hover:bg-zinc-800">
-        <Play className="h-4 w-4" />
-      </Button>
-      <Button variant="ghost" size="sm" onClick={insertVideo} title="自定义视频" className="hover:bg-gray-200 dark:hover:bg-zinc-800">
-        <Play className="h-4 w-4" />
-      </Button>
-      <Button variant="ghost" size="sm" onClick={insertFlow} title="流程图" className="hover:bg-gray-200 dark:hover:bg-zinc-800">
-        <CheckSquare className="h-4 w-4" />
-      </Button>
-      <Button variant="ghost" size="sm" onClick={insertCards} title="卡片" className="hover:bg-gray-200 dark:hover:bg-zinc-800">
-        <LayoutGrid className="h-4 w-4" />
-      </Button>
-      <Button variant="ghost" size="sm" onClick={insertDiagram} title="关系图" className="hover:bg-gray-200 dark:hover:bg-zinc-800">
-        <Network className="h-4 w-4" />
-      </Button>
-      <Button variant="ghost" size="sm" onClick={insertTimeline} title="时间线" className="hover:bg-gray-200 dark:hover:bg-zinc-800">
-        <Clock3 className="h-4 w-4" />
-      </Button>
-      <Button variant="ghost" size="sm" onClick={insertRichShowcase} title="富文本块" className="hover:bg-gray-200 dark:hover:bg-zinc-800">
-        <Layers3 className="h-4 w-4" />
-      </Button>
-      <Button variant="ghost" size="sm" onClick={insertAudio} title="音频" className="hover:bg-gray-200 dark:hover:bg-zinc-800">
-        <Music2 className="h-4 w-4" />
-      </Button>
-
-      <div className="w-px h-8 bg-gray-300 dark:bg-zinc-700 mx-1" />
-
-      {/* 撤销/重做 */}
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => editor.chain().focus().undo().run()}
-        disabled={!editor.can().undo()}
-        className="hover:bg-gray-200 dark:hover:bg-zinc-800"
-      >
-        <Undo className="h-4 w-4" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => editor.chain().focus().redo().run()}
-        disabled={!editor.can().redo()}
-        className="hover:bg-gray-200 dark:hover:bg-zinc-800"
-      >
-        <Redo className="h-4 w-4" />
-      </Button>
+                  return (
+                    <button key={`${group.title}-${item.title}`} type="button" onClick={() => run(item.action)}>
+                      <Icon className="h-4 w-4" />
+                      <span>
+                        <strong>{item.title}</strong>
+                        <small>{item.description}</small>
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
+            </section>
+          ))}
+        </PopoverContent>
+      </Popover>
+      <div className="doc-history-actions" aria-label="历史操作">
+        <button type="button" onClick={() => editor.chain().focus().undo().run()} disabled={!editor.can().undo()} aria-label="撤销">
+          <Undo className="h-4 w-4" />
+        </button>
+        <button type="button" onClick={() => editor.chain().focus().redo().run()} disabled={!editor.can().redo()} aria-label="重做">
+          <Redo className="h-4 w-4" />
+        </button>
+      </div>
     </div>
   )
 }
 
 export function SelectionBubbleMenu({ editor }: MenuBarProps) {
+  const [linkInputOpen, setLinkInputOpen] = useState(false)
+  const [linkValue, setLinkValue] = useState('')
+
+  const openLinkInput = () => {
+    const href = editor.getAttributes('link').href
+    setLinkValue(typeof href === 'string' ? href : '')
+    setLinkInputOpen(true)
+  }
+
+  const applyLink = () => {
+    const href = linkValue.trim()
+
+    if (!href) {
+      editor.chain().focus().extendMarkRange('link').unsetLink().run()
+      setLinkInputOpen(false)
+      return
+    }
+
+    editor.chain().focus().extendMarkRange('link').setLink({ href }).run()
+    setLinkInputOpen(false)
+  }
+
   return (
     <BubbleMenu editor={editor} className="doc-selection-menu">
       <button
@@ -624,12 +541,26 @@ export function SelectionBubbleMenu({ editor }: MenuBarProps) {
       >
         <Code className="h-4 w-4" />
       </button>
+      <button type="button" onClick={openLinkInput} aria-label="链接">
+        <LinkIcon className="h-4 w-4" />
+      </button>
+      {linkInputOpen ? (
+        <form
+          className="doc-selection-link-form"
+          onSubmit={(event) => {
+            event.preventDefault()
+            applyLink()
+          }}
+        >
+          <input
+            value={linkValue}
+            onChange={(event) => setLinkValue(event.target.value)}
+            placeholder="https://"
+            autoFocus
+          />
+          <button type="submit">应用</button>
+        </form>
+      ) : null}
     </BubbleMenu>
   )
-}
-
-function normalizeCalloutTone(value: string): CalloutTone {
-  return calloutTones.includes(value.trim().toLowerCase() as CalloutTone)
-    ? (value.trim().toLowerCase() as CalloutTone)
-    : 'note'
 }

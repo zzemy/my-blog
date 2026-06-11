@@ -832,6 +832,8 @@ function GalleryView({ node, editor, updateAttributes }: NodeViewProps) {
     setIsEditing(false)
   }
 
+  if (!images.length && !editor.isEditable) return null
+
   return (
     <NodeViewWrapper
       className="component-gallery not-prose"
@@ -843,12 +845,19 @@ function GalleryView({ node, editor, updateAttributes }: NodeViewProps) {
           <RichBlockEditButton onClick={startEditing} label="编辑图集" />
         </div>
       ) : null}
-      {images.map((image) => (
-        <figure key={`${image.file}-${image.src}`}>
-          <img src={image.src} alt={image.alt} referrerPolicy="no-referrer" />
-          <figcaption>{image.file}</figcaption>
-        </figure>
-      ))}
+      {images.length ? (
+        images.map((image) => (
+          <figure key={`${image.file}-${image.src}`}>
+            <img src={image.src} alt={image.alt} referrerPolicy="no-referrer" />
+            <figcaption>{image.file}</figcaption>
+          </figure>
+        ))
+      ) : (
+        <div className="component-placeholder">
+          <span>图集</span>
+          <p>还没有图片，点击编辑添加图集图片。</p>
+        </div>
+      )}
       {editor.isEditable && isEditing ? (
         <RichBlockEditorPanel title="编辑图集" onCancel={() => setIsEditing(false)} onSave={saveDraft}>
           <ImageItemsEditor items={draft} onChange={setDraft} addLabel="添加图片" />

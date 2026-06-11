@@ -1,6 +1,6 @@
 'use client'
 
-import { EditorContent, useEditor, Editor } from '@tiptap/react'
+import { EditorContent, useEditor, Editor, ReactNodeViewRenderer } from '@tiptap/react'
 import type { Content } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { Link } from '@tiptap/extension-link'
@@ -18,7 +18,7 @@ import { TextStyle } from '@tiptap/extension-text-style'
 import { CodeBlockLowlight } from '@tiptap/extension-code-block-lowlight'
 import { Mathematics } from '@tiptap/extension-mathematics'
 import { common, createLowlight } from 'lowlight'
-import { useState, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { remark } from 'remark'
 import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
@@ -26,6 +26,7 @@ import remarkRehype from 'remark-rehype'
 import rehypeStringify from 'rehype-stringify'
 import { MenuBar, SelectionBubbleMenu } from './menu-bar'
 import { articleRichBlockExtensions } from './rich-block-extensions'
+import { CodeBlockView } from './code-block-view'
 import { hasArticleShortcodes, splitArticleMarkdown } from './markdown-shortcodes'
 import { MarkdownShortcodeGuide } from './markdown-shortcode-guide'
 import styles from './tiptap-editor.module.css'
@@ -82,6 +83,7 @@ interface TipTapEditorProps {
   onChange?: (content: Content) => void
   placeholder?: string
   editable?: boolean
+  showMarkdownGuide?: boolean
 }
 
 export function TipTapEditor({
@@ -89,6 +91,7 @@ export function TipTapEditor({
   onChange,
   placeholder = '开始编写内容...',
   editable = true,
+  showMarkdownGuide = false,
 }: TipTapEditorProps) {
   const [isUploading, setIsUploading] = useState(false)
   const editorRef = useRef<Editor | null>(null)
@@ -105,42 +108,43 @@ export function TipTapEditor({
       Link.configure({
         openOnClick: false,
         HTMLAttributes: {
-          class: 'text-blue-500 hover:text-blue-600 underline',
+          class: 'article-link',
         },
       }),
       Image.configure({
         HTMLAttributes: {
-          class: 'rounded-lg max-w-full h-auto',
+          class: 'article-image',
           referrerPolicy: 'no-referrer',
         },
       }),
       CodeBlockLowlight.configure({
         lowlight,
-        HTMLAttributes: {
-          class: 'rounded-lg bg-zinc-100 dark:bg-zinc-950 p-4 overflow-x-auto text-sm',
+      }).extend({
+        addNodeView() {
+          return ReactNodeViewRenderer(CodeBlockView)
         },
       }),
       Table.configure({
         resizable: true,
         HTMLAttributes: {
-          class: 'border-collapse table-auto w-full my-4',
+          class: 'article-table',
         },
       }),
       TableRow.configure({
         HTMLAttributes: {
-          class: 'border border-zinc-200 dark:border-zinc-800',
+          class: '',
         },
       }),
       TableCell.extend({
         content: 'block+',
       }).configure({
         HTMLAttributes: {
-          class: 'border border-zinc-200 dark:border-zinc-800 px-4 py-2',
+          class: '',
         },
       }),
       TableHeader.configure({
         HTMLAttributes: {
-          class: 'border border-zinc-200 dark:border-zinc-800 px-4 py-2 bg-zinc-100 dark:bg-zinc-800 font-bold',
+          class: '',
         },
       }),
       TaskList.configure({
@@ -265,6 +269,27 @@ export function TipTapEditor({
     },
   })
 
+  useEffect(() => {
+    if (!editor) return
+
+    const assignHeadingIds = () => {
+      const headings = editor.view.dom.querySelectorAll('h1, h2, h3, h4, h5, h6')
+      headings.forEach((heading, index) => {
+        heading.setAttribute('id', `outline-${index + 1}`)
+        ;(heading as HTMLElement).style.scrollMarginTop = '96px'
+      })
+    }
+
+    assignHeadingIds()
+    editor.on('update', assignHeadingIds)
+    editor.on('create', assignHeadingIds)
+
+    return () => {
+      editor.off('update', assignHeadingIds)
+      editor.off('create', assignHeadingIds)
+    }
+  }, [editor])
+
   if (!editor) {
     return null
   }
@@ -279,7 +304,7 @@ export function TipTapEditor({
       <div className={styles.editorCanvas}>
         {editable && <MenuBar editor={editor} />}
         {editable && <SelectionBubbleMenu editor={editor} />}
-        {editable && <MarkdownShortcodeGuide />}
+        {editable && showMarkdownGuide && <MarkdownShortcodeGuide />}
         <EditorContent editor={editor} />
       </div>
       {editable && editor && (
