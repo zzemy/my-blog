@@ -13,6 +13,9 @@
 # testing
 /coverage
 
+# local code index
+/.codegraph/
+
 # next.js
 /.next/
 /out/

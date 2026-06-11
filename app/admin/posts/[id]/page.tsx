@@ -2,14 +2,22 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { pinyin } from 'pinyin-pro'
-import type { Content } from '@tiptap/react'
+import Link from 'next/link'
+
 import { TipTapEditor } from '@/features/blog/editor/tiptap-editor'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Card } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
+import {
+  calculateContentSize,
+  createEmptyPostForm,
+  generatePostSlug,
+  resolvePublishedAtForSubmit,
+  validatePostForm,
+} from '@/features/admin/posts/form-utils'
+import { isoToLocalInput, nowLocalInput } from '@/features/admin/posts/utils'
 import {
   ArrowLeft,
   Save,
@@ -22,46 +30,19 @@ import {
   Star,
   Search,
 } from 'lucide-react'
-import Link from 'next/link'
 
 export default function EditPostPage() {
   const router = useRouter()
   const params = useParams()
   const postId = String(params.id ?? '')
-  
-  const isoToLocalInput = (iso: string) => {
-    const d = new Date(iso)
-    const pad = (n: number) => String(n).padStart(2, '0')
-    const yyyy = d.getFullYear()
-    const MM = pad(d.getMonth() + 1)
-    const dd = pad(d.getDate())
-    const hh = pad(d.getHours())
-    const mm = pad(d.getMinutes())
-    return `${yyyy}-${MM}-${dd}T${hh}:${mm}`
-  }
-  const nowLocalInput = () => isoToLocalInput(new Date().toISOString())
-  
+
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   const [previewTag, setPreviewTag] = useState('')
 
-  const [formData, setFormData] = useState({
-    title: '',
-    slug: '',
-    description: '',
-    cover_image: '',
-    tags: [] as string[],
-    content: undefined as Content | undefined,
-    published: false,
-    featured: false,
-    reading_time: 0,
-    locale: 'zh',
-    published_at: '',
-    seo_title: '',
-    seo_description: '',
-  })
+  const [formData, setFormData] = useState(createEmptyPostForm)
 
   const fetchPost = useCallback(async () => {
     try {
@@ -80,7 +61,7 @@ export default function EditPostPage() {
         description: post.description || '',
         cover_image: post.cover_image || '',
         tags: post.tags || [],
-        content: (post.content ?? undefined) as Content | undefined,
+        content: post.content ?? undefined,
         published: post.published,
         featured: post.featured || false,
         reading_time: post.reading_time || 0,
@@ -102,26 +83,7 @@ export default function EditPostPage() {
   }, [fetchPost])
 
   const generateSlug = () => {
-    const slug = pinyin(formData.title, { 
-      toneType: 'none', 
-      type: 'array',
-      v: true 
-    })
-    .join('')
-    .toLowerCase()
-    .trim()
-    .replace(/[^\w-]/g, '')
-    .replace(/-+/g, '-')
-
-    setFormData({ ...formData, slug })
-  }
-
-  const calculateWordCount = () => {
-    if (!formData.content) return 0
-    // 获取文本内容
-    const text = JSON.stringify(formData.content)
-    // 粗略统计字数
-    return text.length
+    setFormData({ ...formData, slug: generatePostSlug(formData.title) })
   }
 
   const handleAddTag = () => {
@@ -144,12 +106,7 @@ export default function EditPostPage() {
   const handleSubmit = async (published: boolean) => {
     setError(null)
 
-    // 验证
-    const errors = []
-    if (!formData.title.trim()) errors.push('标题不能为空')
-    if (!formData.slug.trim()) errors.push('URL Slug 不能为空')
-    if (!formData.content) errors.push('内容不能为空')
-    if (formData.tags.length === 0) errors.push('至少需要一个标签')
+    const errors = validatePostForm(formData)
 
     if (errors.length > 0) {
       setError(errors.join('，'))
@@ -167,7 +124,7 @@ export default function EditPostPage() {
         content: formData.content,
         published,
         featured: formData.featured,
-        reading_time: calculateWordCount(),
+        reading_time: calculateContentSize(formData.content),
         locale: formData.locale,
         seo_title: formData.seo_title,
         seo_description: formData.seo_description,
@@ -175,9 +132,7 @@ export default function EditPostPage() {
 
       // 如果发布，设置发布时间
       if (published) {
-        submitData.published_at = (formData.published && formData.published_at
-          ? new Date(formData.published_at).toISOString()
-          : new Date().toISOString())
+        submitData.published_at = resolvePublishedAtForSubmit(published, formData.published, formData.published_at)
       }
 
       const res = await fetch(`/api/admin/posts/${params.id}`, {
@@ -454,7 +409,7 @@ export default function EditPostPage() {
               <div className="space-y-3 text-sm text-muted-foreground">
                 <div>
                   <span className="font-medium">字数统计</span>
-                  <p>{calculateWordCount()} 字</p>
+                  <p>{calculateContentSize(formData.content)} 字</p>
                 </div>
                 <Separator />
                 <div>

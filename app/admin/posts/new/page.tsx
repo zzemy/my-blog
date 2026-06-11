@@ -2,14 +2,22 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { pinyin } from 'pinyin-pro'
-import type { Content } from '@tiptap/react'
+import Link from 'next/link'
+
 import { TipTapEditor } from '@/features/blog/editor/tiptap-editor'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Card } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
+import {
+  calculateContentSize,
+  createEmptyPostForm,
+  generatePostSlug,
+  resolvePublishedAtForSubmit,
+  validatePostForm,
+} from '@/features/admin/posts/form-utils'
+import { nowLocalInput } from '@/features/admin/posts/utils'
 import {
   ArrowLeft,
   Save,
@@ -23,7 +31,6 @@ import {
   Star,
   Search,
 } from 'lucide-react'
-import Link from 'next/link'
 
 export default function NewPostPage() {
   const router = useRouter()
@@ -31,46 +38,14 @@ export default function NewPostPage() {
 
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
-  
-  const isoToLocalInput = (iso: string) => {
-    const d = new Date(iso)
-    const pad = (n: number) => String(n).padStart(2, '0')
-    const yyyy = d.getFullYear()
-    const MM = pad(d.getMonth() + 1)
-    const dd = pad(d.getDate())
-    const hh = pad(d.getHours())
-    const mm = pad(d.getMinutes())
-    return `${yyyy}-${MM}-${dd}T${hh}:${mm}`
-  }
-  const nowLocalInput = () => isoToLocalInput(new Date().toISOString())
-  
-  const [formData, setFormData] = useState({
-    title: '',
-    slug: '',
-    description: '',
-    cover_image: '',
-    tags: [] as string[],
-    content: undefined as Content | undefined,
-    published: false,
-    locale: 'zh',
-    featured: false,
-    reading_time: 0,
-    published_at: '',
-    seo_title: '',
-    seo_description: '',
-  })
+  const [formData, setFormData] = useState(createEmptyPostForm)
 
   const [previewTag, setPreviewTag] = useState('')
 
   const handleSubmit = async (published: boolean) => {
     setError(null)
 
-    // 验证
-    const errors = []
-    if (!formData.title.trim()) errors.push('标题不能为空')
-    if (!formData.slug.trim()) errors.push('URL Slug 不能为空')
-    if (!formData.content) errors.push('内容不能为空')
-    if (formData.tags.length === 0) errors.push('至少需要一个标签')
+    const errors = validatePostForm(formData)
     
     if (errors.length > 0) {
       setError(errors.join('，'))
@@ -86,15 +61,9 @@ export default function NewPostPage() {
         },
         body: JSON.stringify({
           ...formData,
-          reading_time: calculateWordCount(),
+          reading_time: calculateContentSize(formData.content),
           published,
-          // 若发布则传递 ISO UTC 时间；未勾选发布则忽略
-          // 如果勾选了"设定发布时间" (formData.published) 且有值，则使用该时间，否则使用当前时间
-          published_at: published
-            ? (formData.published && formData.published_at
-                ? new Date(formData.published_at).toISOString()
-                : new Date().toISOString())
-            : null,
+          published_at: resolvePublishedAtForSubmit(published, formData.published, formData.published_at),
         }),
       })
 
@@ -116,19 +85,7 @@ export default function NewPostPage() {
   }
 
   const generateSlug = () => {
-    // 使用 pinyin-pro 将标题转换为拼音
-    const slug = pinyin(formData.title, { 
-      toneType: 'none', 
-      type: 'array',
-      v: true 
-    })
-    .join('')
-    .toLowerCase()
-    .trim()
-    .replace(/[^\w-]/g, '')
-    .replace(/-+/g, '-')
-
-    setFormData({ ...formData, slug })
+    setFormData({ ...formData, slug: generatePostSlug(formData.title) })
   }
 
   const handleAddTag = () => {
@@ -146,20 +103,7 @@ export default function NewPostPage() {
     })
   }
 
-  const calculateWordCount = () => {
-    if (!formData.content) return 0
-    // 获取 JSON 字符串长度作为粗略字数，或者更精确地提取文本内容
-    // 这里简单使用 JSON 字符串长度，实际可能需要更复杂的逻辑来提取 pure text
-    // 但对于 TiTap JSON 结构，JSON.stringify 长度是一个可接受的近似值（虽然会包含 key names）
-    // 为了更准确，我们可以尝试简单过滤
-    const text = JSON.stringify(formData.content)
-    // 简单粗暴：统计非 ASCII 字符算作汉字，其他算作单词？
-    // 为了保持一致性和简单性，暂时使用 content 的 string length.
-    // 更好的方式其实是 Tiptap editor 提供 word count extension，但这里我们先用 length 兜底
-    return text.length
-  }
-
-  const wordCount = calculateWordCount()
+  const wordCount = calculateContentSize(formData.content)
 
   return (
     <div className="min-h-screen bg-background py-8">

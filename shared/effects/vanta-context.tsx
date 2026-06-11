@@ -4,6 +4,8 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 type VantaEffectType = 'none' | 'birds' | 'waves' | 'globe' | 'topology' | 'rings' | 'dots' | 'halo';
 
+const DEFAULT_VANTA_EFFECT: VantaEffectType = 'halo';
+
 export const VANTA_EFFECTS: VantaEffectType[] = [
   'none',
   'birds', 
@@ -41,7 +43,7 @@ const getPreferredTheme = (): 'light' | 'dark' => {
 };
 
 const getDeviceDefaultEffect = (): VantaEffectType => {
-  if (typeof window === 'undefined') return 'halo';
+  if (typeof window === 'undefined') return DEFAULT_VANTA_EFFECT;
 
   const ua = navigator.userAgent || '';
   const isMobileUA = /Mobi|Android|iPhone|iPad|iPod/i.test(ua);
@@ -54,22 +56,8 @@ const getDeviceDefaultEffect = (): VantaEffectType => {
 };
 
 export function VantaProvider({ children }: { children: React.ReactNode }) {
-  const [effect, setEffect] = useState<VantaEffectType>(() => {
-    if (typeof window === 'undefined') return 'halo';
-
-    const savedEffect = normalizeEffect(localStorage.getItem('vanta-effect'));
-    return savedEffect ?? getDeviceDefaultEffect();
-  });
-
-  const [hasUserSelected, setHasUserSelected] = useState<boolean>(() => {
-    if (typeof window === 'undefined') return false;
-
-    const selectedFlag = localStorage.getItem('vanta-user-selected');
-    if (selectedFlag === '1') return true;
-    if (selectedFlag === '0') return false;
-
-    return normalizeEffect(localStorage.getItem('vanta-effect')) !== null;
-  });
+  const [effect, setEffect] = useState<VantaEffectType>(DEFAULT_VANTA_EFFECT);
+  const [hasUserSelected, setHasUserSelected] = useState(false);
 
   // Load saved effect from local storage or decide default by device type
   useEffect(() => {

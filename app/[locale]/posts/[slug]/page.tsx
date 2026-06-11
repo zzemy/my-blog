@@ -9,6 +9,7 @@ import { FallbackBanner } from '@/features/blog/components/client/fallback-banne
 import { ShareButtons } from "@/features/blog/components/client/share-buttons";
 import { PostStats } from "@/features/blog/components/client/post-stats";
 import { Comments } from "@/features/blog/components/client/comments";
+import { buildToc } from "@/features/blog/utils/toc";
 import { supabase } from '@/lib/supabase/client';
 import { Database } from "@/lib/supabase/types";
 import { isExpectedSupabaseBuildError, logExpectedSupabaseBuildErrorOnce } from '@/lib/supabase/error-utils';
@@ -152,14 +153,14 @@ export default async function PostPage({ params }: { params: Promise<{ locale: s
       <FadeIn>
         <PostBreadcrumb title={post.title} />
         
-        <article className="prose dark:prose-invert max-w-none">
+        <article className="article-shell">
           {showFallbackNote && (
             <FallbackBanner postId={post.id} message={fallbackMessage} />
           )}
-          <div className="space-y-4 border-b pb-8">
-            <h1 className="text-3xl font-bold tracking-tight md:text-4xl lg:text-5xl">{post.title}</h1>
-            <div className="flex flex-wrap items-start justify-between">
-              <div className="flex-1 min-w-0 flex flex-col sm:flex-row items-start sm:items-center gap-1 sm:gap-4 text-muted-foreground text-sm">
+          <div className="article-hero">
+            <h1 className="article-title text-3xl md:text-4xl lg:text-5xl">{post.title}</h1>
+            <div className="article-meta-row">
+              <div className="flex min-w-0 flex-1 flex-col items-start gap-1 text-sm text-muted-foreground sm:flex-row sm:items-center sm:gap-4">
                 <time dateTime={post.published_at || post.created_at} className="whitespace-nowrap text-sm truncate block min-w-0">
                   {new Date(post.published_at || post.created_at).toLocaleDateString(locale, { year: 'numeric', month: 'long', day: 'numeric' })}
                 </time>
@@ -181,7 +182,7 @@ export default async function PostPage({ params }: { params: Promise<{ locale: s
               <div className="flex flex-wrap gap-2 pt-2">
                 {post.tags.map((tag: string) => (
                   <Link key={tag} href={`/tags/${tag}`} className="no-underline">
-                    <span className="text-sm bg-muted px-2.5 py-0.5 rounded-full text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors">
+                    <span className="article-tag">
                       #{tag}
                     </span>
                   </Link>
@@ -191,7 +192,7 @@ export default async function PostPage({ params }: { params: Promise<{ locale: s
           </div>
           
           <TipTapRenderer 
-            className="mt-8 leading-7 text-base md:text-lg"
+            className="mt-10"
             content={post.content} 
             toc={toc}
           />
@@ -203,70 +204,4 @@ export default async function PostPage({ params }: { params: Promise<{ locale: s
       </FadeIn>
     </PostLayout>
   );
-}
-
-type TocItem = {
-  id: string
-  text: string
-  depth: number
-}
-
-type TiptapNode = {
-  type?: string
-  text?: string
-  attrs?: { level?: number }
-  content?: TiptapNode[]
-}
-
-function buildToc(content: TiptapNode | TiptapNode[] | null | undefined): TocItem[] {
-  const toc: TocItem[] = []
-  const idCount: Record<string, number> = {}
-
-  const slugify = (text: string) =>
-    text
-      .toLowerCase()
-      .trim()
-      .replace(/[^a-z0-9\u4e00-\u9fa5\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-')
-
-  const walk = (node: TiptapNode | TiptapNode[] | null | undefined) => {
-    if (!node) return
-    if (Array.isArray(node)) {
-      node.forEach(walk)
-      return
-    }
-
-    if (node.type === 'heading' && node.attrs?.level) {
-      const text = extractText(node)
-      if (text) {
-        let base = slugify(text)
-        if (!base) base = 'section'
-        let unique = base
-        if (idCount[base] != null) {
-          idCount[base] += 1
-          unique = `${base}-${idCount[base]}`
-        } else {
-          idCount[base] = 0
-        }
-        toc.push({ id: unique, text, depth: node.attrs.level })
-      }
-    }
-
-    if (node.content) {
-      walk(node.content)
-    }
-  }
-
-  walk(content)
-  return toc
-}
-
-function extractText(node: TiptapNode | null | undefined): string {
-  if (!node) return ''
-  if (node.text) return node.text
-  if (node.content) {
-    return node.content.map(extractText).join('')
-  }
-  return ''
 }

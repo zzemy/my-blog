@@ -1,0 +1,103 @@
+.referencePage {
+  color: var(--article-text);
+  --reference-code-attr: var(--article-syntax-attr);
+  --reference-code-keyword: var(--article-syntax-keyword);
+  --reference-code-type: var(--article-syntax-type);
+  --reference-code-string: var(--article-syntax-string);
+  --reference-code-js-keyword: var(--article-syntax-keyword);
+  --reference-code-js-string: var(--article-syntax-string);
+  --reference-code-js-comment: var(--article-syntax-comment);
+  --reference-code-highlight: var(--article-code-highlight);
+}
+
+.alertStack {
+  gap: 2rem;
+  margin: 1.2rem 0 2.2rem;
+}
+
+.alertPair {
+  display: grid;
+  gap: 1.35rem;
+}
+
+.alertPair > :global(.code-window),
+.alertPair > :global(.component-callout),
+.codeStack > :global(.code-window) {
+  width: 100%;
+  max-width: 100%;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.codeStack {
+  display: grid;
+  gap: 1.25rem;
+  margin: 1.5rem 0 2rem;
+}
+
+.alertPair > :global(.code-window),
+.codeStack > :global(.code-window) {
+  margin: 0;
+}
+
+.codeWindowLine {
+  display: block;
+  min-height: var(--article-code-line-height, 1.6rem);
+  line-height: var(--article-code-line-height, 1.6rem);
+}
+
+.codeWindowLine:nth-child(15) {
+  background: var(--reference-code-highlight);
+}
+
+.tokenAttr {
+  color: var(--reference-code-attr);
+}
+
+.tokenKeyword {
+  color: var(--reference-code-keyword);
+  font-weight: 720;
+}
+
+.tokenType {
+  color: var(--reference-code-type);
+  font-weight: 720;
+}
+
+.tokenString {
+  color: var(--reference-code-string);
+  font-weight: 720;
+}
+
+.tokenJsKeyword,
+.tokenJsFunction {
+  color: var(--reference-code-js-keyword);
+  font-weight: 760;
+}
+
+.tokenJsString {
+  color: var(--reference-code-js-string);
+  font-weight: 650;
+}
+
+.tokenJsComment {
+  color: var(--reference-code-js-comment);
+  font-style: italic;
+}
+
+@media (max-width: 1180px) {
+  .alertPair > :global(.code-window),
+  .alertPair > :global(.component-callout),
+  .codeStack > :global(.code-window) {
+    width: 100%;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 720px) {
+  .alertStack {
+    gap: 1rem;
+    margin-right: 0;
+    margin-left: 0;
+  }
+}

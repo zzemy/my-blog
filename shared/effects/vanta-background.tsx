@@ -31,9 +31,12 @@ export function VantaBackground() {
     setHasMounted(true)
   }, [])
 
-  const isArticlePage = pathname && /\/posts\/.+/.test(pathname)
-  const isAboutPage = pathname && /\/about$/.test(pathname)
-  const shouldDisableEffect = isArticlePage || isAboutPage
+  const pathSegments = pathname?.split('/').filter(Boolean) ?? []
+  const section = pathSegments[1]
+  const isArticlePage = section === 'posts' && pathSegments.length > 2
+  const isAboutPage = section === 'about'
+  const isComponentsPage = section === 'components'
+  const shouldDisableEffect = isArticlePage || isAboutPage || isComponentsPage
   const isDark = theme === 'dark'
 
   useEffect(() => {

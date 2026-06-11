@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { createRoot } from 'react-dom/client'
 import { EditorContent, useEditor, NodeViewContent, NodeViewWrapper, ReactNodeViewRenderer } from '@tiptap/react'
-import type { Content } from '@tiptap/react'
+import type { Content, NodeViewProps } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { Link } from '@tiptap/extension-link'
 import { Image } from '@tiptap/extension-image'
@@ -18,137 +18,18 @@ import { TextStyle } from '@tiptap/extension-text-style'
 import { CodeBlockLowlight } from '@tiptap/extension-code-block-lowlight'
 import { Mathematics } from '@tiptap/extension-mathematics'
 import { common, createLowlight } from 'lowlight'
-import { Check, Copy } from 'lucide-react'
+import { Check, ChevronDown, Copy } from 'lucide-react'
+import { articleRichBlockExtensions } from './rich-block-extensions'
 import { LinkPreview } from '@/shared/components/common/link-preview'
 
 const lowlight = createLowlight(common)
 
-// Dual Theme Syntax Highlighting (Light & Dark)
-const syntaxThemeCss = `
-/* Light Theme (VS Code Light+) */
-.hljs-comment,
-.hljs-quote {
-  color: #008000;
-  font-style: italic;
-}
-.hljs-keyword,
-.hljs-selector-tag,
-.hljs-literal,
-.hljs-section,
-.hljs-link {
-  color: #0000ff;
-}
-.hljs-name {
-  color: #800000;
-}
-.hljs-string,
-.hljs-meta-string {
-  color: #a31515;
-}
-.hljs-attr {
-  color: #ff0000;
-}
-.hljs-variable,
-.hljs-template-variable,
-.hljs-template-tag,
-.hljs-property {
-  color: #001080;
-}
-.hljs-title,
-.hljs-title.function_,
-.hljs-doctag {
-  color: #795e26;
-}
-.hljs-type,
-.hljs-built_in,
-.hljs-class .hljs-title {
-  color: #267f99;
-}
-.hljs-number,
-.hljs-symbol,
-.hljs-bullet {
-  color: #098658;
-}
-.hljs-regexp {
-  color: #811f3f;
-}
-.hljs-emphasis {
-  font-style: italic;
-}
-.hljs-strong {
-  font-weight: bold;
-}
-.hljs-meta {
-  color: #0000ff;
-}
-
-/* Dark Theme Overrides (VS Code Dark+) */
-.dark .hljs-comment,
-.dark .hljs-quote {
-  color: #6a9955;
-}
-.dark .hljs-keyword,
-.dark .hljs-selector-tag,
-.dark .hljs-literal,
-.dark .hljs-section,
-.dark .hljs-link {
-  color: #569cd6;
-}
-.dark .hljs-name {
-  color: #569cd6;
-}
-.dark .hljs-string,
-.dark .hljs-meta-string {
-  color: #ce9178;
-}
-.dark .hljs-attr,
-.dark .hljs-variable,
-.dark .hljs-template-variable,
-.dark .hljs-template-tag,
-.dark .hljs-property {
-  color: #9cdcfe;
-}
-.dark .hljs-title,
-.dark .hljs-title.function_,
-.dark .hljs-doctag {
-  color: #dcdcaa;
-}
-.dark .hljs-type,
-.dark .hljs-built_in,
-.dark .hljs-class .hljs-title {
-  color: #4ec9b0;
-}
-.dark .hljs-number,
-.dark .hljs-symbol,
-.dark .hljs-bullet {
-  color: #b5cea8;
-}
-.dark .hljs-regexp {
-  color: #d16969;
-}
-.dark .hljs-meta {
-  color: #569cd6;
-}
-
-/* Scrollbar Styling - Adaptive */
-.code-window ::-webkit-scrollbar {
-  height: 8px;
-  width: 8px;
-}
-.code-window ::-webkit-scrollbar-thumb {
-  background-color: rgba(0,0,0,0.2);
-  border-radius: 9999px;
-}
-.dark .code-window ::-webkit-scrollbar-thumb {
-  background-color: rgba(255,255,255,0.14);
-}
-.code-window ::-webkit-scrollbar-track {
-  background-color: transparent;
-}
-`
-
-const CodeBlock = ({ node: { textContent } }: { node: { textContent: string } }) => {
+const CodeBlock = ({ node }: NodeViewProps) => {
   const [copied, setCopied] = useState(false)
+  const [collapsed, setCollapsed] = useState(false)
+  const textContent = node.textContent
+  const language = formatCodeLanguage(node.attrs.language)
+  const fileName = getCodeFileName(node.attrs.language)
 
   const onCopy = () => {
     navigator.clipboard.writeText(textContent)
@@ -164,58 +45,103 @@ const CodeBlock = ({ node: { textContent } }: { node: { textContent: string } })
   }
 
   return (
-    <NodeViewWrapper 
-      className="code-window my-4 relative group rounded-xl overflow-hidden shadow-sm dark:shadow-2xl border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-[#1e1e1e]"
-      style={{
-        fontSize: '14px',
-        lineHeight: '1.5',
-        fontFamily: '"Menlo", "Monaco", "Consolas", "Courier New", monospace'
-      }}
-    >
+    <NodeViewWrapper className={`code-window not-prose group relative ${collapsed ? 'is-collapsed' : ''}`}>
       {/* Header / Title Bar */}
-      <div 
-        className="flex items-center justify-between px-4 py-1.5 bg-white dark:bg-[#1e1e1e]"
-      >
-        <div className="flex gap-2">
-          <div className="w-3 h-3 rounded-full bg-[#ff5f56]" />
-          <div className="w-3 h-3 rounded-full bg-[#ffbd2e]" />
-          <div className="w-3 h-3 rounded-full bg-[#27c93f]" />
+      <div className="code-window-header">
+        <div className="code-window-titlebar">
+          <span className="code-window-dots" aria-hidden="true">
+            <i />
+            <i />
+            <i />
+          </span>
+          <span className="component-code-label">{language}</span>
+          <span className="code-window-file">{fileName}</span>
         </div>
-        <button
-          onClick={onCopy}
-          className="p-1.5 hover:bg-black/5 dark:hover:bg-white/10 rounded-md transition-colors text-gray-400 dark:text-gray-400 hover:text-gray-600 dark:hover:text-white opacity-0 group-hover:opacity-100"
-          aria-label="Copy code"
-        >
-          {copied ? (
-            <Check className="w-3.5 h-3.5 text-green-400" />
-          ) : (
-            <Copy className="w-3.5 h-3.5" />
-          )}
-        </button>
+        <div className="code-window-tools">
+          <button type="button" onClick={onCopy} className="code-window-copy" aria-label="复制代码">
+            {copied ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5" />}
+          </button>
+          <button
+            type="button"
+            onClick={() => setCollapsed((value) => !value)}
+            className="code-window-toggle"
+            aria-label={collapsed ? '展开代码' : '折叠代码'}
+            aria-expanded={!collapsed}
+          >
+            <ChevronDown className="w-3.5 h-3.5" />
+          </button>
+        </div>
       </div>
 
-      <div className="relative flex overflow-x-auto pt-1 pb-0">
+      <div className="code-window-body">
         {/* Line Numbers */}
-        <div 
-          className="flex-shrink-0 flex flex-col items-end pr-4 pl-2 select-none text-[#237893] dark:text-[#858585] min-w-[3.5rem]"
-          aria-hidden="true"
-          style={{ fontFamily: 'inherit', fontSize: 'inherit', lineHeight: 'inherit' }}
-        >
+        <div className="code-window-gutter" aria-hidden="true">
           {lines.map((_, i) => (
             <span key={i} className="block">{i + 1}</span>
           ))}
         </div>
 
         {/* Code Content */}
-        <pre 
-          className="flex-1 pl-6 pr-4 pb-0 !m-0 !bg-transparent overflow-visible scrollbar-hide !text-[#24292e] dark:!text-[#d4d4d4]"
-          style={{ fontFamily: 'inherit', fontSize: 'inherit', lineHeight: 'inherit' }}
-        >
+        <pre className="code-window-pre">
           <NodeViewContent className="!bg-transparent !p-0 !whitespace-pre !font-inherit !text-inherit" />
         </pre>
       </div>
     </NodeViewWrapper>
   )
+}
+
+function formatCodeLanguage(value: unknown) {
+  if (typeof value !== 'string' || !value.trim()) return 'Code'
+  const language = value.trim().toLowerCase()
+
+  const labels: Record<string, string> = {
+    c: 'C',
+    cpp: 'C++',
+    css: 'CSS',
+    html: 'HTML',
+    js: 'JavaScript',
+    javascript: 'JavaScript',
+    json: 'JSON',
+    jsx: 'JSX',
+    md: 'Markdown',
+    markdown: 'Markdown',
+    py: 'Python',
+    python: 'Python',
+    sh: 'Shell',
+    shell: 'Shell',
+    ts: 'TypeScript',
+    tsx: 'TSX',
+    typescript: 'TypeScript',
+  }
+
+  return labels[language] || value.trim()
+}
+
+function getCodeFileName(value: unknown) {
+  if (typeof value !== 'string' || !value.trim()) return 'example.txt'
+  const language = value.trim().toLowerCase()
+
+  const extensions: Record<string, string> = {
+    c: 'c',
+    cpp: 'cpp',
+    css: 'css',
+    html: 'html',
+    js: 'js',
+    javascript: 'js',
+    json: 'json',
+    jsx: 'jsx',
+    md: 'md',
+    markdown: 'md',
+    py: 'py',
+    python: 'py',
+    sh: 'sh',
+    shell: 'sh',
+    ts: 'ts',
+    tsx: 'tsx',
+    typescript: 'ts',
+  }
+
+  return `example.${extensions[language] || language}`
 }
 
 interface TocItem {
@@ -241,14 +167,16 @@ export function TipTapRenderer({ content, className = '', toc = [] }: TipTapRend
       Link.configure({
         openOnClick: true,
         HTMLAttributes: {
-          class: 'text-blue-500 hover:text-blue-600 underline cursor-pointer',
+          class: 'article-link',
           target: '_blank',
           rel: 'noopener noreferrer',
         },
       }),
       Image.configure({
         HTMLAttributes: {
-          class: 'rounded-lg max-w-full h-auto my-4',          referrerPolicy: 'no-referrer',        },
+          class: 'article-image',
+          referrerPolicy: 'no-referrer',
+        },
       }),
       CodeBlockLowlight.configure({
         lowlight,
@@ -260,23 +188,22 @@ export function TipTapRenderer({ content, className = '', toc = [] }: TipTapRend
       Table.configure({
         resizable: false,
         HTMLAttributes: {
-          class: 'border-collapse table-auto w-full my-4',
+          class: 'article-table',
         },
       }),
       TableRow.configure({
         HTMLAttributes: {
-          class: 'border border-gray-300 dark:border-gray-700',
+          class: '',
         },
       }),
       TableCell.configure({
         HTMLAttributes: {
-          class: 'border border-gray-300 dark:border-gray-700 px-4 py-2',
+          class: '',
         },
       }),
       TableHeader.configure({
         HTMLAttributes: {
-          class:
-            'border border-gray-300 dark:border-gray-700 px-4 py-2 bg-gray-100 dark:bg-gray-800 font-bold',
+          class: '',
         },
       }),
       TaskList.configure({
@@ -292,12 +219,13 @@ export function TipTapRenderer({ content, className = '', toc = [] }: TipTapRend
       Mathematics,
       Color,
       TextStyle,
+      ...articleRichBlockExtensions,
     ],
     content,
     editable: false,
     editorProps: {
       attributes: {
-        class: `prose prose-xl dark:prose-invert max-w-none leading-relaxed article-font prose-headings:font-bold prose-headings:tracking-tight prose-p:my-6 prose-li:my-1.5 prose-li:leading-relaxed prose-code:text-sm prose-code:px-1.5 prose-code:py-0.5 ${className}`,
+        class: `article-content prose dark:prose-invert max-w-none article-font ${className}`,
       },
     },
   })
@@ -362,7 +290,7 @@ export function TipTapRenderer({ content, className = '', toc = [] }: TipTapRend
           a.textContent = part
           a.rel = 'noopener noreferrer'
           a.target = '_blank'
-          a.className = 'text-blue-500 hover:text-blue-600 underline cursor-pointer'
+          a.className = 'article-link'
           frag.appendChild(a)
         } else {
           frag.appendChild(document.createTextNode(part))
@@ -406,7 +334,9 @@ export function TipTapRenderer({ content, className = '', toc = [] }: TipTapRend
     })
 
     return () => {
-      roots.forEach((root) => root.unmount())
+      window.setTimeout(() => {
+        roots.forEach((root) => root.unmount())
+      }, 0)
     }
   }, [editor, content])
 
@@ -440,7 +370,6 @@ export function TipTapRenderer({ content, className = '', toc = [] }: TipTapRend
 
   return (
     <>
-      <style>{syntaxThemeCss}</style>
       <EditorContent editor={editor} />
       {previewSrc && (
         <div

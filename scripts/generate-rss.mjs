@@ -18,6 +18,31 @@ function normalizeLegacyBranding(text) {
   return text.replace(/ZHalio/g, 'emmm').replace(/github\.com\/zhalio/g, 'github.com/zzemy');
 }
 
+function getPostDate(post) {
+  const value = post.updated_at || post.published_at || post.created_at;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function getFeedUpdatedAt(posts) {
+  const dates = posts.map(getPostDate).filter(Boolean);
+  if (dates.length === 0) {
+    return new Date('1970-01-01T00:00:00.000Z');
+  }
+
+  return new Date(Math.max(...dates.map((date) => date.getTime())));
+}
+
+function writeFileIfChanged(filePath, content) {
+  const previous = fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf8') : null;
+  if (previous === content) {
+    return false;
+  }
+
+  fs.writeFileSync(filePath, content);
+  return true;
+}
+
 if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
   console.warn('Missing Supabase environment variables. Skipping RSS generation.');
   process.exit(0);
@@ -29,29 +54,6 @@ const supabase = createClient(
 );
 
 async function generateRssFeed() {
-  const feed = new Feed({
-    title: "emmm's Blog",
-    description: "A personal blog about technology and life.",
-    id: siteUrl,
-    link: siteUrl,
-    language: "zh",
-    image: `${siteUrl}/icon.png`,
-    favicon: `${siteUrl}/favicon.ico`,
-    copyright: `All rights reserved ${new Date().getFullYear()}, emmm`,
-    updated: new Date(),
-    generator: "Feed for Node.js",
-    feedLinks: {
-      rss2: `${siteUrl}/rss.xml`,
-      json: `${siteUrl}/rss.json`,
-      atom: `${siteUrl}/atom.xml`,
-    },
-    author: {
-      name: "emmm",
-      email: "1992107794@qq.com",
-      link: siteUrl,
-    },
-  });
-
   // Fetch published posts from Supabase for zh locale
   const { data: posts, error } = await supabase
     .from('posts')
@@ -65,7 +67,32 @@ async function generateRssFeed() {
     process.exit(1);
   }
 
-  posts.forEach((post) => {
+  const publishedPosts = posts || [];
+
+  const feed = new Feed({
+    title: "emmm's Blog",
+    description: "A personal blog about technology and life.",
+    id: siteUrl,
+    link: siteUrl,
+    language: "zh",
+    image: `${siteUrl}/icon.png`,
+    favicon: `${siteUrl}/favicon.ico`,
+    copyright: `All rights reserved ${new Date().getFullYear()}, emmm`,
+    updated: getFeedUpdatedAt(publishedPosts),
+    generator: "Feed for Node.js",
+    feedLinks: {
+      rss2: `${siteUrl}/rss.xml`,
+      json: `${siteUrl}/rss.json`,
+      atom: `${siteUrl}/atom.xml`,
+    },
+    author: {
+      name: "emmm",
+      email: "1992107794@qq.com",
+      link: siteUrl,
+    },
+  });
+
+  publishedPosts.forEach((post) => {
     const url = `${siteUrl}/zh/posts/${post.slug}`;
     
     // Extract plain text from TipTap JSON content
@@ -107,11 +134,18 @@ async function generateRssFeed() {
     fs.mkdirSync(publicDirectory, { recursive: true });
   }
 
-  fs.writeFileSync(path.join(publicDirectory, 'rss.xml'), feed.rss2());
-  fs.writeFileSync(path.join(publicDirectory, 'atom.xml'), feed.atom1());
-  fs.writeFileSync(path.join(publicDirectory, 'rss.json'), feed.json1());
+  const outputs = [
+    [path.join(publicDirectory, 'rss.xml'), feed.rss2()],
+    [path.join(publicDirectory, 'atom.xml'), feed.atom1()],
+    [path.join(publicDirectory, 'rss.json'), feed.json1()],
+  ];
+  const changedCount = outputs.filter(([filePath, content]) => writeFileIfChanged(filePath, content)).length;
 
-  console.log('RSS feeds generated successfully!');
+  console.log(
+    changedCount > 0
+      ? `RSS feeds generated successfully! ${changedCount} file(s) updated.`
+      : 'RSS feeds already up to date.'
+  );
 }
 
 generateRssFeed().catch((err) => {

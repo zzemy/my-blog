@@ -1,0 +1,315 @@
+/* Article body skin, scoped to rendered article content only. */
+.article-content {
+  --article-skin-glow: var(--article-rule-glow);
+  --article-skin-soft: var(--article-block-bg-hover);
+  --article-skin-softer: var(--article-block-bg);
+  --article-skin-shadow: var(--article-block-shadow);
+  --article-skin-shadow-hover: var(--article-block-shadow-hover);
+}
+
+.article-content.prose h2 {
+  position: relative;
+  margin-bottom: 1rem;
+  border-top: 0;
+  border-bottom: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.article-content.prose h2::after {
+  display: none;
+}
+
+.article-content.prose h2:hover::after {
+  display: none;
+}
+
+.article-content.prose h1,
+.article-content.prose h2,
+.article-content.prose h3,
+.article-content.prose h4,
+.article-content.prose h5,
+.article-content.prose h6 {
+  scroll-margin-top: 96px;
+}
+
+.article-content.prose h1::before,
+.article-content.prose h2::before,
+.article-content.prose h3::before,
+.article-content.prose h4::before,
+.article-content.prose h5::before,
+.article-content.prose h6::before {
+  content: "#";
+  margin-right: 0.42em;
+  color: var(--article-accent);
+  font-family: var(--font-mono);
+  font-size: 1em;
+  font-weight: 850;
+  opacity: 0.78;
+}
+
+.article-content.prose .not-prose :is(h1, h2, h3, h4, h5, h6)::before {
+  content: none;
+}
+
+.article-content.prose .paragraph-anchor {
+  opacity: 0;
+  text-decoration: none !important;
+  transition: opacity 180ms var(--article-motion);
+}
+
+.article-content.prose :is(p, li, dd, dt, td, th, blockquote, details, figure, figcaption):hover > .paragraph-anchor {
+  opacity: 0.4;
+}
+
+.article-content.prose hr,
+.article-content.prose .component-footnotes {
+  border-top: 0;
+}
+
+.article-content.prose .component-footnotes::before {
+  display: block;
+  height: 4px;
+  border: 0;
+  background-image: linear-gradient(
+    to right,
+    var(--article-rule-color) 50%,
+    transparent 0%
+  );
+  background-repeat: repeat-x;
+  background-size: 50px 4px;
+  opacity: 0.3;
+  filter: none;
+  transition: opacity 180ms var(--article-motion);
+}
+
+.article-content.prose hr {
+  margin: 12px 0;
+}
+
+.article-content.prose hr:hover,
+.article-content.prose .component-footnotes:hover::before {
+  opacity: 0.5;
+}
+
+.article-content.prose .component-footnotes::before {
+  content: "";
+  margin-bottom: 1rem;
+}
+
+.article-content.prose a,
+.article-content .article-link {
+  color: var(--article-accent);
+  text-decoration: none;
+}
+
+.article-content.prose :where(p, li, dd, dt, td, th, blockquote, figcaption) > a:not([href^="#"]):not(:has(code))::after,
+.article-content.prose :where(p, li, dd, dt, td, th, blockquote, figcaption) .article-link:not([href^="#"]):not(:has(code))::after {
+  content: "↗";
+  display: inline-block;
+  margin: 0 0.35em;
+  font-size: 0.68em;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+.article-content.prose :where(p, li, dd, dt, td, th, blockquote, figcaption) > a:not([href^="#"]) code::after,
+.article-content.prose :where(p, li, dd, dt, td, th, blockquote, figcaption) .article-link:not([href^="#"]) code::after {
+  content: "↗";
+  display: inline-block;
+  margin: 0 0.35em;
+  font-size: 0.68em;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+.article-content.prose a:hover,
+.article-content .article-link:hover {
+  color: color-mix(in oklch, var(--article-accent), var(--article-heading) 24%);
+  text-decoration: underline;
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.22em;
+}
+
+.article-content.prose :not(pre) > code,
+.article-content.prose kbd {
+  background: var(--article-code-inline);
+  color: var(--article-accent);
+  box-shadow: none;
+}
+
+.article-content.prose blockquote,
+.article-content.prose details,
+.article-content .component-placeholder,
+.article-content .component-tabs-list,
+.article-content .component-tab-panels,
+.article-content .component-accordions details,
+.article-content .component-math-card,
+.article-content .component-chart,
+.article-content .component-diagram,
+.article-content .component-emoji-board,
+.article-content .component-file-list a,
+.article-content .component-audio,
+.article-content .component-embed,
+.article-content .component-slider-stage,
+.article-content .component-gallery figure,
+.article-content .component-rich-showcase {
+  border-color: var(--article-line);
+  border-radius: 10px;
+  background: var(--article-skin-softer);
+  box-shadow: var(--article-skin-shadow);
+  transition:
+    background-color 220ms var(--article-motion),
+    border-color 220ms var(--article-motion),
+    box-shadow 220ms var(--article-motion),
+    transform 220ms var(--article-motion);
+}
+
+.article-content.prose blockquote:hover,
+.article-content.prose details:hover,
+.article-content .component-placeholder:hover,
+.article-content .component-tab-panels:hover,
+.article-content .component-accordions details:hover,
+.article-content .component-math-card:hover,
+.article-content .component-chart:hover,
+.article-content .component-diagram:hover,
+.article-content .component-emoji-board:hover,
+.article-content .component-file-list a:hover,
+.article-content .component-audio:hover,
+.article-content .component-embed:hover,
+.article-content .component-slider-stage:hover,
+.article-content .component-gallery figure:hover,
+.article-content .component-rich-showcase:hover {
+  border-color: color-mix(in oklch, var(--article-line), var(--article-heading) 12%);
+  box-shadow: var(--article-skin-shadow-hover);
+}
+
+.article-content.prose blockquote {
+  margin: 28px 0;
+  border: 0;
+  border-left-color: var(--article-block-border);
+  border-left-width: 6px;
+  border-left-style: solid;
+  border-radius: 10px;
+  background: var(--article-block-bg);
+  color: var(--article-text);
+  padding: 0 12px;
+  box-shadow: var(--article-block-shadow);
+}
+
+.article-content.prose details {
+  margin: 16px 0;
+  border: 0;
+  border-radius: 10px;
+  background: var(--article-block-bg);
+  padding: 16px 12px;
+  box-shadow: var(--article-block-shadow);
+}
+
+.article-content.prose summary {
+  border-radius: 8px;
+  color: var(--article-heading);
+  cursor: pointer;
+  font-size: 1.1em;
+  font-weight: 700;
+  padding: 8px;
+  transition: background-color 180ms var(--article-motion);
+}
+
+.article-content.prose summary:hover,
+.article-content.prose details[open] summary,
+.article-content .component-accordions summary:hover,
+.article-content .component-accordions details[open] summary {
+  background: var(--article-skin-soft);
+}
+
+.article-content.prose details > :not(summary) {
+  margin-right: 12px;
+  margin-left: 12px;
+}
+
+.article-content.prose img,
+.article-content.prose video,
+.article-content.prose .article-image {
+  border-radius: 10px;
+  box-shadow: none;
+  transition: opacity 220ms var(--article-motion);
+}
+
+.article-content.prose img:hover,
+.article-content.prose video:hover,
+.article-content.prose .article-image:hover {
+  box-shadow: none;
+}
+
+.article-content .component-slider-controls button {
+  filter: none;
+}
+
+.article-content .component-slider-controls button:hover,
+.article-content .component-slider-strip button:hover,
+.article-content .component-slider-strip button.is-active {
+  border-color: color-mix(in oklch, var(--article-accent), transparent 28%);
+  background: var(--article-skin-soft);
+  color: var(--article-accent);
+}
+
+.article-content .component-button,
+.article-content .component-mini-actions a,
+.article-content .component-badge,
+.article-content .component-timeline li > span {
+  border-color: color-mix(in oklch, var(--article-accent), transparent 58%);
+  background: var(--article-skin-soft);
+  color: var(--article-accent);
+  box-shadow: none;
+}
+
+.article-content .component-button-primary {
+  background: var(--article-accent);
+  color: oklch(0.99 0.004 255);
+}
+
+.article-content .component-button-primary:hover,
+.article-content .component-button-primary:focus-visible {
+  background: color-mix(in oklch, var(--article-accent), var(--article-heading) 14%);
+  color: oklch(0.99 0.004 255);
+}
+
+.article-content .component-tabs-list label:hover,
+.article-content .component-tabs-list button:hover,
+.article-content .component-tabs-list button.is-active {
+  background: var(--article-skin-soft);
+  color: var(--article-accent);
+}
+
+.article-content .component-flow {
+  border-color: var(--article-line);
+  background: var(--article-skin-softer);
+  box-shadow: var(--article-skin-shadow);
+}
+
+.article-content .component-flow-question {
+  border-color: var(--article-line);
+  box-shadow: none;
+}
+
+.article-content .component-flow-node,
+.article-content .component-diagram > div {
+  border-color: var(--article-line);
+  background: var(--article-soft);
+}
+
+.article-content .component-gallery figcaption,
+.article-content .component-slider-stage figcaption,
+.article-content .component-video-caption {
+  background: color-mix(in oklch, var(--article-panel), transparent 10%);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .article-content.prose h2::after,
+  .article-content.prose hr,
+  .article-content .component-file-list a,
+  .article-content .component-gallery figure {
+    will-change: box-shadow, border-color;
+  }
+}
