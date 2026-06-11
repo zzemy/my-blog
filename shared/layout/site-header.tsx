@@ -23,14 +23,14 @@ export function SiteHeader() {
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-white/30 bg-background/70 backdrop-blur-2xl shadow-[0_12px_45px_-30px_rgba(0,0,0,0.55)] supports-[backdrop-filter]:bg-background/70 dark:border-white/10">
-      <div className="mx-auto flex h-14 w-full items-center px-3 md:px-6">
+    <header className="sticky top-0 z-50 w-full border-b border-white/35 bg-background/75 backdrop-blur-2xl shadow-[0_12px_45px_-32px_rgba(0,0,0,0.55)] supports-[backdrop-filter]:bg-background/75 dark:border-white/10">
+      <div className="mx-auto flex h-16 w-full items-center px-3 md:px-6">
         <MobileNav />
         <div className="mr-4 flex">
-          <Link href="/" className="mr-6 flex items-center space-x-2 ml-4 md:ml-6">
+          <Link href="/" className="mr-4 flex items-center space-x-2 ml-4 md:ml-6">
             <Terminal className="h-6 w-6" />
           </Link>
-          <nav className="hidden md:flex items-center gap-6 text-[15px] font-medium">
+          <nav className="hidden items-center gap-1 rounded-full border border-black/10 bg-white/55 p-1 text-[15px] font-semibold shadow-[0_8px_24px_-20px_rgba(0,0,0,0.7)] backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.06] md:flex">
             {[
               { href: '/', label: t('home') },
               { href: '/posts', label: t('posts') },
@@ -43,17 +43,13 @@ export function SiteHeader() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`relative transition-colors ${active ? 'text-foreground' : 'text-foreground/70 hover:text-foreground'} `}
+                  className={`rounded-full px-3.5 py-1.5 transition-[background-color,border-color,color,box-shadow] duration-200 ${
+                    active
+                      ? 'border border-black/10 bg-foreground text-background shadow-[0_6px_16px_-12px_rgba(0,0,0,0.9)] dark:border-white/20 dark:bg-white dark:text-background'
+                      : 'border border-transparent text-foreground/68 hover:bg-black/[0.055] hover:text-foreground dark:text-white/68 dark:hover:bg-white/10 dark:hover:text-white'
+                  }`}
                 >
-                  <span
-                    className={`after:absolute after:left-0 after:-bottom-1 after:h-0.5 after:rounded-full after:transition-all after:duration-200 ${
-                      active
-                        ? 'after:w-full after:bg-primary/80 dark:after:bg-white/90'
-                        : 'after:w-0 after:bg-primary/45 hover:after:w-full hover:after:bg-primary/70 dark:after:bg-white/55 dark:hover:after:bg-white/80'
-                    }`}
-                  >
-                    {item.label}
-                  </span>
+                  {item.label}
                 </Link>
               )
             })}

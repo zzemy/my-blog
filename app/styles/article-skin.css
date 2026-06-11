@@ -185,7 +185,7 @@
 }
 
 .article-content .component-callout {
-  border-color: var(--article-line);
+  border-color: var(--callout-border, var(--article-line));
   border-left-color: var(--callout-icon);
   background: var(--callout-bg);
   box-shadow: none;
@@ -196,7 +196,7 @@
 }
 
 .article-content .component-callout:hover {
-  border-color: var(--article-line);
+  border-color: var(--callout-border, var(--article-line));
   border-left-color: var(--callout-icon);
   background: var(--callout-bg);
   box-shadow: none;
