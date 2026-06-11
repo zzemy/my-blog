@@ -16,10 +16,10 @@ export const BlockControls = Extension.create({
             state.doc.forEach((node, offset, index) => {
               const insertPos = offset + node.nodeSize
               decorations.push(createBlockDecoration(offset, offset + node.nodeSize))
-              decorations.push(createInsertDecoration(offset, insertPos, `block-${index}`))
+              decorations.push(createInsertDecoration(offset, insertPos, `block-${index}`, node.isTextblock))
             })
 
-            decorations.push(createInsertDecoration(state.doc.content.size, state.doc.content.size, 'end'))
+            decorations.push(createInsertDecoration(state.doc.content.size, state.doc.content.size, 'end', false))
 
             return DecorationSet.create(state.doc, decorations)
           },
@@ -35,12 +35,12 @@ function createBlockDecoration(from: number, to: number) {
   })
 }
 
-function createInsertDecoration(anchorPos: number, insertPos: number, key: string) {
+function createInsertDecoration(anchorPos: number, insertPos: number, key: string, canStyle: boolean) {
   return Decoration.widget(
     anchorPos,
     (view) => {
       const wrapper = document.createElement('span')
-      wrapper.className = 'doc-block-control'
+      wrapper.className = canStyle ? 'doc-block-control' : 'doc-block-control doc-block-control-compact'
       wrapper.contentEditable = 'false'
 
       const insertButton = document.createElement('button')
@@ -58,28 +58,7 @@ function createInsertDecoration(anchorPos: number, insertPos: number, key: strin
             bubbles: true,
             detail: {
               pos: insertPos,
-              x: rect.right + 8,
-              y: rect.top,
-            },
-          }),
-        )
-      })
-
-      const styleButton = document.createElement('button')
-      styleButton.type = 'button'
-      styleButton.className = 'doc-block-style-button'
-      styleButton.setAttribute('aria-label', '修改当前块样式')
-      styleButton.innerHTML = '<span aria-hidden="true">⋮</span>'
-
-      styleButton.addEventListener('mousedown', (event) => {
-        event.preventDefault()
-        event.stopPropagation()
-        const rect = styleButton.getBoundingClientRect()
-        view.dom.dispatchEvent(
-          new CustomEvent('tiptap-block-style', {
-            bubbles: true,
-            detail: {
-              pos: Math.min(anchorPos + 1, view.state.doc.content.size),
+              anchorPos,
               x: rect.right + 8,
               y: rect.top,
             },
@@ -88,7 +67,34 @@ function createInsertDecoration(anchorPos: number, insertPos: number, key: strin
       })
 
       wrapper.appendChild(insertButton)
-      wrapper.appendChild(styleButton)
+
+      if (canStyle) {
+        const styleButton = document.createElement('button')
+        styleButton.type = 'button'
+        styleButton.className = 'doc-block-style-button'
+        styleButton.setAttribute('aria-label', '修改当前块样式')
+        styleButton.innerHTML = '<span aria-hidden="true">⋮</span>'
+
+        styleButton.addEventListener('mousedown', (event) => {
+          event.preventDefault()
+          event.stopPropagation()
+          const rect = styleButton.getBoundingClientRect()
+          view.dom.dispatchEvent(
+            new CustomEvent('tiptap-block-style', {
+              bubbles: true,
+              detail: {
+                pos: Math.min(anchorPos + 1, view.state.doc.content.size),
+                anchorPos,
+                x: rect.right + 8,
+                y: rect.top,
+              },
+            }),
+          )
+        })
+
+        wrapper.appendChild(styleButton)
+      }
+
       return wrapper
     },
     {

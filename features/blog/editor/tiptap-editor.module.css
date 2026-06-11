@@ -81,6 +81,15 @@
   z-index: 8;
 }
 
+.editorShell :global(.doc-block-control-compact) {
+  width: 1.7rem;
+  transform: translate(-2.25rem, 0.08rem);
+}
+
+.editorShell :global(.doc-block-control-compact:hover) {
+  transform: translate(-2.25rem, 0.08rem) scale(1.04);
+}
+
 .editorShell :global(.ProseMirror:hover .doc-block-control) {
   opacity: 0.16;
 }

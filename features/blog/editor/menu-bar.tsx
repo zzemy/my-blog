@@ -47,6 +47,7 @@ interface MenuBarProps {
 
 type InsertTarget = {
   pos: number
+  anchorPos: number
   x: number
   y: number
 }
@@ -93,18 +94,25 @@ export function MenuBar({ editor }: MenuBarProps) {
     return typeof pos === 'number' ? chain.setTextSelection(pos) : chain
   }
 
+  const closeMenus = useCallback(() => {
+    setTopMenuOpen(false)
+    setFloatingTarget(null)
+    setStyleTarget(null)
+    setInsertQuery('')
+  }, [])
+
   const openFloatingMenu = useCallback((target: InsertTarget) => {
     setTopMenuOpen(false)
     setStyleTarget(null)
-    setFloatingTarget(target)
+    setFloatingTarget(resolveFloatingTarget(editor, target))
     setInsertQuery('')
-  }, [])
+  }, [editor])
 
   const openStyleMenu = useCallback((target: InsertTarget) => {
     setTopMenuOpen(false)
     setFloatingTarget(null)
-    setStyleTarget(target)
-  }, [])
+    setStyleTarget(resolveFloatingTarget(editor, target))
+  }, [editor])
 
   const insertGroups: InsertGroup[] = [
       {
@@ -433,7 +441,7 @@ export function MenuBar({ editor }: MenuBarProps) {
 
       event.preventDefault()
       const coords = editor.view.coordsAtPos(selection.from)
-      openFloatingMenu({ pos: selection.from, x: coords.left, y: coords.bottom + 8 })
+      openFloatingMenu({ pos: selection.from, anchorPos: selection.from, x: coords.left, y: coords.bottom + 8 })
     }
 
     const openFromBlockControl = (event: Event) => {
@@ -459,7 +467,31 @@ export function MenuBar({ editor }: MenuBarProps) {
       dom.removeEventListener('tiptap-block-style', openFromBlockStyle)
       document.removeEventListener('keydown', closeOnEscape)
     }
-  }, [editor, openFloatingMenu, openStyleMenu])
+  }, [closeMenus, editor, openFloatingMenu, openStyleMenu])
+
+  useEffect(() => {
+    if (!floatingTarget && !styleTarget) return
+
+    let frame = 0
+    const updateFloatingPosition = () => {
+      window.cancelAnimationFrame(frame)
+      frame = window.requestAnimationFrame(() => {
+        setFloatingTarget((target) => (target ? resolveFloatingTarget(editor, target) : target))
+        setStyleTarget((target) => (target ? resolveFloatingTarget(editor, target) : target))
+      })
+    }
+
+    window.addEventListener('scroll', updateFloatingPosition, true)
+    window.addEventListener('resize', updateFloatingPosition)
+    editor.on('transaction', updateFloatingPosition)
+
+    return () => {
+      window.cancelAnimationFrame(frame)
+      window.removeEventListener('scroll', updateFloatingPosition, true)
+      window.removeEventListener('resize', updateFloatingPosition)
+      editor.off('transaction', updateFloatingPosition)
+    }
+  }, [editor, floatingTarget, styleTarget])
 
   const uploadInlineImage = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -480,13 +512,6 @@ export function MenuBar({ editor }: MenuBarProps) {
         pendingImagePosRef.current = null
         if (fileInputRef.current) fileInputRef.current.value = ''
       })
-  }
-
-  const closeMenus = () => {
-    setTopMenuOpen(false)
-    setFloatingTarget(null)
-    setStyleTarget(null)
-    setInsertQuery('')
   }
 
   const run = (action: InsertItem['action'], pos: number | null) => {
@@ -790,6 +815,25 @@ export function SelectionBubbleMenu({ editor }: MenuBarProps) {
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max)
+}
+
+function resolveFloatingTarget(editor: Editor, target: InsertTarget): InsertTarget {
+  if (typeof window === 'undefined') return target
+
+  try {
+    const docSize = editor.state.doc.content.size
+    const anchorPos = clamp(target.anchorPos, 0, docSize)
+    const coords = editor.view.coordsAtPos(anchorPos)
+
+    return {
+      ...target,
+      anchorPos,
+      x: coords.left,
+      y: coords.bottom + 8,
+    }
+  } catch {
+    return target
+  }
 }
 
 function getFloatingMenuStyle(

@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import type { Dispatch, SetStateAction } from 'react'
+import type { Dispatch, MouseEvent, SetStateAction } from 'react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   AlertCircle,
@@ -107,6 +107,17 @@ export function PostEditorWorkspace({
     updateForm({ tags: formData.tags.filter((tag) => tag !== tagToRemove) })
   }
 
+  const jumpToOutlineItem = (event: MouseEvent<HTMLAnchorElement>, item: OutlineItem) => {
+    event.preventDefault()
+
+    const target = document.getElementById(item.id)
+    if (!target) return
+
+    const y = target.getBoundingClientRect().top + window.scrollY - 140
+    window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' })
+    window.history.replaceState(null, '', `#${item.id}`)
+  }
+
   return (
     <div className={styles.workspace}>
       <header className={styles.topbar}>
@@ -172,7 +183,7 @@ export function PostEditorWorkspace({
           <nav className={styles.outlineList} aria-label="文章大纲">
             {outline.length ? (
               outline.map((item) => (
-                <a key={item.id} href={`#${item.id}`} data-level={item.level}>
+                <a key={item.id} href={`#${item.id}`} data-level={item.level} onClick={(event) => jumpToOutlineItem(event, item)}>
                   {item.text}
                 </a>
               ))
