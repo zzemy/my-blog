@@ -50,6 +50,12 @@ type InsertTarget = {
   anchorPos: number
   x: number
   y: number
+  source?: 'block' | 'cursor'
+}
+
+type BlockHandleTarget = InsertTarget & {
+  canStyle: boolean
+  stylePos: number
 }
 
 type FloatingMenuStyle = {
@@ -74,6 +80,7 @@ export function MenuBar({ editor }: MenuBarProps) {
   const pendingImagePosRef = useRef<number | null>(null)
   const [isUploading, setIsUploading] = useState(false)
   const [topMenuOpen, setTopMenuOpen] = useState(false)
+  const [blockHandleTarget, setBlockHandleTarget] = useState<BlockHandleTarget | null>(null)
   const [floatingTarget, setFloatingTarget] = useState<InsertTarget | null>(null)
   const [styleTarget, setStyleTarget] = useState<InsertTarget | null>(null)
   const [insertQuery, setInsertQuery] = useState('')
@@ -441,41 +448,48 @@ export function MenuBar({ editor }: MenuBarProps) {
 
       event.preventDefault()
       const coords = editor.view.coordsAtPos(selection.from)
-      openFloatingMenu({ pos: selection.from, anchorPos: selection.from, x: coords.left, y: coords.bottom + 8 })
+      openFloatingMenu({
+        pos: selection.from,
+        anchorPos: selection.from,
+        x: coords.left,
+        y: coords.bottom + 8,
+        source: 'cursor',
+      })
     }
 
-    const openFromBlockControl = (event: Event) => {
-      const detail = (event as CustomEvent<InsertTarget>).detail
-      if (!detail || typeof detail.pos !== 'number') return
-      openFloatingMenu(detail)
+    const updateBlockHandle = (event: MouseEvent) => {
+      const target = resolveBlockHandleTarget(editor, event.clientX, event.clientY)
+      setBlockHandleTarget(target)
     }
 
-    const openFromBlockStyle = (event: Event) => {
-      const detail = (event as CustomEvent<InsertTarget>).detail
-      if (!detail || typeof detail.pos !== 'number') return
-      openStyleMenu(detail)
+    const hideBlockHandle = (event: MouseEvent) => {
+      if (floatingTarget || styleTarget) return
+      if (event.relatedTarget instanceof HTMLElement && event.relatedTarget.closest('.doc-block-handle')) return
+
+      setBlockHandleTarget(null)
     }
 
     dom.addEventListener('keydown', openWithSlash)
-    dom.addEventListener('tiptap-block-insert', openFromBlockControl)
-    dom.addEventListener('tiptap-block-style', openFromBlockStyle)
+    dom.addEventListener('mousemove', updateBlockHandle)
+    dom.addEventListener('mouseleave', hideBlockHandle)
     document.addEventListener('keydown', closeOnEscape)
 
     return () => {
       dom.removeEventListener('keydown', openWithSlash)
-      dom.removeEventListener('tiptap-block-insert', openFromBlockControl)
-      dom.removeEventListener('tiptap-block-style', openFromBlockStyle)
+      dom.removeEventListener('mousemove', updateBlockHandle)
+      dom.removeEventListener('mouseleave', hideBlockHandle)
       document.removeEventListener('keydown', closeOnEscape)
     }
-  }, [closeMenus, editor, openFloatingMenu, openStyleMenu])
+  }, [closeMenus, editor, floatingTarget, openFloatingMenu, styleTarget])
 
   useEffect(() => {
-    if (!floatingTarget && !styleTarget) return
+    if (!blockHandleTarget && !floatingTarget && !styleTarget) return
 
     let frame = 0
     const updateFloatingPosition = () => {
       window.cancelAnimationFrame(frame)
       frame = window.requestAnimationFrame(() => {
+        setBlockHandleTarget((target) => (target ? resolveBlockHandleTargetAtPos(editor, target.anchorPos) : target))
         setFloatingTarget((target) => (target ? resolveFloatingTarget(editor, target) : target))
         setStyleTarget((target) => (target ? resolveFloatingTarget(editor, target) : target))
       })
@@ -491,7 +505,7 @@ export function MenuBar({ editor }: MenuBarProps) {
       window.removeEventListener('resize', updateFloatingPosition)
       editor.off('transaction', updateFloatingPosition)
     }
-  }, [editor, floatingTarget, styleTarget])
+  }, [blockHandleTarget, editor, floatingTarget, styleTarget])
 
   const uploadInlineImage = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -594,6 +608,55 @@ export function MenuBar({ editor }: MenuBarProps) {
           <Redo className="h-4 w-4" />
         </button>
       </div>
+      {blockHandleTarget ? (
+        <div
+          className="doc-block-handle"
+          style={{
+            left: blockHandleTarget.x,
+            top: blockHandleTarget.y,
+          }}
+          onMouseEnter={() => setBlockHandleTarget(blockHandleTarget)}
+          onMouseLeave={() => {
+            if (!floatingTarget && !styleTarget) setBlockHandleTarget(null)
+          }}
+        >
+          <button
+            type="button"
+            className="doc-block-insert-button"
+            onMouseDown={(event) => {
+              event.preventDefault()
+              event.stopPropagation()
+              openFloatingMenu({
+                ...blockHandleTarget,
+                x: blockHandleTarget.x + 64,
+                source: 'block',
+              })
+            }}
+            aria-label="在当前块后插入内容块"
+          >
+            <Plus className="h-4 w-4" />
+          </button>
+          {blockHandleTarget.canStyle ? (
+            <button
+              type="button"
+              className="doc-block-style-button"
+              onMouseDown={(event) => {
+                event.preventDefault()
+                event.stopPropagation()
+                openStyleMenu({
+                  ...blockHandleTarget,
+                  pos: blockHandleTarget.stylePos,
+                  x: blockHandleTarget.x + 64,
+                  source: 'block',
+                })
+              }}
+              aria-label="修改当前块样式"
+            >
+              <GripVertical className="h-4 w-4" />
+            </button>
+          ) : null}
+        </div>
+      ) : null}
       {floatingTarget ? (
         <div
           className="doc-floating-insert"
@@ -817,10 +880,70 @@ function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max)
 }
 
-function resolveFloatingTarget(editor: Editor, target: InsertTarget): InsertTarget {
+function resolveBlockHandleTarget(editor: Editor, clientX: number, clientY: number): BlockHandleTarget | null {
+  const coords = editor.view.posAtCoords({ left: clientX, top: clientY })
+  if (!coords) return null
+
+  return resolveBlockHandleTargetAtDocPos(editor, coords.pos)
+}
+
+function resolveBlockHandleTargetAtPos(editor: Editor, anchorPos: number): BlockHandleTarget | null {
+  return resolveBlockHandleTargetAtDocPos(editor, Math.min(anchorPos + 1, editor.state.doc.content.size))
+}
+
+function resolveBlockHandleTargetAtDocPos(editor: Editor, pos: number): BlockHandleTarget | null {
+  if (typeof window === 'undefined') return null
+
+  try {
+    const docSize = editor.state.doc.content.size
+    if (docSize <= 0) return null
+
+    const $pos = editor.state.doc.resolve(clamp(pos, 0, docSize))
+    const depth = Math.min($pos.depth, 1)
+    if (depth < 1) return null
+
+    const node = $pos.node(depth)
+    const anchorPos = $pos.before(depth)
+    const dom = editor.view.nodeDOM(anchorPos)
+    if (!(dom instanceof HTMLElement)) return null
+
+    const blockRect = dom.getBoundingClientRect()
+    if (blockRect.bottom < 76 || blockRect.top > window.innerHeight - 32) return null
+
+    const editorRect = editor.view.dom.getBoundingClientRect()
+    const left = Math.max(12, editorRect.left - 56)
+    const top = blockRect.top + 2
+
+    return {
+      pos: Math.min(anchorPos + node.nodeSize, docSize),
+      anchorPos,
+      stylePos: Math.min(anchorPos + 1, docSize),
+      x: left,
+      y: top,
+      canStyle: node.isTextblock,
+      source: 'block',
+    }
+  } catch {
+    return null
+  }
+}
+
+function resolveFloatingTarget(editor: Editor, target: InsertTarget): InsertTarget | null {
   if (typeof window === 'undefined') return target
 
   try {
+    if (target.source === 'block') {
+      const blockTarget = resolveBlockHandleTargetAtPos(editor, target.anchorPos)
+      if (!blockTarget) return null
+
+      return {
+        ...target,
+        anchorPos: blockTarget.anchorPos,
+        x: blockTarget.x + 64,
+        y: blockTarget.y,
+      }
+    }
+
     const docSize = editor.state.doc.content.size
     const anchorPos = clamp(target.anchorPos, 0, docSize)
     const coords = editor.view.coordsAtPos(anchorPos)

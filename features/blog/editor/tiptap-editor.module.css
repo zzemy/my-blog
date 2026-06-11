@@ -65,48 +65,28 @@
   backdrop-filter: none;
 }
 
-.editorShell :global(.doc-block-control) {
-  position: absolute;
+.editorShell :global(.doc-block-handle) {
+  position: fixed;
   display: inline-flex;
   width: 3.45rem;
   height: 1.7rem;
   align-items: center;
   gap: 0.18rem;
-  transform: translate(-3.95rem, 0.08rem);
-  opacity: 0;
   pointer-events: auto;
+  opacity: 0.92;
   transition:
     opacity 140ms var(--article-motion),
     transform 140ms var(--article-motion);
-  z-index: 8;
+  z-index: 70;
 }
 
-.editorShell :global(.doc-block-control-compact) {
-  width: 1.7rem;
-  transform: translate(-2.25rem, 0.08rem);
-}
-
-.editorShell :global(.doc-block-control-compact:hover) {
-  transform: translate(-2.25rem, 0.08rem) scale(1.04);
-}
-
-.editorShell :global(.ProseMirror:hover .doc-block-control) {
-  opacity: 0.16;
-}
-
-.editorShell :global(.doc-block-control:has(+ .doc-editable-block:hover)),
-.editorShell :global(.doc-block-control:has(+ .doc-editable-block:focus-within)),
-.editorShell :global(.doc-block-control:hover) {
-  opacity: 0.85;
-}
-
-.editorShell :global(.doc-block-control:hover) {
-  transform: translate(-3.95rem, 0.08rem) scale(1.04);
+.editorShell :global(.doc-block-handle:hover) {
   opacity: 1;
+  transform: scale(1.035);
 }
 
-.editorShell :global(.doc-block-insert-button),
-.editorShell :global(.doc-block-style-button) {
+.editorShell :global(.doc-block-handle .doc-block-insert-button),
+.editorShell :global(.doc-block-handle .doc-block-style-button) {
   display: inline-flex;
   width: 1.7rem;
   height: 1.7rem;
@@ -122,15 +102,15 @@
   box-shadow: 0 10px 28px rgb(0 0 0 / 26%);
 }
 
-.editorShell :global(.doc-block-style-button) {
+.editorShell :global(.doc-block-handle .doc-block-style-button) {
   color: #9daebf;
   font-size: 1.1rem;
 }
 
-.editorShell :global(.doc-block-insert-button:hover),
-.editorShell :global(.doc-block-insert-button:focus-visible),
-.editorShell :global(.doc-block-style-button:hover),
-.editorShell :global(.doc-block-style-button:focus-visible) {
+.editorShell :global(.doc-block-handle .doc-block-insert-button:hover),
+.editorShell :global(.doc-block-handle .doc-block-insert-button:focus-visible),
+.editorShell :global(.doc-block-handle .doc-block-style-button:hover),
+.editorShell :global(.doc-block-handle .doc-block-style-button:focus-visible) {
   border-color: rgb(104 170 235 / 42%);
   background: rgb(45 60 78 / 96%);
   color: #f5f9ff;

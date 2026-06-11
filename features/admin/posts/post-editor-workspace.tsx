@@ -107,13 +107,18 @@ export function PostEditorWorkspace({
     updateForm({ tags: formData.tags.filter((tag) => tag !== tagToRemove) })
   }
 
-  const jumpToOutlineItem = (event: MouseEvent<HTMLAnchorElement>, item: OutlineItem) => {
+  const jumpToOutlineItem = (event: MouseEvent<HTMLAnchorElement>, item: OutlineItem, index: number) => {
     event.preventDefault()
 
-    const target = document.getElementById(item.id)
+    const target = document.getElementById(item.id) || getEditorHeadingByIndex(index)
     if (!target) return
 
-    scrollElementIntoEditorView(target, 140)
+    if (!target.id) {
+      target.id = item.id
+      target.style.scrollMarginTop = '140px'
+    }
+
+    target.scrollIntoView({ behavior: 'smooth', block: 'start' })
     window.history.replaceState(null, '', `#${item.id}`)
   }
 
@@ -181,8 +186,13 @@ export function PostEditorWorkspace({
           </div>
           <nav className={styles.outlineList} aria-label="文章大纲">
             {outline.length ? (
-              outline.map((item) => (
-                <a key={item.id} href={`#${item.id}`} data-level={item.level} onClick={(event) => jumpToOutlineItem(event, item)}>
+              outline.map((item, index) => (
+                <a
+                  key={item.id}
+                  href={`#${item.id}`}
+                  data-level={item.level}
+                  onClick={(event) => jumpToOutlineItem(event, item, index)}
+                >
                   {item.text}
                 </a>
               ))
@@ -431,35 +441,10 @@ function isRecord(value: unknown): value is JsonNode & Record<string, unknown> {
   return typeof value === 'object' && value !== null
 }
 
-function scrollElementIntoEditorView(target: HTMLElement, offset: number) {
-  const container = getScrollContainer(target)
+function getEditorHeadingByIndex(index: number): HTMLElement | null {
+  const headings = document.querySelectorAll<HTMLElement>(
+    '.admin-editor .ProseMirror > h1, .admin-editor .ProseMirror > h2, .admin-editor .ProseMirror > h3, .admin-editor .ProseMirror > h4, .admin-editor .ProseMirror > h5, .admin-editor .ProseMirror > h6',
+  )
 
-  if (!container || container === document.documentElement || container === document.body) {
-    const top = target.getBoundingClientRect().top + window.scrollY - offset
-    window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' })
-    return
-  }
-
-  const containerRect = container.getBoundingClientRect()
-  const targetRect = target.getBoundingClientRect()
-  const top = container.scrollTop + targetRect.top - containerRect.top - offset
-
-  container.scrollTo({ top: Math.max(0, top), behavior: 'smooth' })
-}
-
-function getScrollContainer(element: HTMLElement): HTMLElement | null {
-  let parent = element.parentElement
-
-  while (parent && parent !== document.body) {
-    const style = window.getComputedStyle(parent)
-    const canScroll = /(auto|scroll|overlay)/.test(style.overflowY)
-
-    if (canScroll && parent.scrollHeight > parent.clientHeight) {
-      return parent
-    }
-
-    parent = parent.parentElement
-  }
-
-  return document.scrollingElement instanceof HTMLElement ? document.scrollingElement : document.documentElement
+  return headings[index] || null
 }
