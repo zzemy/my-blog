@@ -175,7 +175,7 @@ export function PostLayout({ children, toc = [] }: PostLayoutProps) {
                         item.depth >= 6 && "pl-20",
                         activeId === item.id
                             ? "border-primary font-medium text-primary bg-accent/10"
-                            : "border-transparent text-muted-foreground hover:border-muted-foreground/50"
+                            : "border-transparent text-foreground/65 hover:border-foreground/35 hover:text-foreground/85"
                         )}
                     >
                         {item.text}
