@@ -106,10 +106,10 @@
   --article-line: oklch(1 0 0 / 12%);
   --article-accent: oklch(0.68 0.095 188);
   --article-code-inline: var(--article-soft);
-  --article-code-surface: #252927;
-  --article-code-header: #2c302e;
+  --article-code-surface: #202321;
+  --article-code-header: #282c29;
   --article-code-scrollbar: rgb(255 255 255 / 14%);
-  --article-code-text: #c9d1d9;
+  --article-code-text: #d6dcda;
   --article-code-highlight: rgb(255 255 255 / 7%);
   --article-h2-line: color-mix(in oklch, var(--article-line), transparent 10%);
   --article-rule-color: var(--article-accent);
@@ -159,16 +159,16 @@
 
 .dark .article-shell,
 .dark .admin-editor {
-  --article-syntax-comment: #7aa397;
-  --article-syntax-keyword: #8ab4f8;
-  --article-syntax-name: #7dcfff;
-  --article-syntax-string: #8bd5ca;
-  --article-syntax-attr: #89ddff;
-  --article-syntax-variable: #89ddff;
-  --article-syntax-title: #b4cafe;
-  --article-syntax-type: #4ec9b0;
-  --article-syntax-number: #b5cea8;
-  --article-syntax-regexp: #7aa2f7;
+  --article-syntax-comment: #7e8783;
+  --article-syntax-keyword: #8fa8d8;
+  --article-syntax-name: #cfd6d3;
+  --article-syntax-string: #a8b99f;
+  --article-syntax-attr: #b7a8d8;
+  --article-syntax-variable: #c4cbc8;
+  --article-syntax-title: #d7ddd9;
+  --article-syntax-type: #c9ad7a;
+  --article-syntax-number: #d0bd8a;
+  --article-syntax-regexp: #c49ac1;
 }
 
 .article-hero {
