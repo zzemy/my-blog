@@ -246,6 +246,7 @@
   --tw-prose-td-borders: var(--article-line);
   color: var(--article-text);
   font-size: var(--article-font-size);
+  font-weight: 500;
   line-height: var(--article-line-height);
 }
 
@@ -262,7 +263,7 @@
 .article-content.prose h5,
 .article-content.prose h6 {
   color: var(--article-heading);
-  font-family: var(--font-heading);
+  font-family: var(--article-font);
   font-weight: 700;
   line-height: 1.2;
   letter-spacing: 0;

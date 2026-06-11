@@ -74,7 +74,7 @@
 :root {
   --radius: 0.625rem;
   --font-wenkai: "LXGW WenKai", "霞鹜文楷", "LXGW WenKai Screen", "Source Han Sans SC", "Noto Sans SC", "Microsoft YaHei", "PingFang SC", "Heiti SC", system-ui, sans-serif;
-  --article-font: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", "Source Han Sans SC", system-ui, sans-serif;
+  --article-font: var(--font-wenkai);
   --article-font-size: 1.0625rem;
   --article-line-height: 1.82;
   --article-motion: cubic-bezier(0.22, 1, 0.36, 1);
