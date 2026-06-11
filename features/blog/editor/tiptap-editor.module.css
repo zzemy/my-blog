@@ -1,246 +1,193 @@
 .editorShell {
-  background: transparent;
-  border: none;
-  box-shadow: none;
+  overflow: hidden;
+  border: 1px solid var(--article-line);
+  border-radius: 8px;
+  background: var(--article-panel);
+  box-shadow: 0 18px 42px color-mix(in oklch, var(--foreground), transparent 94%);
 }
 
-.editorShell :global(.ProseMirror pre) {
+:global(.dark) .editorShell {
+  box-shadow: 0 18px 42px rgb(0 0 0 / 24%);
+}
+
+.editorCanvas {
+  background:
+    linear-gradient(to right, color-mix(in oklch, var(--article-line), transparent 72%) 1px, transparent 1px),
+    var(--article-panel);
+  background-size: 100% 100%;
+}
+
+.editorShell :global(.ProseMirror) {
+  min-height: 560px;
+  padding: 1.5rem;
+  caret-color: var(--article-accent);
+}
+
+.editorShell :global(.ProseMirror:focus) {
+  outline: none;
+}
+
+.editorShell :global(.ProseMirror p.is-editor-empty:first-child::before) {
+  float: left;
+  height: 0;
+  color: var(--article-muted);
+  content: attr(data-placeholder);
+  pointer-events: none;
+}
+
+.editorShell :global(.ProseMirror-selectednode) {
+  outline: 2px solid color-mix(in oklch, var(--article-accent), transparent 18%);
+  outline-offset: 4px;
+}
+
+.editorShell :global([data-rich-block-editable="true"]) {
   position: relative;
-  overflow: auto;
-  border: 1px solid #1f2937;
-  border-radius: 10px;
-  background: #0f172a;
-  color: #e5e7eb;
-  padding: 14px 16px;
-  font-family: "JetBrains Mono", "Menlo", "Consolas", monospace;
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 4%);
 }
 
-:global(.dark) .editorShell :global(.ProseMirror) {
-  min-height: 520px;
-  background: transparent;
-  color: #e5e7eb;
-  padding: 20px 24px 28px;
-  line-height: 1.8;
-}
-
-:global(.dark) .editorShell :global(.ProseMirror h1),
-:global(.dark) .editorShell :global(.ProseMirror h2),
-:global(.dark) .editorShell :global(.ProseMirror h3),
-:global(.dark) .editorShell :global(.ProseMirror h4),
-:global(.dark) .editorShell :global(.ProseMirror h5),
-:global(.dark) .editorShell :global(.ProseMirror h6) {
-  color: #f8fafc;
-  letter-spacing: -0.01em;
-}
-
-:global(.dark) .editorShell :global(.ProseMirror p) {
-  color: #d1d5db;
-}
-
-:global(.dark) .editorShell :global(.ProseMirror pre) {
-  color: #e5e7eb;
-}
-
-:global(.dark) .editorShell :global(.ProseMirror pre::before) {
-  content: "code";
-  position: absolute;
-  top: 10px;
-  right: 12px;
-  color: rgb(229 231 235 / 60%);
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-:global(.dark) .editorShell :global(.ProseMirror pre code) {
-  background: transparent;
-  padding: 0;
-}
-
-:global(.dark) .editorShell :global(.ProseMirror li) {
-  padding-left: 6px;
-}
-
-:global(.dark) .editorShell :global(.ProseMirror ul),
-:global(.dark) .editorShell :global(.ProseMirror ol) {
-  margin-left: 1.2rem;
-}
-
-:global(.dark) .editorShell :global(.ProseMirror ul li::marker) {
-  color: #94a3b8;
-}
-
-:global(.dark) .editorShell :global(.ProseMirror code:not(pre code)) {
-  border: 1px solid rgb(148 163 184 / 35%);
+.editorShell :global(.component-block-edit-button) {
+  display: inline-flex;
+  width: 1.7rem;
+  height: 1.7rem;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  border: 1px solid color-mix(in oklch, var(--callout-icon), transparent 45%);
   border-radius: 6px;
-  background: rgb(148 163 184 / 15%);
-  color: #e5e7eb;
-  padding: 0.15rem 0.35rem;
-  font-family: "JetBrains Mono", "Menlo", "Consolas", monospace;
+  background: color-mix(in oklch, var(--callout-bg), white 20%);
+  color: var(--callout-text);
+  cursor: pointer;
+  transition:
+    background-color 160ms var(--article-motion),
+    border-color 160ms var(--article-motion),
+    transform 160ms var(--article-motion);
 }
 
-:global(.dark) .editorShell :global(.ProseMirror blockquote) {
-  border-left: 3px solid #1f2937;
-  border-radius: 10px;
-  background: rgb(31 41 55 / 35%);
-  color: #cbd5e1;
-  padding: 10px 14px;
+.editorShell :global(.component-block-edit-button:hover),
+.editorShell :global(.component-block-edit-button:focus-visible) {
+  border-color: var(--callout-icon);
+  background: color-mix(in oklch, var(--callout-bg), white 36%);
 }
 
-:global(.dark) .editorShell :global(.ProseMirror table) {
-  overflow: hidden;
-  border: 1px solid #1f2937;
+.editorShell :global(.component-block-edit-button:focus-visible) {
+  outline: 2px solid color-mix(in oklch, var(--callout-icon), transparent 36%);
+  outline-offset: 2px;
+}
+
+.editorShell :global(.component-block-edit-button:active) {
+  transform: scale(0.96);
+}
+
+.editorShell :global(.component-block-editor) {
+  display: grid;
+  grid-template-columns: minmax(8rem, 0.55fr) minmax(12rem, 1fr);
+  gap: 0.85rem;
+  margin-top: 0.65rem;
+  border: 1px solid var(--article-line);
   border-radius: 8px;
-  background: #0f172a;
+  background: color-mix(in oklch, var(--article-panel), var(--article-soft) 44%);
+  padding: 0.9rem;
+  box-shadow: inset 0 1px 0 color-mix(in oklch, var(--foreground), transparent 94%);
 }
 
-:global(.dark) .editorShell :global(.ProseMirror th) {
-  border: 1px solid #1f2937;
-  background: #111827;
-  color: #e5e7eb;
+.editorShell :global(.component-block-editor label) {
+  display: grid;
+  gap: 0.35rem;
 }
 
-:global(.dark) .editorShell :global(.ProseMirror tr:nth-child(odd) td) {
-  background: rgb(255 255 255 / 2%);
+.editorShell :global(.component-block-editor span) {
+  color: var(--article-muted);
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0;
 }
 
-:global(.dark) .editorShell :global(.ProseMirror td) {
-  border: 1px solid #1f2937;
-}
-
-:global(.dark) .editorShell :global(.ProseMirror hr) {
-  margin: 1.5rem 0;
-  border-top: 1px dashed rgb(99 102 241 / 40%);
-}
-
-:global(.dark) .editorShell :global(.ProseMirror a) {
-  color: #8ab4f8;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-:global(.dark) .editorShell :global(.ProseMirror img) {
-  border: 1px solid #1f2937;
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgb(0 0 0 / 35%);
-}
-
-:global(.light) .editorShell :global(.ProseMirror) {
-  min-height: 520px;
-  background: transparent;
-  color: #0f172a;
-  padding: 18px 22px 24px;
-  line-height: 1.8;
-}
-
-:global(.light) .editorShell :global(.ProseMirror h1),
-:global(.light) .editorShell :global(.ProseMirror h2),
-:global(.light) .editorShell :global(.ProseMirror h3),
-:global(.light) .editorShell :global(.ProseMirror h4),
-:global(.light) .editorShell :global(.ProseMirror h5),
-:global(.light) .editorShell :global(.ProseMirror h6) {
-  color: #0f172a;
-  letter-spacing: -0.01em;
-}
-
-:global(.light) .editorShell :global(.ProseMirror p) {
-  color: #111827;
-}
-
-:global(.light) .editorShell :global(.ProseMirror pre) {
-  border: 1px solid #e2e8f0;
-  background: #f8fafc;
-  color: #0f172a;
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 5%);
-}
-
-:global(.light) .editorShell :global(.ProseMirror pre::before) {
-  content: "code";
-  position: absolute;
-  top: 10px;
-  right: 12px;
-  color: #94a3b8;
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-:global(.light) .editorShell :global(.ProseMirror pre code) {
-  background: transparent;
-  padding: 0;
-}
-
-:global(.light) .editorShell :global(.ProseMirror li) {
-  padding-left: 6px;
-}
-
-:global(.light) .editorShell :global(.ProseMirror ul),
-:global(.light) .editorShell :global(.ProseMirror ol) {
-  margin-left: 1.2rem;
-}
-
-:global(.light) .editorShell :global(.ProseMirror ul li::marker) {
-  color: #9ca3af;
-}
-
-:global(.light) .editorShell :global(.ProseMirror code:not(pre code)) {
-  border: 1px solid #cbd5e1;
+.editorShell :global(.component-block-editor input),
+.editorShell :global(.component-block-editor select),
+.editorShell :global(.component-block-editor textarea) {
+  width: 100%;
+  border: 1px solid var(--article-line);
   border-radius: 6px;
-  background: #e2e8f0;
-  color: #0f172a;
-  padding: 0.15rem 0.35rem;
-  font-family: "JetBrains Mono", "Menlo", "Consolas", monospace;
+  background: var(--article-panel);
+  color: var(--article-heading);
+  padding: 0.52rem 0.62rem;
+  font: inherit;
+  font-size: 0.92rem;
+  line-height: 1.45;
 }
 
-:global(.light) .editorShell :global(.ProseMirror blockquote) {
-  border-left: 3px solid #cbd5e1;
-  border-radius: 10px;
-  background: #f8fafc;
-  color: #0f172a;
-  padding: 10px 14px;
+.editorShell :global(.component-block-editor textarea) {
+  resize: vertical;
 }
 
-:global(.light) .editorShell :global(.ProseMirror table) {
-  overflow: hidden;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  background: #ffffff;
+.editorShell :global(.component-block-editor input:focus),
+.editorShell :global(.component-block-editor select:focus),
+.editorShell :global(.component-block-editor textarea:focus) {
+  outline: 2px solid color-mix(in oklch, var(--article-accent), transparent 35%);
+  outline-offset: 2px;
 }
 
-:global(.light) .editorShell :global(.ProseMirror th) {
-  border: 1px solid #e2e8f0;
-  background: #f1f5f9;
-  color: #0f172a;
+.editorShell :global(.component-block-editor-wide),
+.editorShell :global(.component-block-editor-actions) {
+  grid-column: 1 / -1;
 }
 
-:global(.light) .editorShell :global(.ProseMirror tr:nth-child(odd) td) {
-  background: #f8fafc;
+.editorShell :global(.component-block-editor-actions) {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.55rem;
 }
 
-:global(.light) .editorShell :global(.ProseMirror td) {
-  border: 1px solid #e2e8f0;
+.editorShell :global(.component-block-editor-actions button) {
+  display: inline-flex;
+  min-height: 2.1rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  border: 1px solid var(--article-line);
+  border-radius: 6px;
+  background: var(--article-panel);
+  color: var(--article-heading);
+  padding: 0.35rem 0.65rem;
+  font-size: 0.82rem;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background-color 160ms var(--article-motion),
+    border-color 160ms var(--article-motion),
+    transform 160ms var(--article-motion);
 }
 
-:global(.light) .editorShell :global(.ProseMirror hr) {
-  margin: 1.5rem 0;
-  border-top: 1px dashed rgb(99 102 241 / 50%);
+.editorShell :global(.component-block-editor-actions button:hover),
+.editorShell :global(.component-block-editor-actions button:focus-visible) {
+  border-color: color-mix(in oklch, var(--article-accent), transparent 25%);
+  background: color-mix(in oklch, var(--article-accent), var(--article-panel) 92%);
 }
 
-:global(.light) .editorShell :global(.ProseMirror a) {
-  color: #2563eb;
-  text-decoration: underline;
-  text-underline-offset: 3px;
+.editorShell :global(.component-block-editor-actions button:focus-visible) {
+  outline: 2px solid color-mix(in oklch, var(--article-accent), transparent 35%);
+  outline-offset: 2px;
 }
 
-:global(.light) .editorShell :global(.ProseMirror img) {
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  box-shadow: 0 12px 30px rgb(15 23 42 / 8%);
+.editorShell :global(.component-block-editor-actions button:active) {
+  transform: scale(0.98);
 }
 
-.editorShell :global(.ProseMirror .component-gallery img),
-.editorShell :global(.ProseMirror .component-slider img) {
+.editorStats {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid var(--article-line);
+  background: color-mix(in oklch, var(--article-panel), var(--article-soft) 38%);
+  color: var(--article-muted);
+  padding: 0.55rem 0.85rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.editorShell :global(.component-gallery img),
+.editorShell :global(.component-slider img),
+.editorShell :global(.component-rich-showcase img) {
   max-width: none;
   margin: 0;
   border: 0;
@@ -248,9 +195,20 @@
   box-shadow: none;
 }
 
-.editorShell :global(.ProseMirror .component-tabs h3),
-.editorShell :global(.ProseMirror .component-tabs p),
-.editorShell :global(.ProseMirror .component-accordions p),
-.editorShell :global(.ProseMirror .component-callout p) {
+.editorShell :global(.component-tabs h3),
+.editorShell :global(.component-tabs p),
+.editorShell :global(.component-accordions p),
+.editorShell :global(.component-callout p) {
   margin: 0;
+}
+
+@media (max-width: 640px) {
+  .editorShell :global(.ProseMirror) {
+    min-height: 440px;
+    padding: 1rem;
+  }
+
+  .editorShell :global(.component-block-editor) {
+    grid-template-columns: 1fr;
+  }
 }

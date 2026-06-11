@@ -169,7 +169,7 @@ export function TipTapEditor({
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-lg dark:prose-invert max-w-none focus:outline-none min-h-[500px] leading-relaxed article-font ProseMirror',
+        class: 'article-content prose dark:prose-invert max-w-none focus:outline-none min-h-[500px] article-font',
       },
       handlePaste: (view, event) => {
         // 1. Image Paste Support
@@ -270,7 +270,7 @@ export function TipTapEditor({
   }
 
   return (
-    <div className={`border rounded-lg overflow-hidden relative admin-editor ${styles.editorShell}`}>
+    <div className={`relative admin-editor article-shell ${styles.editorShell}`}>
       {isUploading && (
         <div className="absolute inset-0 z-50 bg-background/50 backdrop-blur-sm flex items-center justify-center">
             <div className="animate-pulse text-primary font-medium">图片上传中...</div>
@@ -278,9 +278,11 @@ export function TipTapEditor({
       )}
       {editable && <MenuBar editor={editor} />}
       {editable && <MarkdownShortcodeGuide />}
-      <EditorContent editor={editor} />
+      <div className={styles.editorCanvas}>
+        <EditorContent editor={editor} />
+      </div>
       {editable && editor && (
-        <div className="border-t px-4 py-2 text-xs text-gray-500 flex justify-between">
+        <div className={styles.editorStats}>
           <span>{editor.storage.characterCount.characters()} 字符</span>
           <span>{editor.storage.characterCount.words()} 词</span>
         </div>

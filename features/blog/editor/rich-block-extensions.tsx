@@ -14,9 +14,12 @@ import {
   Layers3,
   MousePointerClick,
   Music2,
+  Pencil,
   Network,
   Play,
   Quote,
+  Save,
+  X,
 } from 'lucide-react'
 
 export type RichImageItem = {
@@ -53,6 +56,17 @@ type FlowNode = {
 }
 
 const calloutTones: CalloutTone[] = ['note', 'quote', 'tip', 'info', 'important', 'warning', 'success', 'caution']
+
+const calloutLabels: Record<CalloutTone, string> = {
+  note: '备注',
+  quote: '引用',
+  tip: '技巧',
+  info: '信息',
+  important: '重要',
+  warning: '警告',
+  success: '完成',
+  caution: '风险',
+}
 
 export const articleRichBlockExtensions = [
   createCalloutExtension(),
@@ -552,23 +566,100 @@ function createAudioExtension() {
   })
 }
 
-function CalloutView({ node }: NodeViewProps) {
+function CalloutView({ node, editor, updateAttributes }: NodeViewProps) {
   const tone = getCalloutTone(node.attrs.tone)
   const title = getString(node.attrs.title, '备注')
   const text = getString(node.attrs.text, '这是一条普通备注。')
   const Icon = getCalloutIcon(tone)
+  const [isEditing, setIsEditing] = useState(false)
+  const [draft, setDraft] = useState({ tone, title, text })
+
+  const startEditing = () => {
+    setDraft({ tone, title, text })
+    setIsEditing(true)
+  }
+
+  const saveDraft = () => {
+    const nextTone = getCalloutTone(draft.tone)
+
+    updateAttributes({
+      tone: nextTone,
+      title: draft.title.trim() || calloutLabels[nextTone],
+      text: draft.text.trim() || `这是一条${calloutLabels[nextTone]}。`,
+    })
+    setIsEditing(false)
+  }
 
   return (
-    <NodeViewWrapper className="component-stack not-prose" data-rich-block="callout">
+    <NodeViewWrapper
+      className="component-stack not-prose"
+      data-rich-block="callout"
+      data-rich-block-editable={editor.isEditable ? 'true' : undefined}
+    >
       <div className={`component-callout component-callout-${tone}`}>
         <div className="component-callout-heading">
           <div className="component-callout-icon">
             <Icon className="h-4 w-4" />
           </div>
           <p className="component-callout-title">{title}</p>
+          {editor.isEditable ? (
+            <button
+              type="button"
+              className="component-block-edit-button"
+              onClick={startEditing}
+              contentEditable={false}
+              aria-label="编辑提示块"
+            >
+              <Pencil className="h-3.5 w-3.5" />
+            </button>
+          ) : null}
         </div>
         <p>{text}</p>
       </div>
+      {editor.isEditable && isEditing ? (
+        <div className="component-block-editor" contentEditable={false}>
+          <label>
+            <span>类型</span>
+            <select
+              value={draft.tone}
+              onChange={(event) => setDraft((current) => ({ ...current, tone: getCalloutTone(event.target.value) }))}
+            >
+              {calloutTones.map((item) => (
+                <option key={item} value={item}>
+                  {calloutLabels[item]} / {item}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            <span>标题</span>
+            <input
+              value={draft.title}
+              onChange={(event) => setDraft((current) => ({ ...current, title: event.target.value }))}
+              placeholder={calloutLabels[draft.tone]}
+            />
+          </label>
+          <label className="component-block-editor-wide">
+            <span>内容</span>
+            <textarea
+              value={draft.text}
+              onChange={(event) => setDraft((current) => ({ ...current, text: event.target.value }))}
+              rows={3}
+              placeholder={`这是一条${calloutLabels[draft.tone]}。`}
+            />
+          </label>
+          <div className="component-block-editor-actions">
+            <button type="button" onClick={() => setIsEditing(false)}>
+              <X className="h-3.5 w-3.5" />
+              取消
+            </button>
+            <button type="button" onClick={saveDraft}>
+              <Save className="h-3.5 w-3.5" />
+              保存
+            </button>
+          </div>
+        </div>
+      ) : null}
     </NodeViewWrapper>
   )
 }
