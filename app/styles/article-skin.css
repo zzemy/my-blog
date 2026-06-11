@@ -9,29 +9,19 @@
 
 .article-content.prose h2 {
   position: relative;
-  margin-bottom: 22px;
+  margin-bottom: 1rem;
   border-top: 0;
-  border-bottom: 1px solid var(--article-h2-line);
+  border-bottom: 0;
   padding-top: 0;
-  padding-bottom: 18px;
-  transition: border-color 1s var(--article-motion);
+  padding-bottom: 0;
 }
 
 .article-content.prose h2::after {
-  content: "";
-  position: absolute;
-  bottom: -4px;
-  left: 0;
-  width: 1em;
-  height: 7px;
-  border-radius: 8px;
-  background: var(--article-accent);
-  box-shadow: none;
-  transition: width 220ms var(--article-motion);
+  display: none;
 }
 
 .article-content.prose h2:hover::after {
-  width: 3em;
+  display: none;
 }
 
 .article-content.prose h1,
