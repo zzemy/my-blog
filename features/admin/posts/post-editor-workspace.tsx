@@ -75,6 +75,7 @@ export function PostEditorWorkspace({
 }: PostEditorWorkspaceProps) {
   const [draftTag, setDraftTag] = useState('')
   const titleRef = useRef<HTMLTextAreaElement>(null)
+  const documentPaneRef = useRef<HTMLElement>(null)
   const outline = useMemo(() => collectOutline(formData.content), [formData.content])
   const wordCount = calculateContentSize(formData.content)
   const publishLabel = mode === 'edit' ? (formData.published ? '更新文章' : '发布文章') : '发布文章'
@@ -115,16 +116,23 @@ export function PostEditorWorkspace({
 
     if (!target.id) {
       target.id = item.id
-      target.style.scrollMarginTop = '140px'
+      target.style.scrollMarginTop = '150px'
     }
 
-    target.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    target.classList.remove('admin-editor-heading-flash')
+    scrollHeadingIntoView(target, documentPaneRef.current, 'smooth')
+    window.setTimeout(() => {
+      scrollHeadingIntoView(target, documentPaneRef.current, 'auto')
+      target.classList.add('admin-editor-heading-flash')
+      window.setTimeout(() => target.classList.remove('admin-editor-heading-flash'), 1100)
+    }, 260)
+
     window.history.replaceState(null, '', `#${item.id}`)
   }
 
   return (
     <div className={styles.workspace}>
-      <header className={styles.topbar}>
+      <header className={styles.topbar} data-editor-topbar="true">
         <div className={styles.topbarLeft}>
           <Link href="/admin/posts">
             <Button variant="ghost" size="sm" className={styles.topbarButton}>
@@ -202,7 +210,7 @@ export function PostEditorWorkspace({
           </nav>
         </aside>
 
-        <main className={styles.documentPane}>
+        <main ref={documentPaneRef} className={styles.documentPane}>
           <div className={styles.documentMeta}>
             <span>{mode === 'new' ? '新文章' : '编辑文章'}</span>
             <span>{wordCount} 字符</span>
@@ -447,4 +455,53 @@ function getEditorHeadingByIndex(index: number): HTMLElement | null {
   )
 
   return headings[index] || null
+}
+
+function scrollHeadingIntoView(target: HTMLElement, scope: HTMLElement | null, behavior: ScrollBehavior) {
+  const offset = getStickyScrollOffset()
+  const scrollParent = getScrollableParent(scope || target)
+
+  if (scrollParent) {
+    const parentRect = scrollParent.getBoundingClientRect()
+    const targetRect = target.getBoundingClientRect()
+    const top = scrollParent.scrollTop + targetRect.top - parentRect.top - offset
+
+    scrollParent.scrollTo({ top: Math.max(0, top), behavior })
+    return
+  }
+
+  const top = window.scrollY + target.getBoundingClientRect().top - offset
+  window.scrollTo({ top: Math.max(0, top), behavior })
+}
+
+function getScrollableParent(start: HTMLElement): HTMLElement | null {
+  let current: HTMLElement | null = start
+
+  while (current && current !== document.body && current !== document.documentElement) {
+    const style = window.getComputedStyle(current)
+    const overflowY = style.overflowY
+    const canScroll = /(auto|scroll|overlay)/.test(overflowY) && current.scrollHeight > current.clientHeight + 1
+    if (canScroll) return current
+
+    current = current.parentElement
+  }
+
+  return null
+}
+
+function getStickyScrollOffset() {
+  const stickyElements = document.querySelectorAll<HTMLElement>('header, [data-editor-topbar="true"]')
+  let offset = 16
+
+  stickyElements.forEach((element) => {
+    const style = window.getComputedStyle(element)
+    if (style.position !== 'sticky' && style.position !== 'fixed') return
+
+    const rect = element.getBoundingClientRect()
+    if (rect.bottom <= 0 || rect.top >= 180) return
+
+    offset += rect.height
+  })
+
+  return Math.min(offset, 176)
 }

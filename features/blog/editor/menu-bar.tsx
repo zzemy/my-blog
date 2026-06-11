@@ -135,7 +135,7 @@ export function MenuBar({ editor }: MenuBarProps) {
     blockHandleHideTimerRef.current = window.setTimeout(() => {
       setBlockHandleTarget(null)
       blockHandleHideTimerRef.current = null
-    }, 420)
+    }, 1600)
   }, [clearBlockHandleHideTimer])
 
   const insertGroups: InsertGroup[] = [
@@ -650,7 +650,7 @@ export function MenuBar({ editor }: MenuBarProps) {
               event.stopPropagation()
               openFloatingMenu({
                 ...blockHandleTarget,
-                x: blockHandleTarget.x + 64,
+                x: blockHandleTarget.x + 96,
                 source: 'block',
               })
             }}
@@ -668,7 +668,7 @@ export function MenuBar({ editor }: MenuBarProps) {
                 openStyleMenu({
                   ...blockHandleTarget,
                   pos: blockHandleTarget.stylePos,
-                  x: blockHandleTarget.x + 64,
+                  x: blockHandleTarget.x + 96,
                   source: 'block',
                 })
               }}
@@ -932,7 +932,7 @@ function resolveBlockHandleTargetAtDocPos(editor: Editor, pos: number): BlockHan
     const blockRect = dom.getBoundingClientRect()
     if (blockRect.bottom < 76 || blockRect.top > window.innerHeight - 32) return null
 
-    const left = Math.max(12, blockRect.left - 58)
+    const left = Math.max(12, blockRect.left - 98)
     const top = blockRect.top + 2
 
     return {
@@ -960,7 +960,7 @@ function resolveFloatingTarget(editor: Editor, target: InsertTarget): InsertTarg
       return {
         ...target,
         anchorPos: blockTarget.anchorPos,
-        x: blockTarget.x + 64,
+        x: blockTarget.x + 96,
         y: blockTarget.y,
       }
     }

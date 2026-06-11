@@ -354,6 +354,15 @@
   margin-top: 1rem;
 }
 
+.documentPane :global(.admin-editor-heading-flash) {
+  border-radius: 8px;
+  background: linear-gradient(90deg, rgb(111 161 222 / 24%), transparent 72%);
+  box-shadow: -0.55rem 0 0 rgb(111 161 222 / 34%);
+  transition:
+    background-color 240ms ease,
+    box-shadow 240ms ease;
+}
+
 @media (max-width: 1180px) {
   .body {
     grid-template-columns: 13.5rem minmax(0, 1fr);
@@ -378,8 +387,10 @@
 @media (max-width: 760px) {
   .workspace {
     width: auto;
+    min-height: calc(100dvh - 4rem);
     margin: -2rem -1rem;
     background: #111315;
+    overflow-x: hidden;
   }
 
   .topbar,
@@ -389,18 +400,51 @@
   }
 
   .topbar {
-    position: relative;
+    position: sticky;
+    top: 4rem;
+    min-height: auto;
     flex-direction: column;
+    gap: 0.65rem;
+    padding: 0.7rem 0.8rem;
   }
 
   .topbarLeft,
   .topbarRight {
     width: 100%;
-    justify-content: space-between;
+    min-width: 0;
   }
 
   .docCrumb {
     flex: 1;
+  }
+
+  .docCrumb strong {
+    max-width: 100%;
+    font-size: 0.86rem;
+  }
+
+  .topbarRight {
+    justify-content: flex-start;
+    gap: 0.45rem;
+    overflow-x: auto;
+    padding-bottom: 0.12rem;
+    scrollbar-width: none;
+  }
+
+  .topbarRight::-webkit-scrollbar {
+    display: none;
+  }
+
+  .topbarRight button,
+  .topbarLeft button {
+    flex: 0 0 auto;
+    min-height: 2.65rem;
+  }
+
+  .saveState,
+  .successState {
+    flex: 0 0 auto;
+    min-height: 2.35rem;
   }
 
   .body {
@@ -413,13 +457,77 @@
     height: auto;
     border-right: 0;
     border-bottom: 1px solid rgb(255 255 255 / 8%);
+    padding: 0.8rem 0.8rem 0.9rem;
+  }
+
+  .outlineList {
+    display: flex;
+    gap: 0.45rem;
+    overflow-x: auto;
+    padding-bottom: 0.15rem;
+    scrollbar-width: none;
+  }
+
+  .outlineList::-webkit-scrollbar {
+    display: none;
+  }
+
+  .outlineList a,
+  .outlineList p {
+    flex: 0 0 auto;
+    max-width: min(16rem, 72vw);
+    overflow: hidden;
+    border: 1px solid rgb(255 255 255 / 8%);
+    background: rgb(255 255 255 / 4%);
+    padding: 0.52rem 0.68rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .outlineList a[data-level="2"],
+  .outlineList a[data-level="3"] {
+    padding-left: 0.68rem;
   }
 
   .documentPane {
-    padding: 2rem 1rem 4rem;
+    padding: 1.25rem 0.85rem 4.5rem;
+  }
+
+  .documentMeta {
+    gap: 0.35rem;
+    font-size: 0.75rem;
   }
 
   .titleInput {
     min-height: 3.6rem;
+    font-size: clamp(1.75rem, 8vw, 2.25rem);
+    line-height: 1.14;
+  }
+
+  .inspector {
+    padding: 0.85rem 0.85rem max(2rem, env(safe-area-inset-bottom));
+  }
+
+  .inspectorSection {
+    gap: 0.75rem;
+    padding: 0.9rem 0;
+  }
+
+  .inspectorSection input,
+  .inspectorSection textarea,
+  .inspectorSection select,
+  .inlineControl button,
+  .tagInput button,
+  .inspectorSection > button {
+    min-height: 2.75rem;
+  }
+
+  .inlineControl,
+  .tagInput {
+    flex-direction: column;
+  }
+
+  .tags button {
+    min-height: 2.35rem;
   }
 }

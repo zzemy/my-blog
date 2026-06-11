@@ -272,29 +272,39 @@ export function TipTapEditor({
   useEffect(() => {
     if (!editor) return
 
+    let frame = 0
+
     const assignHeadingIds = () => {
-      let index = 0
+      window.cancelAnimationFrame(frame)
 
-      editor.state.doc.descendants((node, pos) => {
-        if (node.type.name !== 'heading') return
+      frame = window.requestAnimationFrame(() => {
+        let index = 0
 
-        const dom = editor.view.nodeDOM(pos)
-        const heading = getHeadingElement(dom)
-        if (!heading) return
+        editor.state.doc.descendants((node, pos) => {
+          if (node.type.name !== 'heading') return
 
-        index += 1
-        heading.setAttribute('id', `outline-${index}`)
-        heading.style.scrollMarginTop = '140px'
+          const dom = editor.view.nodeDOM(pos)
+          const heading = getHeadingElement(dom)
+          if (!heading) return
+
+          index += 1
+          heading.setAttribute('id', `outline-${index}`)
+          heading.setAttribute('data-editor-outline-heading', String(index))
+          heading.style.scrollMarginTop = '150px'
+        })
       })
     }
 
     assignHeadingIds()
     editor.on('update', assignHeadingIds)
     editor.on('create', assignHeadingIds)
+    editor.on('transaction', assignHeadingIds)
 
     return () => {
+      window.cancelAnimationFrame(frame)
       editor.off('update', assignHeadingIds)
       editor.off('create', assignHeadingIds)
+      editor.off('transaction', assignHeadingIds)
     }
   }, [editor])
 
