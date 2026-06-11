@@ -33,6 +33,7 @@ import {
   Table,
   Undo,
   Redo,
+  Search,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
@@ -59,6 +60,7 @@ export function MenuBar({ editor }: MenuBarProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isUploading, setIsUploading] = useState(false)
   const [open, setOpen] = useState(false)
+  const [insertQuery, setInsertQuery] = useState('')
 
   useEffect(() => {
     const dom = editor.view.dom
@@ -68,6 +70,7 @@ export function MenuBar({ editor }: MenuBarProps) {
 
       event.preventDefault()
       setOpen(true)
+      setInsertQuery('')
     }
 
     dom.addEventListener('keydown', openWithSlash)
@@ -96,6 +99,7 @@ export function MenuBar({ editor }: MenuBarProps) {
   const run = (action: () => void) => {
     action()
     setOpen(false)
+    setInsertQuery('')
   }
 
   const insertGroups: InsertGroup[] = [
@@ -415,6 +419,17 @@ export function MenuBar({ editor }: MenuBarProps) {
     },
   ]
 
+  const normalizedQuery = insertQuery.trim().toLowerCase()
+  const visibleGroups = insertGroups
+    .map((group) => ({
+      ...group,
+      items: group.items.filter((item) => {
+        if (!normalizedQuery) return true
+        return `${group.title} ${item.title} ${item.description}`.toLowerCase().includes(normalizedQuery)
+      }),
+    }))
+    .filter((group) => group.items.length > 0)
+
   return (
     <div className="doc-editor-toolbar" aria-label="插入内容块">
       <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={uploadInlineImage} />
@@ -422,11 +437,20 @@ export function MenuBar({ editor }: MenuBarProps) {
         <PopoverTrigger asChild>
           <Button type="button" variant="ghost" size="sm" className="doc-insert-trigger" aria-label="插入内容块">
             {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-            <span>插入</span>
+            <span>插入块</span>
           </Button>
         </PopoverTrigger>
         <PopoverContent align="start" className="doc-insert-menu">
-          {insertGroups.map((group) => (
+          <label className="doc-insert-search">
+            <Search className="h-4 w-4" />
+            <input
+              value={insertQuery}
+              onChange={(event) => setInsertQuery(event.target.value)}
+              placeholder="搜索块，或直接输入 / 打开菜单"
+              autoFocus
+            />
+          </label>
+          {visibleGroups.map((group) => (
             <section key={group.title} className="doc-insert-group">
               <h3>{group.title}</h3>
               <div>
@@ -446,6 +470,7 @@ export function MenuBar({ editor }: MenuBarProps) {
               </div>
             </section>
           ))}
+          {!visibleGroups.length ? <p className="doc-insert-empty">没有匹配的内容块。</p> : null}
         </PopoverContent>
       </Popover>
       <div className="doc-history-actions" aria-label="历史操作">

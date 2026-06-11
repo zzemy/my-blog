@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import type { Dispatch, SetStateAction } from 'react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   AlertCircle,
   ArrowLeft,
@@ -74,9 +74,18 @@ export function PostEditorWorkspace({
   onDelete,
 }: PostEditorWorkspaceProps) {
   const [draftTag, setDraftTag] = useState('')
+  const titleRef = useRef<HTMLTextAreaElement>(null)
   const outline = useMemo(() => collectOutline(formData.content), [formData.content])
   const wordCount = calculateContentSize(formData.content)
   const publishLabel = mode === 'edit' ? (formData.published ? '更新文章' : '发布文章') : '发布文章'
+
+  useEffect(() => {
+    const titleInput = titleRef.current
+    if (!titleInput) return
+
+    titleInput.style.height = '0px'
+    titleInput.style.height = `${titleInput.scrollHeight}px`
+  }, [formData.title])
 
   const updateForm = (patch: Partial<PostFormData>) => {
     setFormData((current) => ({ ...current, ...patch }))
@@ -180,18 +189,13 @@ export function PostEditorWorkspace({
             <span>{formData.locale.toUpperCase()}</span>
           </div>
           <textarea
+            ref={titleRef}
             value={formData.title}
             onChange={(event) => updateForm({ title: event.target.value })}
             onBlur={generateSlugFromTitle}
             placeholder="未命名文档"
             className={styles.titleInput}
             rows={1}
-          />
-          <Textarea
-            value={formData.description}
-            onChange={(event) => updateForm({ description: event.target.value })}
-            placeholder="写一句摘要，或留到右侧面板后面再补。"
-            className={styles.descriptionInput}
           />
           <TipTapEditor
             content={formData.content}
@@ -223,6 +227,15 @@ export function PostEditorWorkspace({
                 <option value="fr">Français</option>
                 <option value="ja">日本語</option>
               </select>
+            </label>
+            <label>
+              <span>摘要</span>
+              <Textarea
+                value={formData.description}
+                onChange={(event) => updateForm({ description: event.target.value })}
+                placeholder="用于列表页、SEO fallback 和文章摘要。"
+                className={styles.compactTextarea}
+              />
             </label>
           </section>
 

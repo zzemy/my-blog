@@ -1,15 +1,18 @@
 .workspace {
-  min-height: 100dvh;
+  width: calc(100vw - 17px);
+  min-height: calc(100dvh - 4.25rem);
+  margin: -2rem calc(50% - 50vw + 8.5px) -2rem;
   background:
-    linear-gradient(90deg, rgb(13 14 16) 0, rgb(13 14 16) 17rem, transparent 17rem),
-    radial-gradient(circle at 56% 0%, rgb(40 45 52 / 42%), transparent 34rem),
-    #111315;
+    linear-gradient(90deg, rgb(11 12 14) 0, rgb(11 12 14) clamp(13.5rem, 15vw, 16.5rem), transparent clamp(13.5rem, 15vw, 16.5rem)),
+    radial-gradient(circle at 52% 0%, rgb(45 58 68 / 26%), transparent 42rem),
+    linear-gradient(180deg, #14171a 0%, #0f1113 38%, #0d0f11 100%);
   color: #e8edf2;
+  overflow-x: clip;
 }
 
 .topbar {
   position: sticky;
-  top: 0;
+  top: 4.25rem;
   z-index: 40;
   display: flex;
   min-height: 4rem;
@@ -17,8 +20,9 @@
   justify-content: space-between;
   gap: 1rem;
   border-bottom: 1px solid rgb(255 255 255 / 8%);
-  background: rgb(18 20 22 / 92%);
-  padding: 0.65rem 1rem;
+  background: rgb(17 18 20 / 94%);
+  padding: 0.55rem 1.25rem;
+  box-shadow: 0 1px 0 rgb(255 255 255 / 4%), 0 18px 40px rgb(0 0 0 / 18%);
   backdrop-filter: blur(16px);
 }
 
@@ -51,8 +55,8 @@
   max-width: 32rem;
   overflow: hidden;
   color: #f3f6f9;
-  font-size: 0.9rem;
-  font-weight: 750;
+  font-size: 0.92rem;
+  font-weight: 780;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -62,13 +66,19 @@
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  color: #9ba7b4;
+  border: 1px solid rgb(255 255 255 / 8%);
+  border-radius: 999px;
+  background: rgb(255 255 255 / 4%);
+  color: #a5b0bd;
+  padding: 0.3rem 0.55rem;
   font-size: 0.78rem;
   font-weight: 650;
   white-space: nowrap;
 }
 
 .successState {
+  border-color: rgb(143 212 163 / 24%);
+  background: rgb(34 81 52 / 26%);
   color: #8fd4a3;
 }
 
@@ -85,18 +95,19 @@
 
 .body {
   display: grid;
-  grid-template-columns: minmax(13rem, 17rem) minmax(0, 1fr) minmax(18rem, 23rem);
+  grid-template-columns: clamp(13.5rem, 15vw, 16.5rem) minmax(0, 1fr) clamp(19rem, 22vw, 24rem);
   gap: 0;
   min-height: calc(100dvh - 4rem);
 }
 
 .outlinePanel {
   position: sticky;
-  top: 4rem;
-  height: calc(100dvh - 4rem);
+  top: 8.25rem;
+  height: calc(100dvh - 8.25rem);
   overflow: auto;
   border-right: 1px solid rgb(255 255 255 / 8%);
-  padding: 1.25rem 0.75rem;
+  background: rgb(10 12 14 / 52%);
+  padding: 1.15rem 0.85rem 2rem;
 }
 
 .outlineHeader {
@@ -106,6 +117,7 @@
   color: #9ca8b5;
   font-size: 0.8rem;
   font-weight: 760;
+  padding: 0 0.35rem;
 }
 
 .outlineList {
@@ -117,16 +129,16 @@
 .outlineList a,
 .outlineList p {
   border-radius: 6px;
-  color: #aeb8c4;
-  font-size: 0.86rem;
+  color: #9da8b4;
+  font-size: 0.82rem;
   line-height: 1.55;
-  padding: 0.28rem 0.45rem;
+  padding: 0.3rem 0.42rem;
   text-decoration: none;
 }
 
 .outlineList a:hover,
 .outlineList a:focus-visible {
-  background: rgb(67 89 124 / 38%);
+  background: rgb(67 89 124 / 34%);
   color: #f4f7fb;
 }
 
@@ -140,11 +152,14 @@
 
 .documentPane {
   min-width: 0;
-  padding: 3.8rem clamp(1.25rem, 5vw, 5rem) 6rem;
+  max-width: 62rem;
+  width: 100%;
+  justify-self: center;
+  padding: clamp(2.25rem, 4vh, 3.5rem) clamp(2rem, 4vw, 4rem) 7rem;
 }
 
 .documentPane :global(.admin-editor) {
-  margin-top: 1.5rem;
+  margin-top: 0.95rem;
 }
 
 .documentMeta {
@@ -165,16 +180,19 @@
 .titleInput {
   display: block;
   width: 100%;
-  min-height: 4.8rem;
+  min-height: 2.95rem;
+  max-height: none;
+  overflow: hidden;
   resize: none;
   border: 0;
   background: transparent;
-  color: #f7f8fa;
-  font-size: clamp(2.3rem, 4.2vw, 4.6rem);
-  font-weight: 850;
+  color: #f6f8fb;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: clamp(2.05rem, 2.45vw, 2.8rem);
+  font-weight: 820;
   letter-spacing: 0;
-  line-height: 1.08;
-  margin-top: 1.1rem;
+  line-height: 1.18;
+  margin-top: 0.72rem;
   outline: none;
 }
 
@@ -182,39 +200,22 @@
   color: #626d79;
 }
 
-.descriptionInput {
-  min-height: 3.2rem;
-  margin-top: 0.45rem;
-  border: 0;
-  background: transparent;
-  color: #b9c3cf;
-  font-size: 1rem;
-  line-height: 1.7;
-  padding: 0;
-  resize: vertical;
-  box-shadow: none;
-}
-
-.descriptionInput:focus-visible {
-  box-shadow: none;
-  outline: none;
-}
-
 .inspector {
   position: sticky;
-  top: 4rem;
-  height: calc(100dvh - 4rem);
+  top: 8.25rem;
+  height: calc(100dvh - 8.25rem);
   overflow: auto;
   border-left: 1px solid rgb(255 255 255 / 8%);
-  background: rgb(17 19 21 / 86%);
-  padding: 1rem;
+  background: linear-gradient(180deg, rgb(18 20 22 / 92%), rgb(14 16 18 / 92%));
+  padding: 1rem 1rem 2rem;
+  box-shadow: inset 1px 0 0 rgb(255 255 255 / 4%);
 }
 
 .inspectorSection {
   display: grid;
-  gap: 0.8rem;
+  gap: 0.82rem;
   border-bottom: 1px solid rgb(255 255 255 / 7%);
-  padding: 0.95rem 0;
+  padding: 1.05rem 0;
 }
 
 .inspectorSection:first-child {
@@ -225,9 +226,9 @@
   display: flex;
   align-items: center;
   gap: 0.45rem;
-  color: #eef2f6;
-  font-size: 0.86rem;
-  font-weight: 780;
+  color: #f0f4f8;
+  font-size: 0.88rem;
+  font-weight: 820;
   margin: 0;
 }
 
@@ -248,9 +249,18 @@
 .inspectorSection input,
 .inspectorSection textarea,
 .inspectorSection select {
-  border-color: rgb(255 255 255 / 12%);
-  background: rgb(255 255 255 / 4%);
+  border-color: rgb(255 255 255 / 11%);
+  background: rgb(255 255 255 / 5%);
   color: #edf1f5;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 3%);
+}
+
+.inspectorSection input:focus,
+.inspectorSection textarea:focus,
+.inspectorSection select:focus {
+  border-color: rgb(111 161 222 / 55%);
+  outline: none;
+  box-shadow: 0 0 0 3px rgb(74 128 198 / 18%);
 }
 
 .inspectorSection select {
@@ -288,6 +298,11 @@
   font-size: 0.86rem !important;
 }
 
+.compactTextarea {
+  min-height: 5.75rem;
+  resize: vertical;
+}
+
 .tags {
   display: flex;
   flex-wrap: wrap;
@@ -299,8 +314,8 @@
   align-items: center;
   gap: 0.35rem;
   border: 1px solid rgb(99 132 180 / 42%);
-  border-radius: 6px;
-  background: rgb(55 79 114 / 42%);
+  border-radius: 7px;
+  background: linear-gradient(180deg, rgb(58 86 124 / 58%), rgb(40 61 91 / 52%));
   color: #dbeafe;
   padding: 0.28rem 0.5rem;
   font-size: 0.8rem;
@@ -341,7 +356,13 @@
 
 @media (max-width: 1180px) {
   .body {
-    grid-template-columns: minmax(11rem, 14rem) minmax(0, 1fr);
+    grid-template-columns: 13.5rem minmax(0, 1fr);
+  }
+
+  .documentPane {
+    max-width: none;
+    padding-right: 2rem;
+    padding-left: 2rem;
   }
 
   .inspector {
@@ -356,6 +377,8 @@
 
 @media (max-width: 760px) {
   .workspace {
+    width: auto;
+    margin: -2rem -1rem;
     background: #111315;
   }
 

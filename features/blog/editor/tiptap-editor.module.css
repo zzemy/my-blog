@@ -23,12 +23,12 @@
 }
 
 .editorShell :global(.ProseMirror) {
-  width: min(100%, 820px);
+  width: 100%;
   min-height: 560px;
   margin: 0;
   background: transparent;
   caret-color: var(--article-accent);
-  padding: 1.25rem 0 5rem 3rem;
+  padding: 1rem 0 5rem 1.65rem;
 }
 
 .editorShell :global(.ProseMirror:focus) {
@@ -52,10 +52,10 @@
   position: relative;
   z-index: 20;
   display: flex;
-  width: min(100%, 820px);
+  width: 100%;
   align-items: center;
-  gap: 0.45rem;
-  margin: 1.15rem 0 0.2rem;
+  gap: 0.38rem;
+  margin: 1.05rem 0 0.2rem 1.65rem;
   border: 0;
   border-radius: 8px;
   background: transparent;
@@ -70,15 +70,22 @@
 }
 
 .editorShell :global(.doc-insert-trigger) {
-  height: 2rem;
-  gap: 0.35rem;
-  border: 1px solid color-mix(in oklch, var(--article-line), transparent 35%);
-  border-radius: 6px;
-  background: color-mix(in oklch, var(--article-panel), transparent 8%);
+  height: 2.15rem;
+  gap: 0.4rem;
+  border: 1px solid rgb(255 255 255 / 10%);
+  border-radius: 7px;
+  background: linear-gradient(180deg, rgb(255 255 255 / 8%), rgb(255 255 255 / 3%));
   color: var(--article-heading);
-  padding: 0 0.65rem;
+  padding: 0 0.72rem;
   font-size: 0.82rem;
-  font-weight: 780;
+  font-weight: 820;
+  box-shadow: 0 10px 28px rgb(0 0 0 / 18%);
+}
+
+.editorShell :global(.doc-insert-trigger:hover),
+.editorShell :global(.doc-insert-trigger:focus-visible) {
+  border-color: rgb(111 161 222 / 42%);
+  background: linear-gradient(180deg, rgb(82 118 170 / 24%), rgb(255 255 255 / 5%));
 }
 
 .editorShell :global(.doc-history-actions) {
@@ -89,8 +96,8 @@
 
 .editorShell :global(.doc-history-actions button) {
   display: inline-flex;
-  width: 2rem;
-  height: 2rem;
+  width: 2.05rem;
+  height: 2.05rem;
   align-items: center;
   justify-content: center;
   border: 0;
@@ -179,15 +186,44 @@
 
 :global(.doc-insert-menu) {
   display: grid;
-  width: min(27rem, calc(100vw - 2rem));
-  max-height: min(38rem, calc(100vh - 8rem));
+  width: min(34rem, calc(100vw - 2rem));
+  max-height: min(42rem, calc(100vh - 8rem));
   overflow-y: auto;
-  gap: 0.9rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
   border-color: rgb(255 255 255 / 10%);
-  background: rgb(33 35 38 / 96%);
+  border-radius: 10px;
+  background: linear-gradient(180deg, rgb(34 37 41 / 98%), rgb(23 25 28 / 98%));
   color: #edf1f5;
-  padding: 0.8rem;
-  box-shadow: 0 24px 80px rgb(0 0 0 / 42%);
+  padding: 0.9rem;
+  box-shadow: 0 30px 90px rgb(0 0 0 / 52%);
+}
+
+:global(.doc-insert-search) {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: 1.5rem minmax(0, 1fr);
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px solid rgb(255 255 255 / 10%);
+  border-radius: 8px;
+  background: rgb(255 255 255 / 5%);
+  color: #9ca8b5;
+  padding: 0.55rem 0.65rem;
+}
+
+:global(.doc-insert-search input) {
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: #f5f7fa;
+  font: inherit;
+  font-size: 0.86rem;
+  outline: none;
+}
+
+:global(.doc-insert-search input::placeholder) {
+  color: #7f8a96;
 }
 
 :global(.doc-insert-group) {
@@ -195,9 +231,19 @@
   gap: 0.45rem;
 }
 
+:global(.doc-insert-empty) {
+  grid-column: 1 / -1;
+  margin: 0;
+  border: 1px dashed rgb(255 255 255 / 12%);
+  border-radius: 8px;
+  color: #9ca8b5;
+  padding: 1rem;
+  text-align: center;
+}
+
 :global(.doc-insert-group h3) {
   margin: 0;
-  color: #8f9aa8;
+  color: #9aa7b5;
   font-size: 0.74rem;
   font-weight: 820;
 }
@@ -213,22 +259,24 @@
   gap: 0.55rem;
   align-items: center;
   border: 0;
-  border-radius: 7px;
-  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: rgb(255 255 255 / 2%);
   color: #e8edf2;
-  padding: 0.45rem;
+  padding: 0.5rem;
   text-align: left;
   cursor: pointer;
 }
 
 :global(.doc-insert-group button:hover),
 :global(.doc-insert-group button:focus-visible) {
-  background: rgb(255 255 255 / 8%);
+  border-color: rgb(111 161 222 / 28%);
+  background: rgb(87 125 178 / 16%);
   outline: none;
 }
 
 :global(.doc-insert-group svg) {
-  color: #62a4ff;
+  color: #66b4ff;
 }
 
 :global(.doc-insert-group span) {
@@ -511,8 +559,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  width: min(100%, 820px);
-  margin: 0 auto;
+  width: 100%;
+  margin: 0;
   border-top: 1px solid color-mix(in oklch, var(--article-line), transparent 28%);
   background: transparent;
   color: var(--article-muted);
@@ -541,7 +589,15 @@
 @media (max-width: 640px) {
   .editorShell :global(.ProseMirror) {
     min-height: 440px;
-    padding: 1.25rem 0 4rem 2.25rem;
+    padding: 1.25rem 0 4rem 0.5rem;
+  }
+
+  .editorShell :global(.doc-editor-toolbar) {
+    margin-left: 0.5rem;
+  }
+
+  :global(.doc-insert-menu) {
+    grid-template-columns: 1fr;
   }
 
   .editorCanvas {
