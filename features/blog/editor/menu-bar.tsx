@@ -78,6 +78,7 @@ type InsertGroup = {
 export function MenuBar({ editor }: MenuBarProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const pendingImagePosRef = useRef<number | null>(null)
+  const blockHandleHideTimerRef = useRef<number | null>(null)
   const [isUploading, setIsUploading] = useState(false)
   const [topMenuOpen, setTopMenuOpen] = useState(false)
   const [blockHandleTarget, setBlockHandleTarget] = useState<BlockHandleTarget | null>(null)
@@ -120,6 +121,22 @@ export function MenuBar({ editor }: MenuBarProps) {
     setFloatingTarget(null)
     setStyleTarget(resolveFloatingTarget(editor, target))
   }, [editor])
+
+  const clearBlockHandleHideTimer = useCallback(() => {
+    if (blockHandleHideTimerRef.current === null) return
+
+    window.clearTimeout(blockHandleHideTimerRef.current)
+    blockHandleHideTimerRef.current = null
+  }, [])
+
+  const scheduleBlockHandleHide = useCallback(() => {
+    clearBlockHandleHideTimer()
+
+    blockHandleHideTimerRef.current = window.setTimeout(() => {
+      setBlockHandleTarget(null)
+      blockHandleHideTimerRef.current = null
+    }, 420)
+  }, [clearBlockHandleHideTimer])
 
   const insertGroups: InsertGroup[] = [
       {
@@ -458,6 +475,7 @@ export function MenuBar({ editor }: MenuBarProps) {
     }
 
     const updateBlockHandle = (event: MouseEvent) => {
+      clearBlockHandleHideTimer()
       const target = resolveBlockHandleTarget(editor, event.clientX, event.clientY)
       setBlockHandleTarget(target)
     }
@@ -466,7 +484,7 @@ export function MenuBar({ editor }: MenuBarProps) {
       if (floatingTarget || styleTarget) return
       if (event.relatedTarget instanceof HTMLElement && event.relatedTarget.closest('.doc-block-handle')) return
 
-      setBlockHandleTarget(null)
+      scheduleBlockHandleHide()
     }
 
     dom.addEventListener('keydown', openWithSlash)
@@ -479,8 +497,9 @@ export function MenuBar({ editor }: MenuBarProps) {
       dom.removeEventListener('mousemove', updateBlockHandle)
       dom.removeEventListener('mouseleave', hideBlockHandle)
       document.removeEventListener('keydown', closeOnEscape)
+      clearBlockHandleHideTimer()
     }
-  }, [closeMenus, editor, floatingTarget, openFloatingMenu, styleTarget])
+  }, [clearBlockHandleHideTimer, closeMenus, editor, floatingTarget, openFloatingMenu, scheduleBlockHandleHide, styleTarget])
 
   useEffect(() => {
     if (!blockHandleTarget && !floatingTarget && !styleTarget) return
@@ -615,9 +634,12 @@ export function MenuBar({ editor }: MenuBarProps) {
             left: blockHandleTarget.x,
             top: blockHandleTarget.y,
           }}
-          onMouseEnter={() => setBlockHandleTarget(blockHandleTarget)}
+          onMouseEnter={() => {
+            clearBlockHandleHideTimer()
+            setBlockHandleTarget(blockHandleTarget)
+          }}
           onMouseLeave={() => {
-            if (!floatingTarget && !styleTarget) setBlockHandleTarget(null)
+            if (!floatingTarget && !styleTarget) scheduleBlockHandleHide()
           }}
         >
           <button
@@ -910,8 +932,7 @@ function resolveBlockHandleTargetAtDocPos(editor: Editor, pos: number): BlockHan
     const blockRect = dom.getBoundingClientRect()
     if (blockRect.bottom < 76 || blockRect.top > window.innerHeight - 32) return null
 
-    const editorRect = editor.view.dom.getBoundingClientRect()
-    const left = Math.max(12, editorRect.left - 56)
+    const left = Math.max(12, blockRect.left - 58)
     const top = blockRect.top + 2
 
     return {

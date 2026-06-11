@@ -65,6 +65,11 @@
   backdrop-filter: none;
 }
 
+.editorShell :global(.doc-block-control),
+.editorShell :global(.doc-block-control-compact) {
+  display: none !important;
+}
+
 .editorShell :global(.doc-block-handle) {
   position: fixed;
   display: inline-flex;
