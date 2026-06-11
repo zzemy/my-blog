@@ -11,6 +11,7 @@
     "publish": "git add . && git commit -m \"chore: update project\" && git push"
   },
   "dependencies": {
+    "@fontsource/lxgw-wenkai": "^5.2.5",
     "@giscus/react": "^3.1.0",
     "@hookform/resolvers": "^5.2.2",
     "@orama/orama": "^3.1.16",

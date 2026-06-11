@@ -1,4 +1,7 @@
 @import "katex/dist/katex.min.css";
+@import "@fontsource/lxgw-wenkai/300.css";
+@import "@fontsource/lxgw-wenkai/500.css";
+@import "@fontsource/lxgw-wenkai/700.css";
 @import "tailwindcss";
 @import "./styles/article.css";
 @import "./styles/tiptap-syntax.css";
@@ -12,11 +15,12 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans, "Inter", "Segoe UI", system-ui, -apple-system, sans-serif);
+  --font-wenkai: "LXGW WenKai", "霞鹜文楷", "LXGW WenKai Screen", "Source Han Sans SC", "Noto Sans SC", "Microsoft YaHei", "PingFang SC", "Heiti SC", system-ui, sans-serif;
+  --font-sans: var(--font-wenkai);
   --font-mono: var(--font-geist-mono, "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", monospace);
-  --font-serif: Georgia, Cambria, "Times New Roman", Times, serif;
-  --font-heading: "Aeonik", "Satoshi", var(--font-geist-sans, "Inter"), "Segoe UI", system-ui, -apple-system, sans-serif, "LXGW Bright", "Source Han Sans SC", "Noto Sans SC";
-  --font-heading-cjk: "LXGW Bright", "Source Han Sans SC", "Noto Sans SC", "Microsoft YaHei", "PingFang SC", "Heiti SC", system-ui, sans-serif;
+  --font-serif: var(--font-wenkai);
+  --font-heading: var(--font-wenkai);
+  --font-heading-cjk: var(--font-wenkai);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -67,34 +71,10 @@
   to { background-position: 200% center; }
 }
 
-/* 自定义字体面，通过 unicode-range 分别控制拉丁和CJK字符 */
-@font-face {
-  font-family: 'ArticleFont';
-  src: local('Arial');
-  unicode-range: U+0000-024F, U+1E00-1EFF, U+2000-206F, U+20A0-20CF, U+2100-214F;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'ArticleFont';
-  src: local('Source Han Sans SC'), local('Noto Sans SC'), local('Microsoft YaHei');
-  unicode-range: U+4E00-9FFF, U+3000-303F, U+FF00-FFEF;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'MaShanZhengLocal';
-  src: url('/fonts/MaShanZheng-Regular.ttf') format('truetype');
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-}
-
 :root {
   --radius: 0.625rem;
-  --article-font-latin: var(--font-sans);
-  --article-font-cjk: "Source Han Sans SC", "Noto Sans SC", "Microsoft YaHei", "PingFang SC", "Heiti SC", "WenQuanYi Micro Hei", "Hiragino Sans GB", system-ui, sans-serif;
-  --article-font: ArticleFont, system-ui, sans-serif;
+  --font-wenkai: "LXGW WenKai", "霞鹜文楷", "LXGW WenKai Screen", "Source Han Sans SC", "Noto Sans SC", "Microsoft YaHei", "PingFang SC", "Heiti SC", system-ui, sans-serif;
+  --article-font: var(--font-wenkai);
   --article-font-size: 1rem;
   --article-line-height: 1.7;
   --article-motion: cubic-bezier(0.22, 1, 0.36, 1);
@@ -129,25 +109,6 @@
   --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
   --sidebar-border: oklch(0.929 0.013 255.508);
   --sidebar-ring: oklch(0.704 0.04 256.788);
-}
-
-:root[data-font="serif"] {
-  --font-sans: var(--font-serif);
-}
-
-:root[data-article-font="sans"] {
-  --article-font-latin: var(--font-sans);
-  --article-font: var(--article-font-latin), var(--article-font-cjk), system-ui, sans-serif;
-}
-
-:root[data-article-font="serif"] {
-  --article-font-latin: var(--font-serif);
-  --article-font: var(--article-font-latin), var(--article-font-cjk), system-ui, serif;
-}
-
-:root[data-article-font="mono"] {
-  --article-font-latin: var(--font-mono);
-  --article-font: var(--article-font-latin), var(--article-font-cjk), monospace;
 }
 
 .dark {
@@ -190,19 +151,20 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-wenkai);
   }
   .font-heading {
     font-family: var(--font-heading);
     letter-spacing: 0.06em;
   }
   .font-handwriting {
-    font-family: "MaShanZhengLocal", "Ma Shan Zheng", "Zhi Mang Xing", "LXGW WenKai", "STXingkai", "STKaiti", "KaiTi", "Segoe Script", "Bradley Hand", cursive;
-    letter-spacing: 0.02em;
-    font-weight: 600;
+    font-family: var(--font-wenkai);
+    letter-spacing: 0;
+    font-weight: 500;
   }
   .font-handwriting-cjk {
-    font-family: "MaShanZhengLocal", "Ma Shan Zheng", "Zhi Mang Xing", "LXGW WenKai", "STXingkai", "STKaiti", "KaiTi", "Source Han Sans SC", "Noto Sans SC", cursive;
-    letter-spacing: 0.02em;
+    font-family: var(--font-wenkai);
+    letter-spacing: 0;
     font-weight: 400;
   }
 }
