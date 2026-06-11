@@ -30,7 +30,7 @@ export function SiteHeader() {
           <Link href="/" className="mr-6 flex items-center space-x-2 ml-4 md:ml-6">
             <Terminal className="h-6 w-6" />
           </Link>
-          <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
+          <nav className="hidden md:flex items-center gap-6 text-[15px] font-medium">
             {[
               { href: '/', label: t('home') },
               { href: '/posts', label: t('posts') },

@@ -121,7 +121,7 @@ export function PostLayout({ children, toc = [] }: PostLayoutProps) {
         <div className={cn("flex h-full flex-col")}>
             {/* Fixed Header in Sidebar */}
             <div className="flex items-center justify-between border-b p-4">
-                <span className="text-sm font-semibold">目录</span>
+                <span className="text-[15px] font-semibold">目录</span>
                 <Button 
                     variant="ghost" 
                     size="icon" 
@@ -166,7 +166,7 @@ export function PostLayout({ children, toc = [] }: PostLayoutProps) {
                           }
                         }}
                         className={cn(
-                        "block text-sm transition-colors hover:text-primary py-1.5 border-l-2 pl-4 -ml-4",
+                        "block text-[15px] transition-colors hover:text-primary py-1.5 border-l-2 pl-4 -ml-4",
                         item.depth === 1 && "font-bold",
                         item.depth === 2 && "pl-4",
                         item.depth === 3 && "pl-8",

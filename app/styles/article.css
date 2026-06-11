@@ -245,13 +245,13 @@
   --tw-prose-th-borders: var(--article-line);
   --tw-prose-td-borders: var(--article-line);
   color: var(--article-text);
-  font-size: 0.9375rem;
-  line-height: 1.67;
+  font-size: var(--article-font-size);
+  line-height: var(--article-line-height);
 }
 
 @media (min-width: 768px) {
   .article-content.prose {
-    font-size: 0.9375rem;
+    font-size: var(--article-font-size);
   }
 }
 
@@ -330,9 +330,9 @@
 }
 
 .article-content.prose p {
-  margin: 16px 0;
+  margin: 18px 0;
   color: var(--article-text);
-  line-height: 1.67;
+  line-height: var(--article-line-height);
   word-wrap: break-word;
 }
 
@@ -410,7 +410,7 @@
   font-family: "JetBrains Mono", "Menlo", "Consolas", monospace;
   font-size: 1em;
   font-weight: 500;
-  line-height: 1.67;
+  line-height: var(--article-line-height);
 }
 
 .article-content.prose acronym,
@@ -455,7 +455,7 @@
 .article-content.prose ul,
 .article-content.prose ol {
   margin: 0 20px;
-  line-height: 1.67;
+  line-height: var(--article-line-height);
   padding-left: 1.45rem;
 }
 
@@ -477,7 +477,7 @@
 
 .article-content.prose dl {
   margin: 0 20px;
-  line-height: 1.67;
+  line-height: var(--article-line-height);
   word-wrap: break-word;
 }
 
@@ -591,7 +591,7 @@
   border-spacing: 0;
   border-radius: 0;
   background: transparent;
-  line-height: 1.67;
+  line-height: var(--article-line-height);
 }
 
 .article-content.prose th,
