@@ -48,6 +48,10 @@
   opacity: 0.78;
 }
 
+.article-content.prose .not-prose :is(h1, h2, h3, h4, h5, h6)::before {
+  content: none;
+}
+
 .article-content.prose .paragraph-anchor {
   opacity: 0;
   text-decoration: none !important;
@@ -144,8 +148,6 @@
 .article-content .component-chart,
 .article-content .component-diagram,
 .article-content .component-emoji-board,
-.article-content .component-table-scroll,
-.article-content .component-card,
 .article-content .component-file-list a,
 .article-content .component-audio,
 .article-content .component-embed,
@@ -172,8 +174,6 @@
 .article-content .component-chart:hover,
 .article-content .component-diagram:hover,
 .article-content .component-emoji-board:hover,
-.article-content .component-table-scroll:hover,
-.article-content .component-card:hover,
 .article-content .component-file-list a:hover,
 .article-content .component-audio:hover,
 .article-content .component-embed:hover,
@@ -182,24 +182,6 @@
 .article-content .component-rich-showcase:hover {
   border-color: color-mix(in oklch, var(--article-line), var(--article-heading) 12%);
   box-shadow: var(--article-skin-shadow-hover);
-}
-
-.article-content .component-callout {
-  border-color: var(--callout-border, var(--article-line));
-  border-left-color: var(--callout-icon);
-  background: var(--callout-bg);
-  box-shadow: none;
-  transition:
-    background-color 180ms var(--article-motion),
-    border-color 180ms var(--article-motion),
-    box-shadow 180ms var(--article-motion);
-}
-
-.article-content .component-callout:hover {
-  border-color: var(--callout-border, var(--article-line));
-  border-left-color: var(--callout-icon);
-  background: var(--callout-bg);
-  box-shadow: none;
 }
 
 .article-content.prose blockquote {
@@ -246,19 +228,6 @@
   margin-left: 12px;
 }
 
-.article-content.prose table {
-  box-shadow: none;
-}
-
-.article-content.prose th {
-  border-bottom: 3px solid var(--article-line);
-}
-
-.article-content.prose th,
-.article-content.prose td {
-  border-color: var(--article-line);
-}
-
 .article-content.prose img,
 .article-content.prose video,
 .article-content.prose .article-image {
@@ -273,28 +242,6 @@
   box-shadow: none;
 }
 
-.article-content .code-window {
-  border-color: color-mix(in oklch, var(--article-line), transparent 24%);
-  border-radius: 12px;
-  background: var(--article-code-surface);
-  box-shadow: none;
-  transition:
-    border-color 220ms var(--article-motion),
-    background-color 220ms var(--article-motion);
-}
-
-.article-content .code-window:hover {
-  border-color: color-mix(in oklch, var(--article-line), var(--article-heading) 10%);
-  box-shadow: none;
-}
-
-.article-content .code-window-header {
-  min-height: 3rem;
-  background: var(--article-code-header);
-}
-
-.article-content .code-window-copy,
-.article-content .code-window-toggle,
 .article-content .component-slider-controls button {
   filter: none;
 }
@@ -305,18 +252,6 @@
   border-color: color-mix(in oklch, var(--article-accent), transparent 28%);
   background: var(--article-skin-soft);
   color: var(--article-accent);
-}
-
-.article-content .code-window-copy:hover {
-  border-color: color-mix(in oklch, var(--article-line), var(--article-heading) 10%);
-  background: color-mix(in oklch, var(--article-heading), transparent 94%);
-  color: var(--article-heading);
-}
-
-.article-content .code-window-toggle:hover {
-  border-color: color-mix(in oklch, var(--article-line), var(--article-heading) 10%);
-  background: color-mix(in oklch, var(--article-heading), transparent 94%);
-  color: var(--article-heading);
 }
 
 .article-content .component-button,
@@ -373,7 +308,6 @@
 @media (prefers-reduced-motion: no-preference) {
   .article-content.prose h2::after,
   .article-content.prose hr,
-  .article-content .component-card,
   .article-content .component-file-list a,
   .article-content .component-gallery figure {
     will-change: box-shadow, border-color;

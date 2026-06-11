@@ -33,7 +33,7 @@ export function PostLayout({ children, toc = [] }: PostLayoutProps) {
   React.useEffect(() => {
     const handleScroll = () => {
       let currentActiveId = "";
-      // Offset to account for sticky header (h-14 = 56px) + some buffer
+      // Offset to account for sticky header (h-20 = 80px).
       // Reducing this ensures we don't highlight the next section too early
       // while the user is still reading the end of the previous one.
       const offset = 80;
@@ -114,22 +114,23 @@ export function PostLayout({ children, toc = [] }: PostLayoutProps) {
       <aside
         className={cn(
           // Sidebar is fixed on the left; hidden by translate-x when closed on all breakpoints
-          "fixed left-0 top-14 z-40 h-[calc(100vh-3.5rem)] border-r bg-background transition-all duration-300 ease-in-out w-64",
+          "fixed left-0 top-20 z-40 h-[calc(100vh-5rem)] border-r bg-background transition-all duration-300 ease-in-out w-64",
           isOpen ? "translate-x-0 shadow-lg lg:shadow-none" : "-translate-x-full"
         )}
       >
         <div className={cn("flex h-full flex-col")}>
             {/* Fixed Header in Sidebar */}
-            <div className="flex items-center justify-between border-b p-4">
-                <span className="text-[15px] font-semibold">目录</span>
+            <div className="flex h-12 items-center justify-between border-b border-border/60 bg-background/95 px-4">
+                <span className="text-sm font-semibold text-foreground/90">目录</span>
                 <Button 
                     variant="ghost" 
                     size="icon" 
-                    className="h-8 w-8" 
+                    className="h-7 w-7 rounded-md text-muted-foreground/80 hover:bg-accent/70 hover:text-foreground"
                     onClick={() => setIsOpen(false)}
+                    aria-label="收起目录"
                     title="收起目录"
                 >
-                    <PanelLeftClose className="h-4 w-4" />
+                    <PanelLeftClose className="h-3.5 w-3.5" />
                 </Button>
             </div>
 
@@ -188,7 +189,7 @@ export function PostLayout({ children, toc = [] }: PostLayoutProps) {
 
       {/* Toggle Button (Visible when collapsed) */}
         {!isOpen && (
-          <div className="fixed left-4 top-20 z-40">
+          <div className="fixed left-4 top-24 z-40">
             <Button
             variant="outline"
             size="icon"

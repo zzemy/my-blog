@@ -110,13 +110,14 @@ function toPostData(doc: SearchDocument): PostData {
   };
 }
 
-export function CommandMenu() {
+export function CommandMenu({ compact = false }: { compact?: boolean }) {
   const router = useRouter();
   const [open, setOpen] = React.useState(false);
   const [query, setQuery] = React.useState('');
   const [searchScope, setSearchScope] = React.useState<SearchScope>('global');
   const [oramaDb, setOramaDb] = React.useState<SearchDb | null>(null);
   const [results, setResults] = React.useState<PostData[]>([]);
+  const searchInputRef = React.useRef<HTMLInputElement>(null);
   const locale = useLocale();
   const t = useTranslations('Common');
 
@@ -179,33 +180,71 @@ export function CommandMenu() {
     return () => document.removeEventListener('keydown', down);
   }, []);
 
+  React.useEffect(() => {
+    if (!open || !compact) return;
+
+    const frame = window.requestAnimationFrame(() => {
+      searchInputRef.current?.focus();
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [compact, open]);
+
   const runCommand = React.useCallback((command: () => unknown) => {
     setOpen(false);
     command();
   }, []);
 
   return (
-    <div className="relative w-full md:w-64">
+    <div className={cn("relative", compact ? "w-auto" : "w-full md:w-64")}>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
-          <div className="relative">
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-            <input
-              className="flex h-9 w-full rounded-md border border-input bg-background dark:bg-input/30 px-3 py-1 text-[15px] shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 pl-8"
-              placeholder={t('searchPlaceholder')}
-              value={query}
-              onChange={(e) => {
-                setQuery(e.target.value);
-                if (!open) setOpen(true);
-              }}
-              onClick={() => setOpen(true)}
-            />
-            <kbd className="pointer-events-none absolute right-1.5 top-2 hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
-              <span className="text-xs">⌘</span>K
-            </kbd>
-          </div>
+          {compact ? (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-10 w-10 text-foreground/78 hover:bg-accent hover:text-foreground dark:text-white/82 dark:hover:bg-white/10 dark:hover:text-white"
+              aria-label={t('searchPlaceholder')}
+            >
+              <Search className="h-5 w-5" />
+            </Button>
+          ) : (
+            <div className="relative">
+              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <input
+                ref={searchInputRef}
+                className="flex h-9 w-full rounded-md border border-input bg-background dark:bg-input/30 px-3 py-1 text-[15px] shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 pl-8"
+                placeholder={t('searchPlaceholder')}
+                value={query}
+                onChange={(e) => {
+                  setQuery(e.target.value);
+                  if (!open) setOpen(true);
+                }}
+                onClick={() => setOpen(true)}
+              />
+              <kbd className="pointer-events-none absolute right-1.5 top-2 hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
+                <span className="text-xs">⌘</span>K
+              </kbd>
+            </div>
+          )}
         </PopoverTrigger>
-        <PopoverContent className="p-0 w-[var(--radix-popover-trigger-width)]" align="start" onOpenAutoFocus={(e) => e.preventDefault()}>
+        <PopoverContent
+          className={cn("p-0", compact ? "w-[min(22rem,calc(100vw-2rem))]" : "w-[var(--radix-popover-trigger-width)]")}
+          align={compact ? "end" : "start"}
+          onOpenAutoFocus={(e) => e.preventDefault()}
+        >
+          {compact && (
+            <div className="relative border-b p-2">
+              <Search className="absolute left-4 top-4 h-4 w-4 text-muted-foreground" />
+              <input
+                ref={searchInputRef}
+                className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 pl-8 text-[15px] shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                placeholder={t('searchPlaceholder')}
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+              />
+            </div>
+          )}
           <div className="flex items-center gap-1 p-2 border-b overflow-x-auto no-scrollbar">
             {SCOPE_OPTIONS.map((scope) => (
               <Button
