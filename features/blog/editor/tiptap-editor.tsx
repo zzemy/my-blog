@@ -275,10 +275,18 @@ export function TipTapEditor({
     if (!editor) return
 
     const assignHeadingIds = () => {
-      const headings = editor.view.dom.querySelectorAll('h1, h2, h3, h4, h5, h6')
-      headings.forEach((heading, index) => {
-        heading.setAttribute('id', `outline-${index + 1}`)
-        ;(heading as HTMLElement).style.scrollMarginTop = '96px'
+      let index = 0
+
+      editor.state.doc.descendants((node, pos) => {
+        if (node.type.name !== 'heading') return
+
+        const dom = editor.view.nodeDOM(pos)
+        const heading = getHeadingElement(dom)
+        if (!heading) return
+
+        index += 1
+        heading.setAttribute('id', `outline-${index}`)
+        heading.style.scrollMarginTop = '140px'
       })
     }
 
@@ -317,4 +325,10 @@ export function TipTapEditor({
       )}
     </div>
   )
+}
+
+function getHeadingElement(dom: globalThis.Node | null): HTMLElement | null {
+  if (!(dom instanceof HTMLElement)) return null
+  if (dom.matches('h1, h2, h3, h4, h5, h6')) return dom
+  return dom.querySelector('h1, h2, h3, h4, h5, h6')
 }

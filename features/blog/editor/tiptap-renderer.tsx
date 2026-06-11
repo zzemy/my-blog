@@ -113,13 +113,21 @@ export function TipTapRenderer({ content, className = '', toc = [] }: TipTapRend
   // 将标题批量设置 id 和 scroll-margin-top
   const assignHeadingIds = useCallback(() => {
     if (!editor || !toc.length) return
-    const headings = editor.view.dom.querySelectorAll('h1, h2, h3, h4, h5, h6')
-    toc.slice(0, headings.length).forEach((item, idx) => {
-      const el = headings[idx] as HTMLElement
-      if (el) {
-        el.setAttribute('id', item.id)
-        el.style.scrollMarginTop = '96px'
+
+    let index = 0
+    editor.state.doc.descendants((node, pos) => {
+      if (node.type.name !== 'heading') return
+
+      const item = toc[index]
+      if (!item) return
+
+      const heading = getHeadingElement(editor.view.nodeDOM(pos))
+      if (heading) {
+        heading.setAttribute('id', item.id)
+        heading.style.scrollMarginTop = '96px'
       }
+
+      index += 1
     })
   }, [editor, toc])
 
@@ -267,4 +275,10 @@ export function TipTapRenderer({ content, className = '', toc = [] }: TipTapRend
       )}
     </>
   )
+}
+
+function getHeadingElement(dom: globalThis.Node | null): HTMLElement | null {
+  if (!(dom instanceof HTMLElement)) return null
+  if (dom.matches('h1, h2, h3, h4, h5, h6')) return dom
+  return dom.querySelector('h1, h2, h3, h4, h5, h6')
 }

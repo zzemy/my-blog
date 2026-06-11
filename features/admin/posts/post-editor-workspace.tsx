@@ -113,8 +113,7 @@ export function PostEditorWorkspace({
     const target = document.getElementById(item.id)
     if (!target) return
 
-    const y = target.getBoundingClientRect().top + window.scrollY - 140
-    window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' })
+    scrollElementIntoEditorView(target, 140)
     window.history.replaceState(null, '', `#${item.id}`)
   }
 
@@ -430,4 +429,37 @@ function getHeadingLevel(node: JsonNode) {
 
 function isRecord(value: unknown): value is JsonNode & Record<string, unknown> {
   return typeof value === 'object' && value !== null
+}
+
+function scrollElementIntoEditorView(target: HTMLElement, offset: number) {
+  const container = getScrollContainer(target)
+
+  if (!container || container === document.documentElement || container === document.body) {
+    const top = target.getBoundingClientRect().top + window.scrollY - offset
+    window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' })
+    return
+  }
+
+  const containerRect = container.getBoundingClientRect()
+  const targetRect = target.getBoundingClientRect()
+  const top = container.scrollTop + targetRect.top - containerRect.top - offset
+
+  container.scrollTo({ top: Math.max(0, top), behavior: 'smooth' })
+}
+
+function getScrollContainer(element: HTMLElement): HTMLElement | null {
+  let parent = element.parentElement
+
+  while (parent && parent !== document.body) {
+    const style = window.getComputedStyle(parent)
+    const canScroll = /(auto|scroll|overlay)/.test(style.overflowY)
+
+    if (canScroll && parent.scrollHeight > parent.clientHeight) {
+      return parent
+    }
+
+    parent = parent.parentElement
+  }
+
+  return document.scrollingElement instanceof HTMLElement ? document.scrollingElement : document.documentElement
 }
