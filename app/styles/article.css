@@ -114,9 +114,9 @@
   --article-h2-line: color-mix(in oklch, var(--article-line), transparent 10%);
   --article-rule-color: var(--article-accent);
   --article-rule-glow: color-mix(in oklch, var(--article-accent), transparent 40%);
-  --article-block-border: color-mix(in oklch, var(--article-accent), var(--article-line) 58%);
-  --article-block-bg: color-mix(in oklch, var(--article-accent), var(--article-panel) 97%);
-  --article-block-bg-hover: color-mix(in oklch, var(--article-accent), var(--article-panel) 92%);
+  --article-block-border: rgb(255 255 255 / 12%);
+  --article-block-bg: #242424;
+  --article-block-bg-hover: #2b2b2b;
   --article-block-shadow: 0 0 5px 2px rgb(0 0 0 / 20%);
   --article-block-shadow-hover: 0 0 6px 4px rgb(0 0 0 / 24%);
   --article-table-header: transparent;
