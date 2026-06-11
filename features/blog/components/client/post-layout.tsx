@@ -205,10 +205,10 @@ export function PostLayout({ children, toc = [] }: PostLayoutProps) {
       <main
         className={cn(
           "transition-all duration-300 ease-in-out",
-          isOpen ? "lg:ml-64" : "lg:ml-0"
+          isOpen ? "lg:ml-64 2xl:ml-0" : "lg:ml-0"
         )}
       >
-        <div className="container mx-auto max-w-[780px] px-4 py-8 pt-24 md:pt-12 md:px-6">
+        <div className="container mx-auto max-w-[860px] px-4 py-8 pt-24 md:pt-12 md:px-6">
             {children}
         </div>
       </main>
