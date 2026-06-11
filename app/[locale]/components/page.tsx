@@ -16,6 +16,7 @@ import {
   Sigma,
 } from 'lucide-react'
 import { PostLayout } from '@/features/blog/components/client/post-layout'
+import { Comments } from '@/features/blog/components/client/comments'
 import { FadeIn } from '@/shared/visuals/fade-in'
 import { ReferenceSlider } from './reference-slider'
 import { ReferenceAlerts, ReferenceCodeExamples, ReferenceDiagram, ReferenceFlow } from './reference-showcase'
@@ -668,6 +669,10 @@ export default async function ComponentsPage({ params }: { params: Promise<{ loc
               </li>
             </ol>
           </section>
+          </div>
+
+          <div className="mt-12 border-t pt-10">
+            <Comments />
           </div>
         </article>
       </FadeIn>
