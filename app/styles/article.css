@@ -250,9 +250,10 @@
   line-height: var(--article-line-height);
 }
 
-@media (min-width: 768px) {
+@media (min-width: 1024px) {
   .article-content.prose {
-    font-size: var(--article-font-size);
+    --article-font-size: var(--article-font-size-desktop);
+    --article-line-height: var(--article-line-height-desktop);
   }
 }
 
