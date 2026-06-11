@@ -105,15 +105,15 @@ caption=MP3 · 正文宽度媒体控件
 
 export function MarkdownShortcodeGuide() {
   return (
-    <details className="mb-4 overflow-hidden rounded-lg border border-zinc-200 bg-zinc-50/80 dark:border-zinc-800 dark:bg-zinc-950/70">
-      <summary className="cursor-pointer px-4 py-3 text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+    <details className="markdown-shortcode-guide">
+      <summary>
         Markdown 快捷块
       </summary>
-      <div className="grid gap-3 border-t border-zinc-200 p-4 dark:border-zinc-800 md:grid-cols-2">
+      <div className="markdown-shortcode-grid">
         {examples.map((example) => (
-          <section key={example.title} className="rounded-md border border-zinc-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-950">
-            <h3 className="mb-2 text-sm font-semibold text-zinc-900 dark:text-zinc-100">{example.title}</h3>
-            <pre className="overflow-x-auto rounded-md bg-[#0d1117] p-3 text-xs leading-relaxed text-zinc-100">
+          <section key={example.title}>
+            <h3>{example.title}</h3>
+            <pre>
               <code>{example.code}</code>
             </pre>
           </section>

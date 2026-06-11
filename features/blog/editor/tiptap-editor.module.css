@@ -1,26 +1,34 @@
 .editorShell {
-  overflow: hidden;
-  border: 1px solid var(--article-line);
-  border-radius: 8px;
-  background: var(--article-panel);
-  box-shadow: 0 18px 42px color-mix(in oklch, var(--foreground), transparent 94%);
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 :global(.dark) .editorShell {
-  box-shadow: 0 18px 42px rgb(0 0 0 / 24%);
+  box-shadow: none;
 }
 
 .editorCanvas {
-  background:
-    linear-gradient(to right, color-mix(in oklch, var(--article-line), transparent 72%) 1px, transparent 1px),
-    var(--article-panel);
-  background-size: 100% 100%;
+  min-height: 640px;
+  border: 1px solid color-mix(in oklch, var(--article-line), transparent 35%);
+  border-radius: 8px;
+  background: color-mix(in oklch, var(--article-panel), transparent 18%);
+  padding: 0.75rem 0 1.5rem;
+}
+
+:global(.dark) .editorCanvas {
+  background: color-mix(in oklch, var(--background), #111111 26%);
 }
 
 .editorShell :global(.ProseMirror) {
+  width: min(100%, 820px);
   min-height: 560px;
-  padding: 1.5rem;
+  margin: 0 auto;
+  background: transparent;
   caret-color: var(--article-accent);
+  padding: 2rem 2.5rem 5rem;
 }
 
 .editorShell :global(.ProseMirror:focus) {
@@ -37,7 +45,136 @@
 
 .editorShell :global(.ProseMirror-selectednode) {
   outline: 2px solid color-mix(in oklch, var(--article-accent), transparent 18%);
-  outline-offset: 4px;
+  outline-offset: 3px;
+}
+
+.editorShell :global(.doc-editor-toolbar) {
+  position: sticky;
+  top: 0.75rem;
+  z-index: 20;
+  display: flex;
+  width: fit-content;
+  max-width: calc(100% - 2rem);
+  flex-wrap: wrap;
+  gap: 0.15rem;
+  margin: 0 auto 0.75rem;
+  border: 1px solid color-mix(in oklch, var(--article-line), transparent 18%);
+  border-radius: 8px;
+  background: color-mix(in oklch, var(--article-panel), transparent 4%);
+  padding: 0.35rem;
+  box-shadow: 0 10px 28px rgb(0 0 0 / 12%);
+  backdrop-filter: blur(14px);
+}
+
+:global(.dark) .editorShell :global(.doc-editor-toolbar) {
+  background: rgb(36 36 36 / 92%);
+  box-shadow: 0 18px 42px rgb(0 0 0 / 26%);
+}
+
+.editorShell :global(.doc-editor-toolbar button) {
+  min-width: 2rem;
+  height: 2rem;
+  border-radius: 6px;
+}
+
+.editorShell :global(.doc-editor-toolbar > div) {
+  height: 1.55rem;
+  margin: 0.22rem 0.15rem;
+  background: var(--article-line);
+}
+
+.editorShell :global(.doc-selection-menu) {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+  border: 1px solid color-mix(in oklch, var(--article-line), transparent 18%);
+  border-radius: 8px;
+  background: color-mix(in oklch, var(--article-panel), transparent 4%);
+  padding: 0.25rem;
+  box-shadow: 0 16px 38px rgb(0 0 0 / 18%);
+  backdrop-filter: blur(14px);
+}
+
+:global(.dark) .editorShell :global(.doc-selection-menu) {
+  background: rgb(36 36 36 / 94%);
+  box-shadow: 0 18px 42px rgb(0 0 0 / 30%);
+}
+
+.editorShell :global(.doc-selection-menu button) {
+  display: inline-flex;
+  width: 2rem;
+  height: 2rem;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--article-muted);
+  cursor: pointer;
+}
+
+.editorShell :global(.doc-selection-menu button:hover),
+.editorShell :global(.doc-selection-menu button:focus-visible),
+.editorShell :global(.doc-selection-menu button.is-active) {
+  background: color-mix(in oklch, var(--article-accent), var(--article-panel) 88%);
+  color: var(--article-heading);
+}
+
+.editorShell :global(.markdown-shortcode-guide) {
+  width: min(100%, 820px);
+  margin: 0 auto 0.75rem;
+  overflow: hidden;
+  border: 1px solid color-mix(in oklch, var(--article-line), transparent 25%);
+  border-radius: 8px;
+  background: color-mix(in oklch, var(--article-panel), transparent 25%);
+}
+
+.editorShell :global(.markdown-shortcode-guide summary) {
+  cursor: pointer;
+  color: var(--article-muted);
+  padding: 0.65rem 0.85rem;
+  font-size: 0.85rem;
+  font-weight: 800;
+  line-height: 1.3;
+}
+
+.editorShell :global(.markdown-shortcode-grid) {
+  display: grid;
+  gap: 0.65rem;
+  border-top: 1px solid var(--article-line);
+  padding: 0.75rem;
+}
+
+@media (min-width: 768px) {
+  .editorShell :global(.markdown-shortcode-grid) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.editorShell :global(.markdown-shortcode-grid section) {
+  overflow: hidden;
+  border: 1px solid color-mix(in oklch, var(--article-line), transparent 25%);
+  border-radius: 8px;
+  background: var(--article-panel);
+  padding: 0.75rem;
+}
+
+.editorShell :global(.markdown-shortcode-grid h3) {
+  margin: 0 0 0.45rem;
+  color: var(--article-heading);
+  font-size: 0.85rem;
+  font-weight: 850;
+}
+
+.editorShell :global(.markdown-shortcode-grid pre) {
+  overflow-x: auto;
+  margin: 0;
+  border-radius: 6px;
+  background: #0d1117;
+  color: #f8fafc;
+  padding: 0.65rem;
+  font-size: 0.75rem;
+  line-height: 1.55;
 }
 
 .editorShell :global([data-rich-block-editable="true"]) {
@@ -51,10 +188,10 @@
   align-items: center;
   justify-content: center;
   margin-left: auto;
-  border: 1px solid color-mix(in oklch, var(--callout-icon), transparent 45%);
+  border: 1px solid color-mix(in oklch, var(--callout-icon, var(--article-accent)), transparent 45%);
   border-radius: 6px;
-  background: color-mix(in oklch, var(--callout-bg), white 20%);
-  color: var(--callout-text);
+  background: color-mix(in oklch, var(--callout-bg, var(--article-soft)), white 20%);
+  color: var(--callout-text, var(--article-heading));
   cursor: pointer;
   transition:
     background-color 160ms var(--article-motion),
@@ -64,12 +201,12 @@
 
 .editorShell :global(.component-block-edit-button:hover),
 .editorShell :global(.component-block-edit-button:focus-visible) {
-  border-color: var(--callout-icon);
-  background: color-mix(in oklch, var(--callout-bg), white 36%);
+  border-color: var(--callout-icon, var(--article-accent));
+  background: color-mix(in oklch, var(--callout-bg, var(--article-soft)), white 36%);
 }
 
 .editorShell :global(.component-block-edit-button:focus-visible) {
-  outline: 2px solid color-mix(in oklch, var(--callout-icon), transparent 36%);
+  outline: 2px solid color-mix(in oklch, var(--callout-icon, var(--article-accent)), transparent 36%);
   outline-offset: 2px;
 }
 
@@ -79,6 +216,7 @@
 
 .editorShell :global(.component-block-editor) {
   display: grid;
+  width: 100%;
   grid-template-columns: minmax(8rem, 0.55fr) minmax(12rem, 1fr);
   gap: 0.85rem;
   margin-top: 0.65rem;
@@ -87,6 +225,30 @@
   background: color-mix(in oklch, var(--article-panel), var(--article-soft) 44%);
   padding: 0.9rem;
   box-shadow: inset 0 1px 0 color-mix(in oklch, var(--foreground), transparent 94%);
+}
+
+.editorShell :global(.component-block-edit-row),
+.editorShell :global(.component-block-editor),
+.editorShell :global(.component-block-editor-list-host) {
+  grid-column: 1 / -1;
+}
+
+.editorShell :global(.component-block-edit-row) {
+  display: flex;
+  width: 100%;
+  justify-content: flex-end;
+}
+
+.editorShell :global(.component-block-editor-header) {
+  grid-column: 1 / -1;
+  border-bottom: 1px solid var(--article-line);
+  padding-bottom: 0.35rem;
+}
+
+.editorShell :global(.component-block-editor-header strong) {
+  color: var(--article-heading);
+  font-size: 0.9rem;
+  font-weight: 850;
 }
 
 .editorShell :global(.component-block-editor label) {
@@ -129,6 +291,47 @@
 .editorShell :global(.component-block-editor-wide),
 .editorShell :global(.component-block-editor-actions) {
   grid-column: 1 / -1;
+}
+
+.editorShell :global(.component-block-editor-list) {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.editorShell :global(.component-block-editor-row) {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) auto;
+  gap: 0.65rem;
+  align-items: end;
+  border: 1px solid var(--article-line);
+  border-radius: 8px;
+  background: color-mix(in oklch, var(--article-panel), var(--article-soft) 24%);
+  padding: 0.75rem;
+}
+
+.editorShell :global(.component-block-editor-row .component-block-editor-wide) {
+  grid-column: 1 / -1;
+}
+
+.editorShell :global(.component-block-editor-row > button),
+.editorShell :global(.component-block-editor-list > button) {
+  min-height: 2.45rem;
+  border: 1px solid var(--article-line);
+  border-radius: 6px;
+  background: var(--article-panel);
+  color: var(--article-heading);
+  padding: 0.45rem 0.7rem;
+  font-size: 0.82rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.editorShell :global(.component-block-editor-row > button:hover),
+.editorShell :global(.component-block-editor-list > button:hover),
+.editorShell :global(.component-block-editor-row > button:focus-visible),
+.editorShell :global(.component-block-editor-list > button:focus-visible) {
+  border-color: color-mix(in oklch, var(--article-accent), transparent 25%);
+  background: color-mix(in oklch, var(--article-accent), var(--article-panel) 92%);
 }
 
 .editorShell :global(.component-block-editor-actions) {
@@ -177,8 +380,10 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-top: 1px solid var(--article-line);
-  background: color-mix(in oklch, var(--article-panel), var(--article-soft) 38%);
+  width: min(100%, 820px);
+  margin: 0 auto;
+  border-top: 1px solid color-mix(in oklch, var(--article-line), transparent 28%);
+  background: transparent;
   color: var(--article-muted);
   padding: 0.55rem 0.85rem;
   font-size: 0.78rem;
@@ -205,10 +410,26 @@
 @media (max-width: 640px) {
   .editorShell :global(.ProseMirror) {
     min-height: 440px;
-    padding: 1rem;
+    padding: 1.25rem 1rem 4rem;
+  }
+
+  .editorCanvas {
+    border-right: 0;
+    border-left: 0;
+    border-radius: 0;
+    margin: 0 -1rem;
+  }
+
+  .editorShell :global(.doc-editor-toolbar),
+  .editorShell :global(.markdown-shortcode-guide) {
+    max-width: calc(100% - 1rem);
   }
 
   .editorShell :global(.component-block-editor) {
+    grid-template-columns: 1fr;
+  }
+
+  .editorShell :global(.component-block-editor-row) {
     grid-template-columns: 1fr;
   }
 }

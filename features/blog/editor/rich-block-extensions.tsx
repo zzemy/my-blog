@@ -14,13 +14,32 @@ import {
   Layers3,
   MousePointerClick,
   Music2,
-  Pencil,
   Network,
   Play,
   Quote,
-  Save,
-  X,
 } from 'lucide-react'
+import {
+  CardItemsEditor,
+  DiagramItemsEditor,
+  ImageItemsEditor,
+  PanelItemsEditor,
+  RichBlockEditButton,
+  RichBlockEditorPanel,
+  SelectField,
+  TextAreaField,
+  TextField,
+  TimelineItemsEditor,
+  ensureCardItems,
+  ensureDiagramItems,
+  ensureImageItems,
+  ensurePanelItems,
+  ensureTimelineItems,
+  normalizeCardItems,
+  normalizeDiagramItems,
+  normalizeImageItems,
+  normalizePanelItems,
+  normalizeTimelineItems,
+} from './rich-block-editors'
 
 export type RichImageItem = {
   src: string
@@ -29,6 +48,7 @@ export type RichImageItem = {
 }
 
 type CalloutTone = 'note' | 'quote' | 'tip' | 'info' | 'important' | 'warning' | 'success' | 'caution'
+type EmbedKind = 'youtube' | 'video'
 
 type PanelItem = {
   title: string
@@ -602,89 +622,125 @@ function CalloutView({ node, editor, updateAttributes }: NodeViewProps) {
             <Icon className="h-4 w-4" />
           </div>
           <p className="component-callout-title">{title}</p>
-          {editor.isEditable ? (
-            <button
-              type="button"
-              className="component-block-edit-button"
-              onClick={startEditing}
-              contentEditable={false}
-              aria-label="编辑提示块"
-            >
-              <Pencil className="h-3.5 w-3.5" />
-            </button>
-          ) : null}
+          {editor.isEditable ? <RichBlockEditButton onClick={startEditing} label="编辑提示块" /> : null}
         </div>
         <p>{text}</p>
       </div>
       {editor.isEditable && isEditing ? (
-        <div className="component-block-editor" contentEditable={false}>
-          <label>
-            <span>类型</span>
-            <select
-              value={draft.tone}
-              onChange={(event) => setDraft((current) => ({ ...current, tone: getCalloutTone(event.target.value) }))}
-            >
-              {calloutTones.map((item) => (
-                <option key={item} value={item}>
-                  {calloutLabels[item]} / {item}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            <span>标题</span>
-            <input
-              value={draft.title}
-              onChange={(event) => setDraft((current) => ({ ...current, title: event.target.value }))}
-              placeholder={calloutLabels[draft.tone]}
-            />
-          </label>
-          <label className="component-block-editor-wide">
-            <span>内容</span>
-            <textarea
-              value={draft.text}
-              onChange={(event) => setDraft((current) => ({ ...current, text: event.target.value }))}
-              rows={3}
-              placeholder={`这是一条${calloutLabels[draft.tone]}。`}
-            />
-          </label>
-          <div className="component-block-editor-actions">
-            <button type="button" onClick={() => setIsEditing(false)}>
-              <X className="h-3.5 w-3.5" />
-              取消
-            </button>
-            <button type="button" onClick={saveDraft}>
-              <Save className="h-3.5 w-3.5" />
-              保存
-            </button>
-          </div>
-        </div>
+        <RichBlockEditorPanel title="编辑提示块" onCancel={() => setIsEditing(false)} onSave={saveDraft}>
+          <SelectField
+            label="类型"
+            value={draft.tone}
+            options={calloutTones.map((item) => ({ value: item, label: `${calloutLabels[item]} / ${item}` }))}
+            onChange={(value) => setDraft((current) => ({ ...current, tone: value }))}
+          />
+          <TextField
+            label="标题"
+            value={draft.title}
+            placeholder={calloutLabels[draft.tone]}
+            onChange={(value) => setDraft((current) => ({ ...current, title: value }))}
+          />
+          <TextAreaField
+            label="内容"
+            value={draft.text}
+            placeholder={`这是一条${calloutLabels[draft.tone]}。`}
+            onChange={(value) => setDraft((current) => ({ ...current, text: value }))}
+          />
+        </RichBlockEditorPanel>
       ) : null}
     </NodeViewWrapper>
   )
 }
 
-function ButtonView({ node }: NodeViewProps) {
+function ButtonView({ node, editor, updateAttributes }: NodeViewProps) {
   const label = getString(node.attrs.label, '按钮')
   const href = getString(node.attrs.href, '#')
   const variant = getString(node.attrs.variant, 'primary') === 'secondary' ? 'secondary' : 'primary'
+  const [isEditing, setIsEditing] = useState(false)
+  const [draft, setDraft] = useState({ label, href, variant })
+
+  const startEditing = () => {
+    setDraft({ label, href, variant })
+    setIsEditing(true)
+  }
+
+  const saveDraft = () => {
+    updateAttributes({
+      label: draft.label.trim() || '按钮',
+      href: draft.href.trim() || '#',
+      variant: draft.variant === 'secondary' ? 'secondary' : 'primary',
+    })
+    setIsEditing(false)
+  }
 
   return (
-    <NodeViewWrapper className="component-button-row not-prose" data-rich-block="button">
+    <NodeViewWrapper
+      className="component-button-row not-prose"
+      data-rich-block="button"
+      data-rich-block-editable={editor.isEditable ? 'true' : undefined}
+    >
       <a className={`component-button component-button-${variant}`} href={href}>
         <span>{label}</span>
         <MousePointerClick className="h-4 w-4" />
       </a>
+      {editor.isEditable ? <RichBlockEditButton onClick={startEditing} label="编辑按钮" /> : null}
+      {editor.isEditable && isEditing ? (
+        <RichBlockEditorPanel title="编辑按钮" onCancel={() => setIsEditing(false)} onSave={saveDraft}>
+          <TextField
+            label="文本"
+            value={draft.label}
+            placeholder="按钮"
+            onChange={(value) => setDraft((current) => ({ ...current, label: value }))}
+          />
+          <TextField
+            label="链接"
+            value={draft.href}
+            placeholder="#"
+            onChange={(value) => setDraft((current) => ({ ...current, href: value }))}
+          />
+          <SelectField
+            label="样式"
+            value={draft.variant}
+            options={[
+              { value: 'primary', label: 'Primary' },
+              { value: 'secondary', label: 'Secondary' },
+            ]}
+            onChange={(value) => setDraft((current) => ({ ...current, variant: value }))}
+          />
+        </RichBlockEditorPanel>
+      ) : null}
     </NodeViewWrapper>
   )
 }
 
-function TabsView({ node }: NodeViewProps) {
+function TabsView({ node, editor, updateAttributes }: NodeViewProps) {
   const panels = getPanelItems(node.attrs.panels)
   const [active, setActive] = useState(0)
+  const [isEditing, setIsEditing] = useState(false)
+  const [draft, setDraft] = useState(ensurePanelItems(panels))
+
+  const startEditing = () => {
+    setDraft(ensurePanelItems(panels))
+    setIsEditing(true)
+  }
+
+  const saveDraft = () => {
+    updateAttributes({ panels: normalizePanelItems(draft) })
+    setActive(0)
+    setIsEditing(false)
+  }
 
   return (
-    <NodeViewWrapper className="component-tabs not-prose" data-rich-block="tabs">
+    <NodeViewWrapper
+      className="component-tabs not-prose"
+      data-rich-block="tabs"
+      data-rich-block-editable={editor.isEditable ? 'true' : undefined}
+    >
+      {editor.isEditable ? (
+        <div className="component-block-edit-row">
+          <RichBlockEditButton onClick={startEditing} label="编辑标签页" />
+        </div>
+      ) : null}
       <div className="component-tabs-list" role="tablist" aria-label="正文标签页">
         {panels.map((panel, index) => (
           <button
@@ -711,46 +767,116 @@ function TabsView({ node }: NodeViewProps) {
           </section>
         ))}
       </div>
+      {editor.isEditable && isEditing ? (
+        <RichBlockEditorPanel title="编辑标签页" onCancel={() => setIsEditing(false)} onSave={saveDraft}>
+          <PanelItemsEditor items={draft} onChange={setDraft} addLabel="添加标签页" />
+        </RichBlockEditorPanel>
+      ) : null}
     </NodeViewWrapper>
   )
 }
 
-function AccordionView({ node }: NodeViewProps) {
+function AccordionView({ node, editor, updateAttributes }: NodeViewProps) {
   const items = getPanelItems(node.attrs.items)
+  const [isEditing, setIsEditing] = useState(false)
+  const [draft, setDraft] = useState(ensurePanelItems(items))
+
+  const startEditing = () => {
+    setDraft(ensurePanelItems(items))
+    setIsEditing(true)
+  }
+
+  const saveDraft = () => {
+    updateAttributes({ items: normalizePanelItems(draft) })
+    setIsEditing(false)
+  }
 
   return (
-    <NodeViewWrapper className="component-accordions not-prose" data-rich-block="accordion">
+    <NodeViewWrapper
+      className="component-accordions not-prose"
+      data-rich-block="accordion"
+      data-rich-block-editable={editor.isEditable ? 'true' : undefined}
+    >
+      {editor.isEditable ? (
+        <div className="component-block-edit-row">
+          <RichBlockEditButton onClick={startEditing} label="编辑折叠面板" />
+        </div>
+      ) : null}
       {items.map((item, index) => (
         <details key={`${item.title}-${index}`} open={index === 0}>
           <summary>{item.title}</summary>
           <p>{item.text}</p>
         </details>
       ))}
+      {editor.isEditable && isEditing ? (
+        <RichBlockEditorPanel title="编辑折叠面板" onCancel={() => setIsEditing(false)} onSave={saveDraft}>
+          <PanelItemsEditor items={draft} onChange={setDraft} addLabel="添加面板" />
+        </RichBlockEditorPanel>
+      ) : null}
     </NodeViewWrapper>
   )
 }
 
-function GalleryView({ node }: NodeViewProps) {
+function GalleryView({ node, editor, updateAttributes }: NodeViewProps) {
   const images = getImageItems(node.attrs.images)
+  const [isEditing, setIsEditing] = useState(false)
+  const [draft, setDraft] = useState(ensureImageItems(images))
+
+  const startEditing = () => {
+    setDraft(ensureImageItems(images))
+    setIsEditing(true)
+  }
+
+  const saveDraft = () => {
+    updateAttributes({ images: normalizeImageItems(draft) })
+    setIsEditing(false)
+  }
 
   return (
-    <NodeViewWrapper className="component-gallery not-prose" data-rich-block="gallery">
+    <NodeViewWrapper
+      className="component-gallery not-prose"
+      data-rich-block="gallery"
+      data-rich-block-editable={editor.isEditable ? 'true' : undefined}
+    >
+      {editor.isEditable ? (
+        <div className="component-block-edit-row">
+          <RichBlockEditButton onClick={startEditing} label="编辑图集" />
+        </div>
+      ) : null}
       {images.map((image) => (
         <figure key={`${image.file}-${image.src}`}>
           <img src={image.src} alt={image.alt} referrerPolicy="no-referrer" />
           <figcaption>{image.file}</figcaption>
         </figure>
       ))}
+      {editor.isEditable && isEditing ? (
+        <RichBlockEditorPanel title="编辑图集" onCancel={() => setIsEditing(false)} onSave={saveDraft}>
+          <ImageItemsEditor items={draft} onChange={setDraft} addLabel="添加图片" />
+        </RichBlockEditorPanel>
+      ) : null}
     </NodeViewWrapper>
   )
 }
 
-function SliderView({ node }: NodeViewProps) {
+function SliderView({ node, editor, updateAttributes }: NodeViewProps) {
   const images = getImageItems(node.attrs.images)
   const [active, setActive] = useState(0)
+  const [isEditing, setIsEditing] = useState(false)
+  const [draft, setDraft] = useState(ensureImageItems(images))
   const activeImage = images[active] || images[0]
 
-  if (!activeImage) return null
+  const startEditing = () => {
+    setDraft(ensureImageItems(images))
+    setIsEditing(true)
+  }
+
+  const saveDraft = () => {
+    updateAttributes({ images: normalizeImageItems(draft) })
+    setActive(0)
+    setIsEditing(false)
+  }
+
+  if (!activeImage && !editor.isEditable) return null
 
   const showPrevious = () => {
     setActive((current) => (current === 0 ? images.length - 1 : current - 1))
@@ -761,57 +887,109 @@ function SliderView({ node }: NodeViewProps) {
   }
 
   return (
-    <NodeViewWrapper className="component-slider not-prose" data-rich-block="slider">
-      <figure className="component-slider-stage">
-        <img src={activeImage.src} alt={activeImage.alt} referrerPolicy="no-referrer" />
-        <figcaption>
-          <strong>{activeImage.file}</strong>
-          <span>{activeImage.alt}</span>
-        </figcaption>
-      </figure>
-      <div className="component-slider-controls" aria-label="轮播控制">
-        <button type="button" onClick={showPrevious} aria-label="上一张">
-          <ChevronLeft className="h-4 w-4" />
-        </button>
-        <span>
-          {active + 1} / {images.length}
-        </span>
-        <button type="button" onClick={showNext} aria-label="下一张">
-          <ChevronRight className="h-4 w-4" />
-        </button>
-      </div>
-      <div className="component-slider-strip" aria-label="轮播缩略图">
-        {images.map((image, index) => (
-          <button
-            key={`${image.file}-${image.src}`}
-            className={active === index ? 'is-active' : ''}
-            type="button"
-            aria-label={`预览 ${image.file}`}
-            onClick={() => setActive(index)}
-          >
-            <img src={image.src} alt="" referrerPolicy="no-referrer" />
-            <span>{image.file}</span>
-          </button>
-        ))}
-      </div>
+    <NodeViewWrapper
+      className="component-slider not-prose"
+      data-rich-block="slider"
+      data-rich-block-editable={editor.isEditable ? 'true' : undefined}
+    >
+      {editor.isEditable ? (
+        <div className="component-block-edit-row">
+          <RichBlockEditButton onClick={startEditing} label="编辑轮播" />
+        </div>
+      ) : null}
+      {activeImage ? (
+        <>
+          <figure className="component-slider-stage">
+            <img src={activeImage.src} alt={activeImage.alt} referrerPolicy="no-referrer" />
+            <figcaption>
+              <strong>{activeImage.file}</strong>
+              <span>{activeImage.alt}</span>
+            </figcaption>
+          </figure>
+          <div className="component-slider-controls" aria-label="轮播控制">
+            <button type="button" onClick={showPrevious} aria-label="上一张">
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <span>
+              {active + 1} / {images.length}
+            </span>
+            <button type="button" onClick={showNext} aria-label="下一张">
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
+          <div className="component-slider-strip" aria-label="轮播缩略图">
+            {images.map((image, index) => (
+              <button
+                key={`${image.file}-${image.src}`}
+                className={active === index ? 'is-active' : ''}
+                type="button"
+                aria-label={`预览 ${image.file}`}
+                onClick={() => setActive(index)}
+              >
+                <img src={image.src} alt="" referrerPolicy="no-referrer" />
+                <span>{image.file}</span>
+              </button>
+            ))}
+          </div>
+        </>
+      ) : (
+        <div className="component-placeholder">
+          <span>轮播</span>
+          <p>还没有图片，点击编辑添加轮播图片。</p>
+        </div>
+      )}
+      {editor.isEditable && isEditing ? (
+        <RichBlockEditorPanel title="编辑轮播" onCancel={() => setIsEditing(false)} onSave={saveDraft}>
+          <ImageItemsEditor items={draft} onChange={setDraft} addLabel="添加图片" />
+        </RichBlockEditorPanel>
+      ) : null}
     </NodeViewWrapper>
   )
 }
 
-function EmbedView({ node }: NodeViewProps) {
-  const kind = getString(node.attrs.kind, 'youtube')
+function EmbedView({ node, editor, updateAttributes }: NodeViewProps) {
+  const kind = getEmbedKind(node.attrs.kind)
   const src = getString(node.attrs.src)
   const title = getString(node.attrs.title, kind === 'video' ? '自定义视频' : 'YouTube 视频')
   const poster = getString(node.attrs.poster)
+  const [isEditing, setIsEditing] = useState(false)
+  const [draft, setDraft] = useState({ kind, src, title, poster })
 
-  if (!src) return null
+  const startEditing = () => {
+    setDraft({ kind, src, title, poster })
+    setIsEditing(true)
+  }
+
+  const saveDraft = () => {
+    const nextKind = getEmbedKind(draft.kind)
+    updateAttributes({
+      kind: nextKind,
+      src: nextKind === 'youtube' ? toYouTubeEmbed(draft.src.trim()) : draft.src.trim(),
+      title: draft.title.trim() || (nextKind === 'video' ? '自定义视频' : 'YouTube 视频'),
+      poster: draft.poster.trim(),
+    })
+    setIsEditing(false)
+  }
+
+  if (!src && !editor.isEditable) return null
 
   return (
     <NodeViewWrapper
       className={`component-embed ${kind === 'video' ? 'component-custom-video' : ''} not-prose`}
       data-rich-block="embed"
+      data-rich-block-editable={editor.isEditable ? 'true' : undefined}
     >
-      {kind === 'video' ? (
+      {editor.isEditable ? (
+        <div className="component-block-edit-row">
+          <RichBlockEditButton onClick={startEditing} label="编辑嵌入媒体" />
+        </div>
+      ) : null}
+      {!src ? (
+        <div className="component-placeholder">
+          <span>嵌入媒体</span>
+          <p>还没有媒体 URL，点击编辑添加视频或 YouTube 链接。</p>
+        </div>
+      ) : kind === 'video' ? (
         <>
           <video controls preload="metadata" poster={poster || undefined}>
             <source src={src} type="video/mp4" />
@@ -831,11 +1009,41 @@ function EmbedView({ node }: NodeViewProps) {
           allowFullScreen
         />
       )}
+      {editor.isEditable && isEditing ? (
+        <RichBlockEditorPanel title="编辑嵌入媒体" onCancel={() => setIsEditing(false)} onSave={saveDraft}>
+          <SelectField
+            label="类型"
+            value={draft.kind}
+            options={[
+              { value: 'youtube', label: 'YouTube' },
+              { value: 'video', label: '自定义视频' },
+            ]}
+            onChange={(value) => setDraft((current) => ({ ...current, kind: value }))}
+          />
+          <TextField
+            label="标题"
+            value={draft.title}
+            onChange={(value) => setDraft((current) => ({ ...current, title: value }))}
+          />
+          <TextField
+            label="URL"
+            value={draft.src}
+            onChange={(value) => setDraft((current) => ({ ...current, src: value }))}
+          />
+          {draft.kind === 'video' ? (
+            <TextField
+              label="封面图"
+              value={draft.poster}
+              onChange={(value) => setDraft((current) => ({ ...current, poster: value }))}
+            />
+          ) : null}
+        </RichBlockEditorPanel>
+      ) : null}
     </NodeViewWrapper>
   )
 }
 
-function FlowView({ node }: NodeViewProps) {
+function FlowView({ node, editor, updateAttributes }: NodeViewProps) {
   const flow: Record<keyof FlowAttrs, FlowNode> = {
     start: { label: getString(node.attrs.start, '开始') },
     question: { label: getString(node.attrs.question, '内容完整？') },
@@ -843,9 +1051,49 @@ function FlowView({ node }: NodeViewProps) {
     no: { label: getString(node.attrs.no, '继续修改') },
     end: { label: getString(node.attrs.end, '归档') },
   }
+  const [isEditing, setIsEditing] = useState(false)
+  const [draft, setDraft] = useState({
+    start: flow.start.label,
+    question: flow.question.label,
+    yes: flow.yes.label,
+    no: flow.no.label,
+    end: flow.end.label,
+  })
+
+  const startEditing = () => {
+    setDraft({
+      start: flow.start.label,
+      question: flow.question.label,
+      yes: flow.yes.label,
+      no: flow.no.label,
+      end: flow.end.label,
+    })
+    setIsEditing(true)
+  }
+
+  const saveDraft = () => {
+    updateAttributes({
+      start: draft.start.trim() || '开始',
+      question: draft.question.trim() || '内容完整？',
+      yes: draft.yes.trim() || '预览发布',
+      no: draft.no.trim() || '继续修改',
+      end: draft.end.trim() || '归档',
+    })
+    setIsEditing(false)
+  }
 
   return (
-    <NodeViewWrapper className="component-flow not-prose" data-rich-block="flow" aria-label="正文发布流程示例">
+    <NodeViewWrapper
+      className="component-flow not-prose"
+      data-rich-block="flow"
+      data-rich-block-editable={editor.isEditable ? 'true' : undefined}
+      aria-label="正文发布流程示例"
+    >
+      {editor.isEditable ? (
+        <div className="component-block-edit-row">
+          <RichBlockEditButton onClick={startEditing} label="编辑流程图" />
+        </div>
+      ) : null}
       <div className="component-flow-node">{flow.start.label}</div>
       <div className="component-flow-connector" aria-hidden="true" />
       <div className="component-flow-node component-flow-question">{flow.question.label}</div>
@@ -862,17 +1110,67 @@ function FlowView({ node }: NodeViewProps) {
       </div>
       <div className="component-flow-merge-line" aria-hidden="true" />
       <div className="component-flow-node">{flow.end.label}</div>
+      {editor.isEditable && isEditing ? (
+        <RichBlockEditorPanel title="编辑流程图" onCancel={() => setIsEditing(false)} onSave={saveDraft}>
+          <TextField
+            label="开始"
+            value={draft.start}
+            onChange={(value) => setDraft((current) => ({ ...current, start: value }))}
+          />
+          <TextField
+            label="问题"
+            value={draft.question}
+            onChange={(value) => setDraft((current) => ({ ...current, question: value }))}
+          />
+          <TextField
+            label="是"
+            value={draft.yes}
+            onChange={(value) => setDraft((current) => ({ ...current, yes: value }))}
+          />
+          <TextField
+            label="否"
+            value={draft.no}
+            onChange={(value) => setDraft((current) => ({ ...current, no: value }))}
+          />
+          <TextField
+            label="结束"
+            value={draft.end}
+            onChange={(value) => setDraft((current) => ({ ...current, end: value }))}
+          />
+        </RichBlockEditorPanel>
+      ) : null}
     </NodeViewWrapper>
   )
 }
 
-function CardsView({ node }: NodeViewProps) {
+function CardsView({ node, editor, updateAttributes }: NodeViewProps) {
   const cards = getCardItems(node.attrs.cards)
+  const [isEditing, setIsEditing] = useState(false)
+  const [draft, setDraft] = useState(ensureCardItems(cards))
 
-  if (!cards.length) return null
+  const startEditing = () => {
+    setDraft(ensureCardItems(cards))
+    setIsEditing(true)
+  }
+
+  const saveDraft = () => {
+    updateAttributes({ cards: normalizeCardItems(draft) })
+    setIsEditing(false)
+  }
+
+  if (!cards.length && !editor.isEditable) return null
 
   return (
-    <NodeViewWrapper className="component-card-grid not-prose" data-rich-block="cards">
+    <NodeViewWrapper
+      className="component-card-grid not-prose"
+      data-rich-block="cards"
+      data-rich-block-editable={editor.isEditable ? 'true' : undefined}
+    >
+      {editor.isEditable ? (
+        <div className="component-block-edit-row">
+          <RichBlockEditButton onClick={startEditing} label="编辑卡片" />
+        </div>
+      ) : null}
       {cards.map((card) => (
         <article key={`${card.eyebrow}-${card.title}`} className="component-card">
           <span>{card.eyebrow}</span>
@@ -880,34 +1178,88 @@ function CardsView({ node }: NodeViewProps) {
           <p>{card.text}</p>
         </article>
       ))}
+      {editor.isEditable && isEditing ? (
+        <RichBlockEditorPanel title="编辑卡片" onCancel={() => setIsEditing(false)} onSave={saveDraft}>
+          <CardItemsEditor items={draft} onChange={setDraft} />
+        </RichBlockEditorPanel>
+      ) : null}
     </NodeViewWrapper>
   )
 }
 
-function DiagramView({ node }: NodeViewProps) {
+function DiagramView({ node, editor, updateAttributes }: NodeViewProps) {
   const items = getDiagramItems(node.attrs.items)
+  const [isEditing, setIsEditing] = useState(false)
+  const [draft, setDraft] = useState(ensureDiagramItems(items))
 
-  if (!items.length) return null
+  const startEditing = () => {
+    setDraft(ensureDiagramItems(items))
+    setIsEditing(true)
+  }
+
+  const saveDraft = () => {
+    updateAttributes({ items: normalizeDiagramItems(draft) })
+    setIsEditing(false)
+  }
+
+  if (!items.length && !editor.isEditable) return null
 
   return (
-    <NodeViewWrapper className="component-diagram not-prose" data-rich-block="diagram" aria-label="内容关系图">
+    <NodeViewWrapper
+      className="component-diagram not-prose"
+      data-rich-block="diagram"
+      data-rich-block-editable={editor.isEditable ? 'true' : undefined}
+      aria-label="内容关系图"
+    >
+      {editor.isEditable ? (
+        <div className="component-block-edit-row">
+          <RichBlockEditButton onClick={startEditing} label="编辑关系图" />
+        </div>
+      ) : null}
       {items.map((item) => (
         <div key={item.label}>
           <Network className="h-4 w-4" />
           <span>{item.label}</span>
         </div>
       ))}
+      {editor.isEditable && isEditing ? (
+        <RichBlockEditorPanel title="编辑关系图" onCancel={() => setIsEditing(false)} onSave={saveDraft}>
+          <DiagramItemsEditor items={draft} onChange={setDraft} />
+        </RichBlockEditorPanel>
+      ) : null}
     </NodeViewWrapper>
   )
 }
 
-function TimelineView({ node }: NodeViewProps) {
+function TimelineView({ node, editor, updateAttributes }: NodeViewProps) {
   const items = getTimelineItems(node.attrs.items)
+  const [isEditing, setIsEditing] = useState(false)
+  const [draft, setDraft] = useState(ensureTimelineItems(items))
 
-  if (!items.length) return null
+  const startEditing = () => {
+    setDraft(ensureTimelineItems(items))
+    setIsEditing(true)
+  }
+
+  const saveDraft = () => {
+    updateAttributes({ items: normalizeTimelineItems(draft) })
+    setIsEditing(false)
+  }
+
+  if (!items.length && !editor.isEditable) return null
 
   return (
-    <NodeViewWrapper as="ol" className="component-timeline not-prose" data-rich-block="timeline">
+    <NodeViewWrapper
+      as="ol"
+      className="component-timeline not-prose"
+      data-rich-block="timeline"
+      data-rich-block-editable={editor.isEditable ? 'true' : undefined}
+    >
+      {editor.isEditable ? (
+        <li className="component-block-edit-row">
+          <RichBlockEditButton onClick={startEditing} label="编辑时间线" />
+        </li>
+      ) : null}
       {items.map((item) => (
         <li key={`${item.label}-${item.title}`}>
           <span>{item.label}</span>
@@ -917,11 +1269,18 @@ function TimelineView({ node }: NodeViewProps) {
           </div>
         </li>
       ))}
+      {editor.isEditable && isEditing ? (
+        <li className="component-block-editor-list-host">
+          <RichBlockEditorPanel title="编辑时间线" onCancel={() => setIsEditing(false)} onSave={saveDraft}>
+            <TimelineItemsEditor items={draft} onChange={setDraft} />
+          </RichBlockEditorPanel>
+        </li>
+      ) : null}
     </NodeViewWrapper>
   )
 }
 
-function RichShowcaseView({ node }: NodeViewProps) {
+function RichShowcaseView({ node, editor, updateAttributes }: NodeViewProps) {
   const image = getString(node.attrs.image)
   const alt = getString(node.attrs.alt, '图片说明')
   const eyebrow = getString(node.attrs.eyebrow, '富文本块')
@@ -931,9 +1290,50 @@ function RichShowcaseView({ node }: NodeViewProps) {
   const primaryHref = getString(node.attrs.primaryHref)
   const secondaryLabel = getString(node.attrs.secondaryLabel)
   const secondaryHref = getString(node.attrs.secondaryHref)
+  const [isEditing, setIsEditing] = useState(false)
+  const [draft, setDraft] = useState({
+    image,
+    alt,
+    eyebrow,
+    title,
+    text,
+    primaryLabel,
+    primaryHref,
+    secondaryLabel,
+    secondaryHref,
+  })
+
+  const startEditing = () => {
+    setDraft({ image, alt, eyebrow, title, text, primaryLabel, primaryHref, secondaryLabel, secondaryHref })
+    setIsEditing(true)
+  }
+
+  const saveDraft = () => {
+    updateAttributes({
+      image: draft.image.trim(),
+      alt: draft.alt.trim() || '图片说明',
+      eyebrow: draft.eyebrow.trim() || '富文本块',
+      title: draft.title.trim() || '混合正文模块',
+      text: draft.text.trim() || '一个块里同时承载媒体、摘要、状态和操作入口。',
+      primaryLabel: draft.primaryLabel.trim(),
+      primaryHref: draft.primaryHref.trim(),
+      secondaryLabel: draft.secondaryLabel.trim(),
+      secondaryHref: draft.secondaryHref.trim(),
+    })
+    setIsEditing(false)
+  }
 
   return (
-    <NodeViewWrapper className="component-rich-showcase not-prose" data-rich-block="rich-showcase">
+    <NodeViewWrapper
+      className="component-rich-showcase not-prose"
+      data-rich-block="rich-showcase"
+      data-rich-block-editable={editor.isEditable ? 'true' : undefined}
+    >
+      {editor.isEditable ? (
+        <div className="component-block-edit-row">
+          <RichBlockEditButton onClick={startEditing} label="编辑富文本块" />
+        </div>
+      ) : null}
       {image ? (
         <figure>
           <img src={image} alt={alt} referrerPolicy="no-referrer" />
@@ -953,29 +1353,131 @@ function RichShowcaseView({ node }: NodeViewProps) {
           </div>
         ) : null}
       </div>
+      {editor.isEditable && isEditing ? (
+        <RichBlockEditorPanel title="编辑富文本块" onCancel={() => setIsEditing(false)} onSave={saveDraft}>
+          <TextField
+            label="图片 URL"
+            value={draft.image}
+            onChange={(value) => setDraft((current) => ({ ...current, image: value }))}
+          />
+          <TextField
+            label="图片说明"
+            value={draft.alt}
+            onChange={(value) => setDraft((current) => ({ ...current, alt: value }))}
+          />
+          <TextField
+            label="眉标"
+            value={draft.eyebrow}
+            onChange={(value) => setDraft((current) => ({ ...current, eyebrow: value }))}
+          />
+          <TextField
+            label="标题"
+            value={draft.title}
+            onChange={(value) => setDraft((current) => ({ ...current, title: value }))}
+          />
+          <TextAreaField
+            label="内容"
+            value={draft.text}
+            onChange={(value) => setDraft((current) => ({ ...current, text: value }))}
+          />
+          <TextField
+            label="主按钮文本"
+            value={draft.primaryLabel}
+            onChange={(value) => setDraft((current) => ({ ...current, primaryLabel: value }))}
+          />
+          <TextField
+            label="主按钮链接"
+            value={draft.primaryHref}
+            onChange={(value) => setDraft((current) => ({ ...current, primaryHref: value }))}
+          />
+          <TextField
+            label="次按钮文本"
+            value={draft.secondaryLabel}
+            onChange={(value) => setDraft((current) => ({ ...current, secondaryLabel: value }))}
+          />
+          <TextField
+            label="次按钮链接"
+            value={draft.secondaryHref}
+            onChange={(value) => setDraft((current) => ({ ...current, secondaryHref: value }))}
+          />
+        </RichBlockEditorPanel>
+      ) : null}
     </NodeViewWrapper>
   )
 }
 
-function AudioView({ node }: NodeViewProps) {
+function AudioView({ node, editor, updateAttributes }: NodeViewProps) {
   const src = getString(node.attrs.src)
   const title = getString(node.attrs.title, '嵌入音频')
   const caption = getString(node.attrs.caption, '音频 · 正文宽度媒体控件')
+  const [isEditing, setIsEditing] = useState(false)
+  const [draft, setDraft] = useState({ src, title, caption })
 
-  if (!src) return null
+  const startEditing = () => {
+    setDraft({ src, title, caption })
+    setIsEditing(true)
+  }
+
+  const saveDraft = () => {
+    updateAttributes({
+      src: draft.src.trim(),
+      title: draft.title.trim() || '嵌入音频',
+      caption: draft.caption.trim() || '音频 · 正文宽度媒体控件',
+    })
+    setIsEditing(false)
+  }
+
+  if (!src && !editor.isEditable) return null
 
   return (
-    <NodeViewWrapper className="component-audio not-prose" data-rich-block="audio">
-      <div>
-        <Music2 className="h-5 w-5" />
-        <span>
-          <strong>{title}</strong>
-          <small>{caption}</small>
-        </span>
-      </div>
-      <audio controls preload="metadata" src={src}>
-        当前浏览器不支持音频播放。
-      </audio>
+    <NodeViewWrapper
+      className="component-audio not-prose"
+      data-rich-block="audio"
+      data-rich-block-editable={editor.isEditable ? 'true' : undefined}
+    >
+      {editor.isEditable ? (
+        <div className="component-block-edit-row">
+          <RichBlockEditButton onClick={startEditing} label="编辑音频" />
+        </div>
+      ) : null}
+      {!src ? (
+        <div className="component-placeholder">
+          <span>音频</span>
+          <p>还没有音频 URL，点击编辑添加音频。</p>
+        </div>
+      ) : (
+        <>
+          <div>
+            <Music2 className="h-5 w-5" />
+            <span>
+              <strong>{title}</strong>
+              <small>{caption}</small>
+            </span>
+          </div>
+          <audio controls preload="metadata" src={src}>
+            当前浏览器不支持音频播放。
+          </audio>
+        </>
+      )}
+      {editor.isEditable && isEditing ? (
+        <RichBlockEditorPanel title="编辑音频" onCancel={() => setIsEditing(false)} onSave={saveDraft}>
+          <TextField
+            label="音频 URL"
+            value={draft.src}
+            onChange={(value) => setDraft((current) => ({ ...current, src: value }))}
+          />
+          <TextField
+            label="标题"
+            value={draft.title}
+            onChange={(value) => setDraft((current) => ({ ...current, title: value }))}
+          />
+          <TextField
+            label="说明"
+            value={draft.caption}
+            onChange={(value) => setDraft((current) => ({ ...current, caption: value }))}
+          />
+        </RichBlockEditorPanel>
+      ) : null}
     </NodeViewWrapper>
   )
 }
@@ -994,6 +1496,10 @@ function getString(value: unknown, fallback = '') {
 
 function getCalloutTone(value: unknown): CalloutTone {
   return typeof value === 'string' && calloutTones.includes(value as CalloutTone) ? (value as CalloutTone) : 'note'
+}
+
+function getEmbedKind(value: unknown): EmbedKind {
+  return value === 'video' ? 'video' : 'youtube'
 }
 
 function getCalloutIcon(tone: CalloutTone) {

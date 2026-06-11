@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react'
 import { Editor } from '@tiptap/react'
+import { BubbleMenu } from '@tiptap/react/menus'
 import { Button } from '@/components/ui/button'
 import { uploadImage } from '@/lib/upload-image'
 import {
@@ -336,7 +337,7 @@ export function MenuBar({ editor }: MenuBarProps) {
   }
 
   return (
-    <div className="border-b border-gray-200 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-900 p-2 flex flex-wrap gap-1 sticky top-0 z-10">
+    <div className="doc-editor-toolbar">
       <input 
         type="file" 
         ref={fileInputRef} 
@@ -561,6 +562,69 @@ export function MenuBar({ editor }: MenuBarProps) {
         <Redo className="h-4 w-4" />
       </Button>
     </div>
+  )
+}
+
+export function SelectionBubbleMenu({ editor }: MenuBarProps) {
+  return (
+    <BubbleMenu editor={editor} className="doc-selection-menu">
+      <button
+        type="button"
+        className={editor.isActive('bold') ? 'is-active' : ''}
+        onClick={() => editor.chain().focus().toggleBold().run()}
+        aria-label="加粗"
+      >
+        <Bold className="h-4 w-4" />
+      </button>
+      <button
+        type="button"
+        className={editor.isActive('italic') ? 'is-active' : ''}
+        onClick={() => editor.chain().focus().toggleItalic().run()}
+        aria-label="斜体"
+      >
+        <Italic className="h-4 w-4" />
+      </button>
+      <button
+        type="button"
+        className={editor.isActive('heading', { level: 1 }) ? 'is-active' : ''}
+        onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+        aria-label="一级标题"
+      >
+        <Heading1 className="h-4 w-4" />
+      </button>
+      <button
+        type="button"
+        className={editor.isActive('heading', { level: 2 }) ? 'is-active' : ''}
+        onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+        aria-label="二级标题"
+      >
+        <Heading2 className="h-4 w-4" />
+      </button>
+      <button
+        type="button"
+        className={editor.isActive('bulletList') ? 'is-active' : ''}
+        onClick={() => editor.chain().focus().toggleBulletList().run()}
+        aria-label="无序列表"
+      >
+        <List className="h-4 w-4" />
+      </button>
+      <button
+        type="button"
+        className={editor.isActive('blockquote') ? 'is-active' : ''}
+        onClick={() => editor.chain().focus().toggleBlockquote().run()}
+        aria-label="引用"
+      >
+        <Quote className="h-4 w-4" />
+      </button>
+      <button
+        type="button"
+        className={editor.isActive('code') ? 'is-active' : ''}
+        onClick={() => editor.chain().focus().toggleCode().run()}
+        aria-label="行内代码"
+      >
+        <Code className="h-4 w-4" />
+      </button>
+    </BubbleMenu>
   )
 }
 

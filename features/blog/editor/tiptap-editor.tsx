@@ -24,7 +24,7 @@ import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
 import remarkRehype from 'remark-rehype'
 import rehypeStringify from 'rehype-stringify'
-import { MenuBar } from './menu-bar'
+import { MenuBar, SelectionBubbleMenu } from './menu-bar'
 import { articleRichBlockExtensions } from './rich-block-extensions'
 import { hasArticleShortcodes, splitArticleMarkdown } from './markdown-shortcodes'
 import { MarkdownShortcodeGuide } from './markdown-shortcode-guide'
@@ -276,9 +276,10 @@ export function TipTapEditor({
             <div className="animate-pulse text-primary font-medium">图片上传中...</div>
         </div>
       )}
-      {editable && <MenuBar editor={editor} />}
-      {editable && <MarkdownShortcodeGuide />}
       <div className={styles.editorCanvas}>
+        {editable && <MenuBar editor={editor} />}
+        {editable && <SelectionBubbleMenu editor={editor} />}
+        {editable && <MarkdownShortcodeGuide />}
         <EditorContent editor={editor} />
       </div>
       {editable && editor && (
