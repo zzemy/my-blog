@@ -262,7 +262,7 @@
 .article-content.prose h5,
 .article-content.prose h6 {
   color: var(--article-heading);
-  font-family: var(--article-font);
+  font-family: var(--font-heading);
   font-weight: 700;
   line-height: 1.2;
   letter-spacing: 0;

@@ -208,7 +208,7 @@ export function PostLayout({ children, toc = [] }: PostLayoutProps) {
           isOpen ? "lg:ml-64" : "lg:ml-0"
         )}
       >
-        <div className="container mx-auto max-w-4xl px-4 py-8 pt-24 md:pt-12 md:px-6">
+        <div className="container mx-auto max-w-[820px] px-4 py-8 pt-24 md:pt-12 md:px-6">
             {children}
         </div>
       </main>
