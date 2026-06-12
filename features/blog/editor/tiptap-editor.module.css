@@ -527,16 +527,20 @@
 
 .editorShell :global(.component-block-edit-button) {
   display: inline-flex;
-  width: 1.7rem;
-  height: 1.7rem;
+  min-width: 4.25rem;
+  min-height: 2.25rem;
   align-items: center;
   justify-content: center;
+  gap: 0.35rem;
   margin-left: auto;
   border: 1px solid color-mix(in oklch, var(--callout-icon, var(--article-accent)), transparent 45%);
   border-radius: 6px;
   background: color-mix(in oklch, var(--callout-bg, var(--article-soft)), white 20%);
   color: var(--callout-text, var(--article-heading));
+  padding: 0.35rem 0.65rem;
   cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 820;
   transition:
     background-color 160ms var(--article-motion),
     border-color 160ms var(--article-motion),
@@ -556,6 +560,11 @@
 
 .editorShell :global(.component-block-edit-button:active) {
   transform: scale(0.96);
+}
+
+.editorShell :global(.component-block-edit-button span) {
+  color: inherit;
+  font: inherit;
 }
 
 .editorShell :global(.component-block-editor) {

@@ -2,7 +2,7 @@
 
 /* eslint-disable @next/next/no-img-element */
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Node, mergeAttributes, NodeViewWrapper, ReactNodeViewRenderer } from '@tiptap/react'
 import type { NodeViewProps } from '@tiptap/react'
 import {
@@ -77,6 +77,13 @@ type FlowNode = {
 
 const calloutTones: CalloutTone[] = ['note', 'quote', 'tip', 'info', 'important', 'warning', 'success', 'caution']
 
+const openEditorAttribute = {
+  openEditor: {
+    default: false,
+    rendered: false,
+  },
+}
+
 const calloutLabels: Record<CalloutTone, string> = {
   note: '备注',
   quote: '引用',
@@ -144,6 +151,7 @@ function createCalloutExtension() {
 
     addAttributes() {
       return {
+        ...openEditorAttribute,
         tone: { default: 'note' },
         title: { default: '备注' },
         text: { default: '这是一条普通备注。' },
@@ -177,6 +185,7 @@ function createButtonExtension() {
 
     addAttributes() {
       return {
+        ...openEditorAttribute,
         label: { default: '按钮' },
         href: { default: '#' },
         variant: { default: 'primary' },
@@ -210,6 +219,7 @@ function createTabsExtension() {
 
     addAttributes() {
       return {
+        ...openEditorAttribute,
         panels: {
           default: [
             { title: '结构', text: '第一组内容用于检查标签页结构。' },
@@ -247,6 +257,7 @@ function createAccordionExtension() {
 
     addAttributes() {
       return {
+        ...openEditorAttribute,
         items: {
           default: [
             { title: '为什么需要折叠面板？', text: '为了在同一页里提前看到真实文章会遇到的折叠内容状态。' },
@@ -284,6 +295,7 @@ function createGalleryExtension() {
 
     addAttributes() {
       return {
+        ...openEditorAttribute,
         images: { default: [] },
       }
     },
@@ -315,6 +327,7 @@ function createSliderExtension() {
 
     addAttributes() {
       return {
+        ...openEditorAttribute,
         images: { default: [] },
       }
     },
@@ -346,6 +359,7 @@ function createEmbedExtension() {
 
     addAttributes() {
       return {
+        ...openEditorAttribute,
         kind: { default: 'youtube' },
         src: { default: '' },
         title: { default: '嵌入媒体' },
@@ -380,6 +394,7 @@ function createFlowExtension() {
 
     addAttributes() {
       return {
+        ...openEditorAttribute,
         start: { default: '开始' },
         question: { default: '内容完整？' },
         yes: { default: '预览发布' },
@@ -415,6 +430,7 @@ function createCardsExtension() {
 
     addAttributes() {
       return {
+        ...openEditorAttribute,
         cards: {
           default: [
             { eyebrow: '模式', title: '紧凑摘要卡片', text: '用于文章中的小型结论、资源组或阅读提示。' },
@@ -452,6 +468,7 @@ function createDiagramExtension() {
 
     addAttributes() {
       return {
+        ...openEditorAttribute,
         items: {
           default: [{ label: '内容源' }, { label: '渲染器' }, { label: '正文界面' }],
         },
@@ -485,6 +502,7 @@ function createTimelineExtension() {
 
     addAttributes() {
       return {
+        ...openEditorAttribute,
         items: {
           default: [
             { label: '草稿', title: '收集内容块', text: '先把真实文章里会出现的内容块列全。' },
@@ -522,6 +540,7 @@ function createRichShowcaseExtension() {
 
     addAttributes() {
       return {
+        ...openEditorAttribute,
         image: { default: '' },
         alt: { default: '图片说明' },
         eyebrow: { default: '富文本块' },
@@ -561,6 +580,7 @@ function createAudioExtension() {
 
     addAttributes() {
       return {
+        ...openEditorAttribute,
         src: { default: '' },
         title: { default: '嵌入音频' },
         caption: { default: '音频 · 正文宽度媒体控件' },
@@ -586,18 +606,25 @@ function createAudioExtension() {
   })
 }
 
-function CalloutView({ node, editor, updateAttributes }: NodeViewProps) {
+function CalloutView({ node, editor, updateAttributes, deleteNode }: NodeViewProps) {
   const tone = getCalloutTone(node.attrs.tone)
   const title = getString(node.attrs.title, '备注')
   const text = getString(node.attrs.text, '这是一条普通备注。')
   const Icon = getCalloutIcon(tone)
   const [isEditing, setIsEditing] = useState(false)
   const [draft, setDraft] = useState({ tone, title, text })
+  const [deleteOnCancel, setDeleteOnCancel] = useState(node.attrs.openEditor === true)
 
   const startEditing = () => {
-    setDraft({ tone, title, text })
+    setDraft({
+      tone,
+      title: getDraftString(node.attrs.title, '备注', node.attrs.openEditor),
+      text: getDraftString(node.attrs.text, '这是一条普通备注。', node.attrs.openEditor),
+    })
     setIsEditing(true)
   }
+
+  useOpenEditorOnInsert(node.attrs.openEditor, startEditing, updateAttributes)
 
   const saveDraft = () => {
     const nextTone = getCalloutTone(draft.tone)
@@ -607,6 +634,7 @@ function CalloutView({ node, editor, updateAttributes }: NodeViewProps) {
       title: draft.title.trim() || calloutLabels[nextTone],
       text: draft.text.trim() || `这是一条${calloutLabels[nextTone]}。`,
     })
+    setDeleteOnCancel(false)
     setIsEditing(false)
   }
 
@@ -627,7 +655,11 @@ function CalloutView({ node, editor, updateAttributes }: NodeViewProps) {
         <p>{text}</p>
       </div>
       {editor.isEditable && isEditing ? (
-        <RichBlockEditorPanel title="编辑提示块" onCancel={() => setIsEditing(false)} onSave={saveDraft}>
+        <RichBlockEditorPanel
+          title="编辑提示块"
+          onCancel={() => cancelRichBlockEditing(deleteOnCancel, deleteNode, () => setIsEditing(false))}
+          onSave={saveDraft}
+        >
           <SelectField
             label="类型"
             value={draft.tone}
@@ -652,17 +684,24 @@ function CalloutView({ node, editor, updateAttributes }: NodeViewProps) {
   )
 }
 
-function ButtonView({ node, editor, updateAttributes }: NodeViewProps) {
+function ButtonView({ node, editor, updateAttributes, deleteNode }: NodeViewProps) {
   const label = getString(node.attrs.label, '按钮')
   const href = getString(node.attrs.href, '#')
   const variant = getString(node.attrs.variant, 'primary') === 'secondary' ? 'secondary' : 'primary'
   const [isEditing, setIsEditing] = useState(false)
   const [draft, setDraft] = useState({ label, href, variant })
+  const [deleteOnCancel, setDeleteOnCancel] = useState(node.attrs.openEditor === true)
 
   const startEditing = () => {
-    setDraft({ label, href, variant })
+    setDraft({
+      label: getDraftString(node.attrs.label, '按钮', node.attrs.openEditor),
+      href: getDraftString(node.attrs.href, '#', node.attrs.openEditor),
+      variant,
+    })
     setIsEditing(true)
   }
+
+  useOpenEditorOnInsert(node.attrs.openEditor, startEditing, updateAttributes)
 
   const saveDraft = () => {
     updateAttributes({
@@ -670,6 +709,7 @@ function ButtonView({ node, editor, updateAttributes }: NodeViewProps) {
       href: draft.href.trim() || '#',
       variant: draft.variant === 'secondary' ? 'secondary' : 'primary',
     })
+    setDeleteOnCancel(false)
     setIsEditing(false)
   }
 
@@ -679,13 +719,23 @@ function ButtonView({ node, editor, updateAttributes }: NodeViewProps) {
       data-rich-block="button"
       data-rich-block-editable={editor.isEditable ? 'true' : undefined}
     >
-      <a className={`component-button component-button-${variant}`} href={href}>
+      <a
+        className={`component-button component-button-${variant}`}
+        href={href}
+        onClick={(event) => {
+          if (editor.isEditable) event.preventDefault()
+        }}
+      >
         <span>{label}</span>
         <MousePointerClick className="h-4 w-4" />
       </a>
       {editor.isEditable ? <RichBlockEditButton onClick={startEditing} label="编辑按钮" /> : null}
       {editor.isEditable && isEditing ? (
-        <RichBlockEditorPanel title="编辑按钮" onCancel={() => setIsEditing(false)} onSave={saveDraft}>
+        <RichBlockEditorPanel
+          title="编辑按钮"
+          onCancel={() => cancelRichBlockEditing(deleteOnCancel, deleteNode, () => setIsEditing(false))}
+          onSave={saveDraft}
+        >
           <TextField
             label="文本"
             value={draft.label}
@@ -713,19 +763,23 @@ function ButtonView({ node, editor, updateAttributes }: NodeViewProps) {
   )
 }
 
-function TabsView({ node, editor, updateAttributes }: NodeViewProps) {
+function TabsView({ node, editor, updateAttributes, deleteNode }: NodeViewProps) {
   const panels = getPanelItems(node.attrs.panels)
   const [active, setActive] = useState(0)
   const [isEditing, setIsEditing] = useState(false)
   const [draft, setDraft] = useState(ensurePanelItems(panels))
+  const [deleteOnCancel, setDeleteOnCancel] = useState(node.attrs.openEditor === true)
 
   const startEditing = () => {
     setDraft(ensurePanelItems(panels))
     setIsEditing(true)
   }
 
+  useOpenEditorOnInsert(node.attrs.openEditor, startEditing, updateAttributes)
+
   const saveDraft = () => {
     updateAttributes({ panels: normalizePanelItems(draft) })
+    setDeleteOnCancel(false)
     setActive(0)
     setIsEditing(false)
   }
@@ -768,7 +822,11 @@ function TabsView({ node, editor, updateAttributes }: NodeViewProps) {
         ))}
       </div>
       {editor.isEditable && isEditing ? (
-        <RichBlockEditorPanel title="编辑标签页" onCancel={() => setIsEditing(false)} onSave={saveDraft}>
+        <RichBlockEditorPanel
+          title="编辑标签页"
+          onCancel={() => cancelRichBlockEditing(deleteOnCancel, deleteNode, () => setIsEditing(false))}
+          onSave={saveDraft}
+        >
           <PanelItemsEditor items={draft} onChange={setDraft} addLabel="添加标签页" />
         </RichBlockEditorPanel>
       ) : null}
@@ -776,18 +834,22 @@ function TabsView({ node, editor, updateAttributes }: NodeViewProps) {
   )
 }
 
-function AccordionView({ node, editor, updateAttributes }: NodeViewProps) {
+function AccordionView({ node, editor, updateAttributes, deleteNode }: NodeViewProps) {
   const items = getPanelItems(node.attrs.items)
   const [isEditing, setIsEditing] = useState(false)
   const [draft, setDraft] = useState(ensurePanelItems(items))
+  const [deleteOnCancel, setDeleteOnCancel] = useState(node.attrs.openEditor === true)
 
   const startEditing = () => {
     setDraft(ensurePanelItems(items))
     setIsEditing(true)
   }
 
+  useOpenEditorOnInsert(node.attrs.openEditor, startEditing, updateAttributes)
+
   const saveDraft = () => {
     updateAttributes({ items: normalizePanelItems(draft) })
+    setDeleteOnCancel(false)
     setIsEditing(false)
   }
 
@@ -809,7 +871,11 @@ function AccordionView({ node, editor, updateAttributes }: NodeViewProps) {
         </details>
       ))}
       {editor.isEditable && isEditing ? (
-        <RichBlockEditorPanel title="编辑折叠面板" onCancel={() => setIsEditing(false)} onSave={saveDraft}>
+        <RichBlockEditorPanel
+          title="编辑折叠面板"
+          onCancel={() => cancelRichBlockEditing(deleteOnCancel, deleteNode, () => setIsEditing(false))}
+          onSave={saveDraft}
+        >
           <PanelItemsEditor items={draft} onChange={setDraft} addLabel="添加面板" />
         </RichBlockEditorPanel>
       ) : null}
@@ -817,18 +883,22 @@ function AccordionView({ node, editor, updateAttributes }: NodeViewProps) {
   )
 }
 
-function GalleryView({ node, editor, updateAttributes }: NodeViewProps) {
+function GalleryView({ node, editor, updateAttributes, deleteNode }: NodeViewProps) {
   const images = getImageItems(node.attrs.images)
   const [isEditing, setIsEditing] = useState(false)
   const [draft, setDraft] = useState(ensureImageItems(images))
+  const [deleteOnCancel, setDeleteOnCancel] = useState(node.attrs.openEditor === true)
 
   const startEditing = () => {
     setDraft(ensureImageItems(images))
     setIsEditing(true)
   }
 
+  useOpenEditorOnInsert(node.attrs.openEditor, startEditing, updateAttributes)
+
   const saveDraft = () => {
     updateAttributes({ images: normalizeImageItems(draft) })
+    setDeleteOnCancel(false)
     setIsEditing(false)
   }
 
@@ -859,7 +929,11 @@ function GalleryView({ node, editor, updateAttributes }: NodeViewProps) {
         </div>
       )}
       {editor.isEditable && isEditing ? (
-        <RichBlockEditorPanel title="编辑图集" onCancel={() => setIsEditing(false)} onSave={saveDraft}>
+        <RichBlockEditorPanel
+          title="编辑图集"
+          onCancel={() => cancelRichBlockEditing(deleteOnCancel, deleteNode, () => setIsEditing(false))}
+          onSave={saveDraft}
+        >
           <ImageItemsEditor items={draft} onChange={setDraft} addLabel="添加图片" />
         </RichBlockEditorPanel>
       ) : null}
@@ -867,11 +941,12 @@ function GalleryView({ node, editor, updateAttributes }: NodeViewProps) {
   )
 }
 
-function SliderView({ node, editor, updateAttributes }: NodeViewProps) {
+function SliderView({ node, editor, updateAttributes, deleteNode }: NodeViewProps) {
   const images = getImageItems(node.attrs.images)
   const [active, setActive] = useState(0)
   const [isEditing, setIsEditing] = useState(false)
   const [draft, setDraft] = useState(ensureImageItems(images))
+  const [deleteOnCancel, setDeleteOnCancel] = useState(node.attrs.openEditor === true)
   const activeImage = images[active] || images[0]
 
   const startEditing = () => {
@@ -879,8 +954,11 @@ function SliderView({ node, editor, updateAttributes }: NodeViewProps) {
     setIsEditing(true)
   }
 
+  useOpenEditorOnInsert(node.attrs.openEditor, startEditing, updateAttributes)
+
   const saveDraft = () => {
     updateAttributes({ images: normalizeImageItems(draft) })
+    setDeleteOnCancel(false)
     setActive(0)
     setIsEditing(false)
   }
@@ -948,7 +1026,11 @@ function SliderView({ node, editor, updateAttributes }: NodeViewProps) {
         </div>
       )}
       {editor.isEditable && isEditing ? (
-        <RichBlockEditorPanel title="编辑轮播" onCancel={() => setIsEditing(false)} onSave={saveDraft}>
+        <RichBlockEditorPanel
+          title="编辑轮播"
+          onCancel={() => cancelRichBlockEditing(deleteOnCancel, deleteNode, () => setIsEditing(false))}
+          onSave={saveDraft}
+        >
           <ImageItemsEditor items={draft} onChange={setDraft} addLabel="添加图片" />
         </RichBlockEditorPanel>
       ) : null}
@@ -956,18 +1038,26 @@ function SliderView({ node, editor, updateAttributes }: NodeViewProps) {
   )
 }
 
-function EmbedView({ node, editor, updateAttributes }: NodeViewProps) {
+function EmbedView({ node, editor, updateAttributes, deleteNode }: NodeViewProps) {
   const kind = getEmbedKind(node.attrs.kind)
   const src = getString(node.attrs.src)
   const title = getString(node.attrs.title, kind === 'video' ? '自定义视频' : 'YouTube 视频')
   const poster = getString(node.attrs.poster)
   const [isEditing, setIsEditing] = useState(false)
   const [draft, setDraft] = useState({ kind, src, title, poster })
+  const [deleteOnCancel, setDeleteOnCancel] = useState(node.attrs.openEditor === true)
 
   const startEditing = () => {
-    setDraft({ kind, src, title, poster })
+    setDraft({
+      kind,
+      src: getDraftString(node.attrs.src, '', node.attrs.openEditor),
+      title: getDraftString(node.attrs.title, kind === 'video' ? '自定义视频' : 'YouTube 视频', node.attrs.openEditor),
+      poster: getDraftString(node.attrs.poster, '', node.attrs.openEditor),
+    })
     setIsEditing(true)
   }
+
+  useOpenEditorOnInsert(node.attrs.openEditor, startEditing, updateAttributes)
 
   const saveDraft = () => {
     const nextKind = getEmbedKind(draft.kind)
@@ -977,6 +1067,7 @@ function EmbedView({ node, editor, updateAttributes }: NodeViewProps) {
       title: draft.title.trim() || (nextKind === 'video' ? '自定义视频' : 'YouTube 视频'),
       poster: draft.poster.trim(),
     })
+    setDeleteOnCancel(false)
     setIsEditing(false)
   }
 
@@ -1019,7 +1110,11 @@ function EmbedView({ node, editor, updateAttributes }: NodeViewProps) {
         />
       )}
       {editor.isEditable && isEditing ? (
-        <RichBlockEditorPanel title="编辑嵌入媒体" onCancel={() => setIsEditing(false)} onSave={saveDraft}>
+        <RichBlockEditorPanel
+          title="编辑嵌入媒体"
+          onCancel={() => cancelRichBlockEditing(deleteOnCancel, deleteNode, () => setIsEditing(false))}
+          onSave={saveDraft}
+        >
           <SelectField
             label="类型"
             value={draft.kind}
@@ -1052,7 +1147,7 @@ function EmbedView({ node, editor, updateAttributes }: NodeViewProps) {
   )
 }
 
-function FlowView({ node, editor, updateAttributes }: NodeViewProps) {
+function FlowView({ node, editor, updateAttributes, deleteNode }: NodeViewProps) {
   const flow: Record<keyof FlowAttrs, FlowNode> = {
     start: { label: getString(node.attrs.start, '开始') },
     question: { label: getString(node.attrs.question, '内容完整？') },
@@ -1061,6 +1156,7 @@ function FlowView({ node, editor, updateAttributes }: NodeViewProps) {
     end: { label: getString(node.attrs.end, '归档') },
   }
   const [isEditing, setIsEditing] = useState(false)
+  const [deleteOnCancel, setDeleteOnCancel] = useState(node.attrs.openEditor === true)
   const [draft, setDraft] = useState({
     start: flow.start.label,
     question: flow.question.label,
@@ -1071,14 +1167,16 @@ function FlowView({ node, editor, updateAttributes }: NodeViewProps) {
 
   const startEditing = () => {
     setDraft({
-      start: flow.start.label,
-      question: flow.question.label,
-      yes: flow.yes.label,
-      no: flow.no.label,
-      end: flow.end.label,
+      start: getDraftString(node.attrs.start, '开始', node.attrs.openEditor),
+      question: getDraftString(node.attrs.question, '内容完整？', node.attrs.openEditor),
+      yes: getDraftString(node.attrs.yes, '预览发布', node.attrs.openEditor),
+      no: getDraftString(node.attrs.no, '继续修改', node.attrs.openEditor),
+      end: getDraftString(node.attrs.end, '归档', node.attrs.openEditor),
     })
     setIsEditing(true)
   }
+
+  useOpenEditorOnInsert(node.attrs.openEditor, startEditing, updateAttributes)
 
   const saveDraft = () => {
     updateAttributes({
@@ -1088,6 +1186,7 @@ function FlowView({ node, editor, updateAttributes }: NodeViewProps) {
       no: draft.no.trim() || '继续修改',
       end: draft.end.trim() || '归档',
     })
+    setDeleteOnCancel(false)
     setIsEditing(false)
   }
 
@@ -1120,7 +1219,11 @@ function FlowView({ node, editor, updateAttributes }: NodeViewProps) {
       <div className="component-flow-merge-line" aria-hidden="true" />
       <div className="component-flow-node">{flow.end.label}</div>
       {editor.isEditable && isEditing ? (
-        <RichBlockEditorPanel title="编辑流程图" onCancel={() => setIsEditing(false)} onSave={saveDraft}>
+        <RichBlockEditorPanel
+          title="编辑流程图"
+          onCancel={() => cancelRichBlockEditing(deleteOnCancel, deleteNode, () => setIsEditing(false))}
+          onSave={saveDraft}
+        >
           <TextField
             label="开始"
             value={draft.start}
@@ -1152,18 +1255,22 @@ function FlowView({ node, editor, updateAttributes }: NodeViewProps) {
   )
 }
 
-function CardsView({ node, editor, updateAttributes }: NodeViewProps) {
+function CardsView({ node, editor, updateAttributes, deleteNode }: NodeViewProps) {
   const cards = getCardItems(node.attrs.cards)
   const [isEditing, setIsEditing] = useState(false)
   const [draft, setDraft] = useState(ensureCardItems(cards))
+  const [deleteOnCancel, setDeleteOnCancel] = useState(node.attrs.openEditor === true)
 
   const startEditing = () => {
     setDraft(ensureCardItems(cards))
     setIsEditing(true)
   }
 
+  useOpenEditorOnInsert(node.attrs.openEditor, startEditing, updateAttributes)
+
   const saveDraft = () => {
     updateAttributes({ cards: normalizeCardItems(draft) })
+    setDeleteOnCancel(false)
     setIsEditing(false)
   }
 
@@ -1188,7 +1295,11 @@ function CardsView({ node, editor, updateAttributes }: NodeViewProps) {
         </article>
       ))}
       {editor.isEditable && isEditing ? (
-        <RichBlockEditorPanel title="编辑卡片" onCancel={() => setIsEditing(false)} onSave={saveDraft}>
+        <RichBlockEditorPanel
+          title="编辑卡片"
+          onCancel={() => cancelRichBlockEditing(deleteOnCancel, deleteNode, () => setIsEditing(false))}
+          onSave={saveDraft}
+        >
           <CardItemsEditor items={draft} onChange={setDraft} />
         </RichBlockEditorPanel>
       ) : null}
@@ -1196,18 +1307,22 @@ function CardsView({ node, editor, updateAttributes }: NodeViewProps) {
   )
 }
 
-function DiagramView({ node, editor, updateAttributes }: NodeViewProps) {
+function DiagramView({ node, editor, updateAttributes, deleteNode }: NodeViewProps) {
   const items = getDiagramItems(node.attrs.items)
   const [isEditing, setIsEditing] = useState(false)
   const [draft, setDraft] = useState(ensureDiagramItems(items))
+  const [deleteOnCancel, setDeleteOnCancel] = useState(node.attrs.openEditor === true)
 
   const startEditing = () => {
     setDraft(ensureDiagramItems(items))
     setIsEditing(true)
   }
 
+  useOpenEditorOnInsert(node.attrs.openEditor, startEditing, updateAttributes)
+
   const saveDraft = () => {
     updateAttributes({ items: normalizeDiagramItems(draft) })
+    setDeleteOnCancel(false)
     setIsEditing(false)
   }
 
@@ -1232,7 +1347,11 @@ function DiagramView({ node, editor, updateAttributes }: NodeViewProps) {
         </div>
       ))}
       {editor.isEditable && isEditing ? (
-        <RichBlockEditorPanel title="编辑关系图" onCancel={() => setIsEditing(false)} onSave={saveDraft}>
+        <RichBlockEditorPanel
+          title="编辑关系图"
+          onCancel={() => cancelRichBlockEditing(deleteOnCancel, deleteNode, () => setIsEditing(false))}
+          onSave={saveDraft}
+        >
           <DiagramItemsEditor items={draft} onChange={setDraft} />
         </RichBlockEditorPanel>
       ) : null}
@@ -1240,18 +1359,22 @@ function DiagramView({ node, editor, updateAttributes }: NodeViewProps) {
   )
 }
 
-function TimelineView({ node, editor, updateAttributes }: NodeViewProps) {
+function TimelineView({ node, editor, updateAttributes, deleteNode }: NodeViewProps) {
   const items = getTimelineItems(node.attrs.items)
   const [isEditing, setIsEditing] = useState(false)
   const [draft, setDraft] = useState(ensureTimelineItems(items))
+  const [deleteOnCancel, setDeleteOnCancel] = useState(node.attrs.openEditor === true)
 
   const startEditing = () => {
     setDraft(ensureTimelineItems(items))
     setIsEditing(true)
   }
 
+  useOpenEditorOnInsert(node.attrs.openEditor, startEditing, updateAttributes)
+
   const saveDraft = () => {
     updateAttributes({ items: normalizeTimelineItems(draft) })
+    setDeleteOnCancel(false)
     setIsEditing(false)
   }
 
@@ -1280,7 +1403,11 @@ function TimelineView({ node, editor, updateAttributes }: NodeViewProps) {
       ))}
       {editor.isEditable && isEditing ? (
         <li className="component-block-editor-list-host">
-          <RichBlockEditorPanel title="编辑时间线" onCancel={() => setIsEditing(false)} onSave={saveDraft}>
+          <RichBlockEditorPanel
+            title="编辑时间线"
+            onCancel={() => cancelRichBlockEditing(deleteOnCancel, deleteNode, () => setIsEditing(false))}
+            onSave={saveDraft}
+          >
             <TimelineItemsEditor items={draft} onChange={setDraft} />
           </RichBlockEditorPanel>
         </li>
@@ -1289,7 +1416,7 @@ function TimelineView({ node, editor, updateAttributes }: NodeViewProps) {
   )
 }
 
-function RichShowcaseView({ node, editor, updateAttributes }: NodeViewProps) {
+function RichShowcaseView({ node, editor, updateAttributes, deleteNode }: NodeViewProps) {
   const image = getString(node.attrs.image)
   const alt = getString(node.attrs.alt, '图片说明')
   const eyebrow = getString(node.attrs.eyebrow, '富文本块')
@@ -1311,11 +1438,24 @@ function RichShowcaseView({ node, editor, updateAttributes }: NodeViewProps) {
     secondaryLabel,
     secondaryHref,
   })
+  const [deleteOnCancel, setDeleteOnCancel] = useState(node.attrs.openEditor === true)
 
   const startEditing = () => {
-    setDraft({ image, alt, eyebrow, title, text, primaryLabel, primaryHref, secondaryLabel, secondaryHref })
+    setDraft({
+      image: getDraftString(node.attrs.image, '', node.attrs.openEditor),
+      alt: getDraftString(node.attrs.alt, '图片说明', node.attrs.openEditor),
+      eyebrow: getDraftString(node.attrs.eyebrow, '富文本块', node.attrs.openEditor),
+      title: getDraftString(node.attrs.title, '混合正文模块', node.attrs.openEditor),
+      text: getDraftString(node.attrs.text, '一个块里同时承载媒体、摘要、状态和操作入口。', node.attrs.openEditor),
+      primaryLabel: getDraftString(node.attrs.primaryLabel, '', node.attrs.openEditor),
+      primaryHref: getDraftString(node.attrs.primaryHref, '', node.attrs.openEditor),
+      secondaryLabel: getDraftString(node.attrs.secondaryLabel, '', node.attrs.openEditor),
+      secondaryHref: getDraftString(node.attrs.secondaryHref, '', node.attrs.openEditor),
+    })
     setIsEditing(true)
   }
+
+  useOpenEditorOnInsert(node.attrs.openEditor, startEditing, updateAttributes)
 
   const saveDraft = () => {
     updateAttributes({
@@ -1329,6 +1469,7 @@ function RichShowcaseView({ node, editor, updateAttributes }: NodeViewProps) {
       secondaryLabel: draft.secondaryLabel.trim(),
       secondaryHref: draft.secondaryHref.trim(),
     })
+    setDeleteOnCancel(false)
     setIsEditing(false)
   }
 
@@ -1357,13 +1498,35 @@ function RichShowcaseView({ node, editor, updateAttributes }: NodeViewProps) {
         <p>{text}</p>
         {(primaryLabel && primaryHref) || (secondaryLabel && secondaryHref) ? (
           <div className="component-mini-actions">
-            {primaryLabel && primaryHref ? <a href={primaryHref}>{primaryLabel}</a> : null}
-            {secondaryLabel && secondaryHref ? <a href={secondaryHref}>{secondaryLabel}</a> : null}
+            {primaryLabel && primaryHref ? (
+              <a
+                href={primaryHref}
+                onClick={(event) => {
+                  if (editor.isEditable) event.preventDefault()
+                }}
+              >
+                {primaryLabel}
+              </a>
+            ) : null}
+            {secondaryLabel && secondaryHref ? (
+              <a
+                href={secondaryHref}
+                onClick={(event) => {
+                  if (editor.isEditable) event.preventDefault()
+                }}
+              >
+                {secondaryLabel}
+              </a>
+            ) : null}
           </div>
         ) : null}
       </div>
       {editor.isEditable && isEditing ? (
-        <RichBlockEditorPanel title="编辑富文本块" onCancel={() => setIsEditing(false)} onSave={saveDraft}>
+        <RichBlockEditorPanel
+          title="编辑富文本块"
+          onCancel={() => cancelRichBlockEditing(deleteOnCancel, deleteNode, () => setIsEditing(false))}
+          onSave={saveDraft}
+        >
           <TextField
             label="图片 URL"
             value={draft.image}
@@ -1415,17 +1578,24 @@ function RichShowcaseView({ node, editor, updateAttributes }: NodeViewProps) {
   )
 }
 
-function AudioView({ node, editor, updateAttributes }: NodeViewProps) {
+function AudioView({ node, editor, updateAttributes, deleteNode }: NodeViewProps) {
   const src = getString(node.attrs.src)
   const title = getString(node.attrs.title, '嵌入音频')
   const caption = getString(node.attrs.caption, '音频 · 正文宽度媒体控件')
   const [isEditing, setIsEditing] = useState(false)
   const [draft, setDraft] = useState({ src, title, caption })
+  const [deleteOnCancel, setDeleteOnCancel] = useState(node.attrs.openEditor === true)
 
   const startEditing = () => {
-    setDraft({ src, title, caption })
+    setDraft({
+      src: getDraftString(node.attrs.src, '', node.attrs.openEditor),
+      title: getDraftString(node.attrs.title, '嵌入音频', node.attrs.openEditor),
+      caption: getDraftString(node.attrs.caption, '音频 · 正文宽度媒体控件', node.attrs.openEditor),
+    })
     setIsEditing(true)
   }
+
+  useOpenEditorOnInsert(node.attrs.openEditor, startEditing, updateAttributes)
 
   const saveDraft = () => {
     updateAttributes({
@@ -1433,6 +1603,7 @@ function AudioView({ node, editor, updateAttributes }: NodeViewProps) {
       title: draft.title.trim() || '嵌入音频',
       caption: draft.caption.trim() || '音频 · 正文宽度媒体控件',
     })
+    setDeleteOnCancel(false)
     setIsEditing(false)
   }
 
@@ -1469,7 +1640,11 @@ function AudioView({ node, editor, updateAttributes }: NodeViewProps) {
         </>
       )}
       {editor.isEditable && isEditing ? (
-        <RichBlockEditorPanel title="编辑音频" onCancel={() => setIsEditing(false)} onSave={saveDraft}>
+        <RichBlockEditorPanel
+          title="编辑音频"
+          onCancel={() => cancelRichBlockEditing(deleteOnCancel, deleteNode, () => setIsEditing(false))}
+          onSave={saveDraft}
+        >
           <TextField
             label="音频 URL"
             value={draft.src}
@@ -1499,8 +1674,35 @@ type FlowAttrs = {
   end: string
 }
 
+function useOpenEditorOnInsert(
+  openEditor: unknown,
+  startEditing: () => void,
+  updateAttributes: (attributes: Record<string, unknown>) => void,
+) {
+  useEffect(() => {
+    if (openEditor !== true) return
+
+    startEditing()
+    updateAttributes({ openEditor: false })
+  }, [openEditor, startEditing, updateAttributes])
+}
+
+function cancelRichBlockEditing(deleteOnCancel: boolean, deleteNode: () => void, closeEditor: () => void) {
+  if (deleteOnCancel) {
+    deleteNode()
+    return
+  }
+
+  closeEditor()
+}
+
 function getString(value: unknown, fallback = '') {
   return typeof value === 'string' && value.trim() ? value : fallback
+}
+
+function getDraftString(value: unknown, fallback = '', openEditor: unknown) {
+  if (openEditor === true) return typeof value === 'string' ? value : ''
+  return getString(value, fallback)
 }
 
 function getCalloutTone(value: unknown): CalloutTone {

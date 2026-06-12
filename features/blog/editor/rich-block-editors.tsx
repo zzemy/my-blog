@@ -56,6 +56,7 @@ export function RichBlockEditButton({ onClick, label = '编辑组件' }: { onCli
       aria-label={label}
     >
       <Pencil className="h-3.5 w-3.5" />
+      <span>编辑</span>
     </button>
   )
 }

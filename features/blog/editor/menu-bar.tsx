@@ -39,7 +39,6 @@ import {
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { uploadImage } from '@/lib/upload-image'
-import { toYouTubeEmbed } from './rich-block-extensions'
 
 interface MenuBarProps {
   editor: Editor
@@ -262,13 +261,13 @@ export function MenuBar({ editor }: MenuBarProps) {
             title: '图集',
             description: '插入可编辑图片网格',
             icon: Rows3,
-            action: (pos) => insertAt(pos, { type: 'articleGallery', attrs: { images: [] } }),
+            action: (pos) => insertAt(pos, { type: 'articleGallery', attrs: { openEditor: true, images: [] } }),
           },
           {
             title: '轮播',
             description: '插入可编辑图片轮播',
             icon: Columns3,
-            action: (pos) => insertAt(pos, { type: 'articleSlider', attrs: { images: [] } }),
+            action: (pos) => insertAt(pos, { type: 'articleSlider', attrs: { openEditor: true, images: [] } }),
           },
           {
             title: 'YouTube',
@@ -278,9 +277,10 @@ export function MenuBar({ editor }: MenuBarProps) {
               insertAt(pos, {
                 type: 'articleEmbed',
                 attrs: {
+                  openEditor: true,
                   kind: 'youtube',
-                  src: toYouTubeEmbed('https://www.youtube.com/watch?v=linlz7-Pnvw'),
-                  title: 'YouTube 视频',
+                  src: '',
+                  title: '',
                 },
               }),
           },
@@ -292,9 +292,10 @@ export function MenuBar({ editor }: MenuBarProps) {
               insertAt(pos, {
                 type: 'articleAudio',
                 attrs: {
-                  src: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
-                  title: '嵌入音频',
-                  caption: '音频 · 正文宽度媒体控件',
+                  openEditor: true,
+                  src: '',
+                  title: '',
+                  caption: '',
                 },
               }),
           },
@@ -310,7 +311,7 @@ export function MenuBar({ editor }: MenuBarProps) {
             action: (pos) =>
               insertAt(pos, {
                 type: 'articleCallout',
-                attrs: { tone: 'note', title: '备注', text: '这是一条普通备注。' },
+                attrs: { openEditor: true, tone: 'note', title: '', text: '' },
               }),
           },
           {
@@ -320,7 +321,7 @@ export function MenuBar({ editor }: MenuBarProps) {
             action: (pos) =>
               insertAt(pos, {
                 type: 'articleButton',
-                attrs: { label: '按钮', href: 'https://emmmxx.xyz', variant: 'primary' },
+                attrs: { openEditor: true, label: '', href: '', variant: 'primary' },
               }),
           },
           {
@@ -331,10 +332,10 @@ export function MenuBar({ editor }: MenuBarProps) {
               insertAt(pos, {
                 type: 'articleTabs',
                 attrs: {
+                  openEditor: true,
                   panels: [
-                    { title: '结构', text: '第一组内容用于检查标签页结构。' },
-                    { title: '样式', text: '第二组内容用于检查标签切换状态。' },
-                    { title: '验证', text: '第三组内容用于检查移动端换行。' },
+                    { title: '', text: '' },
+                    { title: '', text: '' },
                   ],
                 },
               }),
@@ -347,10 +348,8 @@ export function MenuBar({ editor }: MenuBarProps) {
               insertAt(pos, {
                 type: 'articleAccordion',
                 attrs: {
-                  items: [
-                    { title: '为什么需要折叠面板？', text: '为了在同一页里展示可折叠内容。' },
-                    { title: '如何编辑？', text: '选中组件后在编辑入口中修改内容。' },
-                  ],
+                  openEditor: true,
+                  items: [{ title: '', text: '' }],
                 },
               }),
           },
@@ -362,15 +361,16 @@ export function MenuBar({ editor }: MenuBarProps) {
               insertAt(pos, {
                 type: 'articleRichShowcase',
                 attrs: {
+                  openEditor: true,
                   image: '',
-                  alt: '图片说明',
-                  eyebrow: '富文本块',
-                  title: '混合正文模块',
-                  text: '一个块里同时承载媒体、摘要、状态和操作入口。',
-                  primaryLabel: '查看图集',
-                  primaryHref: '#gallery',
-                  secondaryLabel: '查看文件',
-                  secondaryHref: '#files',
+                  alt: '',
+                  eyebrow: '',
+                  title: '',
+                  text: '',
+                  primaryLabel: '',
+                  primaryHref: '',
+                  secondaryLabel: '',
+                  secondaryHref: '',
                 },
               }),
           },
@@ -393,11 +393,12 @@ export function MenuBar({ editor }: MenuBarProps) {
               insertAt(pos, {
                 type: 'articleFlow',
                 attrs: {
-                  start: '开始',
-                  question: '内容完整？',
-                  yes: '预览发布',
-                  no: '继续修改',
-                  end: '归档',
+                  openEditor: true,
+                  start: '',
+                  question: '',
+                  yes: '',
+                  no: '',
+                  end: '',
                 },
               }),
           },
@@ -409,11 +410,8 @@ export function MenuBar({ editor }: MenuBarProps) {
               insertAt(pos, {
                 type: 'articleCards',
                 attrs: {
-                  cards: [
-                    { eyebrow: '模式', title: '紧凑摘要卡片', text: '用于文章中的小型结论或阅读提示。' },
-                    { eyebrow: '状态', title: '状态对比', text: '可承载就绪、预览、废弃等状态。' },
-                    { eyebrow: '资源', title: '相关阅读', text: '适合链接到同系列文章或外部资料。' },
-                  ],
+                  openEditor: true,
+                  cards: [{ eyebrow: '', title: '', text: '' }],
                 },
               }),
           },
@@ -424,7 +422,7 @@ export function MenuBar({ editor }: MenuBarProps) {
             action: (pos) =>
               insertAt(pos, {
                 type: 'articleDiagram',
-                attrs: { items: [{ label: '内容源' }, { label: '渲染器' }, { label: '正文界面' }] },
+                attrs: { openEditor: true, items: [{ label: '' }] },
               }),
           },
           {
@@ -435,10 +433,8 @@ export function MenuBar({ editor }: MenuBarProps) {
               insertAt(pos, {
                 type: 'articleTimeline',
                 attrs: {
-                  items: [
-                    { label: '草稿', title: '收集内容块', text: '先把真实文章里会出现的内容块列全。' },
-                    { label: '发布', title: '复用正文体系', text: '组件页和文章详情页使用同一套正文变量。' },
-                  ],
+                  openEditor: true,
+                  items: [{ label: '', title: '', text: '' }],
                 },
               }),
           },
