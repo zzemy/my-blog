@@ -242,6 +242,16 @@ export function PostEditorWorkspace({
         </main>
 
         <aside className={styles.inspector}>
+          <section className={`${styles.inspectorSection} ${styles.richBlockInspector}`}>
+            <h2>
+              <PanelRight className="h-4 w-4" />
+              组件属性
+            </h2>
+            <div id="admin-rich-block-inspector" className={styles.richBlockInspectorHost}>
+              <p>选择正文中的复杂组件后，在这里编辑属性。</p>
+            </div>
+          </section>
+
           <section className={styles.inspectorSection}>
             <h2>
               <PanelRight className="h-4 w-4" />

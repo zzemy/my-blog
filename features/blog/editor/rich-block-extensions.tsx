@@ -657,6 +657,7 @@ function CalloutView({ node, editor, updateAttributes, deleteNode }: NodeViewPro
       {editor.isEditable && isEditing ? (
         <RichBlockEditorPanel
           title="编辑提示块"
+          placement="inline"
           onCancel={() => cancelRichBlockEditing(deleteOnCancel, deleteNode, () => setIsEditing(false))}
           onSave={saveDraft}
         >
@@ -733,6 +734,7 @@ function ButtonView({ node, editor, updateAttributes, deleteNode }: NodeViewProp
       {editor.isEditable && isEditing ? (
         <RichBlockEditorPanel
           title="编辑按钮"
+          placement="inline"
           onCancel={() => cancelRichBlockEditing(deleteOnCancel, deleteNode, () => setIsEditing(false))}
           onSave={saveDraft}
         >
@@ -789,6 +791,7 @@ function TabsView({ node, editor, updateAttributes, deleteNode }: NodeViewProps)
       className="component-tabs not-prose"
       data-rich-block="tabs"
       data-rich-block-editable={editor.isEditable ? 'true' : undefined}
+      data-rich-block-editing={editor.isEditable && isEditing ? 'true' : undefined}
     >
       {editor.isEditable ? (
         <div className="component-block-edit-row">
@@ -858,6 +861,7 @@ function AccordionView({ node, editor, updateAttributes, deleteNode }: NodeViewP
       className="component-accordions not-prose"
       data-rich-block="accordion"
       data-rich-block-editable={editor.isEditable ? 'true' : undefined}
+      data-rich-block-editing={editor.isEditable && isEditing ? 'true' : undefined}
     >
       {editor.isEditable ? (
         <div className="component-block-edit-row">
@@ -909,6 +913,7 @@ function GalleryView({ node, editor, updateAttributes, deleteNode }: NodeViewPro
       className="component-gallery not-prose"
       data-rich-block="gallery"
       data-rich-block-editable={editor.isEditable ? 'true' : undefined}
+      data-rich-block-editing={editor.isEditable && isEditing ? 'true' : undefined}
     >
       {editor.isEditable ? (
         <div className="component-block-edit-row">
@@ -978,6 +983,7 @@ function SliderView({ node, editor, updateAttributes, deleteNode }: NodeViewProp
       className="component-slider not-prose"
       data-rich-block="slider"
       data-rich-block-editable={editor.isEditable ? 'true' : undefined}
+      data-rich-block-editing={editor.isEditable && isEditing ? 'true' : undefined}
     >
       {editor.isEditable ? (
         <div className="component-block-edit-row">
@@ -1078,6 +1084,7 @@ function EmbedView({ node, editor, updateAttributes, deleteNode }: NodeViewProps
       className={`component-embed ${kind === 'video' ? 'component-custom-video' : ''} not-prose`}
       data-rich-block="embed"
       data-rich-block-editable={editor.isEditable ? 'true' : undefined}
+      data-rich-block-editing={editor.isEditable && isEditing ? 'true' : undefined}
     >
       {editor.isEditable ? (
         <div className="component-block-edit-row">
@@ -1195,6 +1202,7 @@ function FlowView({ node, editor, updateAttributes, deleteNode }: NodeViewProps)
       className="component-flow not-prose"
       data-rich-block="flow"
       data-rich-block-editable={editor.isEditable ? 'true' : undefined}
+      data-rich-block-editing={editor.isEditable && isEditing ? 'true' : undefined}
       aria-label="正文发布流程示例"
     >
       {editor.isEditable ? (
@@ -1281,6 +1289,7 @@ function CardsView({ node, editor, updateAttributes, deleteNode }: NodeViewProps
       className="component-card-grid not-prose"
       data-rich-block="cards"
       data-rich-block-editable={editor.isEditable ? 'true' : undefined}
+      data-rich-block-editing={editor.isEditable && isEditing ? 'true' : undefined}
     >
       {editor.isEditable ? (
         <div className="component-block-edit-row">
@@ -1333,6 +1342,7 @@ function DiagramView({ node, editor, updateAttributes, deleteNode }: NodeViewPro
       className="component-diagram not-prose"
       data-rich-block="diagram"
       data-rich-block-editable={editor.isEditable ? 'true' : undefined}
+      data-rich-block-editing={editor.isEditable && isEditing ? 'true' : undefined}
       aria-label="内容关系图"
     >
       {editor.isEditable ? (
@@ -1386,6 +1396,7 @@ function TimelineView({ node, editor, updateAttributes, deleteNode }: NodeViewPr
       className="component-timeline not-prose"
       data-rich-block="timeline"
       data-rich-block-editable={editor.isEditable ? 'true' : undefined}
+      data-rich-block-editing={editor.isEditable && isEditing ? 'true' : undefined}
     >
       {editor.isEditable ? (
         <li className="component-block-edit-row">
@@ -1478,6 +1489,7 @@ function RichShowcaseView({ node, editor, updateAttributes, deleteNode }: NodeVi
       className="component-rich-showcase not-prose"
       data-rich-block="rich-showcase"
       data-rich-block-editable={editor.isEditable ? 'true' : undefined}
+      data-rich-block-editing={editor.isEditable && isEditing ? 'true' : undefined}
     >
       {editor.isEditable ? (
         <div className="component-block-edit-row">
@@ -1642,6 +1654,7 @@ function AudioView({ node, editor, updateAttributes, deleteNode }: NodeViewProps
       {editor.isEditable && isEditing ? (
         <RichBlockEditorPanel
           title="编辑音频"
+          placement="inline"
           onCancel={() => cancelRichBlockEditing(deleteOnCancel, deleteNode, () => setIsEditing(false))}
           onSave={saveDraft}
         >

@@ -1,5 +1,7 @@
 'use client'
 
+import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import type { ReactNode } from 'react'
 import { Pencil, Save, X } from 'lucide-react'
 import type { RichImageItem } from './rich-block-extensions'
@@ -9,6 +11,7 @@ type RichBlockEditorPanelProps = {
   children: ReactNode
   onCancel: () => void
   onSave: () => void
+  placement?: 'inline' | 'inspector'
 }
 
 type TextFieldProps = {
@@ -61,8 +64,22 @@ export function RichBlockEditButton({ onClick, label = '编辑组件' }: { onCli
   )
 }
 
-export function RichBlockEditorPanel({ title, children, onCancel, onSave }: RichBlockEditorPanelProps) {
-  return (
+export function RichBlockEditorPanel({
+  title,
+  children,
+  onCancel,
+  onSave,
+  placement = 'inspector',
+}: RichBlockEditorPanelProps) {
+  const [inspectorHost, setInspectorHost] = useState<HTMLElement | null>(null)
+
+  useEffect(() => {
+    if (placement !== 'inspector') return
+
+    setInspectorHost(document.getElementById('admin-rich-block-inspector'))
+  }, [placement])
+
+  const panel = (
     <div className="component-block-editor" contentEditable={false}>
       <div className="component-block-editor-header">
         <strong>{title}</strong>
@@ -80,6 +97,12 @@ export function RichBlockEditorPanel({ title, children, onCancel, onSave }: Rich
       </div>
     </div>
   )
+
+  if (placement === 'inspector' && inspectorHost) {
+    return createPortal(panel, inspectorHost)
+  }
+
+  return panel
 }
 
 export function TextField({ label, value, placeholder, onChange }: TextFieldProps) {

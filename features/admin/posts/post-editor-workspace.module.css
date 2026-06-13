@@ -239,6 +239,29 @@
   margin: 0;
 }
 
+.richBlockInspector {
+  position: relative;
+}
+
+.richBlockInspectorHost {
+  min-height: 5.5rem;
+}
+
+.richBlockInspectorHost > p {
+  margin: 0;
+  border: 1px dashed rgb(255 255 255 / 11%);
+  border-radius: 8px;
+  background: rgb(255 255 255 / 3%);
+  color: #8d98a6;
+  padding: 0.85rem;
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+.richBlockInspectorHost:has(.component-block-editor) > p {
+  display: none;
+}
+
 .inspectorSection label {
   display: grid;
   gap: 0.4rem;
