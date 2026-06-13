@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import type { Dispatch, MouseEvent, SetStateAction } from 'react'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { toast } from 'sonner'
 import {
   AlertCircle,
   ArrowLeft,
@@ -24,6 +25,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   Sheet,
   SheetContent,
@@ -33,6 +35,7 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet'
 import { TipTapEditor } from '@/features/blog/editor/tiptap-editor'
+import type { TipTapEditorHandle } from '@/features/blog/editor/tiptap-editor'
 import { MarkdownShortcodeGuide } from '@/features/blog/editor/markdown-shortcode-guide'
 import { calculateContentSize, generatePostSlug } from './form-utils'
 import type { PostFormData } from './types'
@@ -76,8 +79,11 @@ export function PostEditorWorkspace({
   onDelete,
 }: PostEditorWorkspaceProps) {
   const [draftTag, setDraftTag] = useState('')
+  const [markdownDraft, setMarkdownDraft] = useState('')
+  const [markdownImporting, setMarkdownImporting] = useState(false)
   const titleRef = useRef<HTMLTextAreaElement>(null)
   const documentPaneRef = useRef<HTMLElement>(null)
+  const editorRef = useRef<TipTapEditorHandle>(null)
   const outline = useMemo(() => collectOutline(formData.content), [formData.content])
   const wordCount = calculateContentSize(formData.content)
   const publishLabel = mode === 'edit' ? (formData.published ? '更新文章' : '发布文章') : '发布文章'
@@ -108,6 +114,26 @@ export function PostEditorWorkspace({
 
   const removeTag = (tagToRemove: string) => {
     updateForm({ tags: formData.tags.filter((tag) => tag !== tagToRemove) })
+  }
+
+  const importMarkdown = async (mode: 'insert' | 'replace') => {
+    const markdown = markdownDraft.trim()
+    if (!markdown) {
+      toast.error('请先粘贴 Markdown 内容')
+      return
+    }
+
+    setMarkdownImporting(true)
+    try {
+      await editorRef.current?.importMarkdown(markdown, mode)
+      setMarkdownDraft('')
+      toast.success(mode === 'replace' ? '已替换正文内容' : '已插入 Markdown 内容')
+    } catch (error) {
+      console.error('Failed to import Markdown:', error)
+      toast.error('Markdown 导入失败，请检查内容格式')
+    } finally {
+      setMarkdownImporting(false)
+    }
   }
 
   const jumpToOutlineItem = (event: MouseEvent<HTMLAnchorElement>, item: OutlineItem, index: number) => {
@@ -172,9 +198,41 @@ export function PostEditorWorkspace({
             <SheetContent side="right" className={styles.advancedSheet}>
               <SheetHeader>
                 <SheetTitle>Markdown 与高级块</SheetTitle>
-                <SheetDescription>粘贴 Markdown 会自动转换；这里保留 shortcode 参考。</SheetDescription>
+                <SheetDescription>粘贴 Markdown 会自动转换；也可以在这里批量导入。</SheetDescription>
               </SheetHeader>
-              <MarkdownShortcodeGuide />
+              <Tabs defaultValue="import" className={styles.advancedTabs}>
+                <TabsList className={styles.advancedTabsList}>
+                  <TabsTrigger value="import">导入 Markdown</TabsTrigger>
+                  <TabsTrigger value="guide">Shortcode 参考</TabsTrigger>
+                </TabsList>
+                <TabsContent value="import" className={styles.markdownImportPanel}>
+                  <label>
+                    <span>Markdown 内容</span>
+                    <Textarea
+                      value={markdownDraft}
+                      onChange={(event) => setMarkdownDraft(event.target.value)}
+                      placeholder="# 标题&#10;&#10;正文、表格、代码块或 shortcode..."
+                      rows={14}
+                    />
+                  </label>
+                  <div className={styles.markdownImportActions}>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => void importMarkdown('insert')}
+                      disabled={markdownImporting}
+                    >
+                      插入到光标
+                    </Button>
+                    <Button type="button" onClick={() => void importMarkdown('replace')} disabled={markdownImporting}>
+                      替换正文
+                    </Button>
+                  </div>
+                </TabsContent>
+                <TabsContent value="guide">
+                  <MarkdownShortcodeGuide />
+                </TabsContent>
+              </Tabs>
             </SheetContent>
           </Sheet>
           <Button type="button" variant="outline" onClick={() => onSubmit(false)} disabled={saving}>
@@ -235,6 +293,7 @@ export function PostEditorWorkspace({
             rows={1}
           />
           <TipTapEditor
+            ref={editorRef}
             content={formData.content}
             onChange={(content) => updateForm({ content })}
             placeholder="输入 / 插入内容块，或直接粘贴 Markdown..."

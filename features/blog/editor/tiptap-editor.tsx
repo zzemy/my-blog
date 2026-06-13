@@ -18,7 +18,7 @@ import { TextStyle } from '@tiptap/extension-text-style'
 import { CodeBlockLowlight } from '@tiptap/extension-code-block-lowlight'
 import { Mathematics } from '@tiptap/extension-mathematics'
 import { common, createLowlight } from 'lowlight'
-import { useEffect, useRef, useState } from 'react'
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { remark } from 'remark'
 import remarkGfm from 'remark-gfm'
@@ -87,13 +87,17 @@ interface TipTapEditorProps {
   showMarkdownGuide?: boolean
 }
 
-export function TipTapEditor({
+export type TipTapEditorHandle = {
+  importMarkdown: (markdown: string, mode: 'insert' | 'replace') => Promise<void>
+}
+
+export const TipTapEditor = forwardRef<TipTapEditorHandle, TipTapEditorProps>(function TipTapEditor({
   content,
   onChange,
   placeholder = '开始编写内容...',
   editable = true,
   showMarkdownGuide = false,
-}: TipTapEditorProps) {
+}, ref) {
   const [isUploading, setIsUploading] = useState(false)
   const editorRef = useRef<Editor | null>(null)
 
@@ -211,21 +215,7 @@ export function TipTapEditor({
              event.preventDefault()
              ;(async () => {
                try {
-                 if (hasArticleShortcodes(text)) {
-                   const segments = splitArticleMarkdown(text)
-                   for (const segment of segments) {
-                     if (segment.kind === 'markdown') {
-                       const html = await markdownToHtml(segment.text)
-                       editorRef.current?.chain().focus().insertContent(html).run()
-                     } else {
-                       editorRef.current?.chain().focus().insertContent(segment.content).run()
-                     }
-                   }
-                   return
-                 }
-
-                 const html = await markdownToHtml(text)
-                 editorRef.current?.chain().focus().insertContent(html).run()
+                 await insertMarkdownContent(editorRef.current, text, 'insert')
                  return
                } catch (error) {
                  console.error('Markdown processing completely failed', error)
@@ -269,6 +259,16 @@ export function TipTapEditor({
       },
     },
   })
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      async importMarkdown(markdown, mode) {
+        await insertMarkdownContent(editorRef.current, markdown, mode)
+      },
+    }),
+    [],
+  )
 
   useEffect(() => {
     if (!editor) return
@@ -334,6 +334,32 @@ export function TipTapEditor({
       )}
     </div>
   )
+})
+
+TipTapEditor.displayName = 'TipTapEditor'
+
+async function insertMarkdownContent(editor: Editor | null, markdown: string, mode: 'insert' | 'replace') {
+  if (!editor) return
+
+  if (mode === 'replace') {
+    editor.chain().focus().clearContent().run()
+  }
+
+  if (hasArticleShortcodes(markdown)) {
+    const segments = splitArticleMarkdown(markdown)
+    for (const segment of segments) {
+      if (segment.kind === 'markdown') {
+        const html = await markdownToHtml(segment.text)
+        editor.chain().focus().insertContent(html).run()
+      } else {
+        editor.chain().focus().insertContent(segment.content).run()
+      }
+    }
+    return
+  }
+
+  const html = await markdownToHtml(markdown)
+  editor.chain().focus().insertContent(html).run()
 }
 
 function getHeadingElement(dom: globalThis.Node | null): HTMLElement | null {
