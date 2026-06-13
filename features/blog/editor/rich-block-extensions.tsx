@@ -3,8 +3,9 @@
 /* eslint-disable @next/next/no-img-element */
 
 import { useEffect, useState } from 'react'
+import type { ComponentType } from 'react'
 import { Node, mergeAttributes, NodeViewWrapper, ReactNodeViewRenderer } from '@tiptap/react'
-import type { NodeViewProps } from '@tiptap/react'
+import type { NodeViewProps, ReactNodeViewProps } from '@tiptap/react'
 import {
   ChevronLeft,
   ChevronRight,
@@ -172,7 +173,7 @@ function createCalloutExtension() {
     },
 
     addNodeView() {
-      return ReactNodeViewRenderer(CalloutView)
+      return createRichBlockNodeView(CalloutView)
     },
   })
 }
@@ -206,7 +207,7 @@ function createButtonExtension() {
     },
 
     addNodeView() {
-      return ReactNodeViewRenderer(ButtonView)
+      return createRichBlockNodeView(ButtonView)
     },
   })
 }
@@ -244,7 +245,7 @@ function createTabsExtension() {
     },
 
     addNodeView() {
-      return ReactNodeViewRenderer(TabsView)
+      return createRichBlockNodeView(TabsView)
     },
   })
 }
@@ -282,7 +283,7 @@ function createAccordionExtension() {
     },
 
     addNodeView() {
-      return ReactNodeViewRenderer(AccordionView)
+      return createRichBlockNodeView(AccordionView)
     },
   })
 }
@@ -314,7 +315,7 @@ function createGalleryExtension() {
     },
 
     addNodeView() {
-      return ReactNodeViewRenderer(GalleryView)
+      return createRichBlockNodeView(GalleryView)
     },
   })
 }
@@ -346,7 +347,7 @@ function createSliderExtension() {
     },
 
     addNodeView() {
-      return ReactNodeViewRenderer(SliderView)
+      return createRichBlockNodeView(SliderView)
     },
   })
 }
@@ -381,7 +382,7 @@ function createEmbedExtension() {
     },
 
     addNodeView() {
-      return ReactNodeViewRenderer(EmbedView)
+      return createRichBlockNodeView(EmbedView)
     },
   })
 }
@@ -417,7 +418,7 @@ function createFlowExtension() {
     },
 
     addNodeView() {
-      return ReactNodeViewRenderer(FlowView)
+      return createRichBlockNodeView(FlowView)
     },
   })
 }
@@ -455,7 +456,7 @@ function createCardsExtension() {
     },
 
     addNodeView() {
-      return ReactNodeViewRenderer(CardsView)
+      return createRichBlockNodeView(CardsView)
     },
   })
 }
@@ -489,7 +490,7 @@ function createDiagramExtension() {
     },
 
     addNodeView() {
-      return ReactNodeViewRenderer(DiagramView)
+      return createRichBlockNodeView(DiagramView)
     },
   })
 }
@@ -527,7 +528,7 @@ function createTimelineExtension() {
     },
 
     addNodeView() {
-      return ReactNodeViewRenderer(TimelineView)
+      return createRichBlockNodeView(TimelineView)
     },
   })
 }
@@ -567,7 +568,7 @@ function createRichShowcaseExtension() {
     },
 
     addNodeView() {
-      return ReactNodeViewRenderer(RichShowcaseView)
+      return createRichBlockNodeView(RichShowcaseView)
     },
   })
 }
@@ -601,7 +602,15 @@ function createAudioExtension() {
     },
 
     addNodeView() {
-      return ReactNodeViewRenderer(AudioView)
+      return createRichBlockNodeView(AudioView)
+    },
+  })
+}
+
+function createRichBlockNodeView(component: ComponentType<ReactNodeViewProps>) {
+  return ReactNodeViewRenderer(component, {
+    stopEvent({ event }) {
+      return event.target instanceof HTMLElement && Boolean(event.target.closest('[data-editor-control="true"]'))
     },
   })
 }

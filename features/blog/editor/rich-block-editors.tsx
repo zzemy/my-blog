@@ -54,8 +54,20 @@ export function RichBlockEditButton({ onClick, label = '编辑组件' }: { onCli
     <button
       type="button"
       className="component-block-edit-button"
-      onClick={onClick}
+      onMouseDown={(event) => {
+        event.preventDefault()
+        event.stopPropagation()
+      }}
+      onPointerDown={(event) => {
+        event.stopPropagation()
+      }}
+      onClick={(event) => {
+        event.preventDefault()
+        event.stopPropagation()
+        onClick()
+      }}
       contentEditable={false}
+      data-editor-control="true"
       aria-label={label}
     >
       <Pencil className="h-3.5 w-3.5" />
@@ -80,17 +92,17 @@ export function RichBlockEditorPanel({
   }, [placement])
 
   const panel = (
-    <div className="component-block-editor" contentEditable={false}>
+    <div className="component-block-editor" contentEditable={false} data-editor-control="true">
       <div className="component-block-editor-header">
         <strong>{title}</strong>
       </div>
       {children}
       <div className="component-block-editor-actions">
-        <button type="button" onClick={onCancel}>
+        <button type="button" onClick={onCancel} contentEditable={false}>
           <X className="h-3.5 w-3.5" />
           取消
         </button>
-        <button type="button" onClick={onSave}>
+        <button type="button" onClick={onSave} contentEditable={false}>
           <Save className="h-3.5 w-3.5" />
           保存
         </button>
