@@ -1695,8 +1695,18 @@ function useOpenEditorOnInsert(
   useEffect(() => {
     if (openEditor !== true) return
 
+    let cancelled = false
     startEditing()
-    updateAttributes({ openEditor: false })
+
+    queueMicrotask(() => {
+      if (!cancelled) {
+        updateAttributes({ openEditor: false })
+      }
+    })
+
+    return () => {
+      cancelled = true
+    }
   }, [openEditor, startEditing, updateAttributes])
 }
 
