@@ -67,12 +67,16 @@ export default function NewPostPage() {
         throw new Error(result.error || '保存失败')
       }
 
+      const result: unknown = await res.json()
+      const createdPostId = getCreatedPostId(result)
+
       setFormData(submittedFormData)
       setSavedSnapshot(serializePostForm(submittedFormData))
       setSuccess(true)
-      window.setTimeout(() => {
-        router.push('/admin/posts')
-      }, 1500)
+
+      if (createdPostId) {
+        router.replace(`/admin/posts/${createdPostId}`)
+      }
     } catch (err) {
       console.error('Failed to save post:', err)
       setError(err instanceof Error ? err.message : '保存失败，请重试')
@@ -97,4 +101,13 @@ export default function NewPostPage() {
 
 function serializePostForm(formData: PostFormData) {
   return JSON.stringify(formData)
+}
+
+function getCreatedPostId(value: unknown) {
+  if (!isRecord(value) || !isRecord(value.post)) return null
+  return typeof value.post.id === 'string' ? value.post.id : null
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null
 }

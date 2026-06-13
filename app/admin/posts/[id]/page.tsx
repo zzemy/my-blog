@@ -142,9 +142,6 @@ export default function EditPostPage() {
       setFormData(submittedFormData)
       setSavedSnapshot(serializePostForm(submittedFormData))
       setSuccess(true)
-      window.setTimeout(() => {
-        router.push('/admin/posts')
-      }, 1500)
     } catch (err) {
       console.error('Failed to save post:', err)
       setError(err instanceof Error ? err.message : '保存失败，请重试')
