@@ -81,6 +81,7 @@ export function PostEditorWorkspace({
   const [draftTag, setDraftTag] = useState('')
   const [markdownDraft, setMarkdownDraft] = useState('')
   const [markdownImporting, setMarkdownImporting] = useState(false)
+  const [advancedOpen, setAdvancedOpen] = useState(false)
   const titleRef = useRef<HTMLTextAreaElement>(null)
   const documentPaneRef = useRef<HTMLElement>(null)
   const editorRef = useRef<TipTapEditorHandle>(null)
@@ -95,6 +96,22 @@ export function PostEditorWorkspace({
     titleInput.style.height = '0px'
     titleInput.style.height = `${titleInput.scrollHeight}px`
   }, [formData.title])
+
+  useEffect(() => {
+    const handleShortcut = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 's') {
+        event.preventDefault()
+        if (!saving) onSubmit(false)
+      }
+
+      if (event.key === 'Escape' && advancedOpen) {
+        setAdvancedOpen(false)
+      }
+    }
+
+    document.addEventListener('keydown', handleShortcut)
+    return () => document.removeEventListener('keydown', handleShortcut)
+  }, [advancedOpen, onSubmit, saving])
 
   const updateForm = (patch: Partial<PostFormData>) => {
     setFormData((current) => ({ ...current, ...patch }))
@@ -189,7 +206,7 @@ export function PostEditorWorkspace({
           ) : (
             <span className={styles.saveState}>{isDirty ? '有未保存改动' : '草稿未提交'}</span>
           )}
-          <Sheet>
+          <Sheet open={advancedOpen} onOpenChange={setAdvancedOpen}>
             <SheetTrigger asChild>
               <Button type="button" variant="ghost" size="sm" className={styles.iconButton} aria-label="高级入口">
                 <MoreHorizontal className="h-4 w-4" />

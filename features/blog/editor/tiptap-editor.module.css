@@ -883,13 +883,24 @@
 @media (max-width: 640px) {
   .editorShell :global(.ProseMirror) {
     min-height: 440px;
-    padding: 1.25rem 0 4rem 0.5rem;
+    padding: 1.25rem 0 7.25rem 0.5rem;
   }
 
   .editorShell :global(.doc-editor-toolbar) {
-    margin-left: 0.5rem;
+    position: fixed;
+    right: 0.75rem;
+    bottom: max(0.75rem, env(safe-area-inset-bottom));
+    left: 0.75rem;
+    z-index: 85;
+    width: auto;
+    margin: 0;
+    border: 1px solid rgb(255 255 255 / 10%);
+    border-radius: 10px;
+    background: rgb(23 25 28 / 94%);
+    padding: 0.42rem;
+    box-shadow: 0 18px 44px rgb(0 0 0 / 42%);
+    backdrop-filter: blur(16px);
     overflow-x: auto;
-    padding-bottom: 0.15rem;
     scrollbar-width: none;
   }
 
@@ -908,6 +919,15 @@
     min-height: 2.75rem;
   }
 
+  .editorShell :global(.doc-insert-trigger) {
+    flex: 1 0 auto;
+    justify-content: center;
+  }
+
+  .editorShell :global(.doc-history-actions) {
+    flex: 0 0 auto;
+  }
+
   :global(.doc-insert-menu) {
     grid-template-columns: 1fr;
   }
@@ -917,7 +937,7 @@
     left: 0.75rem !important;
     right: 0.75rem;
     width: auto;
-    max-height: min(75dvh, 34rem);
+    max-height: min(68dvh, 34rem);
     grid-template-columns: 1fr;
   }
 
