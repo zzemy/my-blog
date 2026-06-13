@@ -699,6 +699,19 @@
   gap: 0.55rem;
 }
 
+.editorShell :global(.component-block-editor-actions .component-block-delete-button) {
+  margin-right: auto;
+  border-color: rgb(248 113 113 / 42%);
+  color: #fecaca;
+}
+
+.editorShell :global(.component-block-editor-actions .component-block-delete-button:hover),
+.editorShell :global(.component-block-editor-actions .component-block-delete-button:focus-visible) {
+  border-color: rgb(248 113 113 / 68%);
+  background: rgb(127 29 29 / 22%);
+  color: #fee2e2;
+}
+
 .editorShell :global(.component-block-editor-actions button) {
   display: inline-flex;
   min-height: 2.1rem;
@@ -848,6 +861,19 @@
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: 0.55rem;
+}
+
+:global(#admin-rich-block-inspector .component-block-editor-actions .component-block-delete-button) {
+  margin-right: auto;
+  border-color: rgb(248 113 113 / 38%);
+  color: #fecaca;
+}
+
+:global(#admin-rich-block-inspector .component-block-editor-actions .component-block-delete-button:hover),
+:global(#admin-rich-block-inspector .component-block-editor-actions .component-block-delete-button:focus-visible) {
+  border-color: rgb(248 113 113 / 66%);
+  background: rgb(127 29 29 / 22%);
+  color: #fee2e2;
 }
 
 .editorStats {

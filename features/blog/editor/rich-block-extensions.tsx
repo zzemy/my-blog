@@ -667,6 +667,7 @@ function CalloutView({ node, editor, updateAttributes, deleteNode }: NodeViewPro
         <RichBlockEditorPanel
           title="编辑提示块"
           placement="inline"
+          onDelete={deleteNode}
           onCancel={() => cancelRichBlockEditing(deleteOnCancel, deleteNode, () => setIsEditing(false))}
           onSave={saveDraft}
         >
@@ -744,6 +745,7 @@ function ButtonView({ node, editor, updateAttributes, deleteNode }: NodeViewProp
         <RichBlockEditorPanel
           title="编辑按钮"
           placement="inline"
+          onDelete={deleteNode}
           onCancel={() => cancelRichBlockEditing(deleteOnCancel, deleteNode, () => setIsEditing(false))}
           onSave={saveDraft}
         >
@@ -836,6 +838,7 @@ function TabsView({ node, editor, updateAttributes, deleteNode }: NodeViewProps)
       {editor.isEditable && isEditing ? (
         <RichBlockEditorPanel
           title="编辑标签页"
+          onDelete={deleteNode}
           onCancel={() => cancelRichBlockEditing(deleteOnCancel, deleteNode, () => setIsEditing(false))}
           onSave={saveDraft}
         >
@@ -886,6 +889,7 @@ function AccordionView({ node, editor, updateAttributes, deleteNode }: NodeViewP
       {editor.isEditable && isEditing ? (
         <RichBlockEditorPanel
           title="编辑折叠面板"
+          onDelete={deleteNode}
           onCancel={() => cancelRichBlockEditing(deleteOnCancel, deleteNode, () => setIsEditing(false))}
           onSave={saveDraft}
         >
@@ -945,6 +949,7 @@ function GalleryView({ node, editor, updateAttributes, deleteNode }: NodeViewPro
       {editor.isEditable && isEditing ? (
         <RichBlockEditorPanel
           title="编辑图集"
+          onDelete={deleteNode}
           onCancel={() => cancelRichBlockEditing(deleteOnCancel, deleteNode, () => setIsEditing(false))}
           onSave={saveDraft}
         >
@@ -1043,6 +1048,7 @@ function SliderView({ node, editor, updateAttributes, deleteNode }: NodeViewProp
       {editor.isEditable && isEditing ? (
         <RichBlockEditorPanel
           title="编辑轮播"
+          onDelete={deleteNode}
           onCancel={() => cancelRichBlockEditing(deleteOnCancel, deleteNode, () => setIsEditing(false))}
           onSave={saveDraft}
         >
@@ -1128,6 +1134,7 @@ function EmbedView({ node, editor, updateAttributes, deleteNode }: NodeViewProps
       {editor.isEditable && isEditing ? (
         <RichBlockEditorPanel
           title="编辑嵌入媒体"
+          onDelete={deleteNode}
           onCancel={() => cancelRichBlockEditing(deleteOnCancel, deleteNode, () => setIsEditing(false))}
           onSave={saveDraft}
         >
@@ -1238,6 +1245,7 @@ function FlowView({ node, editor, updateAttributes, deleteNode }: NodeViewProps)
       {editor.isEditable && isEditing ? (
         <RichBlockEditorPanel
           title="编辑流程图"
+          onDelete={deleteNode}
           onCancel={() => cancelRichBlockEditing(deleteOnCancel, deleteNode, () => setIsEditing(false))}
           onSave={saveDraft}
         >
@@ -1315,6 +1323,7 @@ function CardsView({ node, editor, updateAttributes, deleteNode }: NodeViewProps
       {editor.isEditable && isEditing ? (
         <RichBlockEditorPanel
           title="编辑卡片"
+          onDelete={deleteNode}
           onCancel={() => cancelRichBlockEditing(deleteOnCancel, deleteNode, () => setIsEditing(false))}
           onSave={saveDraft}
         >
@@ -1368,6 +1377,7 @@ function DiagramView({ node, editor, updateAttributes, deleteNode }: NodeViewPro
       {editor.isEditable && isEditing ? (
         <RichBlockEditorPanel
           title="编辑关系图"
+          onDelete={deleteNode}
           onCancel={() => cancelRichBlockEditing(deleteOnCancel, deleteNode, () => setIsEditing(false))}
           onSave={saveDraft}
         >
@@ -1425,6 +1435,7 @@ function TimelineView({ node, editor, updateAttributes, deleteNode }: NodeViewPr
         <li className="component-block-editor-list-host">
           <RichBlockEditorPanel
             title="编辑时间线"
+            onDelete={deleteNode}
             onCancel={() => cancelRichBlockEditing(deleteOnCancel, deleteNode, () => setIsEditing(false))}
             onSave={saveDraft}
           >
@@ -1545,6 +1556,7 @@ function RichShowcaseView({ node, editor, updateAttributes, deleteNode }: NodeVi
       {editor.isEditable && isEditing ? (
         <RichBlockEditorPanel
           title="编辑富文本块"
+          onDelete={deleteNode}
           onCancel={() => cancelRichBlockEditing(deleteOnCancel, deleteNode, () => setIsEditing(false))}
           onSave={saveDraft}
         >
@@ -1664,6 +1676,7 @@ function AudioView({ node, editor, updateAttributes, deleteNode }: NodeViewProps
         <RichBlockEditorPanel
           title="编辑音频"
           placement="inline"
+          onDelete={deleteNode}
           onCancel={() => cancelRichBlockEditing(deleteOnCancel, deleteNode, () => setIsEditing(false))}
           onSave={saveDraft}
         >

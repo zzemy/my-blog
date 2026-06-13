@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import type { ReactNode } from 'react'
-import { Pencil, Save, X } from 'lucide-react'
+import { Pencil, Save, Trash2, X } from 'lucide-react'
 import type { RichImageItem } from './rich-block-extensions'
 
 type RichBlockEditorPanelProps = {
@@ -11,6 +11,7 @@ type RichBlockEditorPanelProps = {
   children: ReactNode
   onCancel: () => void
   onSave: () => void
+  onDelete?: () => void
   placement?: 'inline' | 'inspector'
 }
 
@@ -81,6 +82,7 @@ export function RichBlockEditorPanel({
   children,
   onCancel,
   onSave,
+  onDelete,
   placement = 'inspector',
 }: RichBlockEditorPanelProps) {
   const [inspectorHost, setInspectorHost] = useState<HTMLElement | null>(null)
@@ -98,6 +100,12 @@ export function RichBlockEditorPanel({
       </div>
       {children}
       <div className="component-block-editor-actions">
+        {onDelete ? (
+          <button type="button" className="component-block-delete-button" onClick={onDelete} contentEditable={false}>
+            <Trash2 className="h-3.5 w-3.5" />
+            删除组件
+          </button>
+        ) : null}
         <button type="button" onClick={onCancel} contentEditable={false}>
           <X className="h-3.5 w-3.5" />
           取消
