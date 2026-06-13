@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
+import type { Dispatch, SetStateAction } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 
 import { PostEditorWorkspace } from '@/features/admin/posts/post-editor-workspace'
@@ -10,6 +11,7 @@ import {
   resolvePublishedAtForSubmit,
   validatePostForm,
 } from '@/features/admin/posts/form-utils'
+import type { PostFormData } from '@/features/admin/posts/types'
 import { isoToLocalInput } from '@/features/admin/posts/utils'
 
 export default function EditPostPage() {
@@ -22,6 +24,20 @@ export default function EditPostPage() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   const [formData, setFormData] = useState(createEmptyPostForm)
+  const [savedSnapshot, setSavedSnapshot] = useState(() => serializePostForm(createEmptyPostForm()))
+
+  const currentSnapshot = serializePostForm(formData)
+  const isDirty = currentSnapshot !== savedSnapshot
+
+  const setEditorFormData: Dispatch<SetStateAction<PostFormData>> = (value) => {
+    setFormData((current) => {
+      const next = typeof value === 'function' ? value(current) : value
+      if (serializePostForm(next) !== serializePostForm(current)) {
+        setSuccess(false)
+      }
+      return next
+    })
+  }
 
   const fetchPost = useCallback(async () => {
     try {
@@ -34,7 +50,7 @@ export default function EditPostPage() {
       const result = await res.json()
       const post = result.post
 
-      setFormData({
+      const nextFormData = {
         title: post.title,
         slug: post.slug,
         description: post.description || '',
@@ -48,7 +64,11 @@ export default function EditPostPage() {
         seo_description: post.seo_description || '',
         locale: post.locale || 'zh',
         published_at: post.published_at ? isoToLocalInput(post.published_at) : '',
-      })
+      }
+
+      setFormData(nextFormData)
+      setSavedSnapshot(serializePostForm(nextFormData))
+      setSuccess(false)
     } catch (err) {
       console.error('Failed to fetch post:', err)
       setError('无法获取文章信息')
@@ -72,23 +92,28 @@ export default function EditPostPage() {
 
     setSaving(true)
     try {
-      const submitData: Record<string, unknown> = {
-        title: formData.title,
-        slug: formData.slug,
-        description: formData.description,
-        cover_image: formData.cover_image,
-        tags: formData.tags,
-        content: formData.content,
+      const submittedFormData: PostFormData = {
+        ...formData,
         published,
-        featured: formData.featured,
-        reading_time: calculateContentSize(formData.content),
-        locale: formData.locale,
-        seo_title: formData.seo_title,
-        seo_description: formData.seo_description,
+        published_at: resolvePublishedAtForSubmit(published, formData.published, formData.published_at) ?? '',
+      }
+      const submitData: Record<string, unknown> = {
+        title: submittedFormData.title,
+        slug: submittedFormData.slug,
+        description: submittedFormData.description,
+        cover_image: submittedFormData.cover_image,
+        tags: submittedFormData.tags,
+        content: submittedFormData.content,
+        published,
+        featured: submittedFormData.featured,
+        reading_time: calculateContentSize(submittedFormData.content),
+        locale: submittedFormData.locale,
+        seo_title: submittedFormData.seo_title,
+        seo_description: submittedFormData.seo_description,
       }
 
       if (published) {
-        submitData.published_at = resolvePublishedAtForSubmit(published, formData.published, formData.published_at)
+        submitData.published_at = submittedFormData.published_at
       }
 
       const res = await fetch(`/api/admin/posts/${postId}`, {
@@ -104,6 +129,8 @@ export default function EditPostPage() {
         throw new Error(result.error || '保存失败')
       }
 
+      setFormData(submittedFormData)
+      setSavedSnapshot(serializePostForm(submittedFormData))
       setSuccess(true)
       window.setTimeout(() => {
         router.push('/admin/posts')
@@ -153,7 +180,8 @@ export default function EditPostPage() {
     <PostEditorWorkspace
       mode="edit"
       formData={formData}
-      setFormData={setFormData}
+      setFormData={setEditorFormData}
+      isDirty={isDirty}
       saving={saving}
       error={error}
       success={success}
@@ -161,4 +189,8 @@ export default function EditPostPage() {
       onDelete={handleDelete}
     />
   )
+}
+
+function serializePostForm(formData: PostFormData) {
+  return JSON.stringify(formData)
 }

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import type { Dispatch, SetStateAction } from 'react'
 import { useRouter } from 'next/navigation'
 
 import { PostEditorWorkspace } from '@/features/admin/posts/post-editor-workspace'
@@ -10,6 +11,7 @@ import {
   resolvePublishedAtForSubmit,
   validatePostForm,
 } from '@/features/admin/posts/form-utils'
+import type { PostFormData } from '@/features/admin/posts/types'
 
 export default function NewPostPage() {
   const router = useRouter()
@@ -17,6 +19,20 @@ export default function NewPostPage() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   const [formData, setFormData] = useState(createEmptyPostForm)
+  const [savedSnapshot, setSavedSnapshot] = useState(() => serializePostForm(createEmptyPostForm()))
+
+  const currentSnapshot = serializePostForm(formData)
+  const isDirty = currentSnapshot !== savedSnapshot
+
+  const setEditorFormData: Dispatch<SetStateAction<PostFormData>> = (value) => {
+    setFormData((current) => {
+      const next = typeof value === 'function' ? value(current) : value
+      if (serializePostForm(next) !== serializePostForm(current)) {
+        setSuccess(false)
+      }
+      return next
+    })
+  }
 
   const handleSubmit = async (published: boolean) => {
     setError(null)
@@ -29,16 +45,20 @@ export default function NewPostPage() {
 
     setSaving(true)
     try {
+      const submittedFormData: PostFormData = {
+        ...formData,
+        published,
+        published_at: resolvePublishedAtForSubmit(published, formData.published, formData.published_at) ?? '',
+      }
+
       const res = await fetch('/api/admin/posts', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          ...formData,
+          ...submittedFormData,
           reading_time: calculateContentSize(formData.content),
-          published,
-          published_at: resolvePublishedAtForSubmit(published, formData.published, formData.published_at),
         }),
       })
 
@@ -47,6 +67,8 @@ export default function NewPostPage() {
         throw new Error(result.error || '保存失败')
       }
 
+      setFormData(submittedFormData)
+      setSavedSnapshot(serializePostForm(submittedFormData))
       setSuccess(true)
       window.setTimeout(() => {
         router.push('/admin/posts')
@@ -63,11 +85,16 @@ export default function NewPostPage() {
     <PostEditorWorkspace
       mode="new"
       formData={formData}
-      setFormData={setFormData}
+      setFormData={setEditorFormData}
+      isDirty={isDirty}
       saving={saving}
       error={error}
       success={success}
       onSubmit={handleSubmit}
     />
   )
+}
+
+function serializePostForm(formData: PostFormData) {
+  return JSON.stringify(formData)
 }

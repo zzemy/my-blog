@@ -43,6 +43,7 @@ type PostEditorWorkspaceProps = {
   mode: 'new' | 'edit'
   formData: PostFormData
   setFormData: Dispatch<SetStateAction<PostFormData>>
+  isDirty: boolean
   saving: boolean
   error: string | null
   success: boolean
@@ -67,6 +68,7 @@ export function PostEditorWorkspace({
   mode,
   formData,
   setFormData,
+  isDirty,
   saving,
   error,
   success,
@@ -146,13 +148,20 @@ export function PostEditorWorkspace({
           </div>
         </div>
         <div className={styles.topbarRight}>
-          {success ? (
+          {saving ? (
+            <span className={styles.saveState}>正在保存...</span>
+          ) : error ? (
+            <span className={styles.errorState}>
+              <AlertCircle className="h-4 w-4" />
+              保存失败
+            </span>
+          ) : success && !isDirty ? (
             <span className={styles.successState}>
               <CheckCircle className="h-4 w-4" />
               已保存
             </span>
           ) : (
-            <span className={styles.saveState}>{saving ? '正在保存...' : '草稿未提交'}</span>
+            <span className={styles.saveState}>{isDirty ? '有未保存改动' : '草稿未提交'}</span>
           )}
           <Sheet>
             <SheetTrigger asChild>
