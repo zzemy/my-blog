@@ -389,7 +389,7 @@ export function MenuBar({ editor }: MenuBarProps) {
       {floatingTarget ? (
         <div
           className="doc-floating-insert"
-          style={getFloatingMenuStyle(floatingTarget, { width: 560, height: 560 })}
+          style={getFloatingMenuStyle(floatingTarget, { width: 380, height: 520 })}
         >
           <div className="doc-floating-insert-header">
             <GripVertical className="h-4 w-4" />
