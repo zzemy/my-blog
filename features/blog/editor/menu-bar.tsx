@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import type { ChangeEvent, ReactNode } from 'react'
 import type { Content, Editor } from '@tiptap/react'
 import { BubbleMenu } from '@tiptap/react/menus'
+import { toast } from 'sonner'
 import {
   Bold,
   Code,
@@ -243,7 +244,7 @@ export function MenuBar({ editor }: MenuBarProps) {
         if (url) {
           insertAt(pos, { type: 'image', attrs: { src: url } })
         } else {
-          alert('图片上传失败，请确保 Supabase Storage 已配置 Policies 允许上传。')
+          toast.error('图片上传失败，请确保 Supabase Storage 已配置 Policies 允许上传。')
         }
       })
       .finally(() => {

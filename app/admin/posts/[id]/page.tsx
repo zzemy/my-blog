@@ -5,6 +5,15 @@ import type { Dispatch, SetStateAction } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 
 import { PostEditorWorkspace } from '@/features/admin/posts/post-editor-workspace'
+import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import {
   calculateContentSize,
   createEmptyPostForm,
@@ -25,6 +34,7 @@ export default function EditPostPage() {
   const [success, setSuccess] = useState(false)
   const [formData, setFormData] = useState(createEmptyPostForm)
   const [savedSnapshot, setSavedSnapshot] = useState(() => serializePostForm(createEmptyPostForm()))
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
 
   const currentSnapshot = serializePostForm(formData)
   const isDirty = currentSnapshot !== savedSnapshot
@@ -144,8 +154,6 @@ export default function EditPostPage() {
   }
 
   const handleDelete = async () => {
-    if (!confirm('确定要删除这篇文章吗？此操作不能撤销。')) return
-
     setSaving(true)
     try {
       const res = await fetch(`/api/admin/posts/${postId}`, {
@@ -177,17 +185,43 @@ export default function EditPostPage() {
   }
 
   return (
-    <PostEditorWorkspace
-      mode="edit"
-      formData={formData}
-      setFormData={setEditorFormData}
-      isDirty={isDirty}
-      saving={saving}
-      error={error}
-      success={success}
-      onSubmit={handleSubmit}
-      onDelete={handleDelete}
-    />
+    <>
+      <PostEditorWorkspace
+        mode="edit"
+        formData={formData}
+        setFormData={setEditorFormData}
+        isDirty={isDirty}
+        saving={saving}
+        error={error}
+        success={success}
+        onSubmit={handleSubmit}
+        onDelete={() => setDeleteDialogOpen(true)}
+      />
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>删除文章</DialogTitle>
+            <DialogDescription>确定要删除这篇文章吗？此操作不能撤销。</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setDeleteDialogOpen(false)} disabled={saving}>
+              取消
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={() => {
+                setDeleteDialogOpen(false)
+                void handleDelete()
+              }}
+              disabled={saving}
+            >
+              删除
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   )
 }
 

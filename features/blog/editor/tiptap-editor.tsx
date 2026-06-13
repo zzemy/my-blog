@@ -19,6 +19,7 @@ import { CodeBlockLowlight } from '@tiptap/extension-code-block-lowlight'
 import { Mathematics } from '@tiptap/extension-mathematics'
 import { common, createLowlight } from 'lowlight'
 import { useEffect, useRef, useState } from 'react'
+import { toast } from 'sonner'
 import { remark } from 'remark'
 import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
@@ -190,7 +191,7 @@ export function TipTapEditor({
                 const transaction = view.state.tr.replaceSelectionWith(node)
                 view.dispatch(transaction)
               } else {
-                alert('图片上传失败，请检查 Supabase Storage 设置')
+                toast.error('图片上传失败，请检查 Supabase Storage 设置')
               }
             }).finally(() => {
               setIsUploading(false)
@@ -256,7 +257,7 @@ export function TipTapEditor({
                    view.dispatch(transaction)
                 }
               } else {
-                alert('图片上传失败，请检查 Supabase Storage 设置')
+                toast.error('图片上传失败，请检查 Supabase Storage 设置')
               }
             }).finally(() => {
               setIsUploading(false)
