@@ -27,9 +27,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-        env:
-          PNPM_DISABLE_BUILD_GUARD: true
+        run: pnpm install --frozen-lockfile --config.ignore-build-guard=true
 
       - name: Run ESLint
         run: pnpm run lint
