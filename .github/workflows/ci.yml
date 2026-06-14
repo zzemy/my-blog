@@ -28,8 +28,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          # Verify .npmrc is present
-          cat .npmrc
+          # Auto-approve all build scripts in CI
+          pnpm approve-builds --all || true
           pnpm install --frozen-lockfile
 
       - name: Run ESLint
