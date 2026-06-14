@@ -28,8 +28,11 @@ jobs:
 
       - name: Install dependencies
         run: |
-          # Auto-approve all build scripts in CI
+          # First install will fail but identify packages needing approval
+          pnpm install --frozen-lockfile || true
+          # Now approve all pending builds
           pnpm approve-builds --all || true
+          # Install again with approvals
           pnpm install --frozen-lockfile
 
       - name: Run ESLint
