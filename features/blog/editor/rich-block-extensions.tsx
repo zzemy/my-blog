@@ -619,10 +619,13 @@ function CalloutView({ node, editor, updateAttributes, deleteNode }: NodeViewPro
   const tone = getCalloutTone(node.attrs.tone)
   const title = getString(node.attrs.title, '备注')
   const text = getString(node.attrs.text, '这是一条普通备注。')
-  const Icon = getCalloutIcon(tone)
   const [isEditing, setIsEditing] = useState(false)
   const [draft, setDraft] = useState({ tone, title, text })
   const [deleteOnCancel, setDeleteOnCancel] = useState(node.attrs.openEditor === true)
+  const previewTone = isEditing ? getCalloutTone(draft.tone) : tone
+  const previewTitle = isEditing ? draft.title.trim() || calloutLabels[previewTone] : title
+  const previewText = isEditing ? draft.text.trim() || `这是一条${calloutLabels[previewTone]}。` : text
+  const Icon = getCalloutIcon(previewTone)
 
   const startEditing = () => {
     setDraft({
@@ -652,16 +655,18 @@ function CalloutView({ node, editor, updateAttributes, deleteNode }: NodeViewPro
       className="component-stack not-prose"
       data-rich-block="callout"
       data-rich-block-editable={editor.isEditable ? 'true' : undefined}
+      data-rich-block-editing={editor.isEditable && isEditing ? 'true' : undefined}
+      data-callout-tone={previewTone}
     >
-      <div className={`component-callout component-callout-${tone}`}>
+      <div className={`component-callout component-callout-${previewTone}`}>
         <div className="component-callout-heading">
           <div className="component-callout-icon">
             <Icon className="h-4 w-4" />
           </div>
-          <p className="component-callout-title">{title}</p>
+          <p className="component-callout-title">{previewTitle}</p>
           {editor.isEditable ? <RichBlockEditButton onClick={startEditing} label="编辑提示块" /> : null}
         </div>
-        <p>{text}</p>
+        <p>{previewText}</p>
       </div>
       {editor.isEditable && isEditing ? (
         <RichBlockEditorPanel

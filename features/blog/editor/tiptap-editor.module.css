@@ -531,6 +531,21 @@
   outline-offset: 5px;
 }
 
+.editorShell :global([data-rich-block="callout"].ProseMirror-selectednode),
+.editorShell :global([data-rich-block="callout"][data-rich-block-editing="true"]) {
+  outline: none;
+}
+
+.editorShell :global([data-rich-block="callout"].ProseMirror-selectednode .component-callout),
+.editorShell :global([data-rich-block="callout"][data-rich-block-editing="true"] .component-callout) {
+  border-color: color-mix(in oklch, var(--callout-icon), transparent 42%);
+  background: color-mix(in oklch, var(--callout-bg), var(--callout-icon) 7%);
+  box-shadow:
+    0 0 0 3px color-mix(in oklch, var(--callout-icon), transparent 76%),
+    0 18px 42px color-mix(in oklch, var(--callout-icon), transparent 88%),
+    var(--callout-shadow);
+}
+
 .editorShell :global(.component-block-edit-button) {
   display: inline-flex;
   min-width: 4.25rem;
