@@ -57,6 +57,106 @@ export function hasArticleShortcodes(text: string) {
   )
 }
 
+export function createArticleShortcodeTemplate(name: string): Content | null {
+  const normalized = name.toLowerCase()
+
+  if (isCalloutTone(normalized)) {
+    return {
+      type: 'articleCallout',
+      attrs: {
+        openEditor: true,
+        tone: normalized,
+        title: '',
+        text: '',
+      },
+    }
+  }
+
+  switch (normalized) {
+    case 'button':
+      return {
+        type: 'articleButton',
+        attrs: { openEditor: true, label: '', href: '', variant: 'primary' },
+      }
+    case 'tabs':
+      return {
+        type: 'articleTabs',
+        attrs: {
+          openEditor: true,
+          panels: [
+            { title: '', text: '' },
+            { title: '', text: '' },
+          ],
+        },
+      }
+    case 'accordion':
+      return {
+        type: 'articleAccordion',
+        attrs: {
+          openEditor: true,
+          items: [{ title: '', text: '' }],
+        },
+      }
+    case 'gallery':
+      return { type: 'articleGallery', attrs: { openEditor: true, images: [] } }
+    case 'slider':
+      return { type: 'articleSlider', attrs: { openEditor: true, images: [] } }
+    case 'youtube':
+      return {
+        type: 'articleEmbed',
+        attrs: { openEditor: true, kind: 'youtube', src: '', title: '' },
+      }
+    case 'video':
+      return {
+        type: 'articleEmbed',
+        attrs: { openEditor: true, kind: 'video', src: '', poster: '', title: '' },
+      }
+    case 'flow':
+      return {
+        type: 'articleFlow',
+        attrs: { openEditor: true, start: '', question: '', yes: '', no: '', end: '' },
+      }
+    case 'cards':
+      return {
+        type: 'articleCards',
+        attrs: { openEditor: true, cards: [{ eyebrow: '', title: '', text: '' }] },
+      }
+    case 'diagram':
+      return {
+        type: 'articleDiagram',
+        attrs: { openEditor: true, items: [{ label: '' }] },
+      }
+    case 'timeline':
+      return {
+        type: 'articleTimeline',
+        attrs: { openEditor: true, items: [{ label: '', title: '', text: '' }] },
+      }
+    case 'rich':
+      return {
+        type: 'articleRichShowcase',
+        attrs: {
+          openEditor: true,
+          image: '',
+          alt: '',
+          eyebrow: '',
+          title: '',
+          text: '',
+          primaryLabel: '',
+          primaryHref: '',
+          secondaryLabel: '',
+          secondaryHref: '',
+        },
+      }
+    case 'audio':
+      return {
+        type: 'articleAudio',
+        attrs: { openEditor: true, src: '', title: '', caption: '' },
+      }
+    default:
+      return null
+  }
+}
+
 export function splitArticleMarkdown(text: string): ArticleMarkdownSegment[] {
   const lines = text.replace(/\r\n/g, '\n').split('\n')
   const segments: ArticleMarkdownSegment[] = []
