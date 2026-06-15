@@ -234,8 +234,8 @@ importers:
         specifier: ^3.6.0
         version: 3.6.0
       three:
-        specifier: ^0.124.0
-        version: 0.124.0
+        specifier: ^0.125.2
+        version: 0.125.2
       undici:
         specifier: ^8.4.1
         version: 8.4.1
@@ -3755,8 +3755,8 @@ packages:
     resolution: {integrity: sha512-uxc/zpqFg6x7C8vOE7lh6Lbda8eEL9zmVm/PLeTPBRhh1xCgdWaQ+J1CUieGpIfm2HdtsUpRv+HshiasBMcc6A==}
     engines: {node: '>=6'}
 
-  three@0.124.0:
-    resolution: {integrity: sha512-ROXp1Ly7YyF+jC910DQyAWj++Qlw2lQv0qwYLNQwdDbjk4bsOXAfGO92wYTMPNei1GMJUmCxSxc3MjGBTS09Rg==}
+  three@0.125.2:
+    resolution: {integrity: sha512-7rIRO23jVKWcAPFdW/HREU2NZMGWPBZ4XwEMt0Ak0jwLUKVJhcKM55eCBWyGZq/KiQbeo1IeuAoo/9l2dzhTXA==}
 
   tiny-invariant@1.3.3:
     resolution: {integrity: sha512-+FbBPE1o9QAYvviau/qC5SE3caw21q3xkvWKBtja5vgqOWIHHJ3ioaq1VPfn/Szqctz2bU/oYeKd9/z5BL+PVg==}
@@ -7679,7 +7679,7 @@ snapshots:
 
   tapable@2.3.3: {}
 
-  three@0.124.0: {}
+  three@0.125.2: {}
 
   tiny-invariant@1.3.3: {}
 
