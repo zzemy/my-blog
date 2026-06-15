@@ -130,13 +130,19 @@ export function createImageItemsFromUrls(value: string): RichImageItem[] {
 export function toYouTubeEmbed(value: string) {
   try {
     const url = new URL(value)
-    const host = url.hostname.replace(/^www\./, '')
+    const host = url.hostname.toLowerCase().replace(/^www\./, '')
+
+    // Strict hostname validation - must be exactly youtube.com or youtu.be
+    const isYouTube = host === 'youtube.com' || host === 'youtu.be'
+
+    if (!isYouTube) {
+      return value
+    }
+
     const id =
       host === 'youtu.be'
         ? url.pathname.slice(1)
-        : host.endsWith('youtube.com')
-          ? url.searchParams.get('v') || url.pathname.split('/').filter(Boolean).pop()
-          : ''
+        : url.searchParams.get('v') || url.pathname.split('/').filter(Boolean).pop()
 
     return id ? `https://www.youtube-nocookie.com/embed/${id}?rel=0` : value
   } catch {
