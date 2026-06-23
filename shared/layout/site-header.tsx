@@ -61,7 +61,7 @@ export function SiteHeader() {
           <CommandMenu compact />
           <div className="hidden h-7 w-px bg-border dark:bg-white/14 sm:block" />
           <div className="flex items-center gap-1.5 [&_button]:border-border [&_button]:bg-background/70 [&_button]:text-foreground/80 [&_button:hover]:bg-accent [&_button:hover]:text-foreground dark:[&_button]:border-white/16 dark:[&_button]:bg-white/[0.04] dark:[&_button]:text-white/82 dark:[&_button:hover]:bg-white/10 dark:[&_button:hover]:text-white">
-            <VantaSwitcher />
+            {current === '/' ? <VantaSwitcher /> : null}
             <ModeToggle />
           </div>
           <a
