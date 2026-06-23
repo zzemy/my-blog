@@ -7,7 +7,6 @@ import { TextShimmer } from "@/shared/visuals/text-shimmer";
 import { HomeButtons } from "@/features/blog/effects/home-buttons";
 import { SiteUptimeBadge } from "@/shared/components/common/site-uptime";
 import { getSiteSettings } from "@/lib/site-settings";
-import { VantaBackground } from "@/shared/effects/vanta-background";
 
 export const revalidate = 60;
 
@@ -17,7 +16,6 @@ export default async function Home() {
 
   return (
     <div className="relative min-h-[calc(100vh-4rem)] overflow-hidden">
-      <VantaBackground />
       <div className="relative z-10 container mx-auto px-4 py-6 md:py-10">
         {/* Hero Section: 网站欢迎区域 */}
         <FadeIn className="mx-auto flex max-w-[980px] flex-col items-center gap-4 py-8 md:py-12 md:pb-8 lg:py-20 lg:pb-12 text-center">

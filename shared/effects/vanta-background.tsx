@@ -5,6 +5,7 @@ import * as THREE from 'three'
 import { useTheme } from 'next-themes'
 import { usePathname } from 'next/navigation'
 import { useVanta } from './vanta-context'
+import { shouldUseVantaBackground } from './vanta-routes'
 
 type VantaEffectInstance = {
   destroy: () => void
@@ -31,12 +32,7 @@ export function VantaBackground() {
     setHasMounted(true)
   }, [])
 
-  const pathSegments = pathname?.split('/').filter(Boolean) ?? []
-  const section = pathSegments[0]
-  const isArticlePage = section === 'posts' && pathSegments.length >= 2
-  const isAboutPage = section === 'about'
-  const isComponentsPage = section === 'components'
-  const shouldDisableEffect = isArticlePage || isAboutPage || isComponentsPage
+  const shouldDisableEffect = !shouldUseVantaBackground(pathname)
   const isDark = theme === 'dark'
 
   useEffect(() => {

@@ -8,6 +8,7 @@ import { SiteHeader } from "@/shared/layout/site-header"
 import { ScrollToTopButton } from "@/shared/layout/scroll-to-top-button"
 import { SmoothScroll } from "@/shared/layout/smooth-scroll";
 import { VantaProvider } from "@/shared/effects/vanta-context";
+import { VantaBackground } from "@/shared/effects/vanta-background";
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Analytics } from "@vercel/analytics/react"
 import { getSiteSettings } from "@/lib/site-settings";
@@ -54,6 +55,7 @@ export default function RootLayout({
             disableTransitionOnChange
           >
             <VantaProvider>
+              <VantaBackground />
               <div className="relative flex min-h-screen flex-col">
                 <SiteHeader />
                 <main className="flex-1">
