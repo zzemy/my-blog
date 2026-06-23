@@ -859,8 +859,9 @@
   min-width: 0;
   max-width: 100%;
   overflow-x: auto;
+  overscroll-behavior-x: contain;
   background: var(--article-code-surface);
-  padding: 1.1rem 0 1.2rem;
+  padding: 1.1rem 0 0.85rem;
   scrollbar-color: var(--article-code-scrollbar) transparent;
   scrollbar-width: thin;
 }
@@ -870,6 +871,9 @@
 }
 
 .article-content .code-window-gutter {
+  position: sticky;
+  left: 0;
+  z-index: 1;
   display: flex;
   min-width: 2.85rem;
   flex-shrink: 0;
@@ -882,6 +886,7 @@
   font-family: "JetBrains Mono", "Menlo", "Consolas", monospace;
   font-size: 0.78rem;
   line-height: var(--article-code-line-height);
+  box-shadow: 8px 0 16px color-mix(in oklch, var(--article-code-surface), transparent 20%);
   user-select: none;
 }
 
@@ -911,20 +916,24 @@
   line-height: inherit;
 }
 
+.article-content .code-window-body::-webkit-scrollbar,
 .article-content .code-window ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
+.article-content .code-window-body::-webkit-scrollbar-thumb,
 .article-content .code-window ::-webkit-scrollbar-thumb {
   border-radius: 9999px;
   background-color: var(--article-code-scrollbar);
 }
 
+.dark .article-content .code-window-body::-webkit-scrollbar-thumb,
 .dark .article-content .code-window ::-webkit-scrollbar-thumb {
   background-color: var(--article-code-scrollbar);
 }
 
+.article-content .code-window-body::-webkit-scrollbar-track,
 .article-content .code-window ::-webkit-scrollbar-track {
   background-color: transparent;
 }
