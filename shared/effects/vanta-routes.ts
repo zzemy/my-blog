@@ -1,4 +1,4 @@
-const vantaEnabledSections = new Set(['admin', 'components', 'guestbook', 'tags'])
+const vantaEnabledSections = new Set(['components', 'guestbook', 'tags'])
 
 export function shouldUseVantaBackground(pathname: string | null | undefined) {
   const pathSegments = pathname?.split('/').filter(Boolean) ?? []
