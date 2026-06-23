@@ -32,7 +32,7 @@ export function VantaBackground() {
   }, [])
 
   const pathSegments = pathname?.split('/').filter(Boolean) ?? []
-  const section = pathSegments[1]
+  const section = pathSegments[0]
   const isArticlePage = section === 'posts' && pathSegments.length > 2
   const isAboutPage = section === 'about'
   const isComponentsPage = section === 'components'
