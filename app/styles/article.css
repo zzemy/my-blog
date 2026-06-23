@@ -735,6 +735,7 @@
 .article-content .code-window {
   --article-code-line-height: 1.6rem;
   margin: 1.55rem 0 2.15rem;
+  max-width: 100%;
   overflow: hidden;
   border: 1px solid var(--article-code-border, var(--article-line));
   border-radius: 12px;
@@ -854,10 +855,14 @@
 
 .article-content .code-window-body {
   display: flex;
-  min-width: max-content;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
   overflow-x: auto;
   background: var(--article-code-surface);
   padding: 1.1rem 0 1.2rem;
+  scrollbar-color: var(--article-code-scrollbar) transparent;
+  scrollbar-width: thin;
 }
 
 .article-content .code-window.is-collapsed .code-window-body {
@@ -885,7 +890,7 @@
 }
 
 .article-content .code-window-pre {
-  flex: 1;
+  flex: 1 0 auto;
   min-width: max-content;
   margin: 0 !important;
   padding: 0 0.95rem !important;
