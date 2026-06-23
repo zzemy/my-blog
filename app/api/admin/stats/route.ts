@@ -27,17 +27,17 @@ export async function GET(request: NextRequest) {
     const { count: postsCount } = await client.from('posts').select('*', { count: 'exact', head: true }).eq('published', true)
     const { count: draftsCount } = await client.from('posts').select('*', { count: 'exact', head: true }).eq('published', false)
     
-    // 获取所有文章的 slug，然后从 Redis 读取真实阅读量
+    // 获取所有文章的短链接标识，然后从 Redis 读取真实阅读量
     const { data: allPosts } = await client
       .from('posts')
-      .select('slug')
+      .select('public_id, slug')
       .eq('published', true)
 
     let totalViews = 0
-    const postsArray = (allPosts as { slug: string }[] | null) ?? []
+    const postsArray = (allPosts as { public_id?: string | null; slug: string }[] | null) ?? []
     if (redis && postsArray.length > 0) {
       try {
-        const keys = postsArray.map((p) => `views:${p.slug}`)
+        const keys = postsArray.map((p) => `views:${p.public_id || p.slug}`)
         const viewsUnknown = (await redis.mget(...keys)) as unknown[]
         const viewsArray = viewsUnknown.map((v) => {
           if (v == null) return null

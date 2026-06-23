@@ -17,8 +17,13 @@ const redisEnabled = Boolean(redisUrl?.startsWith('http') && redisToken)
 const redis = redisEnabled ? new Redis({ url: redisUrl!, token: redisToken! }) : null
 
 type PostWithSlugAndViews = {
+  public_id?: string | null
   slug: string
   views?: number
+}
+
+function getPostStatsKey(post: Pick<PostWithSlugAndViews, 'public_id' | 'slug'>) {
+  return post.public_id || post.slug
 }
 
 async function generateUniquePostPublicId(client: ReturnType<typeof getAdminClient>) {
@@ -84,7 +89,7 @@ export async function GET(request: NextRequest) {
     // 从 Redis 获取每篇文章的实时浏览量（仅在配置存在时）
     if (redisEnabled && redis && data && data.length > 0) {
       try {
-        const keys = (data as PostWithSlugAndViews[]).map((post) => `views:${post.slug}`)
+        const keys = (data as PostWithSlugAndViews[]).map((post) => `views:${getPostStatsKey(post)}`)
         const views = await redis.mget(keys)
 
         ;(data as PostWithSlugAndViews[]).forEach((post, index: number) => {

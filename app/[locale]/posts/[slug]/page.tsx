@@ -191,8 +191,8 @@ export default async function PostPage({ params }: { params: Promise<{ locale: s
                 )}
               </div>
               <div className="flex items-center gap-4 flex-shrink-0">
-                <PostStats slug={post.slug} />
-                <ShareButtons 
+                <PostStats slug={routeId} />
+                <ShareButtons
                   url={`https://emmmxx.xyz/${locale}/posts/${routeId}`}
                 />
               </div>
