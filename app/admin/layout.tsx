@@ -5,7 +5,7 @@ import { ThemeProvider } from "@/shared/layout/theme-provider"
 import { Toaster } from "sonner"
 
 export const metadata = {
-  metadataBase: new URL('https://emmmxx.xyz'),
+  metadataBase: new URL('https://blog.zzemy.top'),
   title: 'Blog Admin',
   description: 'Manage your blog content',
 }

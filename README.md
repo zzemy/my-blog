@@ -2,7 +2,7 @@
 
 基于 Next.js 16、Tailwind CSS v4、TipTap 和 Supabase 构建的现代化个人博客与轻量作品集。默认内置外链悬浮预览、图片点击放大、代码块复制、Giscus 评论等体验型能力。
 
-**在线访问**: [https://emmmxx.xyz](https://emmmxx.xyz)
+**在线访问**: [https://blog.zzemy.top](https://blog.zzemy.top)
 **用途定位**: 个人技术博客 + 简历/作品集补充，集中展示项目案例、工程化思路与可运行 Demo。
 
 **授权**：代码采用 [AGPL-3.0](LICENSE)，原创内容/媒体采用 [CC BY-NC-SA 4.0](CONTENT_LICENSE.md)。
@@ -158,7 +158,7 @@
 ### 访问方式
 
 - **本地开发**: [http://localhost:3000/admin](http://localhost:3000/admin)
-- **线上环境**: [https://emmmxx.xyz/admin](https://emmmxx.xyz/admin)
+- **线上环境**: [https://blog.zzemy.top/admin](https://blog.zzemy.top/admin)
 
 ### 功能亮点
 

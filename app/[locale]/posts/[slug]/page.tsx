@@ -193,7 +193,7 @@ export default async function PostPage({ params }: { params: Promise<{ locale: s
               <div className="flex items-center gap-4 flex-shrink-0">
                 <PostStats slug={routeId} />
                 <ShareButtons
-                  url={`https://emmmxx.xyz/${locale}/posts/${routeId}`}
+                  url={`https://blog.zzemy.top/${locale}/posts/${routeId}`}
                 />
               </div>
             </div>

@@ -20,12 +20,12 @@ export async function GET() {
       sameSite: isProduction ? 'none' : 'lax',
       maxAge: 60 * 60, // 1 hour
       path: '/',
-      domain: isProduction ? '.emmmxx.xyz' : undefined, // 生产环境允许跨子域
+      domain: isProduction ? '.blog.zzemy.top' : undefined, // 生产环境允许跨子域
     })
 
     console.log('[CSRF] Token generated and cookie set', {
       env: process.env.NODE_ENV,
-      domain: isProduction ? '.emmmxx.xyz' : 'localhost',
+      domain: isProduction ? '.blog.zzemy.top' : 'localhost',
       sameSite: isProduction ? 'none' : 'lax',
     })
 

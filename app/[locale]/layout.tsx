@@ -49,7 +49,7 @@ export async function generateMetadata({
   const settings = await getSiteSettings();
  
   return {
-    metadataBase: new URL('https://emmmxx.xyz'),
+    metadataBase: new URL('https://blog.zzemy.top'),
     title: {
       default: settings.site_title || t('title'),
       template: `%s | ${settings.site_title || t('title')}`

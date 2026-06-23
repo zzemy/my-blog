@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-    <id>https://emmmxx.xyz</id>
+    <id>https://blog.zzemy.top</id>
     <title>emmm's Blog</title>
-    <updated>2026-06-23T13:18:59.600Z</updated>
+    <updated>2026-06-23T13:28:09.104Z</updated>
     <generator>Feed for Node.js</generator>
     <author>
         <name>emmm</name>
         <email>1992107794@qq.com</email>
-        <uri>https://emmmxx.xyz</uri>
+        <uri>https://blog.zzemy.top</uri>
     </author>
-    <link rel="alternate" href="https://emmmxx.xyz"/>
-    <link rel="self" href="https://emmmxx.xyz/atom.xml"/>
+    <link rel="alternate" href="https://blog.zzemy.top"/>
+    <link rel="self" href="https://blog.zzemy.top/atom.xml"/>
     <subtitle>A personal blog about technology and life.</subtitle>
-    <logo>https://emmmxx.xyz/icon.png</logo>
-    <icon>https://emmmxx.xyz/favicon.ico</icon>
+    <logo>https://blog.zzemy.top/icon.png</logo>
+    <icon>https://blog.zzemy.top/favicon.ico</icon>
     <rights>All rights reserved 2026, emmm</rights>
     <entry>
         <title type="html"><![CDATA[南京邮电大学评教自动化脚本v2]]></title>
-        <id>https://emmmxx.xyz/zh/posts/1990d1c</id>
-        <link href="https://emmmxx.xyz/zh/posts/1990d1c"/>
+        <id>https://blog.zzemy.top/zh/posts/1990d1c</id>
+        <link href="https://blog.zzemy.top/zh/posts/1990d1c"/>
         <updated>2026-06-23T11:27:10.070Z</updated>
         <content type="html"><![CDATA[NJUPT Evaluation Helper
 
@@ -112,13 +112,13 @@ evaluation-helper.js 默认会自动提交前面的课程，但最后一页会�
         <author>
             <name>Admin</name>
             <email>1992107794@qq.com</email>
-            <uri>https://emmmxx.xyz</uri>
+            <uri>https://blog.zzemy.top</uri>
         </author>
     </entry>
     <entry>
         <title type="html"><![CDATA[小爱老师WiFi版（ MTK 架构安卓设备） System 分区扩容与刷机折腾小记]]></title>
-        <id>https://emmmxx.xyz/zh/posts/30f18de</id>
-        <link href="https://emmmxx.xyz/zh/posts/30f18de"/>
+        <id>https://blog.zzemy.top/zh/posts/30f18de</id>
+        <link href="https://blog.zzemy.top/zh/posts/30f18de"/>
         <updated>2026-02-22T16:39:00.000Z</updated>
         <summary type="html"><![CDATA[小爱老师刷入lineageos19.1]]></summary>
         <content type="html"><![CDATA[一、 实现逻辑
@@ -230,13 +230,13 @@ fastboot reboot
         <author>
             <name>Admin</name>
             <email>1992107794@qq.com</email>
-            <uri>https://emmmxx.xyz</uri>
+            <uri>https://blog.zzemy.top</uri>
         </author>
     </entry>
     <entry>
         <title type="html"><![CDATA[关于]]></title>
-        <id>https://emmmxx.xyz/zh/posts/61d9d3d</id>
-        <link href="https://emmmxx.xyz/zh/posts/61d9d3d"/>
+        <id>https://blog.zzemy.top/zh/posts/61d9d3d</id>
+        <link href="https://blog.zzemy.top/zh/posts/61d9d3d"/>
         <updated>2026-01-20T08:06:00.000Z</updated>
         <content type="html"><![CDATA[Emmm's Blog & Portfolio
 
@@ -360,13 +360,13 @@ About 页作为可编辑文章
         <author>
             <name>Admin</name>
             <email>1992107794@qq.com</email>
-            <uri>https://emmmxx.xyz</uri>
+            <uri>https://blog.zzemy.top</uri>
         </author>
     </entry>
     <entry>
         <title type="html"><![CDATA[南京邮电大学评教自动化脚本]]></title>
-        <id>https://emmmxx.xyz/zh/posts/212b014</id>
-        <link href="https://emmmxx.xyz/zh/posts/212b014"/>
+        <id>https://blog.zzemy.top/zh/posts/212b014</id>
+        <link href="https://blog.zzemy.top/zh/posts/212b014"/>
         <updated>2025-12-12T12:05:00.000Z</updated>
         <summary type="html"><![CDATA[评教脚本]]></summary>
         <content type="html"><![CDATA[相应页面右键检查或f12打开控制台，复制以下代码粘贴回车运行
@@ -453,13 +453,13 @@ var task = window.setInterval(function () {
         <author>
             <name>Admin</name>
             <email>1992107794@qq.com</email>
-            <uri>https://emmmxx.xyz</uri>
+            <uri>https://blog.zzemy.top</uri>
         </author>
     </entry>
     <entry>
         <title type="html"><![CDATA[前端组授课文档-javascript]]></title>
-        <id>https://emmmxx.xyz/zh/posts/3b83272</id>
-        <link href="https://emmmxx.xyz/zh/posts/3b83272"/>
+        <id>https://blog.zzemy.top/zh/posts/3b83272</id>
+        <link href="https://blog.zzemy.top/zh/posts/3b83272"/>
         <updated>2025-11-22T10:00:00.000Z</updated>
         <summary type="html"><![CDATA[SAST软研部前端组第三次授课]]></summary>
         <content type="html"><![CDATA[JavaScript 简介
@@ -1765,7 +1765,7 @@ Multimedia
         <author>
             <name>Admin</name>
             <email>1992107794@qq.com</email>
-            <uri>https://emmmxx.xyz</uri>
+            <uri>https://blog.zzemy.top</uri>
         </author>
     </entry>
 </feed>

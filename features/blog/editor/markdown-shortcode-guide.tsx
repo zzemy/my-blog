@@ -90,7 +90,7 @@ caption=MP3 · 正文宽度媒体控件
 :::
 
 :::button
-访问链接 | https://emmmxx.xyz | primary
+访问链接 | https://blog.zzemy.top | primary
 :::`,
   },
   {

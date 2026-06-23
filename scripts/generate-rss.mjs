@@ -7,7 +7,7 @@ import dotenv from 'dotenv';
 // Load environment variables from .env.local
 dotenv.config({ path: '.env.local' });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://emmmxx.xyz';
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://blog.zzemy.top';
 const publicDirectory = path.join(process.cwd(), 'public');
 
 function normalizeLegacyBranding(text) {

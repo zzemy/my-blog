@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
       sameSite: isProduction ? 'none' : 'lax',
       maxAge: 60 * 60 * 24 * 7, // 7 days
       path: '/',
-      domain: isProduction ? '.emmmxx.xyz' : undefined,
+      domain: isProduction ? '.blog.zzemy.top' : undefined,
     })
 
     // 设置刷新令牌（httpOnly Cookie）
@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
       sameSite: isProduction ? 'none' : 'lax',
       maxAge: 60 * 60 * 24 * 30, // 30 days
       path: '/',
-      domain: isProduction ? '.emmmxx.xyz' : undefined,
+      domain: isProduction ? '.blog.zzemy.top' : undefined,
     })
 
     // 清除 CSRF token cookie（一次性使用）
@@ -108,7 +108,7 @@ export async function POST(request: NextRequest) {
       httpOnly: false,
       maxAge: 0,
       path: '/',
-      domain: isProduction ? '.emmmxx.xyz' : undefined,
+      domain: isProduction ? '.blog.zzemy.top' : undefined,
     })
 
     return response

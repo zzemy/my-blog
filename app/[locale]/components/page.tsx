@@ -283,10 +283,10 @@ export default async function ComponentsPage({ params }: { params: Promise<{ loc
 
           <h2 id="links">链接</h2>
           <p>
-            <a href="https://emmmxx.xyz">这是一条行内链接</a>
+            <a href="https://blog.zzemy.top">这是一条行内链接</a>
           </p>
           <p>
-            <a href="https://emmmxx.xyz" title="emmm Blog">
+            <a href="https://blog.zzemy.top" title="emmm Blog">
               这是一条带标题属性的链接
             </a>
           </p>

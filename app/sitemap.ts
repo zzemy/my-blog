@@ -4,7 +4,7 @@ import { getPublishedPosts } from '@/lib/supabase/posts'
 
 export const dynamic = 'force-static'
 
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://emmmxx.xyz'
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://blog.zzemy.top'
 const locales = ['zh', 'en', 'fr', 'ja']
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

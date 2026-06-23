@@ -1,7 +1,7 @@
 import "../globals.css";
 
 export const metadata = {
-  metadataBase: new URL('https://emmmxx.xyz'),
+  metadataBase: new URL('https://blog.zzemy.top'),
 };
 
 export default function RootLayout({
