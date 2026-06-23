@@ -72,7 +72,6 @@ export default function EditPostPage() {
         reading_time: post.reading_time || 0,
         seo_title: post.seo_title || '',
         seo_description: post.seo_description || '',
-        locale: post.locale || 'zh',
         published_at: post.published_at ? isoToLocalInput(post.published_at) : '',
       }
 
@@ -117,7 +116,6 @@ export default function EditPostPage() {
         published,
         featured: submittedFormData.featured,
         reading_time: calculateContentSize(submittedFormData.content),
-        locale: submittedFormData.locale,
         seo_title: submittedFormData.seo_title,
         seo_description: submittedFormData.seo_description,
       }

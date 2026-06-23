@@ -1,5 +1,4 @@
 /* eslint-disable @next/next/no-img-element */
-import { setRequestLocale } from 'next-intl/server'
 import { renderToString } from 'katex'
 import {
   ArrowRight,
@@ -21,8 +20,6 @@ import { FadeIn } from '@/shared/visuals/fade-in'
 import { ReferenceSlider } from './reference-slider'
 import { ReferenceAlerts, ReferenceCodeExamples, ReferenceDiagram, ReferenceFlow } from './reference-showcase'
 import styles from './components-page.module.css'
-
-const locales = ['zh', 'en', 'fr', 'ja']
 
 const toc = [
   { id: 'headings', text: '标题', depth: 2 },
@@ -149,19 +146,12 @@ const emojiGroups = [
   ['✅', '⚠️', '💡', '🔗', '📎'],
 ]
 
-export function generateStaticParams() {
-  return locales.map((locale) => ({ locale }))
-}
-
 export const metadata = {
   title: '正文组件',
   description: '文章正文组件与排版视觉参考。',
 }
 
-export default async function ComponentsPage({ params }: { params: Promise<{ locale: string }> }) {
-  const { locale } = await params
-  setRequestLocale(locale)
-
+export default function ComponentsPage() {
   return (
     <PostLayout toc={toc}>
       <FadeIn>

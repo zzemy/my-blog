@@ -1,12 +1,11 @@
 'use client';
 
 import * as React from 'react';
-import { useRouter } from '@/i18n/routing';
+import { useRouter } from 'next/navigation';
 import { Search } from 'lucide-react';
 import { PostData } from '@/lib/types';
 import { create, insertMultiple, search } from '@orama/orama';
 import { createTokenizer } from '@orama/tokenizers/mandarin';
-import { useLocale, useTranslations } from 'next-intl';
 import {
   Command,
   CommandEmpty,
@@ -84,7 +83,6 @@ type SearchDocument = {
 };
 
 type SearchApiPost = PostData & {
-  locale: string;
   content?: string;
 };
 
@@ -123,8 +121,6 @@ export function CommandMenu({ compact = false }: { compact?: boolean }) {
   const [oramaDb, setOramaDb] = React.useState<SearchDb | null>(null);
   const [results, setResults] = React.useState<PostData[]>([]);
   const searchInputRef = React.useRef<HTMLInputElement>(null);
-  const locale = useLocale();
-  const t = useTranslations('Common');
 
   React.useEffect(() => {
     const initOrama = async () => {
@@ -137,16 +133,15 @@ export function CommandMenu({ compact = false }: { compact?: boolean }) {
 
       const res = await fetch(`/api/search`);
       const data: SearchApiPost[] = await res.json();
-      const filteredPosts = data.filter(post => post.locale === locale);
-      const searchableDocs = filteredPosts.map(toSearchDocument);
+      const searchableDocs = data.map(toSearchDocument);
 
       await insertMultiple(db, searchableDocs);
       setOramaDb(db);
-      setResults(filteredPosts);
+      setResults(data);
     };
 
     initOrama();
-  }, [locale]);
+  }, []);
 
   React.useEffect(() => {
     const searchOrama = async () => {
@@ -209,7 +204,7 @@ export function CommandMenu({ compact = false }: { compact?: boolean }) {
               variant="ghost"
               size="icon"
               className="h-10 w-10 text-foreground/78 hover:bg-accent hover:text-foreground dark:text-white/82 dark:hover:bg-white/10 dark:hover:text-white"
-              aria-label={t('searchPlaceholder')}
+              aria-label="搜索文章"
             >
               <Search className="h-5 w-5" />
             </Button>
@@ -219,7 +214,7 @@ export function CommandMenu({ compact = false }: { compact?: boolean }) {
               <input
                 ref={searchInputRef}
                 className="flex h-9 w-full rounded-md border border-input bg-background dark:bg-input/30 px-3 py-1 text-[15px] shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 pl-8"
-                placeholder={t('searchPlaceholder')}
+                placeholder="搜索文章"
                 value={query}
                 onChange={(e) => {
                   setQuery(e.target.value);
@@ -244,7 +239,7 @@ export function CommandMenu({ compact = false }: { compact?: boolean }) {
               <input
                 ref={searchInputRef}
                 className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 pl-8 text-[15px] shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                placeholder={t('searchPlaceholder')}
+                placeholder="搜索文章"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
               />

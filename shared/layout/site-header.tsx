@@ -1,21 +1,24 @@
 "use client"
 
-import { Link } from "@/i18n/routing"
+import Link from "next/link"
 import { ModeToggle } from "@/shared/layout/mode-toggle"
-import { LanguageToggle } from "@/shared/layout/language-toggle"
-import { useTranslations } from "next-intl"
 import { Github, Terminal } from "lucide-react"
 import { CommandMenu } from "@/shared/layout/command-menu"
 import { MobileNav } from "@/shared/layout/mobile-nav"
 import { VantaSwitcher } from "@/shared/effects/vanta-switcher"
 import { usePathname } from "next/navigation"
 
-export function SiteHeader() {
-  const t = useTranslations('Navigation')
-  const pathname = usePathname()
+const navItems = [
+  { href: '/', label: '首页' },
+  { href: '/posts', label: '文章' },
+  { href: '/tags', label: '标签' },
+  { href: '/guestbook', label: '留言' },
+  { href: '/about', label: '关于' },
+]
 
-  const stripLocale = (path: string) => path.replace(/^\/[a-zA-Z-]+(?=\/|$)/, '') || '/'
-  const current = stripLocale(pathname || '')
+export function SiteHeader() {
+  const pathname = usePathname()
+  const current = pathname || '/'
 
   const isActive = (href: string) => {
     if (href === '/') return current === '/'
@@ -37,13 +40,7 @@ export function SiteHeader() {
           </Link>
         </div>
         <nav className="hidden flex-1 items-center justify-center gap-10 text-[15px] font-bold md:flex">
-          {[
-            { href: '/', label: t('home') },
-            { href: '/posts', label: t('posts') },
-            { href: '/tags', label: t('tags') },
-            { href: '/guestbook', label: t('guestbook') },
-            { href: '/about', label: t('about') },
-          ].map((item) => {
+          {navItems.map((item) => {
             const active = isActive(item.href)
             return (
               <Link
@@ -66,7 +63,6 @@ export function SiteHeader() {
           <div className="flex items-center gap-1.5 [&_button]:border-border [&_button]:bg-background/70 [&_button]:text-foreground/80 [&_button:hover]:bg-accent [&_button:hover]:text-foreground dark:[&_button]:border-white/16 dark:[&_button]:bg-white/[0.04] dark:[&_button]:text-white/82 dark:[&_button:hover]:bg-white/10 dark:[&_button:hover]:text-white">
             <VantaSwitcher />
             <ModeToggle />
-            <LanguageToggle />
           </div>
           <a
             href="https://github.com/zzemy"

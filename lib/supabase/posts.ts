@@ -12,7 +12,6 @@ export interface PostData {
   content: unknown
   coverImage: string | null
   author: string
-  locale: string
   tags: string[]
   published: boolean
   featured: boolean
@@ -25,12 +24,11 @@ export interface PostData {
   seo_description?: string
 }
 
-export async function getPublishedPosts(locale: string = 'zh'): Promise<PostListItem[]> {
+export async function getPublishedPosts(): Promise<PostListItem[]> {
   try {
     const { data, error } = await supabase
       .from('posts')
       .select('*')
-      .eq('locale', locale)
       .eq('published', true)
       .neq('slug', 'about')
       .order('published_at', { ascending: false })
@@ -61,7 +59,6 @@ export async function getPublishedPosts(locale: string = 'zh'): Promise<PostList
       tags: post.tags || [],
       readingTime: post.reading_time ? `${post.reading_time} 字` : undefined,
       coverImage: post.cover_image,
-      locale: post.locale,
     }))
   } catch (error) {
     if (isExpectedSupabaseBuildError(error)) {
@@ -77,12 +74,11 @@ export async function getPublishedPosts(locale: string = 'zh'): Promise<PostList
   }
 }
 
-async function findPublishedPostByIdentifier(identifier: string, locale: string): Promise<Post | null> {
+async function findPublishedPostByIdentifier(identifier: string): Promise<Post | null> {
   const { data: postByPublicId, error: publicIdError } = await supabase
     .from('posts')
     .select('*')
     .eq('public_id', identifier)
-    .eq('locale', locale)
     .eq('published', true)
     .maybeSingle()
 
@@ -98,7 +94,6 @@ async function findPublishedPostByIdentifier(identifier: string, locale: string)
     .from('posts')
     .select('*')
     .eq('slug', identifier)
-    .eq('locale', locale)
     .eq('published', true)
     .maybeSingle()
 
@@ -109,9 +104,9 @@ async function findPublishedPostByIdentifier(identifier: string, locale: string)
   return postBySlug ? (postBySlug as Post) : null
 }
 
-export async function getPostBySlug(slug: string, locale: string = 'zh'): Promise<PostData | null> {
+export async function getPostBySlug(slug: string): Promise<PostData | null> {
   try {
-    const post = await findPublishedPostByIdentifier(slug, locale)
+    const post = await findPublishedPostByIdentifier(slug)
     if (!post) return null
 
     const metadata = post.metadata as { seo_title?: string; seo_description?: string } | undefined
@@ -125,7 +120,6 @@ export async function getPostBySlug(slug: string, locale: string = 'zh'): Promis
       content: post.content,
       coverImage: post.cover_image,
       author: post.author,
-      locale: post.locale,
       tags: post.tags || [],
       published: post.published,
       featured: post.featured,
@@ -186,12 +180,11 @@ export async function getAllTags(): Promise<Array<{ name: string; count: number 
   }
 }
 
-export async function getPostsByTag(tag: string, locale: string = 'zh'): Promise<PostListItem[]> {
+export async function getPostsByTag(tag: string): Promise<PostListItem[]> {
   try {
     const { data, error } = await supabase
       .from('posts')
       .select('*')
-      .eq('locale', locale)
       .eq('published', true)
       .neq('slug', 'about')
       .contains('tags', [tag])
@@ -223,7 +216,6 @@ export async function getPostsByTag(tag: string, locale: string = 'zh'): Promise
       tags: post.tags || [],
       readingTime: post.reading_time ? `${post.reading_time} 字` : undefined,
       coverImage: post.cover_image,
-      locale: post.locale,
     }))
   } catch (error) {
     if (isExpectedSupabaseBuildError(error)) {
@@ -239,11 +231,10 @@ export async function getPostsByTag(tag: string, locale: string = 'zh'): Promise
   }
 }
 
-export async function incrementPostViews(slug: string, locale: string = 'zh'): Promise<void> {
+export async function incrementPostViews(slug: string): Promise<void> {
   try {
     const { error } = await supabase.rpc('increment_post_views', {
       post_slug: slug,
-      post_locale: locale,
     } as never)
 
     if (error) {

@@ -1,7 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { Link } from "@/i18n/routing"
+import Link from "next/link"
 import { ArrowRight, Github, MessageCircle } from "lucide-react"
 import { MagneticButton } from "@/shared/visuals/magnetic-button"
 

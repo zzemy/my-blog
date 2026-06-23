@@ -1,21 +1,9 @@
 import { getPublishedPosts } from "@/lib/supabase/posts";
-import { setRequestLocale, getTranslations } from 'next-intl/server';
-import { Link } from '@/i18n/routing';
+import Link from 'next/link';
 import { Hash } from 'lucide-react';
 
-const locales = ['zh', 'en', 'fr', 'ja'];
-
-export function generateStaticParams() {
-  return locales.map((locale) => ({ locale }));
-}
-
-export default async function TagsPage({ params }: { params: Promise<{ locale: string }> }) {
-  const { locale } = await params;
-  setRequestLocale(locale);
-  const t = await getTranslations('Tags');
-
-  // Build tags directly from all published posts so this is a true "all tags" page.
-  const posts = await getPublishedPosts('zh');
+export default async function TagsPage() {
+  const posts = await getPublishedPosts();
   const tagCountMap = new Map<string, number>();
 
   for (const post of posts) {
@@ -56,17 +44,17 @@ export default async function TagsPage({ params }: { params: Promise<{ locale: s
       <section className="rounded-2xl border border-border/70 bg-background/75 p-5 shadow-sm backdrop-blur-xl md:p-7 dark:border-white/8 dark:bg-zinc-900/38 dark:shadow-lg dark:shadow-black/25">
         <div className="flex flex-col items-start gap-5 md:flex-row md:items-end md:justify-between md:gap-8">
           <div className="flex-1 space-y-3">
-            <h1 className="inline-block font-bold text-4xl tracking-tight lg:text-5xl">{t('title')}</h1>
+            <h1 className="inline-block font-bold text-4xl tracking-tight lg:text-5xl">标签</h1>
             <p className="text-lg text-muted-foreground md:text-xl">
-              {t('description')}
+              按标签浏览文章
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <span className="inline-flex items-center rounded-full border border-border/70 bg-background/70 px-3 py-1 text-xs text-muted-foreground backdrop-blur dark:border-white/12 dark:bg-white/5">
-              {t('totalTags', { count: sortedTags.length })}
+              {sortedTags.length} 个标签
             </span>
             <span className="inline-flex items-center rounded-full border border-border/70 bg-background/70 px-3 py-1 text-xs text-muted-foreground backdrop-blur dark:border-white/12 dark:bg-white/5">
-              {t('totalAssignments', { count: totalPosts })}
+              {totalPosts} 次归档
             </span>
           </div>
         </div>
@@ -76,13 +64,13 @@ export default async function TagsPage({ params }: { params: Promise<{ locale: s
 
       {sortedTags.length === 0 ? (
         <div className="rounded-2xl border border-border/70 bg-background/75 px-6 py-10 text-center text-muted-foreground backdrop-blur dark:border-white/8 dark:bg-zinc-900/38">
-          {t('empty')}
+          暂无标签数据
         </div>
       ) : (
         <section className="rounded-2xl border border-border/70 bg-background/72 p-4 shadow-sm backdrop-blur-xl md:p-6 dark:border-white/8 dark:bg-zinc-900/34 dark:shadow-black/25">
           <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
             <Hash className="h-4 w-4" />
-            <span>{t('description')}</span>
+            <span>按标签浏览文章</span>
           </div>
           <div className="flex flex-wrap gap-3 md:gap-3.5">
             {sortedTags.map((tag) => (
@@ -99,7 +87,7 @@ export default async function TagsPage({ params }: { params: Promise<{ locale: s
             ))}
           </div>
           <p className="mt-5 text-xs text-muted-foreground/90">
-            {t('totalTags', { count: sortedTags.length })} · {t('totalAssignments', { count: totalPosts })}
+            {sortedTags.length} 个标签 · {totalPosts} 次归档
           </p>
         </section>
       )}

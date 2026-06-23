@@ -59,7 +59,6 @@ export async function GET(request: NextRequest) {
   }
   try {
     const { searchParams } = new URL(request.url)
-    const locale = searchParams.get('locale') || 'zh'
     const tag = searchParams.get('tag')
     const published = searchParams.get('published') !== 'false' // 默认只获取已发布的
 
@@ -68,7 +67,6 @@ export async function GET(request: NextRequest) {
     let query = client
       .from('posts')
       .select('*')
-      .eq('locale', locale)
       .order('published_at', { ascending: false })
 
     if (published) {
@@ -143,7 +141,6 @@ export async function POST(request: NextRequest) {
       content,
       cover_image,
       author,
-      locale,
       tags,
       published,
       featured,
@@ -174,7 +171,6 @@ export async function POST(request: NextRequest) {
         content,
         cover_image,
         author,
-        locale,
         tags,
         published,
         featured,
@@ -192,7 +188,6 @@ export async function POST(request: NextRequest) {
 
     revalidatePostMutation({
       after: {
-        locale,
         publicId,
         slug,
         tags,

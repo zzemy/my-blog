@@ -1,4 +1,3 @@
-import { setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { PostLayout } from "@/features/blog/components/client/post-layout";
 import { TipTapRenderer } from "@/features/blog/editor/tiptap-renderer";
@@ -8,8 +7,6 @@ import { supabase } from '@/lib/supabase/client';
 // Always serve fresh content to reflect about page edits immediately
 export const revalidate = 0;
 export const dynamic = 'force-dynamic';
-
-const locales = ['zh', 'en', 'fr', 'ja'];
 
 type AboutPost = {
   title: string;
@@ -35,46 +32,27 @@ function normalizeAboutContent(node: TiptapNode | TiptapNode[] | null): TiptapNo
   }
 }
 
-export function generateStaticParams() {
-  return locales.map((locale) => ({ locale }));
-}
+async function getAboutPost() {
+  const { data, error } = await supabase
+    .from('posts')
+    .select('*')
+    .eq('slug', 'about')
+    .eq('published', true)
+    .single();
 
-async function getAboutPost(locale: string) {
-  // Try locale first, then fallback to zh
-  const fetchPost = async (loc: string): Promise<AboutPost | null> => {
-    const { data, error } = await supabase
-      .from('posts')
-      .select('*')
-      .eq('slug', 'about')
-      .eq('locale', loc)
-      .eq('published', true)
-      .single();
+  if (error) return null;
 
-    if (error) return null;
-
-    const post = data as AboutPost;
-    return {
-      ...post,
-      title: normalizeLegacyBranding(post.title),
-      description: post.description ? normalizeLegacyBranding(post.description) : post.description,
-      content: normalizeAboutContent(post.content),
-    };
+  const post = data as AboutPost;
+  return {
+    ...post,
+    title: normalizeLegacyBranding(post.title),
+    description: post.description ? normalizeLegacyBranding(post.description) : post.description,
+    content: normalizeAboutContent(post.content),
   };
-
-  const current = await fetchPost(locale);
-  if (current) return current;
-  if (locale !== 'zh') {
-    const fallback = await fetchPost('zh');
-    if (fallback) return fallback;
-  }
-  return null;
 }
 
-export default async function AboutPage({ params }: { params: Promise<{ locale: string }> }) {
-  const { locale } = await params;
-  setRequestLocale(locale);
-
-  const post = await getAboutPost(locale);
+export default async function AboutPage() {
+  const post = await getAboutPost();
   if (!post) {
     notFound();
   }

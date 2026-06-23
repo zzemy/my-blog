@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Link } from "@/i18n/routing";
+import Link from "next/link";
 import {
   Card,
   CardContent,

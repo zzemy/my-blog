@@ -13,7 +13,6 @@ export interface Database {
           content: JSONContent
           cover_image: string | null
           author: string
-          locale: string
           tags: string[]
           published: boolean
           featured: boolean
@@ -33,7 +32,6 @@ export interface Database {
           content: JSONContent
           cover_image?: string | null
           author?: string
-          locale?: string
           tags?: string[]
           published?: boolean
           featured?: boolean
@@ -53,7 +51,6 @@ export interface Database {
           content?: JSONContent
           cover_image?: string | null
           author?: string
-          locale?: string
           tags?: string[]
           published?: boolean
           featured?: boolean
@@ -71,7 +68,6 @@ export interface Database {
           title: string
           slug: string
           content: JSONContent
-          locale: string
           published: boolean
           created_at: string
           updated_at: string
@@ -82,7 +78,6 @@ export interface Database {
           title: string
           slug: string
           content: JSONContent
-          locale?: string
           published?: boolean
           created_at?: string
           updated_at?: string
@@ -93,7 +88,6 @@ export interface Database {
           title?: string
           slug?: string
           content?: JSONContent
-          locale?: string
           published?: boolean
           created_at?: string
           updated_at?: string

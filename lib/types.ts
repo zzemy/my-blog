@@ -10,7 +10,6 @@ export interface PostData {
   tags?: string[]
   readingTime?: string
   coverImage?: string | null
-  locale?: string
 }
 
 export interface TocItem {

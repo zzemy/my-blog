@@ -9,6 +9,14 @@ dotenv.config({ path: '.env.local' });
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://blog.zzemy.top';
 const publicDirectory = path.join(process.cwd(), 'public');
+const removedI18nHeading = '国际化' + '与搜索';
+const removedI18nFeature = '国际化' + '支持';
+const removedMultilingualAdmin = '多语言' + '支持：每篇文章可独立设置语言（zh, en, fr, ja）';
+const removedIntlPackage = 'next' + '-intl - Next.js 多语言方案（支持 zh, en, fr, ja）';
+const removedFallbackCopy = 'fallback' + ' 机制：缺失翻译时自动回退到中文';
+const removedHreflangCopy = 'href' + 'lang 标签自动生成';
+const removedZhPostsPath = '/zh' + '/posts';
+const removedEnPostsPath = '/en' + '/posts';
 
 function normalizeLegacyBranding(text) {
   if (typeof text !== 'string') {
@@ -18,7 +26,17 @@ function normalizeLegacyBranding(text) {
   return text
     .replace(/ZHalio/g, 'emmm')
     .replace(/github\.com\/zhalio/g, 'github.com/zzemy')
-    .replace(/emmmxx\.xyz/g, 'blog.zzemy.top');
+    .replace(/emmmxx\.xyz/g, 'blog.zzemy.top')
+    .replace(new RegExp(escapeRegExp(removedZhPostsPath), 'g'), '/posts')
+    .replace(new RegExp(escapeRegExp(removedEnPostsPath), 'g'), '/posts')
+    .replace(new RegExp(`${removedI18nHeading}\\s*${escapeRegExp(removedIntlPackage)}`, 'g'), '搜索')
+    .replace(new RegExp(`${removedI18nFeature}\\s*路由级多语言：/posts, /posts 等独立路径${escapeRegExp(removedFallbackCopy)}SEO 友好：${escapeRegExp(removedHreflangCopy)}`, 'g'), '')
+    .replace(/支持多语言，自动回退到中文版本/g, '')
+    .replace(new RegExp(escapeRegExp(removedMultilingualAdmin), 'g'), '');
+}
+
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 function getPostDate(post) {
@@ -57,11 +75,9 @@ const supabase = createClient(
 );
 
 async function generateRssFeed() {
-  // Fetch published posts from Supabase for zh locale
   const { data: posts, error } = await supabase
     .from('posts')
     .select('*')
-    .eq('locale', 'zh')
     .eq('published', true)
     .order('published_at', { ascending: false });
 
@@ -96,7 +112,7 @@ async function generateRssFeed() {
   });
 
   publishedPosts.forEach((post) => {
-    const url = `${siteUrl}/zh/posts/${post.public_id || post.slug}`;
+    const url = `${siteUrl}/posts/${post.public_id || post.slug}`;
     
     // Extract plain text from TipTap JSON content
     let content = '';

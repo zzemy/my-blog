@@ -45,7 +45,7 @@ export default function AdminPostsPage() {
     setError(null)
 
     try {
-      const res = await fetch('/api/admin/posts?locale=zh&published=false', {
+      const res = await fetch('/api/admin/posts?published=false', {
         credentials: 'include',
         headers: accessToken && accessToken !== 'hidden'
           ? {

@@ -229,7 +229,6 @@ export type Database = {
           excerpt: string | null
           cover_image: string | null
           author: string
-          locale: string
           published: boolean
           tags: string[]
           created_at: string
@@ -247,7 +246,6 @@ export type Database = {
           excerpt?: string | null
           cover_image?: string | null
           author?: string
-          locale?: string
           published?: boolean
           tags?: string[]
           created_at?: string
@@ -265,7 +263,6 @@ export type Database = {
           excerpt?: string | null
           cover_image?: string | null
           author?: string
-          locale?: string
           published?: boolean
           tags?: string[]
           created_at?: string
@@ -281,7 +278,6 @@ export type Database = {
           title: string
           slug: string
           content: unknown // TipTap JSON content
-          locale: string
           published: boolean
           created_at: string
           updated_at: string
@@ -291,7 +287,6 @@ export type Database = {
           title: string
           slug: string
           content: unknown
-          locale?: string
           published?: boolean
           created_at?: string
           updated_at?: string
@@ -301,7 +296,6 @@ export type Database = {
           title?: string
           slug?: string
           content?: unknown
-          locale?: string
           published?: boolean
           created_at?: string
           updated_at?: string

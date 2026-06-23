@@ -1,8 +1,6 @@
 import type { JSONContent } from '@tiptap/react'
 import { z } from 'zod'
 
-const SUPPORTED_LOCALES = ['zh', 'en', 'fr', 'ja'] as const
-
 const emptyStringToUndefined = (value: unknown) => {
   if (typeof value !== 'string') {
     return value
@@ -62,7 +60,6 @@ const basePostSchema = z.object({
     emptyStringToUndefined,
     z.string().trim().min(1, 'Author is required').max(100, 'Author is too long').default('Admin')
   ),
-  locale: z.enum(SUPPORTED_LOCALES).default('zh'),
   tags: z.array(z.string().trim().min(1).max(50)).default([]),
   published: z.boolean().default(false),
   featured: z.boolean().default(false),

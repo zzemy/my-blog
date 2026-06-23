@@ -63,9 +63,8 @@
   - remark-math (数学公式输入)
 - **短 ID 路由** - 自动生成短文章标识，避免中文标题生成过长 URL
 
-### 国际化与搜索
+### 搜索
 
-- **next-intl** - Next.js 多语言方案（支持 zh, en, fr, ja）
 - **@orama/orama** - 客户端全文搜索引擎
 - **fuse.js** - 模糊搜索库
 
@@ -122,12 +121,6 @@
 - **Row Level Security (RLS)**：数据库级权限控制
 - **边缘缓存**：Upstash Redis 提供毫秒级读写
 
-### 🌍 国际化支持
-
-- **路由级多语言**：`/zh/posts`, `/en/posts` 等独立路径
-- **fallback 机制**：缺失翻译时自动回退到中文
-- **SEO 友好**：hreflang 标签自动生成
-
 ### 🚀 极致性能
 
 - **Turbopack**：Next.js 16 开发构建提速 700%
@@ -146,7 +139,6 @@
 
 - 从后台 `slug=about` 文章读取内容
 - 可在管理端编辑/发布，不出现在前台文章列表
-- 支持多语言，自动回退到中文版本
 - 便于更新个人介绍与作品集内容
 
 ---
@@ -174,7 +166,6 @@
 #### 文章管理
 
 - **完整 CRUD**：创建、编辑、删除、发布/取消发布
-- **多语言支持**：每篇文章可独立设置语言（zh, en, fr, ja）
 - **短链接标识**：公开文章 URL 使用短 ID，后台 slug 可手动指定或自动生成短 hash
 - **封面上传**：集成 Supabase Storage
 - **SEO 优化**：独立设置 SEO 标题与描述
@@ -252,9 +243,9 @@ pnpm dev
 
 ```
 ├── app/                      # Next.js App Router 路由（前台 + 后台 + API）
-│   ├── (root)/
-│   ├── [locale]/             # 国际化页面（zh/en/fr/ja）
 │   ├── admin/
+│   ├── posts/
+│   ├── tags/
 │   └── api/
 ├── features/                 # 业务域模块（feature-first）
 │   ├── admin/
@@ -271,7 +262,6 @@ pnpm dev
 │   ├── auth.ts
 │   ├── site-settings.ts
 │   └── utils.ts
-├── messages/                 # i18n 文案
 ├── public/                   # 静态资源 + RSS
 ├── scripts/                  # 构建脚本（如 RSS 生成）
 ├── supabase/                 # schema 与 migrations
@@ -349,16 +339,10 @@ git push origin main
 - **任务列表**：Markdown 风格的 TODO 列表
 - **字数统计**：实时显示字数与预估阅读时长
 
-### 国际化路由
-
-- 访问 `/zh/posts` 查看中文文章列表
-- 访问 `/en/posts` 查看英文文章列表
-- 自动语言检测与 fallback
-
 ### 全文搜索
 
 - 快捷键 `Cmd/Ctrl + K` 唤起搜索框
-- 支持中英文分词与模糊匹配
+- 支持中文分词与范围筛选
 - 搜索结果高亮显示
 
 ### SEO 优化

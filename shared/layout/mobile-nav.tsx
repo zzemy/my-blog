@@ -4,13 +4,11 @@ import * as React from "react"
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import { Menu, Terminal, Home, BookOpen, MessageSquare, User, Tags } from "lucide-react"
-import { Link } from "@/i18n/routing"
-import { useTranslations } from "next-intl"
+import Link from "next/link"
 import { Separator } from "@/components/ui/separator"
 
 export function MobileNav() {
   const [open, setOpen] = React.useState(false)
-  const t = useTranslations('Navigation')
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -41,7 +39,7 @@ export function MobileNav() {
               onClick={() => setOpen(false)}
             >
               <Home className="h-4 w-4" />
-              {t('home')}
+              首页
             </Link>
             <Link
               href="/posts"
@@ -49,7 +47,7 @@ export function MobileNav() {
               onClick={() => setOpen(false)}
             >
               <BookOpen className="h-4 w-4" />
-              {t('posts')}
+              文章
             </Link>
             <Link
               href="/tags"
@@ -57,7 +55,7 @@ export function MobileNav() {
               onClick={() => setOpen(false)}
             >
               <Tags className="h-4 w-4" />
-              {t('tags')}
+              标签
             </Link>
             <Link
               href="/guestbook"
@@ -65,7 +63,7 @@ export function MobileNav() {
               onClick={() => setOpen(false)}
             >
               <MessageSquare className="h-4 w-4" />
-              {t('guestbook')}
+              留言
             </Link>
             <Link
               href="/about"
@@ -73,7 +71,7 @@ export function MobileNav() {
               onClick={() => setOpen(false)}
             >
               <User className="h-4 w-4" />
-              {t('about')}
+              关于
             </Link>
         </div>
       </SheetContent>

@@ -11,7 +11,6 @@ export function createEmptyPostForm(): PostFormData {
     published: false,
     featured: false,
     reading_time: 0,
-    locale: 'zh',
     published_at: '',
     seo_title: '',
     seo_description: '',

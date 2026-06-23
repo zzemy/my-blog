@@ -11,7 +11,6 @@ import {
   CheckCircle,
   FileText,
   Image as ImageIcon,
-  Languages,
   MoreHorizontal,
   PanelRight,
   Save,
@@ -298,7 +297,6 @@ export function PostEditorWorkspace({
           <div className={styles.documentMeta}>
             <span>{mode === 'new' ? '新文章' : '编辑文章'}</span>
             <span>{wordCount} 字符</span>
-            <span>{formData.locale.toUpperCase()}</span>
           </div>
           <textarea
             ref={titleRef}
@@ -341,15 +339,6 @@ export function PostEditorWorkspace({
                   生成
                 </Button>
               </div>
-            </label>
-            <label>
-              <span>语言</span>
-              <select value={formData.locale} onChange={(event) => updateForm({ locale: event.target.value })}>
-                <option value="zh">中文</option>
-                <option value="en">English</option>
-                <option value="fr">Français</option>
-                <option value="ja">日本語</option>
-              </select>
             </label>
             <label>
               <span>摘要</span>
@@ -476,7 +465,6 @@ export function PostEditorWorkspace({
 
           <section className={styles.inspectorSection}>
             <h2>
-              <Languages className="h-4 w-4" />
               操作
             </h2>
             <Button type="button" variant="outline" onClick={() => onSubmit(false)} disabled={saving}>

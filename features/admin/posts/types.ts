@@ -36,7 +36,6 @@ export interface PostFormData {
   published: boolean
   featured: boolean
   reading_time: number
-  locale: string
   published_at: string
   seo_title: string
   seo_description: string

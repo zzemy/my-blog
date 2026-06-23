@@ -14,7 +14,6 @@ CREATE TABLE IF NOT EXISTS posts (
   content JSONB NOT NULL, -- TipTap JSON格式内容
   cover_image TEXT,
   author TEXT DEFAULT 'Admin',
-  locale TEXT DEFAULT 'zh', -- 语言代码: zh, en, fr, ja
   tags TEXT[] DEFAULT '{}', -- 标签数组
   published BOOLEAN DEFAULT false,
   featured BOOLEAN DEFAULT false,
@@ -32,7 +31,6 @@ CREATE TABLE IF NOT EXISTS pages (
   title TEXT NOT NULL,
   slug TEXT UNIQUE NOT NULL,
   content JSONB NOT NULL, -- TipTap JSON格式内容
-  locale TEXT DEFAULT 'zh',
   published BOOLEAN DEFAULT false,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::TEXT, NOW()) NOT NULL,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::TEXT, NOW()) NOT NULL,
@@ -67,14 +65,12 @@ CREATE TABLE IF NOT EXISTS media (
 -- 创建索引以提高查询性能
 CREATE INDEX IF NOT EXISTS posts_slug_idx ON posts(slug);
 CREATE INDEX IF NOT EXISTS posts_public_id_idx ON posts(public_id);
-CREATE INDEX IF NOT EXISTS posts_locale_idx ON posts(locale);
 CREATE INDEX IF NOT EXISTS posts_published_idx ON posts(published);
 CREATE INDEX IF NOT EXISTS posts_published_at_idx ON posts(published_at DESC);
 CREATE INDEX IF NOT EXISTS posts_tags_idx ON posts USING GIN(tags);
 CREATE INDEX IF NOT EXISTS posts_created_at_idx ON posts(created_at DESC);
 
 CREATE INDEX IF NOT EXISTS pages_slug_idx ON pages(slug);
-CREATE INDEX IF NOT EXISTS pages_locale_idx ON pages(locale);
 
 CREATE INDEX IF NOT EXISTS tags_slug_idx ON tags(slug);
 CREATE INDEX IF NOT EXISTS tags_name_idx ON tags(name);
@@ -226,11 +222,11 @@ INSERT INTO tags (name, slug, description) VALUES
 ON CONFLICT (slug) DO NOTHING;
 
 -- 创建增加浏览量的函数
-CREATE OR REPLACE FUNCTION increment_post_views(post_slug TEXT, post_locale TEXT DEFAULT 'zh')
+CREATE OR REPLACE FUNCTION increment_post_views(post_slug TEXT)
 RETURNS void AS $$
 BEGIN
   UPDATE posts 
   SET views = views + 1
-  WHERE slug = post_slug AND locale = post_locale;
+  WHERE slug = post_slug OR public_id = post_slug;
 END;
 $$ LANGUAGE plpgsql;

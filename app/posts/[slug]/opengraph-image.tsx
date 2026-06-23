@@ -11,22 +11,14 @@ export const size = {
 }
 export const contentType = 'image/png'
 
-const locales = ['zh', 'en', 'fr', 'ja'];
-
 export async function generateStaticParams() {
-  const posts = await getPublishedPosts('zh');
-  const params = [];
-  for (const locale of locales) {
-    for (const post of posts) {
-      params.push({ locale, slug: getPostRouteId(post) });
-    }
-  }
-  return params;
+  const posts = await getPublishedPosts();
+  return posts.map((post) => ({ slug: getPostRouteId(post) }));
 }
 
-export default async function Image({ params }: { params: Promise<{ slug: string; locale: string }> }) {
-  const { slug, locale } = await params
-  const post = await getPostBySlug(slug, locale)
+export default async function Image({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params
+  const post = await getPostBySlug(slug)
 
   if (!post) {
     return new ImageResponse(
@@ -114,7 +106,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
             alignItems: 'center',
           }}
         >
-          <span>{new Date(post.publishedAt || post.createdAt).toLocaleDateString(locale, { year: 'numeric', month: 'short', day: 'numeric' })}</span>
+          <span>{new Date(post.publishedAt || post.createdAt).toLocaleDateString('zh-CN', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
           {post.tags && post.tags.length > 0 && (
             <>
               <span style={{ margin: '0 15px' }}>•</span>
