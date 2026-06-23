@@ -13,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { PostData } from "@/lib/types";
+import { getPostRouteId } from "@/lib/post-public-id";
 
 const container = {
   hidden: { opacity: 0 },
@@ -42,13 +43,16 @@ export function PostList({ posts, readMoreText }: PostListProps) {
       initial="hidden"
       animate="show"
     >
-      {posts.map((post) => (
-        <motion.div key={post.id} variants={item} className="h-full">
-          <Card className="group/card flex h-full flex-col rounded-2xl border border-border/70 bg-gradient-to-r from-background/90 via-background/82 to-background/70 shadow-sm backdrop-blur-xl transition-all duration-200 hover:-translate-y-1 hover:border-border hover:from-background/94 hover:via-background/88 hover:to-background/78 dark:border-white/6 dark:from-zinc-900/40 dark:via-zinc-900/30 dark:to-zinc-900/20 dark:shadow-lg dark:shadow-black/20">
+      {posts.map((post) => {
+        const postRouteId = getPostRouteId(post)
+
+        return (
+          <motion.div key={post.id} variants={item} className="h-full">
+            <Card className="group/card flex h-full flex-col rounded-2xl border border-border/70 bg-gradient-to-r from-background/90 via-background/82 to-background/70 shadow-sm backdrop-blur-xl transition-all duration-200 hover:-translate-y-1 hover:border-border hover:from-background/94 hover:via-background/88 hover:to-background/78 dark:border-white/6 dark:from-zinc-900/40 dark:via-zinc-900/30 dark:to-zinc-900/20 dark:shadow-lg dark:shadow-black/20">
               <CardHeader className="space-y-3">
                 <CardTitle className="line-clamp-2 text-lg">
                   <Link
-                    href={`/posts/${post.slug}`}
+                    href={`/posts/${postRouteId}`}
                     className="inline-block no-underline text-foreground transition-colors duration-200"
                   >
                     {post.title}
@@ -82,14 +86,15 @@ export function PostList({ posts, readMoreText }: PostListProps) {
               </CardContent>
               <CardFooter>
                 <Button asChild variant="ghost" className="w-full justify-start px-0 text-foreground/80 transition-colors hover:bg-transparent hover:text-primary">
-                  <Link href={`/posts/${post.slug}`} className="flex items-center">
+                  <Link href={`/posts/${postRouteId}`} className="flex items-center">
                     {readMoreText} <ArrowRight className="ml-2 size-4" />
                   </Link>
                 </Button>
               </CardFooter>
             </Card>
-        </motion.div>
-      ))}
+          </motion.div>
+        )
+      })}
     </motion.div>
   );
 }

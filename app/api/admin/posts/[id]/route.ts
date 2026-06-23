@@ -11,6 +11,7 @@ const currentPostPublishStateSchema = z.object({
 
 const currentPostCacheStateSchema = z.object({
   locale: z.string(),
+  public_id: z.string().nullable().optional(),
   slug: z.string(),
   tags: z.array(z.string()).nullable().optional(),
   published: z.boolean(),
@@ -64,7 +65,7 @@ export async function PUT(
     const client = getAdminClient(token || undefined)
     const { data: existingPost } = await client
       .from('posts')
-      .select('locale, slug, tags, published')
+      .select('locale, public_id, slug, tags, published')
       .eq('id', id)
       .single()
 
@@ -75,6 +76,12 @@ export async function PUT(
     }
 
     const previousPost = existingPostResult.data
+    const previousRevalidationState = {
+      locale: previousPost.locale,
+      publicId: previousPost.public_id,
+      slug: previousPost.slug,
+      tags: previousPost.tags ?? [],
+    }
     const rawBody: unknown = await request.json()
     const parsedBody = updatePostSchema.safeParse(rawBody)
 
@@ -120,9 +127,10 @@ export async function PUT(
     }
 
     revalidatePostMutation({
-      before: previousPost,
+      before: previousRevalidationState,
       after: {
         locale: body.locale ?? previousPost.locale,
+        publicId: previousPost.public_id,
         slug: body.slug ?? previousPost.slug,
         tags: body.tags ?? previousPost.tags ?? [],
       },
@@ -152,7 +160,7 @@ export async function DELETE(
 
     const { data: existingPost } = await client
       .from('posts')
-      .select('locale, slug, tags, published')
+      .select('locale, public_id, slug, tags, published')
       .eq('id', id)
       .single()
 
@@ -170,7 +178,12 @@ export async function DELETE(
     }
 
     revalidatePostMutation({
-      before: existingPostResult.data,
+      before: {
+        locale: existingPostResult.data.locale,
+        publicId: existingPostResult.data.public_id,
+        slug: existingPostResult.data.slug,
+        tags: existingPostResult.data.tags ?? [],
+      },
     })
 
     return NextResponse.json({ message: 'Post deleted successfully' })

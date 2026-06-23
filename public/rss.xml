@@ -4,7 +4,7 @@
         <title>emmm's Blog</title>
         <link>https://emmmxx.xyz</link>
         <description>A personal blog about technology and life.</description>
-        <lastBuildDate>Sun, 08 Mar 2026 14:13:09 GMT</lastBuildDate>
+        <lastBuildDate>Tue, 23 Jun 2026 13:18:59 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>Feed for Node.js</generator>
         <language>zh</language>
@@ -15,9 +15,105 @@
         </image>
         <copyright>All rights reserved 2026, emmm</copyright>
         <item>
+            <title><![CDATA[南京邮电大学评教自动化脚本v2]]></title>
+            <link>https://emmmxx.xyz/zh/posts/1990d1c</link>
+            <guid isPermaLink="false">https://emmmxx.xyz/zh/posts/1990d1c</guid>
+            <pubDate>Tue, 23 Jun 2026 11:27:10 GMT</pubDate>
+            <content:encoded><![CDATA[NJUPT Evaluation Helper
+
+用于南京邮电大学评教页面的浏览器控制台辅助脚本。
+
+https://github.com/zzemy/njupt-evaluation-helper
+
+文件说明
+
+evaluation-helper.js：推荐使用的统一入口脚本，可自动识别课程评价和教学质量评价页面。course-evaluation.js：课程评价脚本。teaching-quality-evaluation.js：教学质量评价脚本。
+
+脚本会跳过课程选择下拉框，只处理评价题目的下拉框。遇到一门课有多个老师时，会按题组生成不同的选项组合，避免多个老师的评价结果完全相同而无法提交。
+
+最快使用方式
+
+打开评教页面后，按 F12 进入 Console，左上角执行上下文选 top，复制下面这一整行并执行：
+
+(function () { var stamp = Date.now(); function decodeBase64(value) { var binary = atob(value.replace(/\s/g, "")); var bytes = new Uint8Array(binary.length); for (var i = 0; i < binary.length; i++) { bytes[i] = binary.charCodeAt(i); } return new TextDecoder("utf-8").decode(bytes); } function getHostWindow() { try { if (window.top && window.top.document) { if (window.top !== window) { console.log("当前控制台在 iframe 上下文，在线加载器将转到 top 页面运行。"); } return window.top; } } catch (error) {} return window; } function runCode(code) { var host = getHostWindow(); try { var script = host.document.createElement("script"); script.textContent = code + "\n//# sourceURL=njupt-evaluation-helper.js"; host.document.documentElement.appendChild(script); script.parentNode.removeChild(script); } catch (error) { host.eval(code); } } function loadFromApi() { return fetch("https://api.github.com/repos/zzemy/njupt-evaluation-helper/contents/evaluation-helper.js?ref=main&t=" + stamp, { cache: "no-store" }).then(function (res) { if (!res.ok) { throw new Error("GitHub API HTTP " + res.status); } return res.json(); }).then(function (file) { if (!file || !file.content) { throw new Error("GitHub API did not return file content"); } return decodeBase64(file.content); }); } function loadText(url) { return fetch(url + "?t=" + stamp, { cache: "no-store" }).then(function (res) { if (!res.ok) { throw new Error(url + " HTTP " + res.status); } return res.text(); }); } loadFromApi().catch(function (error) { console.warn("GitHub API 加载失败，改用 raw fallback：", error); return loadText("https://raw.githubusercontent.com/zzemy/njupt-evaluation-helper/main/evaluation-helper.js"); }).catch(function (error) { console.warn("raw fallback 加载失败，改用 jsDelivr fallback：", error); return loadText("https://cdn.jsdelivr.net/gh/zzemy/njupt-evaluation-helper@main/evaluation-helper.js"); }).then(function (code) { runCode(code); }).catch(function (error) { console.error("NJUPT Evaluation Helper 在线加载失败：", error); alert("评教助手在线加载失败，请改用离线书签或复制完整脚本。"); }); }());
+
+这条命令会在线加载最新版脚本，依次尝试 GitHub API、raw、jsDelivr。如果误选了 iframeautoheight，新版脚本会尝试自动转到顶层页面运行；旧版 fetch(...).then(eval) 写法在 iframe 里执行时，可能只评价一门课就随着 iframe 刷新中断。
+
+长期使用方式
+
+每学期期末反复用，推荐先装成离线书签：
+
+打开在线安装页：https://zzemy.github.io/njupt-evaluation-helper/把页面里的 NJUPT 评教助手 蓝色按钮拖到浏览器书签栏。以后打开评教页面，点击这个书签即可运行脚本。
+
+如果书签栏没显示，可以先按 Ctrl + Shift + B 显示书签栏。
+
+装好后的书签是离线内嵌脚本，不依赖油猴、GitHub 或 CDN。脚本更新后，需要重新打开新版安装页并重新拖一次书签。
+
+如果 GitHub Pages 打不开，也可以下载仓库里的 install.html，用浏览器本地打开后再拖书签。
+
+如果点击书签后控制台出现 Invalid or unexpected token，通常是旧版书签生成方式有问题。删除旧书签，重新打开新版安装页再拖一次即可。
+
+如果修改了 evaluation-helper.js，需要重新生成离线书签：
+
+node .\tools\build-offline-bookmarklet.js
+
+备用方式
+
+如果校园网访问 GitHub 不稳定，在线加载失败，可以改用离线书签，或者复制 evaluation-helper.js 的完整内容到控制台执行。
+
+控制台完整脚本方式
+
+推荐使用 evaluation-helper.js：
+
+打开对应的评教页面。按 F12 打开浏览器开发者工具。进入 Console，左上角执行上下文选 top。复制 evaluation-helper.js 的完整内容并粘贴执行。
+
+evaluation-helper.js 内置了基础的 debugger 防暂停保护，会尽量拦截后续创建的反调试定时器和动态 debugger 代码。如果打开开发者工具时页面已经暂停，先按一次 F8 继续运行，再粘贴脚本执行。
+
+如果只想填写当前页面、不自动提交，可以把脚本最后一行的：
+
+runNjuptEvaluation();
+
+改成：
+
+runNjuptEvaluation({ autoSubmit: false });
+
+如果确认最后一页也要自动提交，可以把最后一行改成：
+
+runNjuptEvaluation({ leaveLastForManual: false });
+
+如果自动识别页面类型失败，可以手动指定：
+
+runNjuptEvaluation({ type: "course" })
+runNjuptEvaluation({ type: "teachingQuality" })
+
+旧脚本 course-evaluation.js 和 teaching-quality-evaluation.js 仍然保留，可以继续按原来的方式复制执行。
+
+本地测试
+
+如果真实评教入口已经消失，可以用本地模拟页测试：
+
+自动化测试：
+
+pnpm install
+pnpm test:e2e
+
+手动测试：
+
+用浏览器打开 test/evaluation-helper-test.html。选择“课程评价”或“教学质量评价”模拟场景。打开开发者工具的 Console。粘贴执行 evaluation-helper.js 的完整内容。
+
+默认应自动提交前两门课，并在第三门课填好后停下，等待手动提交。左侧“提交记录”会显示模拟提交进度。
+
+注意事项
+
+evaluation-helper.js 默认会自动提交前面的课程，但最后一页会停下，方便手动确认。course-evaluation.js 用于课程评价，不要和教学质量评价页面混用。teaching-quality-evaluation.js 用于教学质量评价，不要和课程评价页面混用。如果页面结构发生变化，脚本可能需要调整。运行前建议先确认当前页面和脚本类型一致。
+
+]]></content:encoded>
+            <author>1992107794@qq.com (Admin)</author>
+        </item>
+        <item>
             <title><![CDATA[小爱老师WiFi版（ MTK 架构安卓设备） System 分区扩容与刷机折腾小记]]></title>
-            <link>https://emmmxx.xyz/zh/posts/xiaoailaoshiwifibanmtkjiagouanzhuoshebeisystemfenqukuorongyushuajizhetengxiaoji</link>
-            <guid isPermaLink="false">https://emmmxx.xyz/zh/posts/xiaoailaoshiwifibanmtkjiagouanzhuoshebeisystemfenqukuorongyushuajizhetengxiaoji</guid>
+            <link>https://emmmxx.xyz/zh/posts/30f18de</link>
+            <guid isPermaLink="false">https://emmmxx.xyz/zh/posts/30f18de</guid>
             <pubDate>Sun, 22 Feb 2026 16:39:00 GMT</pubDate>
             <description><![CDATA[小爱老师刷入lineageos19.1]]></description>
             <content:encoded><![CDATA[一、 实现逻辑
@@ -130,8 +226,8 @@ fastboot reboot
         </item>
         <item>
             <title><![CDATA[关于]]></title>
-            <link>https://emmmxx.xyz/zh/posts/about</link>
-            <guid isPermaLink="false">https://emmmxx.xyz/zh/posts/about</guid>
+            <link>https://emmmxx.xyz/zh/posts/61d9d3d</link>
+            <guid isPermaLink="false">https://emmmxx.xyz/zh/posts/61d9d3d</guid>
             <pubDate>Tue, 20 Jan 2026 08:06:00 GMT</pubDate>
             <content:encoded><![CDATA[Emmm's Blog & Portfolio
 
@@ -256,8 +352,8 @@ About 页作为可编辑文章
         </item>
         <item>
             <title><![CDATA[南京邮电大学评教自动化脚本]]></title>
-            <link>https://emmmxx.xyz/zh/posts/nanjingyoudiandaxuepingjiaozidonghuajiaoben</link>
-            <guid isPermaLink="false">https://emmmxx.xyz/zh/posts/nanjingyoudiandaxuepingjiaozidonghuajiaoben</guid>
+            <link>https://emmmxx.xyz/zh/posts/212b014</link>
+            <guid isPermaLink="false">https://emmmxx.xyz/zh/posts/212b014</guid>
             <pubDate>Fri, 12 Dec 2025 12:05:00 GMT</pubDate>
             <description><![CDATA[评教脚本]]></description>
             <content:encoded><![CDATA[相应页面右键检查或f12打开控制台，复制以下代码粘贴回车运行
@@ -345,8 +441,8 @@ var task = window.setInterval(function () {
         </item>
         <item>
             <title><![CDATA[前端组授课文档-javascript]]></title>
-            <link>https://emmmxx.xyz/zh/posts/qianduanzushoukewendang-javascript</link>
-            <guid isPermaLink="false">https://emmmxx.xyz/zh/posts/qianduanzushoukewendang-javascript</guid>
+            <link>https://emmmxx.xyz/zh/posts/3b83272</link>
+            <guid isPermaLink="false">https://emmmxx.xyz/zh/posts/3b83272</guid>
             <pubDate>Sat, 22 Nov 2025 10:00:00 GMT</pubDate>
             <description><![CDATA[SAST软研部前端组第三次授课]]></description>
             <content:encoded><![CDATA[JavaScript 简介

@@ -5,6 +5,7 @@ import { isExpectedSupabaseBuildError, logExpectedSupabaseBuildErrorOnce } from 
 
 export interface PostData {
   id: string
+  publicId: string | null
   title: string
   slug: string
   description: string
@@ -51,6 +52,7 @@ export async function getPublishedPosts(locale: string = 'zh'): Promise<PostList
 
     return rows.map(post => ({
       id: post.id,
+      publicId: post.public_id,
       slug: post.slug,
       title: post.title,
       date: post.published_at || post.created_at,
@@ -75,37 +77,48 @@ export async function getPublishedPosts(locale: string = 'zh'): Promise<PostList
   }
 }
 
+async function findPublishedPostByIdentifier(identifier: string, locale: string): Promise<Post | null> {
+  const { data: postByPublicId, error: publicIdError } = await supabase
+    .from('posts')
+    .select('*')
+    .eq('public_id', identifier)
+    .eq('locale', locale)
+    .eq('published', true)
+    .maybeSingle()
+
+  if (publicIdError) {
+    throw publicIdError
+  }
+
+  if (postByPublicId) {
+    return postByPublicId as Post
+  }
+
+  const { data: postBySlug, error: slugError } = await supabase
+    .from('posts')
+    .select('*')
+    .eq('slug', identifier)
+    .eq('locale', locale)
+    .eq('published', true)
+    .maybeSingle()
+
+  if (slugError) {
+    throw slugError
+  }
+
+  return postBySlug ? (postBySlug as Post) : null
+}
+
 export async function getPostBySlug(slug: string, locale: string = 'zh'): Promise<PostData | null> {
   try {
-    const { data, error } = await supabase
-      .from('posts')
-      .select('*')
-      .eq('slug', slug)
-      .eq('locale', locale)
-      .eq('published', true)
-      .single()
-
-    if (error) {
-      if (isExpectedSupabaseBuildError(error)) {
-        logExpectedSupabaseBuildErrorOnce(
-          'get-post-by-slug-query-fallback',
-          'Using null post because Supabase is unavailable in this environment:',
-          error
-        )
-      } else {
-        console.error('Error fetching post:', error)
-      }
-      return null
-    }
-
-    if (!data) return null
-
-    const post = data as Post;
+    const post = await findPublishedPostByIdentifier(slug, locale)
+    if (!post) return null
 
     const metadata = post.metadata as { seo_title?: string; seo_description?: string } | undefined
 
     return {
       id: post.id,
+      publicId: post.public_id,
       title: post.title,
       slug: post.slug,
       description: post.description || '',
@@ -201,6 +214,7 @@ export async function getPostsByTag(tag: string, locale: string = 'zh'): Promise
 
     return rows.map(post => ({
       id: post.id,
+      publicId: post.public_id,
       slug: post.slug,
       title: post.title,
       date: post.published_at || post.created_at,

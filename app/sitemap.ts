@@ -1,4 +1,5 @@
 import { MetadataRoute } from 'next'
+import { getPostRouteId } from '@/lib/post-public-id'
 import { getPublishedPosts } from '@/lib/supabase/posts'
 
 export const dynamic = 'force-static'
@@ -34,7 +35,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   for (const post of posts) {
     for (const locale of locales) {
       sitemapEntries.push({
-        url: `${baseUrl}/${locale}/posts/${post.slug}`,
+        url: `${baseUrl}/${locale}/posts/${getPostRouteId(post)}`,
         lastModified: new Date(post.date),
         changeFrequency: 'weekly',
         priority: 0.6,

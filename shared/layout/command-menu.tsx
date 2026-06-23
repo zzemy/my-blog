@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/popover"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import { getPostRouteId } from '@/lib/post-public-id';
 
 function escapeRegExp(string: string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -60,6 +61,7 @@ const SCOPE_OPTIONS: ReadonlyArray<{ id: SearchScope; label: string }> = [
 
 const SEARCH_SCHEMA = {
   id: 'string',
+  publicId: 'string',
   slug: 'string',
   title: 'string',
   summary: 'string',
@@ -72,6 +74,7 @@ type SearchableProperty = 'title' | 'summary' | 'content' | 'tags';
 
 type SearchDocument = {
   id: string;
+  publicId: string;
   slug: string;
   title: string;
   summary: string;
@@ -90,6 +93,7 @@ type SearchDb = Awaited<ReturnType<typeof create<typeof SEARCH_SCHEMA>>>;
 function toSearchDocument(post: SearchApiPost): SearchDocument {
   return {
     id: post.id,
+    publicId: post.publicId ?? '',
     slug: post.slug,
     title: post.title,
     summary: post.summary ?? '',
@@ -102,6 +106,7 @@ function toSearchDocument(post: SearchApiPost): SearchDocument {
 function toPostData(doc: SearchDocument): PostData {
   return {
     id: doc.id,
+    publicId: doc.publicId || null,
     slug: doc.slug,
     title: doc.title,
     date: doc.date,
@@ -270,7 +275,7 @@ export function CommandMenu({ compact = false }: { compact?: boolean }) {
                     key={post.id}
                     value={post.title}
                     onSelect={() => {
-                      runCommand(() => router.push(`/posts/${post.slug}`));
+                      runCommand(() => router.push(`/posts/${getPostRouteId(post)}`));
                     }}
                   >
                     <div className="flex flex-col">

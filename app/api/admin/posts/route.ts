@@ -3,6 +3,7 @@ import { getAdminClient } from '@/lib/supabase/client'
 import { getAuthTokenFromRequest, validateAdminRequestWithReason } from '@/lib/auth'
 import { Redis } from '@upstash/redis'
 import { createPostSchema } from '@/lib/validation/post'
+import { generatePostPublicId } from '@/lib/post-public-id'
 import { revalidatePostMutation } from '@/lib/revalidation/posts'
 
 function normalizeEnv(value?: string) {
@@ -18,6 +19,27 @@ const redis = redisEnabled ? new Redis({ url: redisUrl!, token: redisToken! }) :
 type PostWithSlugAndViews = {
   slug: string
   views?: number
+}
+
+async function generateUniquePostPublicId(client: ReturnType<typeof getAdminClient>) {
+  for (let attempt = 0; attempt < 6; attempt += 1) {
+    const publicId = generatePostPublicId()
+    const { data, error } = await client
+      .from('posts')
+      .select('public_id')
+      .eq('public_id', publicId)
+      .maybeSingle()
+
+    if (error) {
+      throw error
+    }
+
+    if (!data) {
+      return publicId
+    }
+  }
+
+  throw new Error('Failed to generate a unique post public id')
 }
 
 // GET - 获取所有文章列表（需要认证）
@@ -134,10 +156,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Slug already exists' }, { status: 409 })
     }
 
+    const publicId = await generateUniquePostPublicId(client)
+
     // 创建新文章
     const { data, error } = await client
       .from('posts')
       .insert({
+        public_id: publicId,
         title,
         slug,
         description,
@@ -163,6 +188,7 @@ export async function POST(request: NextRequest) {
     revalidatePostMutation({
       after: {
         locale,
+        publicId,
         slug,
         tags,
       },

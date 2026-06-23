@@ -222,6 +222,7 @@ export type Database = {
       posts: {
         Row: {
           id: string
+          public_id: string
           title: string
           slug: string
           content: unknown // TipTap JSON content
@@ -239,6 +240,7 @@ export type Database = {
         }
         Insert: {
           id?: string
+          public_id: string
           title: string
           slug: string
           content: unknown
@@ -256,6 +258,7 @@ export type Database = {
         }
         Update: {
           id?: string
+          public_id?: string
           title?: string
           slug?: string
           content?: unknown

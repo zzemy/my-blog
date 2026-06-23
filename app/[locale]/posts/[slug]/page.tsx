@@ -10,6 +10,7 @@ import { ShareButtons } from "@/features/blog/components/client/share-buttons";
 import { PostStats } from "@/features/blog/components/client/post-stats";
 import { Comments } from "@/features/blog/components/client/comments";
 import { buildToc } from "@/features/blog/utils/toc";
+import { getPostRouteId } from "@/lib/post-public-id";
 import { supabase } from '@/lib/supabase/client';
 import { Database } from "@/lib/supabase/types";
 import { isExpectedSupabaseBuildError, logExpectedSupabaseBuildErrorOnce } from '@/lib/supabase/error-utils';
@@ -45,24 +46,41 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 
 type Post = Database['public']['Tables']['posts']['Row'];
 
+async function findPostByIdentifier(identifier: string, locale: string): Promise<Post | null> {
+  const { data: postByPublicId, error: publicIdError } = await supabase
+    .from('posts')
+    .select('*')
+    .eq('public_id', identifier)
+    .eq('locale', locale)
+    .eq('published', true)
+    .maybeSingle();
+
+  if (publicIdError) {
+    throw publicIdError;
+  }
+
+  if (postByPublicId) {
+    return postByPublicId as Post;
+  }
+
+  const { data: postBySlug, error: slugError } = await supabase
+    .from('posts')
+    .select('*')
+    .eq('slug', identifier)
+    .eq('locale', locale)
+    .eq('published', true)
+    .maybeSingle();
+
+  if (slugError) {
+    throw slugError;
+  }
+
+  return postBySlug ? (postBySlug as Post) : null;
+}
+
 async function getPost(slug: string, locale: string): Promise<Post | null> {
   try {
-    const { data, error } = await supabase
-      .from('posts')
-      .select('*')
-      .eq('slug', slug)
-      .eq('locale', locale)
-      .eq('published', true)
-      .single();
-
-    if (error) {
-      if (!isExpectedSupabaseBuildError(error)) {
-        console.error('Failed to fetch post:', error)
-      }
-      return null;
-    }
-
-    return data;
+    return await findPostByIdentifier(slug, locale);
   } catch (error) {
     if (isExpectedSupabaseBuildError(error)) {
       logExpectedSupabaseBuildErrorOnce(
@@ -81,7 +99,7 @@ async function getAllPosts(locale: string) {
   try {
     const { data, error } = await supabase
       .from('posts')
-      .select('slug')
+      .select('public_id, slug')
       .eq('locale', locale)
       .eq('published', true)
       .neq('slug', 'about');
@@ -93,7 +111,7 @@ async function getAllPosts(locale: string) {
       return [];
     }
 
-    return data as { slug: string }[];
+    return data as { public_id: string | null; slug: string }[];
   } catch (error) {
     if (isExpectedSupabaseBuildError(error)) {
       logExpectedSupabaseBuildErrorOnce(
@@ -114,7 +132,7 @@ export async function generateStaticParams() {
   const params = [];
   for (const locale of locales) {
     for (const post of posts) {
-      params.push({ locale, slug: post.slug });
+      params.push({ locale, slug: post.public_id || post.slug });
     }
   }
   return params;
@@ -147,6 +165,7 @@ export default async function PostPage({ params }: { params: Promise<{ locale: s
 
   // 生成目录
   const toc = buildToc(post.content)
+  const routeId = getPostRouteId({ publicId: post.public_id, slug: post.slug })
 
   return (
     <PostLayout toc={toc}>
@@ -172,9 +191,9 @@ export default async function PostPage({ params }: { params: Promise<{ locale: s
                 )}
               </div>
               <div className="flex items-center gap-4 flex-shrink-0">
-                <PostStats slug={slug} />
+                <PostStats slug={post.slug} />
                 <ShareButtons 
-                  url={`https://emmmxx.xyz/${locale}/posts/${slug}`} 
+                  url={`https://emmmxx.xyz/${locale}/posts/${routeId}`}
                 />
               </div>
             </div>

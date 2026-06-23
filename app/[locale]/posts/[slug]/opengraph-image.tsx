@@ -1,4 +1,5 @@
 import { ImageResponse } from 'next/og'
+import { getPostRouteId } from '@/lib/post-public-id'
 import { getPostBySlug, getPublishedPosts } from '@/lib/supabase/posts'
 
 export const runtime = 'nodejs'
@@ -17,7 +18,7 @@ export async function generateStaticParams() {
   const params = [];
   for (const locale of locales) {
     for (const post of posts) {
-      params.push({ locale, slug: post.slug });
+      params.push({ locale, slug: getPostRouteId(post) });
     }
   }
   return params;

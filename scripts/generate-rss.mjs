@@ -93,7 +93,7 @@ async function generateRssFeed() {
   });
 
   publishedPosts.forEach((post) => {
-    const url = `${siteUrl}/zh/posts/${post.slug}`;
+    const url = `${siteUrl}/zh/posts/${post.public_id || post.slug}`;
     
     // Extract plain text from TipTap JSON content
     let content = '';

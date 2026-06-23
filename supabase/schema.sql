@@ -7,6 +7,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- 创建posts表
 CREATE TABLE IF NOT EXISTS posts (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  public_id TEXT UNIQUE NOT NULL,
   title TEXT NOT NULL,
   slug TEXT UNIQUE NOT NULL,
   description TEXT,
@@ -65,6 +66,7 @@ CREATE TABLE IF NOT EXISTS media (
 
 -- 创建索引以提高查询性能
 CREATE INDEX IF NOT EXISTS posts_slug_idx ON posts(slug);
+CREATE INDEX IF NOT EXISTS posts_public_id_idx ON posts(public_id);
 CREATE INDEX IF NOT EXISTS posts_locale_idx ON posts(locale);
 CREATE INDEX IF NOT EXISTS posts_published_idx ON posts(published);
 CREATE INDEX IF NOT EXISTS posts_published_at_idx ON posts(published_at DESC);

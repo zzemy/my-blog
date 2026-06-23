@@ -1,5 +1,3 @@
-import { pinyin } from 'pinyin-pro'
-
 import type { PostFormData } from './types'
 
 export function createEmptyPostForm(): PostFormData {
@@ -21,16 +19,21 @@ export function createEmptyPostForm(): PostFormData {
 }
 
 export function generatePostSlug(title: string) {
-  return pinyin(title, {
-    toneType: 'none',
-    type: 'array',
-    v: true,
-  })
-    .join('')
-    .toLowerCase()
-    .trim()
-    .replace(/[^\w-]/g, '')
-    .replace(/-+/g, '-')
+  const normalizedTitle = title.trim()
+  if (!normalizedTitle) return ''
+
+  return `p-${hashTitleToBase36(normalizedTitle)}`
+}
+
+function hashTitleToBase36(value: string) {
+  let hash = 2166136261
+
+  for (let index = 0; index < value.length; index += 1) {
+    hash ^= value.charCodeAt(index)
+    hash = Math.imul(hash, 16777619)
+  }
+
+  return (hash >>> 0).toString(36).padStart(7, '0').slice(0, 7)
 }
 
 export function calculateContentSize(content: PostFormData['content']) {

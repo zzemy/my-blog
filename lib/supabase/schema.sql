@@ -1,6 +1,7 @@
 -- 创建 posts 表
 CREATE TABLE IF NOT EXISTS posts (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  public_id TEXT NOT NULL,
   title TEXT NOT NULL,
   slug TEXT NOT NULL,
   content JSONB NOT NULL, -- TipTap JSON content
@@ -16,6 +17,7 @@ CREATE TABLE IF NOT EXISTS posts (
   view_count INTEGER DEFAULT 0,
   reading_time INTEGER,
   
+  CONSTRAINT unique_post_public_id UNIQUE (public_id),
   CONSTRAINT unique_slug_locale UNIQUE (slug, locale)
 );
 
@@ -35,6 +37,7 @@ CREATE TABLE IF NOT EXISTS pages (
 
 -- 创建索引
 CREATE INDEX IF NOT EXISTS idx_posts_slug ON posts(slug);
+CREATE INDEX IF NOT EXISTS idx_posts_public_id ON posts(public_id);
 CREATE INDEX IF NOT EXISTS idx_posts_locale ON posts(locale);
 CREATE INDEX IF NOT EXISTS idx_posts_published ON posts(published);
 CREATE INDEX IF NOT EXISTS idx_posts_tags ON posts USING GIN(tags);

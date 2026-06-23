@@ -6,6 +6,7 @@ export interface Database {
       posts: {
         Row: {
           id: string
+          public_id: string
           title: string
           slug: string
           description: string | null
@@ -25,6 +26,7 @@ export interface Database {
         }
         Insert: {
           id?: string
+          public_id: string
           title: string
           slug: string
           description?: string | null
@@ -44,6 +46,7 @@ export interface Database {
         }
         Update: {
           id?: string
+          public_id?: string
           title?: string
           slug?: string
           description?: string | null

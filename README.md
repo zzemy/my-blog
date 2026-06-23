@@ -61,7 +61,7 @@
 - **remark** / **rehype** - 后台编辑器粘贴 Markdown 时转换为可插入 HTML
   - remark-gfm (GitHub Flavored Markdown)
   - remark-math (数学公式输入)
-- **pinyin-pro** - 中文转拼音（自动生成 URL slug）
+- **短 ID 路由** - 自动生成短文章标识，避免中文标题生成过长 URL
 
 ### 国际化与搜索
 
@@ -175,7 +175,7 @@
 
 - **完整 CRUD**：创建、编辑、删除、发布/取消发布
 - **多语言支持**：每篇文章可独立设置语言（zh, en, fr, ja）
-- **自定义 Slug**：手动指定 URL 路径或自动生成（中文自动转拼音）
+- **短链接标识**：公开文章 URL 使用短 ID，后台 slug 可手动指定或自动生成短 hash
 - **封面上传**：集成 Supabase Storage
 - **SEO 优化**：独立设置 SEO 标题与描述
 - **标签管理**：多标签支持，自动聚合统计

@@ -10,6 +10,7 @@ const locales = ['zh', 'en', 'fr', 'ja'];
 
 type PostRow = {
   id: string;
+  public_id: string | null;
   slug: string;
   title: string;
   published_at: string | null;
@@ -42,6 +43,7 @@ async function getPosts(locale: string) {
 
     return (data as PostRow[]).map((post) => ({
       id: post.id,
+      publicId: post.public_id,
       slug: post.slug,
       title: post.title,
       date: post.published_at || post.created_at,

@@ -2,6 +2,7 @@ import { revalidatePath } from 'next/cache'
 
 type RevalidatePostInput = {
   locale?: string | null
+  publicId?: string | null
   slug?: string | null
   tags?: string[] | null
 }
@@ -28,9 +29,16 @@ export function revalidatePostPaths(post: RevalidatePostInput) {
   const locale = normalizeLocale(post.locale)
   revalidateLocaleIndexPaths(locale)
 
-  if (post.slug) {
-    const detailPath = post.slug === 'about' ? `/${locale}/about` : `/${locale}/posts/${post.slug}`
-    revalidatePath(detailPath)
+  if (post.slug === 'about') {
+    revalidatePath(`/${locale}/about`)
+  } else {
+    if (post.publicId) {
+      revalidatePath(`/${locale}/posts/${post.publicId}`)
+    }
+
+    if (post.slug) {
+      revalidatePath(`/${locale}/posts/${post.slug}`)
+    }
   }
 
   for (const tag of normalizeTags(post.tags)) {
