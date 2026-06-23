@@ -15,7 +15,10 @@ function normalizeLegacyBranding(text) {
     return text;
   }
 
-  return text.replace(/ZHalio/g, 'emmm').replace(/github\.com\/zhalio/g, 'github.com/zzemy');
+  return text
+    .replace(/ZHalio/g, 'emmm')
+    .replace(/github\.com\/zhalio/g, 'github.com/zzemy')
+    .replace(/emmmxx\.xyz/g, 'blog.zzemy.top');
 }
 
 function getPostDate(post) {
