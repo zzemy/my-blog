@@ -4,11 +4,8 @@
 import "./globals.css";
 import "katex/dist/katex.min.css";
 import { ThemeProvider } from "@/shared/layout/theme-provider"
-import { SiteHeader } from "@/shared/layout/site-header"
-import { ScrollToTopButton } from "@/shared/layout/scroll-to-top-button"
-import { SmoothScroll } from "@/shared/layout/smooth-scroll";
 import { VantaProvider } from "@/shared/effects/vanta-context";
-import { VantaBackground } from "@/shared/effects/vanta-background";
+import { RootShell } from "@/shared/layout/root-shell";
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Analytics } from "@vercel/analytics/react"
 import { getSiteSettings } from "@/lib/site-settings";
@@ -47,27 +44,18 @@ export default function RootLayout({
   return (
     <html lang="zh" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} min-h-screen bg-background font-sans antialiased`}>
-        <SmoothScroll>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="dark"
-            enableSystem={false}
-            disableTransitionOnChange
-          >
-            <VantaProvider>
-              <VantaBackground />
-              <div className="relative flex min-h-screen flex-col">
-                <SiteHeader />
-                <main className="flex-1">
-                  {children}
-                </main>
-                <ScrollToTopButton />
-              </div>
-              <SpeedInsights />
-              <Analytics />
-            </VantaProvider>
-          </ThemeProvider>
-        </SmoothScroll>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem={false}
+          disableTransitionOnChange
+        >
+          <VantaProvider>
+            <RootShell>{children}</RootShell>
+            <SpeedInsights />
+            <Analytics />
+          </VantaProvider>
+        </ThemeProvider>
       </body>
     </html>
   )
