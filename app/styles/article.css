@@ -922,6 +922,15 @@
   height: 8px;
 }
 
+.article-content .code-window-body::-webkit-scrollbar-button,
+.article-content .code-window ::-webkit-scrollbar-button,
+.article-content .code-window-body::-webkit-scrollbar-corner,
+.article-content .code-window ::-webkit-scrollbar-corner {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
 .article-content .code-window-body::-webkit-scrollbar-thumb,
 .article-content .code-window ::-webkit-scrollbar-thumb {
   border-radius: 9999px;
