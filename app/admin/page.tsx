@@ -81,7 +81,7 @@ export default function AdminDashboard() {
   const heatmapData = Array.from(activityMap.entries()).map(([date, count]) => ({ date, count }))
 
   return (
-    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="mx-auto max-w-6xl space-y-6 px-4 py-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <h1 className="text-3xl font-bold tracking-tight">仪表盘</h1>
         <div className="text-sm text-muted-foreground">
