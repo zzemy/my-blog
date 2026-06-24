@@ -171,9 +171,9 @@ export default function MediaLibraryPage() {
       </div>
 
       {loading ? (
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {[...Array(10)].map((_, i) => (
-            <div key={i} className="aspect-square bg-zinc-100 dark:bg-zinc-800 rounded-lg animate-pulse" />
+            <div key={i} className="aspect-[3/1] bg-zinc-100 dark:bg-zinc-800 rounded-lg animate-pulse" />
           ))}
         </div>
       ) : filteredFiles.length === 0 ? (
@@ -183,17 +183,17 @@ export default function MediaLibraryPage() {
           <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-1">上传图片后将显示在这里</p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filteredFiles.map((file) => (
             <Card key={file.id} className="group relative overflow-hidden bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 hover:shadow-md transition-all">
               {/* Image Preview */}
-              <div className="aspect-square relative bg-zinc-100 dark:bg-zinc-950/50 overflow-hidden">
+              <div className="relative aspect-[3/1] overflow-hidden border-b border-zinc-200 bg-white dark:border-zinc-800">
                 {file.url ? (
                    <Image 
                      src={file.url} 
                      alt={file.name}
                      fill
-                     className="object-contain p-2 transition-transform duration-500 group-hover:scale-105"
+                     className="object-contain p-2 transition-transform duration-500 group-hover:scale-[1.02]"
                      unoptimized
                    />
                 ) : (
