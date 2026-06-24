@@ -114,7 +114,7 @@
   --article-code-header: #282a2e;
   --article-code-border: #383b40;
   --article-code-divider: #32353a;
-  --article-code-gutter: #1c1d20;
+  --article-code-gutter: var(--article-code-surface);
   --article-code-shadow: 0 16px 34px rgb(0 0 0 / 18%), inset 0 1px 0 rgb(255 255 255 / 4%);
   --article-code-scrollbar: rgb(209 213 219 / 20%);
   --article-code-text: #e5e7eb;
@@ -867,8 +867,7 @@
   background: var(--article-code-surface);
   padding: 1.1rem 0 0.85rem;
   scrollbar-color: var(--article-code-scrollbar) transparent;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  scrollbar-width: thin;
 }
 
 .article-content .code-window.is-collapsed .code-window-body {
@@ -886,12 +885,11 @@
   align-items: flex-end;
   border-right: 1px solid var(--article-code-divider, var(--article-code-border, var(--article-line)));
   background: var(--article-code-gutter);
-  color: color-mix(in oklch, var(--article-muted), transparent 30%);
+  color: color-mix(in oklch, var(--article-muted), var(--article-code-text) 10%);
   padding: 0 0.65rem 0 0.5rem;
   font-family: "JetBrains Mono", "Menlo", "Consolas", monospace;
   font-size: 0.78rem;
   line-height: var(--article-code-line-height);
-  box-shadow: 8px 0 16px color-mix(in oklch, var(--article-code-surface), transparent 20%);
   user-select: none;
 }
 
@@ -923,18 +921,22 @@
 
 .article-content .code-window-body::-webkit-scrollbar,
 .article-content .code-window ::-webkit-scrollbar {
-  display: none;
-  width: 0;
-  height: 0;
+  width: 8px;
+  height: 8px;
 }
 
 .article-content .code-window-body::-webkit-scrollbar-button,
 .article-content .code-window ::-webkit-scrollbar-button,
+.article-content .code-window-body::-webkit-scrollbar-button:horizontal:decrement,
+.article-content .code-window-body::-webkit-scrollbar-button:horizontal:increment,
+.article-content .code-window ::-webkit-scrollbar-button:horizontal:decrement,
+.article-content .code-window ::-webkit-scrollbar-button:horizontal:increment,
 .article-content .code-window-body::-webkit-scrollbar-corner,
 .article-content .code-window ::-webkit-scrollbar-corner {
-  display: none;
-  width: 0;
-  height: 0;
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  background: transparent !important;
 }
 
 .article-content .code-window-body::-webkit-scrollbar-thumb,

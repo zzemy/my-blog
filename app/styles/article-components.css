@@ -192,7 +192,7 @@
 .article-content .code-window-file {
   overflow: hidden;
   max-width: 12rem;
-  color: color-mix(in oklch, var(--article-muted), transparent 16%);
+  color: color-mix(in oklch, var(--article-muted), var(--article-heading) 8%);
   font-family: "JetBrains Mono", "Menlo", "Consolas", monospace;
   font-size: 0.74rem;
   font-weight: 650;
