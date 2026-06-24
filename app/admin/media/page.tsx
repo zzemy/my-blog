@@ -185,7 +185,7 @@ export default function MediaLibraryPage() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filteredFiles.map((file) => (
-            <Card key={file.id} className="group relative overflow-hidden bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 hover:shadow-md transition-all">
+            <Card key={file.id} className="group relative gap-0 overflow-hidden rounded-lg border-zinc-200 bg-white p-0 transition-all hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
               {/* Image Preview */}
               <div className="relative aspect-[3/1] overflow-hidden border-b border-zinc-200 bg-white dark:border-zinc-800">
                 {file.url ? (
