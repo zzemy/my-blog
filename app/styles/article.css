@@ -102,29 +102,29 @@
 }
 
 .dark .article-shell {
-  --article-text: #d7d2c8;
-  --article-heading: #f1eee7;
-  --article-muted: #aaa39a;
-  --article-soft: #2a2926;
-  --article-panel: #232220;
+  --article-text: #d1d5db;
+  --article-heading: #f3f4f6;
+  --article-muted: #9ca3af;
+  --article-soft: #272a2f;
+  --article-panel: #222427;
   --article-line: rgb(255 255 255 / 11%);
-  --article-accent: #8fa6a0;
-  --article-code-inline: #29302d;
-  --article-code-surface: #242321;
-  --article-code-header: #2c2b28;
-  --article-code-border: #3a3935;
-  --article-code-divider: #34332f;
-  --article-code-gutter: #201f1d;
+  --article-accent: #94a3b8;
+  --article-code-inline: #28313a;
+  --article-code-surface: #202124;
+  --article-code-header: #282a2e;
+  --article-code-border: #383b40;
+  --article-code-divider: #32353a;
+  --article-code-gutter: #1c1d20;
   --article-code-shadow: 0 16px 34px rgb(0 0 0 / 18%), inset 0 1px 0 rgb(255 255 255 / 4%);
-  --article-code-scrollbar: rgb(215 210 200 / 22%);
-  --article-code-text: #e4dfd6;
-  --article-code-highlight: rgb(143 166 160 / 14%);
+  --article-code-scrollbar: rgb(209 213 219 / 20%);
+  --article-code-text: #e5e7eb;
+  --article-code-highlight: rgb(148 163 184 / 14%);
   --article-h2-line: color-mix(in oklch, var(--article-line), transparent 10%);
   --article-rule-color: var(--article-accent);
   --article-rule-glow: color-mix(in oklch, var(--article-accent), transparent 40%);
   --article-block-border: rgb(255 255 255 / 11%);
-  --article-block-bg: #242321;
-  --article-block-bg-hover: #2a2926;
+  --article-block-bg: #222427;
+  --article-block-bg-hover: #292c31;
   --article-block-shadow: 0 0 5px 1px rgb(0 0 0 / 16%);
   --article-block-shadow-hover: 0 0 6px 2px rgb(0 0 0 / 18%);
   --article-table-header: transparent;
@@ -167,16 +167,16 @@
 
 .dark .article-shell,
 .dark .admin-editor {
-  --article-syntax-comment: #8f8a80;
-  --article-syntax-keyword: #b7becd;
-  --article-syntax-name: #d6d2c8;
-  --article-syntax-string: #b5c2aa;
-  --article-syntax-attr: #c2b7d1;
-  --article-syntax-variable: #d1ccc3;
-  --article-syntax-title: #e1ddd4;
-  --article-syntax-type: #c9ad7a;
-  --article-syntax-number: #c6b98e;
-  --article-syntax-regexp: #c5a9bc;
+  --article-syntax-comment: #858b94;
+  --article-syntax-keyword: #b7c5dc;
+  --article-syntax-name: #d5d9de;
+  --article-syntax-string: #b8c7d9;
+  --article-syntax-attr: #c4bbd6;
+  --article-syntax-variable: #d2d6db;
+  --article-syntax-title: #e1e4e8;
+  --article-syntax-type: #c7c0d8;
+  --article-syntax-number: #c8ccd2;
+  --article-syntax-regexp: #c2b6d0;
 }
 
 .article-hero {
@@ -867,7 +867,8 @@
   background: var(--article-code-surface);
   padding: 1.1rem 0 0.85rem;
   scrollbar-color: var(--article-code-scrollbar) transparent;
-  scrollbar-width: thin;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 .article-content .code-window.is-collapsed .code-window-body {
@@ -922,8 +923,9 @@
 
 .article-content .code-window-body::-webkit-scrollbar,
 .article-content .code-window ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  display: none;
+  width: 0;
+  height: 0;
 }
 
 .article-content .code-window-body::-webkit-scrollbar-button,
