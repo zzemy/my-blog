@@ -7,6 +7,7 @@ export function shouldUseVantaBackground(pathname: string | null | undefined) {
   const section = pathSegments[0]
   if (section === 'about') return false
   if (section === 'posts') return pathSegments.length === 1
+  if (section === 'tags') return pathSegments.length === 1
 
   return vantaEnabledSections.has(section)
 }
