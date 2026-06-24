@@ -1,4 +1,4 @@
-const vantaEnabledSections = new Set(['components', 'guestbook', 'tags'])
+const vantaEnabledSections = new Set(['components', 'guestbook'])
 
 export function shouldUseVantaBackground(pathname: string | null | undefined) {
   const pathSegments = pathname?.split('/').filter(Boolean) ?? []
@@ -6,7 +6,7 @@ export function shouldUseVantaBackground(pathname: string | null | undefined) {
 
   const section = pathSegments[0]
   if (section === 'about') return false
-  if (section === 'posts') return pathSegments.length === 1
+  if (section === 'posts') return false
 
   return vantaEnabledSections.has(section)
 }

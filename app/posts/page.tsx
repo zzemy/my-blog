@@ -61,7 +61,7 @@ async function getPosts() {
 export default async function PostsPage() {
   const posts = await getPosts();
   return (
-    <div className="container mx-auto px-4 py-6 md:py-10">
+    <div className="mx-auto max-w-5xl px-4 py-6 md:py-10">
       <div className="flex flex-col items-start gap-4 md:flex-row md:justify-between md:gap-8">
         <div className="flex-1 space-y-4">
           <h1 className="inline-block font-bold text-4xl tracking-tight lg:text-5xl">所有文章</h1>
