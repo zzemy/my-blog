@@ -267,7 +267,7 @@ export default function AdminPostsPage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="mx-auto max-w-6xl px-4 py-8">
         <div className="flex justify-center items-center min-h-[400px]">
           <div className="text-center">
             <div className="mb-4">
@@ -281,9 +281,9 @@ export default function AdminPostsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-zinc-50 dark:to-zinc-950">
-      <div className="container mx-auto px-4 max-w-6xl py-12 pb-32">
-        <div className="mb-8 md:mb-12 flex flex-col md:flex-row justify-between md:items-end gap-4 md:gap-8">
+    <>
+      <div className="mx-auto max-w-6xl px-4 py-12 pb-32">
+        <div className="mb-8 flex flex-col gap-4 md:mb-12 md:flex-row md:items-end md:justify-between md:gap-8">
           <div>
             <h1 className="text-3xl md:text-5xl font-bold tracking-tight mb-2">文章管理</h1>
             <p className="text-sm md:text-base text-zinc-500 dark:text-zinc-400">
@@ -356,6 +356,6 @@ export default function AdminPostsPage() {
         onRemoveTag={handleRemoveTag}
         onSave={saveQuickEdit}
       />
-    </div>
+    </>
   )
 }

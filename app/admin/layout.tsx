@@ -11,9 +11,9 @@ export const metadata = {
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <AdminProtector>
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-zinc-50 text-zinc-950 dark:bg-zinc-950 dark:text-zinc-50">
         <AdminHeader />
-        <main className="container mx-auto max-w-6xl px-4 py-8">
+        <main className="min-h-[calc(100vh-4.5rem)]">
           {children}
         </main>
         <Toaster />
