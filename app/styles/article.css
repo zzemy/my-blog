@@ -85,9 +85,9 @@
   --article-code-divider: rgb(15 23 42 / 7%);
   --article-code-gutter: var(--article-code-surface);
   --article-code-shadow: 0 14px 36px rgb(15 23 42 / 8%);
-  --article-code-scrollbar-track: rgb(15 23 42 / 8%);
-  --article-code-scrollbar: rgb(100 116 139 / 62%);
-  --article-code-scrollbar-hover: rgb(71 85 105 / 88%);
+  --article-code-scrollbar-track: rgb(15 23 42 / 5%);
+  --article-code-scrollbar: rgb(100 116 139 / 42%);
+  --article-code-scrollbar-hover: rgb(71 85 105 / 68%);
   --article-code-text: #0f172a;
   --article-code-gutter-text: #6f7b88;
   --article-code-label: #334155;
@@ -121,9 +121,9 @@
   --article-code-divider: rgb(255 255 255 / 8%);
   --article-code-gutter: var(--article-code-surface);
   --article-code-shadow: 0 18px 38px rgb(0 0 0 / 18%), inset 0 1px 0 rgb(255 255 255 / 4%);
-  --article-code-scrollbar-track: rgb(255 255 255 / 7%);
-  --article-code-scrollbar: rgb(148 163 184 / 58%);
-  --article-code-scrollbar-hover: rgb(203 213 225 / 82%);
+  --article-code-scrollbar-track: rgb(255 255 255 / 5%);
+  --article-code-scrollbar: rgb(148 163 184 / 40%);
+  --article-code-scrollbar-hover: rgb(203 213 225 / 68%);
   --article-code-text: #f1f5f9;
   --article-code-gutter-text: #9ca6b2;
   --article-code-label: #d8dee7;
@@ -965,17 +965,21 @@
   position: relative;
   grid-column: 2;
   grid-row: 2;
-  height: 0.8rem;
-  margin: 0.36rem 1.15rem 0;
+  height: 0.6rem;
+  margin: 0.28rem 1.4rem 0;
   cursor: grab;
-  opacity: 0.82;
+  align-self: end;
+  opacity: 0.56;
   touch-action: none;
-  transition: opacity 160ms var(--article-motion);
+  transition:
+    opacity 160ms var(--article-motion),
+    transform 160ms var(--article-motion);
 }
 
 .article-content .code-window:hover .code-window-scrollbar,
 .article-content .code-window-scrollbar:active {
   opacity: 1;
+  transform: translateY(-1px);
 }
 
 .article-content .code-window-scrollbar.is-hidden {
@@ -985,32 +989,32 @@
 .article-content .code-window-scrollbar::before {
   content: "";
   position: absolute;
-  top: 0.37rem;
-  right: 0;
-  left: 0;
-  height: 2px;
+  top: 0.27rem;
+  right: 0.15rem;
+  left: 0.15rem;
+  height: 1px;
   border-radius: 999px;
   background: var(--article-code-scrollbar-track);
 }
 
 .article-content .code-window-scrollbar-thumb {
   position: absolute;
-  top: 0.25rem;
-  height: 0.26rem;
-  min-width: 3.6rem;
+  top: 0.18rem;
+  height: 0.18rem;
+  min-width: 3.15rem;
   border-radius: 999px;
   background: var(--article-code-scrollbar);
-  box-shadow: 0 1px 0 rgb(255 255 255 / 12%);
   transition:
     background-color 160ms var(--article-motion),
     height 160ms var(--article-motion),
-    top 160ms var(--article-motion);
+    top 160ms var(--article-motion),
+    opacity 160ms var(--article-motion);
 }
 
 .article-content .code-window-scrollbar:hover .code-window-scrollbar-thumb,
 .article-content .code-window-scrollbar:active .code-window-scrollbar-thumb {
-  top: 0.2rem;
-  height: 0.36rem;
+  top: 0.14rem;
+  height: 0.28rem;
   background: var(--article-code-scrollbar-hover);
 }
 
