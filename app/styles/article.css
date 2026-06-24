@@ -912,8 +912,8 @@
   overflow-x: auto;
   overflow-y: hidden;
   overscroll-behavior-x: contain;
-  scrollbar-color: var(--article-muted) transparent;
-  scrollbar-width: thin;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 .article-content .code-window-body-no-gutter .code-window-scroll {
@@ -921,16 +921,9 @@
 }
 
 .article-content .code-window-scroll::-webkit-scrollbar {
-  height: 8px;
-}
-
-.article-content .code-window-scroll::-webkit-scrollbar-thumb {
-  border-radius: 999px;
-  background-color: color-mix(in srgb, var(--article-muted), transparent 36%);
-}
-
-.article-content .code-window-scroll::-webkit-scrollbar-track {
-  background: transparent;
+  display: none;
+  width: 0;
+  height: 0;
 }
 
 .article-content .code-window-pre {
