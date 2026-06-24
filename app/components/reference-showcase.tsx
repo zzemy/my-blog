@@ -3,6 +3,7 @@
 import { useState, type ReactNode } from 'react'
 import { Check, CheckCircle2, ChevronDown, CircleAlert, Copy, Info, Network, Quote } from 'lucide-react'
 import styles from './components-page.module.css'
+import { useCodeWindowScrollbar } from '@/shared/components/common/use-code-window-scrollbar'
 
 type CalloutTone = 'note' | 'quote' | 'tip' | 'info' | 'important' | 'warning' | 'success' | 'caution'
 
@@ -163,6 +164,15 @@ function CodeWindow({
   const [collapsed, setCollapsed] = useState(false)
   const lines = code.trimEnd().split('\n')
   const resolvedFileName = fileName === undefined ? getCodeExampleFileName(label) : fileName
+  const {
+    handleScrollbarPointerDown,
+    handleScrollbarPointerMove,
+    handleScrollbarPointerUp,
+    handleViewportWheel,
+    scrollbar,
+    updateScrollbar,
+    viewportRef,
+  } = useCodeWindowScrollbar(code)
   const onCopy = async () => {
     await navigator.clipboard.writeText(code.trimEnd())
     setCopied(true)
@@ -170,7 +180,7 @@ function CodeWindow({
   }
 
   return (
-    <div className={`code-window not-prose ${collapsed ? 'is-collapsed' : ''}`}>
+    <div className={`code-window has-custom-scrollbar not-prose ${collapsed ? 'is-collapsed' : ''}`}>
       <div className="code-window-header">
         <div className="code-window-titlebar">
           <span className="code-window-dots" aria-hidden="true">
@@ -196,7 +206,7 @@ function CodeWindow({
           </button>
         </div>
       </div>
-      <div className="code-window-body">
+      <div className={`code-window-body ${showLineNumbers ? '' : 'code-window-body-no-gutter'}`}>
         {showLineNumbers ? (
           <div className="code-window-gutter" aria-hidden="true">
             {lines.map((_, index) => (
@@ -204,17 +214,31 @@ function CodeWindow({
             ))}
           </div>
         ) : null}
-        <pre className="code-window-pre">
-          <code>
-            {highlightedLines
-              ? highlightedLines.map((line, index) => (
-                  <span className={styles.codeWindowLine} key={`${label}-line-${index}`}>
-                    {line}
-                  </span>
-                ))
-              : code}
-          </code>
-        </pre>
+        <div ref={viewportRef} className="code-window-scroll" onScroll={updateScrollbar} onWheel={handleViewportWheel}>
+          <pre className="code-window-pre">
+            <code>
+              {highlightedLines
+                ? highlightedLines.map((line, index) => (
+                    <span className={styles.codeWindowLine} key={`${label}-line-${index}`}>
+                      {line}
+                    </span>
+                  ))
+                : code}
+            </code>
+          </pre>
+        </div>
+        <div
+          className={`code-window-scrollbar ${scrollbar.scrollable ? '' : 'is-hidden'}`}
+          onPointerDown={handleScrollbarPointerDown}
+          onPointerMove={handleScrollbarPointerMove}
+          onPointerUp={handleScrollbarPointerUp}
+          onPointerCancel={handleScrollbarPointerUp}
+        >
+          <div
+            className="code-window-scrollbar-thumb"
+            style={{ left: `${scrollbar.left}%`, width: `${scrollbar.width}%` }}
+          />
+        </div>
       </div>
     </div>
   )

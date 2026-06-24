@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { NodeViewContent, NodeViewWrapper } from '@tiptap/react'
 import type { NodeViewProps } from '@tiptap/react'
 import { Check, ChevronDown, Copy } from 'lucide-react'
+import { useCodeWindowScrollbar } from '@/shared/components/common/use-code-window-scrollbar'
 
 export function CodeBlockView({ node }: NodeViewProps) {
   const [copied, setCopied] = useState(false)
@@ -12,6 +13,15 @@ export function CodeBlockView({ node }: NodeViewProps) {
   const language = formatCodeLanguage(node.attrs.language)
   const fileName = getCodeFileName(node.attrs.language)
   const lines = textContent.split('\n')
+  const {
+    handleScrollbarPointerDown,
+    handleScrollbarPointerMove,
+    handleScrollbarPointerUp,
+    handleViewportWheel,
+    scrollbar,
+    updateScrollbar,
+    viewportRef,
+  } = useCodeWindowScrollbar(textContent)
 
   if (lines.length > 1 && lines[lines.length - 1].trim() === '') {
     lines.pop()
@@ -24,7 +34,7 @@ export function CodeBlockView({ node }: NodeViewProps) {
   }
 
   return (
-    <NodeViewWrapper className={`code-window not-prose group relative ${collapsed ? 'is-collapsed' : ''}`}>
+    <NodeViewWrapper className={`code-window has-custom-scrollbar not-prose group relative ${collapsed ? 'is-collapsed' : ''}`}>
       <div className="code-window-header">
         <div className="code-window-titlebar">
           <span className="code-window-dots" aria-hidden="true">
@@ -59,9 +69,23 @@ export function CodeBlockView({ node }: NodeViewProps) {
             </span>
           ))}
         </div>
-        <pre className="code-window-pre">
-          <NodeViewContent className="!bg-transparent !p-0 !whitespace-pre !font-inherit !text-inherit" />
-        </pre>
+        <div ref={viewportRef} className="code-window-scroll" onScroll={updateScrollbar} onWheel={handleViewportWheel}>
+          <pre className="code-window-pre">
+            <NodeViewContent className="!bg-transparent !p-0 !whitespace-pre !font-inherit !text-inherit" />
+          </pre>
+        </div>
+        <div
+          className={`code-window-scrollbar ${scrollbar.scrollable ? '' : 'is-hidden'}`}
+          onPointerDown={handleScrollbarPointerDown}
+          onPointerMove={handleScrollbarPointerMove}
+          onPointerUp={handleScrollbarPointerUp}
+          onPointerCancel={handleScrollbarPointerUp}
+        >
+          <div
+            className="code-window-scrollbar-thumb"
+            style={{ left: `${scrollbar.left}%`, width: `${scrollbar.width}%` }}
+          />
+        </div>
       </div>
     </NodeViewWrapper>
   )

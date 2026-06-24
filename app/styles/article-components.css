@@ -181,7 +181,7 @@
   border: 0;
   border-radius: 6px;
   background: transparent;
-  color: color-mix(in oklch, var(--article-muted), var(--article-heading) 18%);
+  color: var(--article-code-label, color-mix(in srgb, var(--article-muted), var(--article-heading) 26%));
   padding: 0;
   font-size: 0.86rem;
   font-weight: 850;
@@ -192,7 +192,7 @@
 .article-content .code-window-file {
   overflow: hidden;
   max-width: 12rem;
-  color: color-mix(in oklch, var(--article-muted), var(--article-heading) 8%);
+  color: var(--article-code-file, color-mix(in srgb, var(--article-muted), var(--article-heading) 16%));
   font-family: "JetBrains Mono", "Menlo", "Consolas", monospace;
   font-size: 0.74rem;
   font-weight: 650;

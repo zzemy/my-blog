@@ -66,7 +66,7 @@
 
 .dark :where(.article-content, .admin-editor) .hljs-comment,
 .dark :where(.article-content, .admin-editor) .hljs-quote {
-  color: var(--article-syntax-comment, #7aa397);
+  color: var(--article-syntax-comment, #7f8a98);
 }
 
 .dark :where(.article-content, .admin-editor) .hljs-keyword,
@@ -75,16 +75,16 @@
 .dark :where(.article-content, .admin-editor) .hljs-section,
 .dark :where(.article-content, .admin-editor) .hljs-link,
 .dark :where(.article-content, .admin-editor) .hljs-meta {
-  color: var(--article-syntax-keyword, #8ab4f8);
+  color: var(--article-syntax-keyword, #c9d8ee);
 }
 
 .dark :where(.article-content, .admin-editor) .hljs-name {
-  color: var(--article-syntax-name, #7dcfff);
+  color: var(--article-syntax-name, #f1f5f9);
 }
 
 .dark :where(.article-content, .admin-editor) .hljs-string,
 .dark :where(.article-content, .admin-editor) .hljs-meta-string {
-  color: var(--article-syntax-string, #8bd5ca);
+  color: var(--article-syntax-string, #cbd5e1);
 }
 
 .dark :where(.article-content, .admin-editor) .hljs-attr,
@@ -92,27 +92,27 @@
 .dark :where(.article-content, .admin-editor) .hljs-template-variable,
 .dark :where(.article-content, .admin-editor) .hljs-template-tag,
 .dark :where(.article-content, .admin-editor) .hljs-property {
-  color: var(--article-syntax-attr, #89ddff);
+  color: var(--article-syntax-attr, #d7dee8);
 }
 
 .dark :where(.article-content, .admin-editor) .hljs-title,
 .dark :where(.article-content, .admin-editor) .hljs-title.function_,
 .dark :where(.article-content, .admin-editor) .hljs-doctag {
-  color: var(--article-syntax-title, #b4cafe);
+  color: var(--article-syntax-title, #f5f8fb);
 }
 
 .dark :where(.article-content, .admin-editor) .hljs-type,
 .dark :where(.article-content, .admin-editor) .hljs-built_in,
 .dark :where(.article-content, .admin-editor) .hljs-class .hljs-title {
-  color: var(--article-syntax-type, #4ec9b0);
+  color: var(--article-syntax-type, #d7dee8);
 }
 
 .dark :where(.article-content, .admin-editor) .hljs-number,
 .dark :where(.article-content, .admin-editor) .hljs-symbol,
 .dark :where(.article-content, .admin-editor) .hljs-bullet {
-  color: var(--article-syntax-number, #b5cea8);
+  color: var(--article-syntax-number, #d5dde7);
 }
 
 .dark :where(.article-content, .admin-editor) .hljs-regexp {
-  color: var(--article-syntax-regexp, #7aa2f7);
+  color: var(--article-syntax-regexp, #c9d8ee);
 }
