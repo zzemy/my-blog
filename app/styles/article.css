@@ -102,31 +102,31 @@
 }
 
 .dark .article-shell {
-  --article-text: oklch(0.84 0.012 255);
-  --article-heading: oklch(0.94 0.006 260);
-  --article-muted: oklch(0.68 0.014 260);
-  --article-soft: #2b2b2b;
-  --article-panel: #242424;
-  --article-line: oklch(1 0 0 / 12%);
-  --article-accent: oklch(0.68 0.095 188);
-  --article-code-inline: var(--article-soft);
-  --article-code-surface: #202020;
-  --article-code-header: #2b2b2b;
-  --article-code-border: #3a3a3a;
-  --article-code-divider: #343434;
-  --article-code-gutter: #1c1c1c;
-  --article-code-shadow: 0 18px 38px rgb(0 0 0 / 22%), inset 0 1px 0 rgb(255 255 255 / 4%);
-  --article-code-scrollbar: rgb(255 255 255 / 20%);
-  --article-code-text: #dadada;
-  --article-code-highlight: #343434;
+  --article-text: #d7d2c8;
+  --article-heading: #f1eee7;
+  --article-muted: #aaa39a;
+  --article-soft: #2a2926;
+  --article-panel: #232220;
+  --article-line: rgb(255 255 255 / 11%);
+  --article-accent: #8fa6a0;
+  --article-code-inline: #29302d;
+  --article-code-surface: #242321;
+  --article-code-header: #2c2b28;
+  --article-code-border: #3a3935;
+  --article-code-divider: #34332f;
+  --article-code-gutter: #201f1d;
+  --article-code-shadow: 0 16px 34px rgb(0 0 0 / 18%), inset 0 1px 0 rgb(255 255 255 / 4%);
+  --article-code-scrollbar: rgb(215 210 200 / 22%);
+  --article-code-text: #e4dfd6;
+  --article-code-highlight: rgb(143 166 160 / 14%);
   --article-h2-line: color-mix(in oklch, var(--article-line), transparent 10%);
   --article-rule-color: var(--article-accent);
   --article-rule-glow: color-mix(in oklch, var(--article-accent), transparent 40%);
-  --article-block-border: rgb(255 255 255 / 12%);
-  --article-block-bg: #242424;
-  --article-block-bg-hover: #2b2b2b;
-  --article-block-shadow: 0 0 5px 2px rgb(0 0 0 / 20%);
-  --article-block-shadow-hover: 0 0 6px 4px rgb(0 0 0 / 24%);
+  --article-block-border: rgb(255 255 255 / 11%);
+  --article-block-bg: #242321;
+  --article-block-bg-hover: #2a2926;
+  --article-block-shadow: 0 0 5px 1px rgb(0 0 0 / 16%);
+  --article-block-shadow-hover: 0 0 6px 2px rgb(0 0 0 / 18%);
   --article-table-header: transparent;
   --article-motion: cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -167,16 +167,16 @@
 
 .dark .article-shell,
 .dark .admin-editor {
-  --article-syntax-comment: #7e8783;
-  --article-syntax-keyword: #8fa8d8;
-  --article-syntax-name: #cfd6d3;
-  --article-syntax-string: #a8b99f;
-  --article-syntax-attr: #b7a8d8;
-  --article-syntax-variable: #c4cbc8;
-  --article-syntax-title: #d7ddd9;
+  --article-syntax-comment: #8f8a80;
+  --article-syntax-keyword: #b7becd;
+  --article-syntax-name: #d6d2c8;
+  --article-syntax-string: #b5c2aa;
+  --article-syntax-attr: #c2b7d1;
+  --article-syntax-variable: #d1ccc3;
+  --article-syntax-title: #e1ddd4;
   --article-syntax-type: #c9ad7a;
-  --article-syntax-number: #d0bd8a;
-  --article-syntax-regexp: #c49ac1;
+  --article-syntax-number: #c6b98e;
+  --article-syntax-regexp: #c5a9bc;
 }
 
 .article-hero {
@@ -233,6 +233,10 @@
   border-color: color-mix(in oklch, var(--article-accent), transparent 45%);
   background: color-mix(in oklch, var(--article-accent), transparent 92%);
   color: var(--article-heading);
+}
+
+.dark .article-content.prose a {
+  color: color-mix(in oklch, var(--article-heading), var(--article-accent) 20%);
 }
 
 .article-content.prose {
@@ -402,7 +406,7 @@
   border: 1px solid var(--article-block-border);
   border-radius: 6px;
   background: var(--article-block-bg-hover);
-  color: var(--article-accent);
+  color: var(--article-heading);
   padding: 0.1em 0.3em;
 }
 
@@ -415,7 +419,7 @@
   border-bottom-width: 2px;
   border-radius: 6px;
   background: var(--article-code-inline);
-  color: var(--article-accent);
+  color: var(--article-heading);
   padding: 1px 4px;
   font-family: "JetBrains Mono", "Menlo", "Consolas", monospace;
   font-size: 1em;
@@ -538,7 +542,7 @@
 .article-content.prose :not(pre) > code {
   border-radius: 6px;
   background: var(--article-code-inline);
-  color: var(--article-accent);
+  color: var(--article-heading);
   padding: 1px 4px;
   font-size: 1em;
   font-weight: 500;
