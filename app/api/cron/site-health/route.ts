@@ -134,6 +134,12 @@ async function collectSiteHealth() {
     const totalViews = metrics.reduce((sum, post) => sum + post.views, 0)
     const totalLikes = metrics.reduce((sum, post) => sum + post.likes, 0)
     const draftRows = (drafts as PostSummaryRow[] | null) ?? []
+    const topPosts = metrics
+      .filter((post) => post.views > 0 || post.likes > 0)
+      .sort((a, b) => b.views - a.views || b.likes - a.likes)
+      .slice(0, 5)
+    const recentDrafts = formatRecentDrafts(draftRows)
+    const staleDrafts = formatStaleDrafts(draftRows)
 
     return {
       supabaseOk: true,
@@ -142,14 +148,16 @@ async function collectSiteHealth() {
       totalViews,
       totalLikes,
       topTags: formatTopTags(posts),
-      topPosts: metrics
-        .filter((post) => post.views > 0 || post.likes > 0)
-        .sort((a, b) => b.views - a.views || b.likes - a.likes)
-        .slice(0, 5),
-      recentDrafts: formatRecentDrafts(draftRows),
-      staleDrafts: formatStaleDrafts(draftRows),
+      topPosts,
+      recentDrafts,
+      staleDrafts,
       recentPublished: formatRecentPublished(posts),
-      message: '这一封只保留需要你做判断的信息：哪些文章有人看，哪些草稿该清，系统采集是否正常。',
+      message: buildHealthMessage({
+        topPostsCount: topPosts.length,
+        staleDraftsCount: staleDrafts.length,
+        draftsCount: draftsCount ?? 0,
+        redisConfigured: Boolean(redis),
+      }),
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
@@ -246,6 +254,27 @@ function formatRecentPublished(posts: PostSummaryRow[]) {
 function formatDate(value?: string | null) {
   if (!value) return 'unknown'
   return value.slice(0, 10)
+}
+
+function buildHealthMessage({
+  topPostsCount,
+  staleDraftsCount,
+  draftsCount,
+  redisConfigured,
+}: {
+  topPostsCount: number
+  staleDraftsCount: number
+  draftsCount: number
+  redisConfigured: boolean
+}) {
+  const items = [
+    topPostsCount > 0 ? `${topPostsCount} 篇文章有浏览或点赞数据。` : '本期暂无文章互动数据。',
+    staleDraftsCount > 0 ? `${staleDraftsCount} 篇草稿超过 30 天未处理。` : '没有超过 30 天未处理的草稿。',
+    draftsCount > 0 ? `当前共有 ${draftsCount} 篇草稿。` : '当前没有草稿积压。',
+    redisConfigured ? '浏览量采集已启用。' : '浏览量采集未配置。',
+  ]
+
+  return items.join('\n')
 }
 
 function getSiteUrl() {
