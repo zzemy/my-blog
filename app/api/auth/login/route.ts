@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { validateCSRFToken } from '@/lib/csrf'
+import { sendAdminNotification } from '@/lib/email/admin-notification'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -111,6 +112,8 @@ export async function POST(request: NextRequest) {
       domain: isProduction ? '.blog.zzemy.top' : undefined,
     })
 
+    await sendAdminLoginNotification(request, data.user?.email || email)
+
     return response
   } catch (error) {
     console.error('[LOGIN] Error:', error)
@@ -119,4 +122,29 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     )
   }
+}
+
+async function sendAdminLoginNotification(request: NextRequest, email: string) {
+  if (process.env.ADMIN_LOGIN_EMAIL_NOTIFICATIONS !== 'true') {
+    return
+  }
+
+  await sendAdminNotification({
+    subject: '博客后台登录通知',
+    title: '博客后台发生一次登录',
+    message: '如果这不是你本人操作，请尽快检查 Supabase 账号和后台访问记录。',
+    lines: [
+      ['登录邮箱', email],
+      ['登录时间', new Date().toISOString()],
+      ['IP', getClientIp(request)],
+      ['User-Agent', request.headers.get('user-agent')],
+      ['环境', process.env.NODE_ENV],
+    ],
+  })
+}
+
+function getClientIp(request: NextRequest) {
+  return request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+    || request.headers.get('x-real-ip')
+    || 'unknown'
 }
