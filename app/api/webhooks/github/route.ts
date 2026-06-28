@@ -67,8 +67,12 @@ export async function POST(request: NextRequest) {
 
   const result = await sendAdminNotification({
     subject: `Giscus 新评论：${discussionTitle}`,
-    title: '博客收到一条新的 Giscus 评论',
+    title: '收到新的 Giscus 评论',
     message: commentBody || '评论内容为空或无法读取。',
+    action: {
+      label: '查看评论',
+      href: data.comment.html_url,
+    },
     lines: [
       ['评论者', actor],
       ['讨论标题', discussionTitle],
