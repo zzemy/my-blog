@@ -14,6 +14,7 @@ const navItems = [
   { href: '/posts', label: '文章' },
   { href: '/tags', label: '标签' },
   { href: '/guestbook', label: '留言' },
+  { href: '/contact', label: '联系' },
   { href: '/about', label: '关于' },
 ]
 
