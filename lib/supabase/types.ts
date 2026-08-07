@@ -161,6 +161,47 @@ export interface Database {
           metadata?: Record<string, unknown>
         }
       }
+      friend_links: {
+        Row: {
+          id: string
+          name: string
+          url: string
+          avatar_url: string | null
+          description: string | null
+          note: string | null
+          contact: string | null
+          status: 'pending' | 'approved' | 'rejected'
+          sort_order: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          url: string
+          avatar_url?: string | null
+          description?: string | null
+          note?: string | null
+          contact?: string | null
+          status?: 'pending' | 'approved' | 'rejected'
+          sort_order?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          url?: string
+          avatar_url?: string | null
+          description?: string | null
+          note?: string | null
+          contact?: string | null
+          status?: 'pending' | 'approved' | 'rejected'
+          sort_order?: number
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
   }
 }
@@ -180,3 +221,7 @@ export type TagUpdate = Database['public']['Tables']['tags']['Update']
 export type Media = Database['public']['Tables']['media']['Row']
 export type MediaInsert = Database['public']['Tables']['media']['Insert']
 export type MediaUpdate = Database['public']['Tables']['media']['Update']
+
+export type FriendLink = Database['public']['Tables']['friend_links']['Row']
+export type FriendLinkInsert = Database['public']['Tables']['friend_links']['Insert']
+export type FriendLinkUpdate = Database['public']['Tables']['friend_links']['Update']

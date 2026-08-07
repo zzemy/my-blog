@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useSupabaseAuthStore } from '@/lib/supabase-auth-store'
 import { Button } from '@/components/ui/button'
-import { BookOpen, LogOut, LayoutDashboard, FileText, Settings, Home, Menu, Image as ImageIcon, ExternalLink } from 'lucide-react'
+import { BookOpen, LogOut, LayoutDashboard, FileText, Settings, Home, Menu, Image as ImageIcon, ExternalLink, Link2 } from 'lucide-react'
 import { ModeToggle } from '@/shared/layout/mode-toggle'
 import {
   Sheet,
@@ -64,6 +64,13 @@ export function AdminHeader() {
             >
               <ImageIcon className="w-4 h-4" />
               媒体库
+            </Link>
+            <Link
+              href="/admin/friends"
+              className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50"
+            >
+              <Link2 className="h-4 w-4" />
+              友链
             </Link>
             <Link
               href="/admin/settings"
@@ -157,6 +164,14 @@ export function AdminHeader() {
                   >
                     <Settings className="w-4 h-4" />
                     系统设置
+                  </Link>
+                  <Link
+                    href="/admin/friends"
+                    onClick={() => setOpen(false)}
+                    className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50"
+                  >
+                    <Link2 className="w-4 h-4" />
+                    友链
                   </Link>
                   <div className="h-px bg-zinc-200 dark:bg-zinc-800 mx-2" />
                   <a

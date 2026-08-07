@@ -48,7 +48,7 @@ export function PostList({ posts, readMoreText }: PostListProps) {
 
         return (
           <motion.div key={post.id} variants={item} className="h-full">
-            <Card className="h-full border-border/70 shadow-sm transition-[border-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:border-border hover:shadow-md dark:shadow-sm dark:hover:shadow-md">
+            <Card className="h-full border-border/70 bg-card/80 shadow-sm backdrop-blur-sm transition-[border-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:border-border hover:shadow-md dark:bg-card/72 dark:shadow-sm dark:hover:shadow-md">
               <CardHeader className="space-y-3">
                 <CardTitle className="line-clamp-2 text-lg">
                   <Link

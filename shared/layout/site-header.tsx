@@ -13,6 +13,7 @@ const navItems = [
   { href: '/', label: '首页' },
   { href: '/posts', label: '文章' },
   { href: '/tags', label: '标签' },
+  { href: '/friends', label: '友链' },
   { href: '/guestbook', label: '留言' },
   { href: '/about', label: '关于' },
 ]
