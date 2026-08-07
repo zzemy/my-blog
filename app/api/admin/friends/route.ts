@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
     const client = getAdminClient(token || undefined)
     const { data, error } = await client
       .from('friend_links')
-      .insert({ ...parsed.data, avatar_url: parsed.data.avatar_url || null, note: parsed.data.note || null, contact: parsed.data.contact || null } as never)
+      .insert({ ...parsed.data, avatar_url: parsed.data.avatar_url || null, description: parsed.data.description || null, note: parsed.data.note || null, contact: parsed.data.contact || null } as never)
       .select()
       .single()
     if (error) throw error

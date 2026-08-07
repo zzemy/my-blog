@@ -21,7 +21,7 @@ type FormState = {
 
 const initialForm: FormState = {
   name: '',
-  url: '',
+  url: 'https://',
   avatar_url: '',
   description: '',
   contact: '',
@@ -72,10 +72,7 @@ function FriendLinkCard({ link }: { link: FriendLink }) {
             </a>
           </div>
         </div>
-        <p className="mt-5 line-clamp-3 flex-1 text-sm leading-7 text-muted-foreground dark:text-zinc-300">{link.description}</p>
-        {link.note && (
-          <p className="mt-4 border-l-2 border-primary/40 pl-3 text-xs leading-6 text-muted-foreground/90">{link.note}</p>
-        )}
+        {link.description && <p className="mt-5 line-clamp-3 flex-1 text-sm leading-7 text-muted-foreground dark:text-zinc-300">{link.description}</p>}
       </CardContent>
     </Card>
   )
@@ -169,13 +166,13 @@ export function FriendLinksView({ links }: { links: FriendLink[] }) {
           <form onSubmit={submitApplication} className="space-y-5 rounded-lg border border-border/70 bg-card/55 p-5 shadow-sm backdrop-blur-md dark:border-white/12 dark:bg-[#242424]/48 sm:p-7">
             <div className="grid gap-5 sm:grid-cols-2">
               <div className="grid gap-2"><Label htmlFor="friend-name">个人昵称 *</Label><Input id="friend-name" value={form.name} onChange={(event) => updateField('name', event.target.value)} placeholder="你希望展示的昵称" required maxLength={60} /></div>
-              <div className="grid gap-2"><Label htmlFor="friend-url">网站地址 *</Label><Input id="friend-url" type="url" value={form.url} onChange={(event) => updateField('url', event.target.value)} placeholder="https://example.com" required /></div>
+              <div className="grid gap-2"><Label htmlFor="friend-url">网站地址 *</Label><Input id="friend-url" type="url" value={form.url} onChange={(event) => updateField('url', event.target.value)} placeholder="example.com" required /></div>
             </div>
             <div className="grid gap-2"><Label htmlFor="friend-avatar">头像地址</Label><Input id="friend-avatar" type="url" value={form.avatar_url} onChange={(event) => updateField('avatar_url', event.target.value)} placeholder="https://example.com/avatar.png" /><p className="text-xs text-muted-foreground">没有头像也可以提交，页面会使用昵称首字。</p></div>
-            <div className="grid gap-2"><Label htmlFor="friend-description">网站介绍 *</Label><Textarea id="friend-description" value={form.description} onChange={(event) => updateField('description', event.target.value)} placeholder="一句话介绍你的网站" required maxLength={180} rows={3} className="resize-none" /></div>
+            <div className="grid gap-2"><Label htmlFor="friend-description">网站介绍</Label><Textarea id="friend-description" value={form.description} onChange={(event) => updateField('description', event.target.value)} placeholder="可选，一句话介绍你的网站" maxLength={180} rows={3} className="resize-none" /></div>
             <div className="grid gap-5 sm:grid-cols-2">
               <div className="grid gap-2"><Label htmlFor="friend-contact">联系方式</Label><Input id="friend-contact" value={form.contact} onChange={(event) => updateField('contact', event.target.value)} placeholder="邮箱 / QQ / Telegram" maxLength={120} /></div>
-              <div className="grid gap-2"><Label htmlFor="friend-note">备注</Label><Input id="friend-note" value={form.note} onChange={(event) => updateField('note', event.target.value)} placeholder="想对站长说的话" maxLength={180} /></div>
+              <div className="grid gap-2"><Label htmlFor="friend-note">给站长留言</Label><Input id="friend-note" value={form.note} onChange={(event) => updateField('note', event.target.value)} placeholder="选填，不会公开展示" maxLength={180} /></div>
             </div>
             <input tabIndex={-1} autoComplete="off" aria-hidden="true" className="absolute -left-[9999px] h-px w-px opacity-0" name="website" />
             {feedback && <p role="status" className={`rounded-md border px-3 py-2 text-sm ${feedback.type === 'success' ? 'border-emerald-500/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300' : 'border-destructive/25 bg-destructive/10 text-destructive'}`}>{feedback.text}</p>}

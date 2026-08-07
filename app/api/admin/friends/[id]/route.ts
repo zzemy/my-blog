@@ -21,6 +21,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     const payload = {
       ...parsed.data,
       ...(parsed.data.avatar_url !== undefined ? { avatar_url: parsed.data.avatar_url || null } : {}),
+      ...(parsed.data.description !== undefined ? { description: parsed.data.description || null } : {}),
       ...(parsed.data.note !== undefined ? { note: parsed.data.note || null } : {}),
       ...(parsed.data.contact !== undefined ? { contact: parsed.data.contact || null } : {}),
       updated_at: new Date().toISOString(),

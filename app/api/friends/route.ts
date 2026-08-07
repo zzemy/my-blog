@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
       name: parsed.data.name,
       url: parsed.data.url,
       avatar_url: parsed.data.avatar_url || null,
-      description: parsed.data.description,
+      description: parsed.data.description || null,
       note: parsed.data.note || null,
       contact: parsed.data.contact || null,
       status: 'pending' as const,

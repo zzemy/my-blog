@@ -17,7 +17,7 @@ export const friendLinkSubmissionSchema = z.object({
   name: z.string().trim().min(1, '请填写昵称').max(60, '昵称不能超过 60 个字符'),
   url: httpUrl,
   avatar_url: httpUrl.optional().or(z.literal('')),
-  description: z.string().trim().min(1, '请填写网站介绍').max(180, '介绍不能超过 180 个字符'),
+  description: z.string().trim().max(180, '介绍不能超过 180 个字符'),
   note: optionalText(180),
   contact: optionalText(120),
   csrfToken: z.string().trim().min(1, '请求已过期，请刷新页面后重试'),
