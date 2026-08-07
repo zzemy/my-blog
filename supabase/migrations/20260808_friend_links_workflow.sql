@@ -15,6 +15,7 @@ CREATE INDEX IF NOT EXISTS friend_links_status_sort_idx
   ON friend_links(status, sort_order, created_at DESC);
 
 DROP POLICY IF EXISTS "Friend links are viewable by everyone" ON friend_links;
+DROP POLICY IF EXISTS "Approved friend links are viewable by everyone" ON friend_links;
 
 CREATE POLICY "Approved friend links are viewable by everyone"
   ON friend_links FOR SELECT
