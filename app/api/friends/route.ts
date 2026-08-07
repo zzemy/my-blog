@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getAdminClient, hasValidServiceRoleKey } from '@/lib/supabase/client'
+import { getAdminClient } from '@/lib/supabase/client'
 import { validateCSRFToken } from '@/lib/csrf'
 import { sendAdminNotification } from '@/lib/email/admin-notification'
 import { friendLinkSubmissionSchema } from '@/lib/validation/friend-link'
@@ -31,10 +31,6 @@ export async function POST(request: NextRequest) {
 
     if (parsed.data.website) {
       return NextResponse.json({ success: true, message: '申请已提交' })
-    }
-
-    if (!hasValidServiceRoleKey()) {
-      return NextResponse.json({ error: '友链申请暂不可用，请稍后再试' }, { status: 503 })
     }
 
     const client = getAdminClient()
