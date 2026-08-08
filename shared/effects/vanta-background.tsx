@@ -47,6 +47,7 @@ export function VantaBackground() {
 
     const videos = [primary, secondary] as const
     const mediaOpacity = isDark ? 1 : LIGHT_MEDIA_OPACITY
+    const playbackRate = isDark ? 0.48 : 0.72
     const setOpacity = (video: HTMLVideoElement, opacity: number) => {
       video.style.opacity = String(opacity * mediaOpacity)
       video.style.transition = `opacity ${CROSSFADE_SECONDS}s ease-in-out, filter ${CROSSFADE_SECONDS}s ease-in-out`
@@ -58,7 +59,7 @@ export function VantaBackground() {
     const start = () => {
       setMediaReady(true)
       videos.forEach((video, index) => {
-        video.playbackRate = 0.42
+        video.playbackRate = playbackRate
         video.currentTime = 0
         setOpacity(video, index === activeVideoRef.current ? 1 : 0)
         setSoftness(video, 0)
@@ -77,7 +78,7 @@ export function VantaBackground() {
       const nextIndex = activeIndex === 0 ? 1 : 0
       const next = videos[nextIndex]
       next.currentTime = 0
-      next.playbackRate = 0.42
+      next.playbackRate = playbackRate
       setSoftness(current, 7)
       setSoftness(next, 7)
       setOpacity(next, 1)
@@ -110,7 +111,7 @@ export function VantaBackground() {
       transitioningRef.current = false
       setMediaReady(false)
     }
-  }, [effect, hasMounted, reducedMotion, playbackKey, themeReady])
+  }, [effect, hasMounted, isDark, isHomepage, playbackKey, reducedMotion, themeReady])
 
   if (!hasMounted || !themeReady || !isHomepage || effect === "none") return null
 
@@ -138,7 +139,7 @@ export function VantaBackground() {
               style={{ opacity: index === 0 ? (isDark ? 1 : LIGHT_MEDIA_OPACITY) : 0 }}
               muted
               playsInline
-              preload="metadata"
+              preload="auto"
             >
               <source src={videoSrc} type="video/mp4" />
             </video>
