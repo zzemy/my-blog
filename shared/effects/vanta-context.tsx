@@ -2,19 +2,13 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-type VantaEffectType = 'none' | 'birds' | 'waves' | 'globe' | 'topology' | 'rings' | 'dots' | 'halo';
+type VantaEffectType = 'none' | 'video';
 
-const DEFAULT_VANTA_EFFECT: VantaEffectType = 'halo';
+const DEFAULT_VANTA_EFFECT: VantaEffectType = 'video';
 
 export const VANTA_EFFECTS: VantaEffectType[] = [
   'none',
-  'birds', 
-  'waves', 
-  'globe', 
-  'topology', 
-  'rings', 
-  'dots', 
-  'halo'
+  'video',
 ];
 
 interface VantaContextType {
@@ -27,32 +21,8 @@ const VantaContext = createContext<VantaContextType | undefined>(undefined);
 
 const normalizeEffect = (value: string | null): VantaEffectType | null => {
   if (!value) return null;
-  if (value === 'global') return 'globe';
+  if (value !== 'none') return 'video';
   return VANTA_EFFECTS.includes(value as VantaEffectType) ? (value as VantaEffectType) : null;
-};
-
-const getPreferredTheme = (): 'light' | 'dark' => {
-  if (typeof window === 'undefined') return 'dark';
-
-  const savedTheme = localStorage.getItem('theme');
-  if (savedTheme === 'light' || savedTheme === 'dark') {
-    return savedTheme;
-  }
-
-  return document.documentElement.classList.contains('dark') ? 'dark' : 'light';
-};
-
-const getDeviceDefaultEffect = (): VantaEffectType => {
-  if (typeof window === 'undefined') return DEFAULT_VANTA_EFFECT;
-
-  const ua = navigator.userAgent || '';
-  const isMobileUA = /Mobi|Android|iPhone|iPad|iPod/i.test(ua);
-  const isSmallScreen = window.innerWidth < 768;
-  const isMobile = isMobileUA || isSmallScreen;
-  const preferredTheme = getPreferredTheme();
-
-  if (isMobile) return 'globe';
-  return preferredTheme === 'light' ? 'topology' : 'halo';
 };
 
 export function VantaProvider({ children }: { children: React.ReactNode }) {
@@ -75,9 +45,8 @@ export function VantaProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    const defaultEffect = getDeviceDefaultEffect();
-    setEffect(defaultEffect);
-    localStorage.setItem('vanta-effect', defaultEffect);
+    setEffect(DEFAULT_VANTA_EFFECT);
+    localStorage.setItem('vanta-effect', DEFAULT_VANTA_EFFECT);
     localStorage.setItem('vanta-user-selected', '0');
   }, []);
 
@@ -85,28 +54,7 @@ export function VantaProvider({ children }: { children: React.ReactNode }) {
     if (typeof window === 'undefined') return;
     if (hasUserSelected) return;
 
-    const applyThemeDefault = () => {
-      const nextDefault = getDeviceDefaultEffect();
-      setEffect((prev) => {
-        if (prev === nextDefault) return prev;
-        localStorage.setItem('vanta-effect', nextDefault);
-        localStorage.setItem('vanta-user-selected', '0');
-        return nextDefault;
-      });
-    };
-
-    applyThemeDefault();
-
-    const observer = new MutationObserver(() => {
-      applyThemeDefault();
-    });
-
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['class'],
-    });
-
-    return () => observer.disconnect();
+    return undefined;
   }, [hasUserSelected]);
 
   const saveEffect = (newEffect: VantaEffectType, byUser = false) => {

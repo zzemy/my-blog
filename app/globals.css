@@ -169,4 +169,9 @@
     letter-spacing: 0;
     font-weight: 400;
   }
+  .hero-display {
+    font-family: Georgia, "Times New Roman", "Noto Serif SC", "Songti SC", serif;
+    letter-spacing: 0;
+    font-weight: 400;
+  }
 }

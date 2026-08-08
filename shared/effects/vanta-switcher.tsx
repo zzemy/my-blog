@@ -11,6 +11,11 @@ import { useVanta, VANTA_EFFECTS } from "./vanta-context"
 import { Palette } from "lucide-react"
 import { cn } from "@/lib/utils"
 
+const effectLabels = {
+  none: "关闭",
+  video: "烟雾视频",
+} as const
+
 export function VantaSwitcher() {
   const { setEffect, effect } = useVanta()
 
@@ -20,10 +25,10 @@ export function VantaSwitcher() {
         <Button
           variant="outline"
           size="icon"
-          title={`Change Background Effect (Current: ${effect})`}
+          title={`背景纹理：${effectLabels[effect]}`}
         >
           <Palette className="h-[1.2rem] w-[1.2rem]" />
-          <span className="sr-only">Change Background Effect</span>
+          <span className="sr-only">切换背景纹理</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
@@ -32,11 +37,10 @@ export function VantaSwitcher() {
             key={vantaEffect}
             onClick={() => setEffect(vantaEffect)}
             className={cn(
-              "capitalize",
               effect === vantaEffect && "bg-accent text-accent-foreground"
             )}
           >
-            {vantaEffect}
+            {effectLabels[vantaEffect]}
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>

@@ -13,8 +13,17 @@ const calcDays = () => {
   return Math.floor(diff / MS_PER_DAY)
 }
 
-export function SiteUptimeBadge() {
+export function SiteUptimeBadge({ compact = false }: { compact?: boolean }) {
   const days = useMemo(() => calcDays(), [])
+
+  if (compact) {
+    return (
+      <span className="hidden items-center gap-1.5 font-mono text-[11px] text-muted-foreground xl:inline-flex" title={`本站已稳定运行 ${days} 天`}>
+        <span className="size-1.5 rounded-full bg-emerald-500" aria-hidden />
+        <span>运行 {days} 天</span>
+      </span>
+    )
+  }
 
   const handleConfetti = () => {
     const duration = 3 * 1000
