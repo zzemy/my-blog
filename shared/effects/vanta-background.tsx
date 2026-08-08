@@ -50,10 +50,7 @@ export function VantaBackground() {
     const playbackRate = isDark ? 0.48 : 0.72
     const setOpacity = (video: HTMLVideoElement, opacity: number) => {
       video.style.opacity = String(opacity * mediaOpacity)
-      video.style.transition = `opacity ${CROSSFADE_SECONDS}s ease-in-out, filter ${CROSSFADE_SECONDS}s ease-in-out`
-    }
-    const setSoftness = (video: HTMLVideoElement, softness: number) => {
-      video.style.filter = softness > 0 ? `blur(${softness}px)` : ""
+      video.style.transition = `opacity ${CROSSFADE_SECONDS}s ease-in-out`
     }
 
     const start = () => {
@@ -62,7 +59,6 @@ export function VantaBackground() {
         video.playbackRate = playbackRate
         video.currentTime = 0
         setOpacity(video, index === activeVideoRef.current ? 1 : 0)
-        setSoftness(video, 0)
       })
       void primary.play().catch(() => {})
     }
@@ -79,8 +75,6 @@ export function VantaBackground() {
       const next = videos[nextIndex]
       next.currentTime = 0
       next.playbackRate = playbackRate
-      setSoftness(current, 7)
-      setSoftness(next, 7)
       setOpacity(next, 1)
       setOpacity(current, 0)
       void next.play().catch(() => {})
@@ -90,8 +84,6 @@ export function VantaBackground() {
         current.pause()
         current.currentTime = 0
         setOpacity(current, 0)
-        setSoftness(current, 0)
-        setSoftness(next, 0)
         transitioningRef.current = false
       }, CROSSFADE_SECONDS * 1000)
     }
@@ -103,7 +95,6 @@ export function VantaBackground() {
     return () => {
       videos.forEach((video) => {
         video.pause()
-        video.style.filter = ""
         video.removeEventListener("timeupdate", handleTimeUpdate)
       })
       primary.removeEventListener("loadedmetadata", start)
