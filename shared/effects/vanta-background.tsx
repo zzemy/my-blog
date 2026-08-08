@@ -8,12 +8,11 @@ import { useVanta } from "./vanta-context"
 import { shouldUseVantaBackground } from "./vanta-routes"
 
 const VIDEO_SRC = "/videos/hero-smoke-720.mp4"
-const POSTER_SRC = "/videos/hero-smoke-poster.jpg"
 const LIGHT_VIDEO_SRC = "/videos/hero-light-clouds-720.mp4"
-const LIGHT_POSTER_SRC = "/videos/hero-light-clouds-poster.jpg"
 const MAX_VIDEO_SECONDS = 14
-const CROSSFADE_SECONDS = 1.8
+const CROSSFADE_SECONDS = 3.6
 const LIGHT_MEDIA_OPACITY = 0.14
+const HERO_READY_EVENT = "blog:hero-ready"
 
 export function VantaBackground() {
   const pathname = usePathname()
@@ -21,35 +20,48 @@ export function VantaBackground() {
   const reducedMotion = useReducedMotion()
   const { resolvedTheme } = useTheme()
   const [hasMounted, setHasMounted] = useState(false)
+  const [mediaReady, setMediaReady] = useState(false)
+  const [heroReady, setHeroReady] = useState(false)
   const primaryVideoRef = useRef<HTMLVideoElement>(null)
   const secondaryVideoRef = useRef<HTMLVideoElement>(null)
   const activeVideoRef = useRef<0 | 1>(0)
   const transitioningRef = useRef(false)
   const isHomepage = shouldUseVantaBackground(pathname)
   const isDark = resolvedTheme === "dark"
+  const themeReady = resolvedTheme === "dark" || resolvedTheme === "light"
   const playbackKey = `${isHomepage}:${isDark}`
   const videoSrc = isDark ? VIDEO_SRC : LIGHT_VIDEO_SRC
-  const posterSrc = isDark ? POSTER_SRC : LIGHT_POSTER_SRC
 
   useEffect(() => setHasMounted(true), [])
 
   useEffect(() => {
+    const handleHeroReady = () => setHeroReady(true)
+    window.addEventListener(HERO_READY_EVENT, handleHeroReady)
+    return () => window.removeEventListener(HERO_READY_EVENT, handleHeroReady)
+  }, [hasMounted])
+
+  useEffect(() => {
     const primary = primaryVideoRef.current
     const secondary = secondaryVideoRef.current
-    if (!hasMounted || !primary || !secondary || reducedMotion || effect === "none" || !isHomepage) return
+    if (!hasMounted || !themeReady || !primary || !secondary || reducedMotion || effect === "none" || !isHomepage) return
 
     const videos = [primary, secondary] as const
     const mediaOpacity = isDark ? 1 : LIGHT_MEDIA_OPACITY
     const setOpacity = (video: HTMLVideoElement, opacity: number) => {
       video.style.opacity = String(opacity * mediaOpacity)
-      video.style.transition = `opacity ${CROSSFADE_SECONDS}s ease-in-out`
+      video.style.transition = `opacity ${CROSSFADE_SECONDS}s ease-in-out, filter ${CROSSFADE_SECONDS}s ease-in-out`
+    }
+    const setSoftness = (video: HTMLVideoElement, softness: number) => {
+      video.style.filter = softness > 0 ? `blur(${softness}px)` : ""
     }
 
     const start = () => {
+      setMediaReady(true)
       videos.forEach((video, index) => {
         video.playbackRate = 0.42
         video.currentTime = 0
         setOpacity(video, index === activeVideoRef.current ? 1 : 0)
+        setSoftness(video, 0)
       })
       void primary.play().catch(() => {})
     }
@@ -66,6 +78,8 @@ export function VantaBackground() {
       const next = videos[nextIndex]
       next.currentTime = 0
       next.playbackRate = 0.42
+      setSoftness(current, 7)
+      setSoftness(next, 7)
       setOpacity(next, 1)
       setOpacity(current, 0)
       void next.play().catch(() => {})
@@ -75,6 +89,8 @@ export function VantaBackground() {
         current.pause()
         current.currentTime = 0
         setOpacity(current, 0)
+        setSoftness(current, 0)
+        setSoftness(next, 0)
         transitioningRef.current = false
       }, CROSSFADE_SECONDS * 1000)
     }
@@ -86,15 +102,17 @@ export function VantaBackground() {
     return () => {
       videos.forEach((video) => {
         video.pause()
+        video.style.filter = ""
         video.removeEventListener("timeupdate", handleTimeUpdate)
       })
       primary.removeEventListener("loadedmetadata", start)
       activeVideoRef.current = 0
       transitioningRef.current = false
+      setMediaReady(false)
     }
-  }, [effect, hasMounted, reducedMotion, playbackKey])
+  }, [effect, hasMounted, reducedMotion, playbackKey, themeReady])
 
-  if (!hasMounted || !isHomepage || effect === "none") return null
+  if (!hasMounted || !themeReady || !isHomepage || effect === "none") return null
 
   const mediaClass = isDark
     ? "grayscale brightness-[0.62] contrast-110"
@@ -105,10 +123,10 @@ export function VantaBackground() {
 
   return (
     <div aria-hidden="true" className={`pointer-events-none fixed inset-0 -z-10 overflow-hidden ${isDark ? "bg-[#101214]" : "bg-[#f4f5f6]"}`}>
+      <div className={`absolute inset-0 transition-opacity duration-700 ${mediaReady && (heroReady || reducedMotion) ? "opacity-0" : "opacity-100"} ${isDark ? "bg-[#101214]" : "bg-[#f4f5f6]"}`} />
       {reducedMotion ? (
         <div
-          className={`absolute inset-0 bg-cover bg-center ${mediaClass}`}
-          style={{ backgroundImage: `url('${posterSrc}')`, opacity: isDark ? 1 : 0.14 }}
+          className={`absolute inset-0 ${isDark ? "bg-[#101214]" : "bg-[#f4f5f6]"}`}
         />
       ) : (
         <div className="absolute inset-0">
@@ -121,7 +139,6 @@ export function VantaBackground() {
               muted
               playsInline
               preload="metadata"
-              poster={posterSrc}
             >
               <source src={videoSrc} type="video/mp4" />
             </video>

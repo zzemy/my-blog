@@ -1,6 +1,9 @@
 'use client'
 
 import { useReducedMotion, motion, useMotionValue, useSpring } from 'framer-motion'
+import { useEffect } from 'react'
+
+const HERO_REVEAL_DELAY = 1200
 
 type HeroTitleProps = {
   title: string
@@ -13,6 +16,11 @@ export function HeroTitle({ title, description }: HeroTitleProps) {
   const offsetY = useMotionValue(0)
   const x = useSpring(offsetX, { stiffness: 55, damping: 18, mass: 0.8 })
   const y = useSpring(offsetY, { stiffness: 55, damping: 18, mass: 0.8 })
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => window.dispatchEvent(new Event('blog:hero-ready')), HERO_REVEAL_DELAY)
+    return () => window.clearTimeout(timer)
+  }, [])
 
   const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
     if (reducedMotion) return
@@ -38,7 +46,7 @@ export function HeroTitle({ title, description }: HeroTitleProps) {
       <motion.h1
         aria-label={title}
         className="hero-display text-6xl font-normal leading-none text-foreground sm:text-7xl md:text-8xl lg:text-[8.5rem]"
-        initial={reducedMotion ? undefined : { opacity: 0.92 }}
+        initial={false}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         style={reducedMotion ? undefined : { x, y }}
@@ -48,7 +56,7 @@ export function HeroTitle({ title, description }: HeroTitleProps) {
             <motion.span
               key={`${character}-${index}`}
               className="inline-block"
-              initial={reducedMotion ? undefined : { opacity: 0, y: 30, filter: 'blur(10px)' }}
+              initial={false}
               animate={reducedMotion ? undefined : { opacity: 1, y: 0, filter: 'blur(0px)' }}
               transition={{
                 duration: reducedMotion ? 0.2 : 0.85,
@@ -63,7 +71,7 @@ export function HeroTitle({ title, description }: HeroTitleProps) {
       </motion.h1>
       <motion.p
         className="max-w-[750px] font-handwriting-cjk text-lg leading-8 text-muted-foreground/80 sm:text-xl"
-        initial={reducedMotion ? { opacity: 0 } : { opacity: 0, y: 12, filter: 'blur(6px)' }}
+        initial={false}
         animate={reducedMotion ? { opacity: 1 } : { opacity: 1, y: 0, filter: 'blur(0px)' }}
         transition={{ duration: reducedMotion ? 0.2 : 0.8, delay: reducedMotion ? 0 : 0.35, ease: [0.16, 1, 0.3, 1] }}
       >

@@ -31,7 +31,7 @@ export function PostList({ posts, readMoreText }: PostListProps) {
     <motion.div 
       className="border-t border-border/70 dark:border-white/12"
       variants={container}
-      initial="hidden"
+      initial={false}
       animate="show"
     >
       {posts.map((post) => {
