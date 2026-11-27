@@ -7,18 +7,19 @@
 
 .component-callout {
   display: grid;
-  gap: 0.72rem;
-  --callout-bg: #f2f8fc;
-  --callout-icon: #4b6f82;
-  --callout-border: transparent;
-  --callout-shadow: transparent;
-  --callout-text: #18394b;
+  gap: 0.55rem;
+  --callout-bg: #f3f7fb;
+  --callout-icon: #476b85;
+  --callout-border: rgb(71 107 133 / 16%);
+  --callout-shadow: none;
+  --callout-title: #1e3a4c;
+  --callout-text: #2c4759;
   border: 1px solid var(--callout-border);
-  border-left: 4px solid var(--callout-icon);
-  border-radius: 12px;
+  border-left: 3.5px solid var(--callout-icon);
+  border-radius: 10px;
   background: var(--callout-bg);
   color: var(--callout-text);
-  padding: 0.9rem 1.15rem 0.95rem;
+  padding: 0.9rem 1.15rem;
   box-shadow: var(--callout-shadow);
   transition:
     background-color 180ms var(--article-motion),
@@ -27,99 +28,116 @@
 }
 
 .component-callout-info {
-  --callout-bg: #eef8ff;
-  --callout-icon: #0b7db8;
-  --callout-shadow: transparent;
-  --callout-text: #075985;
+  --callout-bg: #eff7ff;
+  --callout-icon: #0284c7;
+  --callout-border: rgb(2 132 199 / 18%);
+  --callout-title: #0369a1;
+  --callout-text: #164e63;
 }
 
 .component-callout-note {
-  --callout-bg: #f2f8fc;
-  --callout-icon: #4b6f82;
-  --callout-shadow: transparent;
-  --callout-text: #18394b;
-}
-
-.component-callout-quote {
-  --callout-bg: #f5f6f8;
-  --callout-icon: #64748b;
-  --callout-shadow: transparent;
+  --callout-bg: #f4f7fa;
+  --callout-icon: #4b6880;
+  --callout-border: rgb(75 104 128 / 16%);
+  --callout-title: #1e3a4c;
   --callout-text: #334155;
 }
 
-.component-callout-tip {
-  --callout-bg: #eafff3;
-  --callout-icon: #009b5a;
-  --callout-border: transparent;
-  --callout-shadow: 0 14px 34px rgb(0 155 90 / 10%);
-  --callout-text: #008a4f;
+.component-callout-quote {
+  --callout-bg: #f6f7f9;
+  --callout-icon: #64748b;
+  --callout-border: rgb(100 116 139 / 16%);
+  --callout-title: #334155;
+  --callout-text: #475569;
+}
+
+.component-callout-tip,
+.component-callout-success {
+  --callout-bg: #eefbf4;
+  --callout-icon: #059669;
+  --callout-border: rgb(5 150 105 / 18%);
+  --callout-title: #047857;
+  --callout-text: #14532d;
 }
 
 .component-callout-warning {
-  --callout-bg: #fff4dc;
-  --callout-icon: #b86b00;
-  --callout-shadow: transparent;
-  --callout-text: #b86b00;
-}
-
-.component-callout-success {
-  --callout-bg: #eafff3;
-  --callout-icon: #009b5a;
-  --callout-border: transparent;
-  --callout-shadow: 0 14px 34px rgb(0 155 90 / 10%);
-  --callout-text: #008a4f;
+  --callout-bg: #fff8eb;
+  --callout-icon: #d97706;
+  --callout-border: rgb(217 119 6 / 20%);
+  --callout-title: #b45309;
+  --callout-text: #78350f;
 }
 
 .component-callout-important {
-  --callout-bg: #f3eaff;
-  --callout-icon: #7c2bd8;
-  --callout-shadow: transparent;
-  --callout-text: #7625d6;
+  --callout-bg: #f6f1ff;
+  --callout-icon: #7c3aed;
+  --callout-border: rgb(124 58 237 / 18%);
+  --callout-title: #6d28d9;
+  --callout-text: #4c1d95;
 }
 
 .component-callout-caution {
-  --callout-bg: #ffecec;
-  --callout-icon: #d12c2c;
-  --callout-shadow: transparent;
-  --callout-text: #c92127;
+  --callout-bg: #fef2f2;
+  --callout-icon: #dc2626;
+  --callout-border: rgb(220 38 38 / 18%);
+  --callout-title: #b91c1c;
+  --callout-text: #7f1d1d;
 }
 
 .dark .component-callout-info,
-.dark .component-callout-note,
+.dark .component-callout-note {
+  --callout-bg: rgb(56 139 253 / 10%);
+  --callout-icon: #60a5fa;
+  --callout-border: rgb(96 165 250 / 22%);
+  --callout-shadow: none;
+  --callout-title: #93c5fd;
+  --callout-text: #d7e2f0;
+}
+
 .dark .component-callout-quote {
-  --callout-bg: hsl(210 30% 25%);
-  --callout-icon: hsl(210 80% 70%);
-  --callout-shadow: hsl(210 30% 16%);
-  --callout-text: hsl(210 80% 70%);
+  --callout-bg: rgb(148 163 184 / 9%);
+  --callout-icon: #94a3b8;
+  --callout-border: rgb(148 163 184 / 20%);
+  --callout-shadow: none;
+  --callout-title: #cbd5e1;
+  --callout-text: #cbd5e1;
 }
 
 .dark .component-callout-tip,
 .dark .component-callout-success {
-  --callout-bg: hsl(138 30% 25%);
-  --callout-icon: hsl(138 80% 70%);
-  --callout-shadow: hsl(138 30% 16%);
-  --callout-text: hsl(138 80% 70%);
+  --callout-bg: rgb(16 185 129 / 10%);
+  --callout-icon: #34d399;
+  --callout-border: rgb(52 211 153 / 22%);
+  --callout-shadow: none;
+  --callout-title: #6ee7b7;
+  --callout-text: #d1e7dd;
 }
 
 .dark .component-callout-warning {
-  --callout-bg: hsl(40 30% 25%);
-  --callout-icon: hsl(40 80% 70%);
-  --callout-shadow: hsl(40 30% 16%);
-  --callout-text: hsl(40 80% 70%);
+  --callout-bg: rgb(245 158 11 / 11%);
+  --callout-icon: #fbbf24;
+  --callout-border: rgb(251 191 36 / 24%);
+  --callout-shadow: none;
+  --callout-title: #fcd34d;
+  --callout-text: #ebe0c9;
 }
 
 .dark .component-callout-important {
-  --callout-bg: hsl(270 30% 25%);
-  --callout-icon: hsl(270 80% 70%);
-  --callout-shadow: hsl(270 30% 16%);
-  --callout-text: hsl(270 80% 70%);
+  --callout-bg: rgb(168 85 247 / 11%);
+  --callout-icon: #c084fc;
+  --callout-border: rgb(192 132 252 / 24%);
+  --callout-shadow: none;
+  --callout-title: #d8b4fe;
+  --callout-text: #e2d9f3;
 }
 
 .dark .component-callout-caution {
-  --callout-bg: hsl(0 30% 25%);
-  --callout-icon: hsl(0 80% 70%);
-  --callout-shadow: hsl(0 30% 16%);
-  --callout-text: hsl(0 80% 70%);
+  --callout-bg: rgb(239 68 68 / 11%);
+  --callout-icon: #f87171;
+  --callout-border: rgb(248 113 113 / 24%);
+  --callout-shadow: none;
+  --callout-title: #fca5a5;
+  --callout-text: #f3d6d6;
 }
 
 .component-callout-heading {
@@ -142,10 +160,14 @@
   margin: 0;
 }
 
+.dark .component-callout-icon {
+  color: #0f172a;
+}
+
 .component-callout-icon svg {
-  width: 0.78rem;
-  height: 0.78rem;
-  stroke-width: 3;
+  width: 0.76rem;
+  height: 0.76rem;
+  stroke-width: 2.8;
 }
 
 .component-callout-icon svg circle {
@@ -154,23 +176,24 @@
 
 .component-callout-title {
   margin: 0;
-  color: var(--callout-text);
-  font-size: 1rem;
-  font-weight: 800;
-  line-height: 1.22;
+  color: var(--callout-title, var(--callout-text));
+  font-size: 0.94rem;
+  font-weight: 760;
+  line-height: 1.28;
 }
 
 .article-content .component-callout p,
 .component-callout p {
   margin: 0;
   color: var(--callout-text);
-  line-height: 1.55;
+  font-size: 0.94em;
+  line-height: 1.72;
 }
 
 .article-content .component-callout-title {
   margin: 0;
-  color: var(--callout-text);
-  line-height: 1.22;
+  color: var(--callout-title, var(--callout-text));
+  line-height: 1.28;
 }
 
 .component-code-label {
@@ -570,17 +593,47 @@
 .component-accordions details {
   overflow: hidden;
   border: 1px solid var(--article-line);
-  border-radius: 8px;
+  border-radius: 10px;
   background: var(--article-panel);
+  transition: border-color 180ms var(--article-motion);
+}
+
+.component-accordions details:hover {
+  border-color: color-mix(in oklch, var(--article-line), var(--article-heading) 14%);
 }
 
 .component-accordions summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
   cursor: pointer;
   color: var(--article-heading);
-  font-weight: 800;
-  line-height: 1.4;
-  padding: 0.85rem 1rem;
+  font-weight: 700;
+  line-height: 1.45;
+  padding: 0.85rem 1.05rem;
+  list-style: none;
   transition: background-color 180ms var(--article-motion), color 180ms var(--article-motion);
+}
+
+.component-accordions summary::-webkit-details-marker {
+  display: none;
+}
+
+.component-accordions summary::after {
+  content: "+";
+  flex-shrink: 0;
+  color: var(--article-muted);
+  font-family: var(--font-mono);
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1;
+  transition: transform 180ms var(--article-motion), color 180ms var(--article-motion);
+}
+
+.component-accordions details[open] summary::after {
+  content: "−";
+  color: var(--article-accent);
 }
 
 .component-accordions summary:hover {
@@ -599,8 +652,8 @@
 .component-accordions p {
   margin: 0;
   color: var(--article-text);
-  line-height: 1.75;
-  padding: 0.9rem 1rem 1rem;
+  line-height: 1.78;
+  padding: 0.9rem 1.05rem 1rem;
 }
 
 .component-code-stack {
@@ -1077,20 +1130,28 @@
 .component-card {
   display: grid;
   align-content: start;
-  gap: 0.75rem;
+  gap: 0.6rem;
   border: 1px solid var(--article-line);
-  border-radius: 8px;
+  border-radius: 10px;
   background: var(--article-panel);
-  padding: 1rem 1.05rem 1.1rem;
+  padding: 1.05rem 1.15rem 1.15rem;
+  transition:
+    border-color 180ms var(--article-motion),
+    transform 180ms var(--article-motion);
+}
+
+.component-card:hover {
+  border-color: color-mix(in oklch, var(--article-accent), var(--article-line) 58%);
+  transform: translateY(-1px);
 }
 
 .component-card span {
   display: inline-flex;
   margin: 0;
-  color: var(--article-muted);
+  color: var(--article-accent);
   font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.04em;
+  font-weight: 720;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
 }
 
@@ -1099,14 +1160,15 @@
   color: var(--article-heading);
   font-family: var(--font-heading);
   font-size: 1.02rem;
-  font-weight: 800;
-  line-height: 1.35;
+  font-weight: 760;
+  line-height: 1.38;
 }
 
 .component-card p {
   margin: 0;
   color: var(--article-text);
-  line-height: 1.65;
+  font-size: 0.92em;
+  line-height: 1.68;
 }
 
 .component-file-list {

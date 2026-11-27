@@ -15,6 +15,8 @@ import { Placeholder } from '@tiptap/extension-placeholder'
 import { CharacterCount } from '@tiptap/extension-character-count'
 import { Color } from '@tiptap/extension-color'
 import { TextStyle } from '@tiptap/extension-text-style'
+import { Highlight } from '@tiptap/extension-highlight'
+import { Typography } from '@tiptap/extension-typography'
 import { CodeBlockLowlight } from '@tiptap/extension-code-block-lowlight'
 import { Mathematics } from '@tiptap/extension-mathematics'
 import { common, createLowlight } from 'lowlight'
@@ -82,6 +84,7 @@ async function markdownToHtml(markdown: string) {
 interface TipTapEditorProps {
   content?: Content
   onChange?: (content: Content) => void
+  onActiveHeadingChange?: (outlineId: string | null) => void
   placeholder?: string
   editable?: boolean
   showMarkdownGuide?: boolean
@@ -89,17 +92,25 @@ interface TipTapEditorProps {
 
 export type TipTapEditorHandle = {
   importMarkdown: (markdown: string, mode: 'insert' | 'replace') => Promise<void>
+  focusStart: () => void
+  setContent: (content: Content | undefined) => void
 }
 
-export const TipTapEditor = forwardRef<TipTapEditorHandle, TipTapEditorProps>(function TipTapEditor({
-  content,
-  onChange,
-  placeholder = '开始编写内容...',
-  editable = true,
-  showMarkdownGuide = false,
-}, ref) {
+export const TipTapEditor = forwardRef<TipTapEditorHandle, TipTapEditorProps>(function TipTapEditor(
+  {
+    content,
+    onChange,
+    onActiveHeadingChange,
+    placeholder = '开始编写内容...',
+    editable = true,
+    showMarkdownGuide = false,
+  },
+  ref,
+) {
   const [isUploading, setIsUploading] = useState(false)
   const editorRef = useRef<Editor | null>(null)
+  const activeHeadingCallbackRef = useRef(onActiveHeadingChange)
+  activeHeadingCallbackRef.current = onActiveHeadingChange
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -109,6 +120,7 @@ export const TipTapEditor = forwardRef<TipTapEditorHandle, TipTapEditorProps>(fu
     extensions: [
       StarterKit.configure({
         codeBlock: false, // 使用 CodeBlockLowlight 替代
+        link: false, // 使用下方自定义 Link 配置
       }),
       Link.configure({
         openOnClick: false,
@@ -163,6 +175,8 @@ export const TipTapEditor = forwardRef<TipTapEditorHandle, TipTapEditorProps>(fu
         },
       }),
       Mathematics,
+      Highlight,
+      Typography,
       Placeholder.configure({
         placeholder,
       }),
@@ -188,18 +202,20 @@ export const TipTapEditor = forwardRef<TipTapEditorHandle, TipTapEditorProps>(fu
           const file = item.getAsFile()
           if (file) {
             setIsUploading(true)
-            uploadImage(file).then((url) => {
-              if (url) {
-                const { schema } = view.state
-                const node = schema.nodes.image.create({ src: url })
-                const transaction = view.state.tr.replaceSelectionWith(node)
-                view.dispatch(transaction)
-              } else {
-                toast.error('图片上传失败，请检查 Supabase Storage 设置')
-              }
-            }).finally(() => {
-              setIsUploading(false)
-            })
+            uploadImage(file)
+              .then((url) => {
+                if (url) {
+                  const { schema } = view.state
+                  const node = schema.nodes.image.create({ src: url })
+                  const transaction = view.state.tr.replaceSelectionWith(node)
+                  view.dispatch(transaction)
+                } else {
+                  toast.error('图片上传失败，请检查 Supabase Storage 设置')
+                }
+              })
+              .finally(() => {
+                setIsUploading(false)
+              })
           }
           return true
         }
@@ -207,51 +223,56 @@ export const TipTapEditor = forwardRef<TipTapEditorHandle, TipTapEditorProps>(fu
         // 2. Existing Markdown Support
         try {
           const text = event.clipboardData?.getData('text/markdown') || event.clipboardData?.getData('text/plain') || ''
-          
-          // Include all common markdown triggers: math, tables, headers, lists, quotes, code, formatting, html, footnotes
-          const looksMarkdown = /(^|\n)\s{0,3}(#{1,6}\s|[-*+]\s|\d+\.\s|>|```|~~|[*_](?!\s)|`|[-*_]{3,}|!\[|\[|\||\$\$?|\\|<\/?[a-z]|\[\^)/i.test(text)
-          
-          if (text && (looksMarkdown || hasArticleShortcodes(text))) {
-             event.preventDefault()
-             ;(async () => {
-               try {
-                 await insertMarkdownContent(editorRef.current, text, 'insert')
-                 return
-               } catch (error) {
-                 console.error('Markdown processing completely failed', error)
-               }
 
-               editorRef.current?.chain().focus().insertContent(text).run()
-             })()
-             return true
+          // Include all common markdown triggers: math, tables, headers, lists, quotes, code, formatting, html, footnotes
+          const looksMarkdown =
+            /(^|\n)\s{0,3}(#{1,6}\s|[-*+]\s|\d+\.\s|>|```|~~|[*_](?!\s)|`|[-*_]{3,}|!\[|\[|\||\$\$?|\\|<\/?[a-z]|\[\^)/i.test(
+              text,
+            )
+
+          if (text && (looksMarkdown || hasArticleShortcodes(text))) {
+            event.preventDefault()
+            ;(async () => {
+              try {
+                await insertMarkdownContent(editorRef.current, text, 'insert')
+                return
+              } catch (error) {
+                console.error('Markdown processing completely failed', error)
+              }
+
+              editorRef.current?.chain().focus().insertContent(text).run()
+            })()
+            return true
           }
         } catch {}
-        
+
         return false
       },
       handleDrop: (view, event, slice, moved) => {
         if (!moved && event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0]) {
           const file = event.dataTransfer.files[0]
-          
+
           if (file.type.indexOf('image') === 0) {
             event.preventDefault()
-            
+
             setIsUploading(true)
-            uploadImage(file).then((url) => {
-              if (url) {
-                const { schema } = view.state
-                const coordinates = view.posAtCoords({ left: event.clientX, top: event.clientY })
-                if (coordinates) {
-                   const node = schema.nodes.image.create({ src: url })
-                   const transaction = view.state.tr.insert(coordinates.pos, node)
-                   view.dispatch(transaction)
+            uploadImage(file)
+              .then((url) => {
+                if (url) {
+                  const { schema } = view.state
+                  const coordinates = view.posAtCoords({ left: event.clientX, top: event.clientY })
+                  if (coordinates) {
+                    const node = schema.nodes.image.create({ src: url })
+                    const transaction = view.state.tr.insert(coordinates.pos, node)
+                    view.dispatch(transaction)
+                  }
+                } else {
+                  toast.error('图片上传失败，请检查 Supabase Storage 设置')
                 }
-              } else {
-                toast.error('图片上传失败，请检查 Supabase Storage 设置')
-              }
-            }).finally(() => {
-              setIsUploading(false)
-            })
+              })
+              .finally(() => {
+                setIsUploading(false)
+              })
             return true
           }
         }
@@ -265,6 +286,13 @@ export const TipTapEditor = forwardRef<TipTapEditorHandle, TipTapEditorProps>(fu
     () => ({
       async importMarkdown(markdown, mode) {
         await insertMarkdownContent(editorRef.current, markdown, mode)
+      },
+      focusStart() {
+        editorRef.current?.commands.focus('start')
+      },
+      setContent(nextContent) {
+        if (!editorRef.current) return
+        editorRef.current.commands.setContent(nextContent ?? '')
       },
     }),
     [],
@@ -283,6 +311,7 @@ export const TipTapEditor = forwardRef<TipTapEditorHandle, TipTapEditorProps>(fu
 
         editor.state.doc.descendants((node, pos) => {
           if (node.type.name !== 'heading') return
+          if (!node.textContent.trim()) return
 
           const dom = editor.view.nodeDOM(pos)
           const heading = getHeadingElement(dom)
@@ -291,21 +320,46 @@ export const TipTapEditor = forwardRef<TipTapEditorHandle, TipTapEditorProps>(fu
           index += 1
           heading.setAttribute('id', `outline-${index}`)
           heading.setAttribute('data-editor-outline-heading', String(index))
-          heading.style.scrollMarginTop = '150px'
+          heading.style.scrollMarginTop = '88px'
         })
       })
     }
 
+    const reportActiveHeading = () => {
+      if (!activeHeadingCallbackRef.current) return
+
+      const cursorPos = editor.state.selection.from
+      let headingIndex = 0
+      let activeId: string | null = null
+
+      editor.state.doc.descendants((node, pos) => {
+        if (node.type.name !== 'heading') return
+        if (!node.textContent.trim()) return
+
+        headingIndex += 1
+        if (pos <= cursorPos) {
+          activeId = `outline-${headingIndex}`
+        }
+      })
+
+      activeHeadingCallbackRef.current(activeId)
+    }
+
     assignHeadingIds()
+    reportActiveHeading()
     editor.on('update', assignHeadingIds)
     editor.on('create', assignHeadingIds)
     editor.on('transaction', assignHeadingIds)
+    editor.on('selectionUpdate', reportActiveHeading)
+    editor.on('update', reportActiveHeading)
 
     return () => {
       window.cancelAnimationFrame(frame)
       editor.off('update', assignHeadingIds)
       editor.off('create', assignHeadingIds)
       editor.off('transaction', assignHeadingIds)
+      editor.off('selectionUpdate', reportActiveHeading)
+      editor.off('update', reportActiveHeading)
     }
   }, [editor])
 
@@ -317,7 +371,7 @@ export const TipTapEditor = forwardRef<TipTapEditorHandle, TipTapEditorProps>(fu
     <div className={`relative admin-editor article-shell ${styles.editorShell}`}>
       {isUploading && (
         <div className="absolute inset-0 z-50 bg-background/50 backdrop-blur-sm flex items-center justify-center">
-            <div className="animate-pulse text-primary font-medium">图片上传中...</div>
+          <div className="animate-pulse text-primary font-medium">图片上传中...</div>
         </div>
       )}
       <div className={styles.editorCanvas}>

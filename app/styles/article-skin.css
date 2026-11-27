@@ -9,7 +9,7 @@
 
 .article-content.prose h2 {
   position: relative;
-  margin-bottom: 1rem;
+  margin-bottom: 0.65em;
   border-top: 0;
   border-bottom: 0;
   padding-top: 0;
@@ -40,12 +40,17 @@
 .article-content.prose h5::before,
 .article-content.prose h6::before {
   content: "#";
-  margin-right: 0.42em;
+  margin-right: 0.36em;
   color: var(--article-accent);
   font-family: var(--font-mono);
-  font-size: 1em;
-  font-weight: 850;
-  opacity: 0.78;
+  font-size: 0.78em;
+  font-weight: 700;
+  opacity: 0.42;
+  transition: opacity 180ms var(--article-motion);
+}
+
+.article-content.prose :is(h1, h2, h3, h4, h5, h6):hover::before {
+  opacity: 0.85;
 }
 
 .article-content.prose .not-prose :is(h1, h2, h3, h4, h5, h6)::before {
@@ -84,10 +89,9 @@
 }
 
 .article-content.prose hr {
-  margin: 12px 0;
+  margin: 2.1rem 0;
 }
 
-.article-content.prose hr:hover,
 .article-content.prose .component-footnotes:hover::before {
   opacity: 0.5;
 }
@@ -134,7 +138,7 @@
 .article-content.prose :not(pre) > code,
 .article-content.prose kbd {
   background: var(--article-code-inline);
-  color: var(--article-accent);
+  color: var(--article-code-inline-text, var(--article-accent));
   box-shadow: none;
 }
 
@@ -185,16 +189,14 @@
 }
 
 .article-content.prose blockquote {
-  margin: 28px 0;
-  border: 0;
-  border-left-color: var(--article-block-border);
-  border-left-width: 6px;
-  border-left-style: solid;
-  border-radius: 10px;
+  margin: 1.5em 0;
+  border: 1px solid var(--article-line);
+  border-left: 3.5px solid var(--article-block-border);
+  border-radius: 0 10px 10px 0;
   background: var(--article-block-bg);
   color: var(--article-text);
-  padding: 0 12px;
-  box-shadow: var(--article-block-shadow);
+  padding: 0.85rem 1.2rem;
+  box-shadow: none;
 }
 
 .article-content.prose details {

@@ -7,6 +7,7 @@ import {
   CodeSquare,
   Columns3,
   FileText,
+  FolderOpen,
   Heading1,
   Heading2,
   Heading3,
@@ -26,7 +27,7 @@ import {
   Table,
 } from 'lucide-react'
 
-export type EditorInsertAction = 'insertContent' | 'uploadImage' | 'insertTable'
+export type EditorInsertAction = 'insertContent' | 'uploadImage' | 'pickMediaImage' | 'insertTable'
 
 export type EditorInsertDefinition = {
   title: string
@@ -159,6 +160,12 @@ export const editorInsertRegistry: EditorInsertGroup[] = [
         description: '上传并插入单张图片',
         icon: ImageIcon,
         action: 'uploadImage',
+      },
+      {
+        title: '媒体库图片',
+        description: '从已上传媒体库选择图片',
+        icon: FolderOpen,
+        action: 'pickMediaImage',
       },
       {
         title: '图集',

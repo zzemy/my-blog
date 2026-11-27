@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 
 import { PostEditorWorkspace } from '@/features/admin/posts/post-editor-workspace'
 import { Button } from '@/components/ui/button'
@@ -16,6 +17,7 @@ import {
 } from '@/components/ui/dialog'
 import {
   calculateContentSize,
+  clearLocalDraft,
   createEmptyPostForm,
   resolvePublishedAtForSubmit,
   validatePostForm,
@@ -32,6 +34,8 @@ export default function EditPostPage() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+  const [lastSavedAt, setLastSavedAt] = useState<string | null>(null)
+  const [publicId, setPublicId] = useState<string | null>(null)
   const [formData, setFormData] = useState(createEmptyPostForm)
   const [savedSnapshot, setSavedSnapshot] = useState(() => serializePostForm(createEmptyPostForm()))
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
@@ -60,7 +64,7 @@ export default function EditPostPage() {
       const result = await res.json()
       const post = result.post
 
-      const nextFormData = {
+      const nextFormData: PostFormData = {
         title: post.title,
         slug: post.slug,
         description: post.description || '',
@@ -75,6 +79,8 @@ export default function EditPostPage() {
         published_at: post.published_at ? isoToLocalInput(post.published_at) : '',
       }
 
+      setPublicId(typeof post.public_id === 'string' ? post.public_id : null)
+      setLastSavedAt(typeof post.updated_at === 'string' ? post.updated_at : null)
       setFormData(nextFormData)
       setSavedSnapshot(serializePostForm(nextFormData))
       setSuccess(false)
@@ -101,10 +107,15 @@ export default function EditPostPage() {
 
     setSaving(true)
     try {
+      const resolvedPublishedAtIso = resolvePublishedAtForSubmit(
+        published,
+        formData.published,
+        formData.published_at,
+      )
       const submittedFormData: PostFormData = {
         ...formData,
         published,
-        published_at: resolvePublishedAtForSubmit(published, formData.published, formData.published_at) ?? '',
+        published_at: resolvedPublishedAtIso ? isoToLocalInput(resolvedPublishedAtIso) : '',
       }
       const submitData: Record<string, unknown> = {
         title: submittedFormData.title,
@@ -120,8 +131,8 @@ export default function EditPostPage() {
         seo_description: submittedFormData.seo_description,
       }
 
-      if (published) {
-        submitData.published_at = submittedFormData.published_at
+      if (published && resolvedPublishedAtIso) {
+        submitData.published_at = resolvedPublishedAtIso
       }
 
       const res = await fetch(`/api/admin/posts/${postId}`, {
@@ -133,13 +144,16 @@ export default function EditPostPage() {
       })
 
       if (!res.ok) {
-        const result = await res.json()
+        const result = await res.json().catch(() => ({}))
         throw new Error(result.error || '保存失败')
       }
 
+      clearLocalDraft(postId)
       setFormData(submittedFormData)
       setSavedSnapshot(serializePostForm(submittedFormData))
+      setLastSavedAt(new Date().toISOString())
       setSuccess(true)
+      toast.success(published ? (formData.published ? '文章已更新' : '文章已发布') : '草稿已保存')
     } catch (err) {
       console.error('Failed to save post:', err)
       setError(err instanceof Error ? err.message : '保存失败，请重试')
@@ -159,6 +173,8 @@ export default function EditPostPage() {
         throw new Error('删除失败')
       }
 
+      clearLocalDraft(postId)
+      toast.success('文章已删除')
       router.push('/admin/posts')
     } catch (err) {
       console.error('Failed to delete post:', err)
@@ -179,16 +195,24 @@ export default function EditPostPage() {
     )
   }
 
+  const publicUrl = formData.published && (publicId || formData.slug)
+    ? `/posts/${publicId || formData.slug}`
+    : null
+
   return (
     <>
       <PostEditorWorkspace
         mode="edit"
+        draftKey={postId}
         formData={formData}
         setFormData={setEditorFormData}
         isDirty={isDirty}
         saving={saving}
         error={error}
+        onDismissError={() => setError(null)}
         success={success}
+        lastSavedAt={lastSavedAt}
+        publicUrl={publicUrl}
         onSubmit={handleSubmit}
         onDelete={() => setDeleteDialogOpen(true)}
       />

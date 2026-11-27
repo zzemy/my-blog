@@ -15,6 +15,7 @@ import { TaskList } from '@tiptap/extension-task-list'
 import { TaskItem } from '@tiptap/extension-task-item'
 import { Color } from '@tiptap/extension-color'
 import { TextStyle } from '@tiptap/extension-text-style'
+import { Highlight } from '@tiptap/extension-highlight'
 import { CodeBlockLowlight } from '@tiptap/extension-code-block-lowlight'
 import { Mathematics } from '@tiptap/extension-mathematics'
 import { common, createLowlight } from 'lowlight'
@@ -43,6 +44,7 @@ export function TipTapRenderer({ content, className = '', toc = [] }: TipTapRend
     extensions: [
       StarterKit.configure({
         codeBlock: false,
+        link: false,
       }),
       Link.configure({
         openOnClick: true,
@@ -97,6 +99,7 @@ export function TipTapRenderer({ content, className = '', toc = [] }: TipTapRend
         },
       }),
       Mathematics,
+      Highlight,
       Color,
       TextStyle,
       ...articleRichBlockExtensions,

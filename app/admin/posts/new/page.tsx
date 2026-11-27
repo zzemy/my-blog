@@ -3,21 +3,25 @@
 import { useState } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 
 import { PostEditorWorkspace } from '@/features/admin/posts/post-editor-workspace'
 import {
   calculateContentSize,
+  clearLocalDraft,
   createEmptyPostForm,
   resolvePublishedAtForSubmit,
   validatePostForm,
 } from '@/features/admin/posts/form-utils'
 import type { PostFormData } from '@/features/admin/posts/types'
+import { isoToLocalInput } from '@/features/admin/posts/utils'
 
 export default function NewPostPage() {
   const router = useRouter()
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+  const [lastSavedAt, setLastSavedAt] = useState<string | null>(null)
   const [formData, setFormData] = useState(createEmptyPostForm)
   const [savedSnapshot, setSavedSnapshot] = useState(() => serializePostForm(createEmptyPostForm()))
 
@@ -45,10 +49,15 @@ export default function NewPostPage() {
 
     setSaving(true)
     try {
+      const resolvedPublishedAtIso = resolvePublishedAtForSubmit(
+        published,
+        formData.published,
+        formData.published_at,
+      )
       const submittedFormData: PostFormData = {
         ...formData,
         published,
-        published_at: resolvePublishedAtForSubmit(published, formData.published, formData.published_at) ?? '',
+        published_at: resolvedPublishedAtIso ? isoToLocalInput(resolvedPublishedAtIso) : '',
       }
 
       const res = await fetch('/api/admin/posts', {
@@ -58,21 +67,25 @@ export default function NewPostPage() {
         },
         body: JSON.stringify({
           ...submittedFormData,
+          published_at: resolvedPublishedAtIso,
           reading_time: calculateContentSize(formData.content),
         }),
       })
 
       if (!res.ok) {
-        const result = await res.json()
+        const result = await res.json().catch(() => ({}))
         throw new Error(result.error || '保存失败')
       }
 
       const result: unknown = await res.json()
       const createdPostId = getCreatedPostId(result)
 
+      clearLocalDraft('new')
       setFormData(submittedFormData)
       setSavedSnapshot(serializePostForm(submittedFormData))
+      setLastSavedAt(new Date().toISOString())
       setSuccess(true)
+      toast.success(published ? '文章已发布' : '草稿已保存')
 
       if (createdPostId) {
         router.replace(`/admin/posts/${createdPostId}`)
@@ -88,12 +101,15 @@ export default function NewPostPage() {
   return (
     <PostEditorWorkspace
       mode="new"
+      draftKey="new"
       formData={formData}
       setFormData={setEditorFormData}
       isDirty={isDirty}
       saving={saving}
       error={error}
+      onDismissError={() => setError(null)}
       success={success}
+      lastSavedAt={lastSavedAt}
       onSubmit={handleSubmit}
     />
   )

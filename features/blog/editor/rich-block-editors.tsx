@@ -90,11 +90,43 @@ export function RichBlockEditorPanel({
   useEffect(() => {
     if (placement !== 'inspector') return
 
-    setInspectorHost(document.getElementById('admin-rich-block-inspector'))
+    window.dispatchEvent(new CustomEvent('admin-rich-block-edit-open'))
+
+    const resolveHost = () => {
+      const host = document.getElementById('admin-rich-block-inspector')
+      if (host) {
+        setInspectorHost(host)
+        return true
+      }
+      return false
+    }
+
+    if (resolveHost()) return
+
+    const frame = window.requestAnimationFrame(() => {
+      resolveHost()
+    })
+
+    return () => window.cancelAnimationFrame(frame)
   }, [placement])
 
   const panel = (
-    <div className="component-block-editor" contentEditable={false} data-editor-control="true">
+    <div
+      className="component-block-editor"
+      contentEditable={false}
+      data-editor-control="true"
+      onKeyDown={(event) => {
+        if (event.key === 'Escape') {
+          event.preventDefault()
+          event.stopPropagation()
+          onCancel()
+        } else if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+          event.preventDefault()
+          event.stopPropagation()
+          onSave()
+        }
+      }}
+    >
       <div className="component-block-editor-header">
         <strong>{title}</strong>
       </div>

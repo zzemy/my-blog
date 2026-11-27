@@ -2,7 +2,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useSupabaseAuthStore } from '@/lib/supabase-auth-store'
 import { Button } from '@/components/ui/button'
 import { BookOpen, LogOut, LayoutDashboard, FileText, Settings, Home, Menu, Image as ImageIcon, ExternalLink, Link2 } from 'lucide-react'
@@ -17,9 +17,15 @@ import {
 import { useState } from 'react'
 
 export function AdminHeader() {
+  const pathname = usePathname()
   const router = useRouter()
   const logout = useSupabaseAuthStore((state) => state.logout)
   const [open, setOpen] = useState(false)
+
+  // 文章新建/编辑页使用独立的沉浸式文档顶栏，避免双顶栏占用写作空间
+  if (pathname && /^\/admin\/posts\/.+/.test(pathname)) {
+    return null
+  }
 
   const handleLogout = async () => {
     try {

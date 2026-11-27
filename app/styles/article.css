@@ -8,17 +8,17 @@
 
 /* 1. 行内代码样式 (不包含代码块) */
 .prose :not(pre) > code {
-  background-color: #eff1f3;
-  color: #24292e;
-  padding: 0.2em 0.4em;
-  border-radius: 0.25rem;
+  background-color: var(--article-code-inline, #eff1f3);
+  color: var(--article-code-inline-text, #24292e);
+  padding: 0.14em 0.4em;
+  border-radius: 5px;
   font-weight: 500;
 }
 
 .dark .prose :not(pre) > code {
-  background-color: #0d1117;
-  color: #c9d1d9;
-  border: 1px solid var(--border);
+  background-color: var(--article-code-inline, rgb(255 255 255 / 7%));
+  color: var(--article-code-inline-text, #e2e8f0);
+  border: 1px solid var(--article-line, var(--border));
 }
 
 .prose :not(pre) > code::before,
@@ -72,115 +72,122 @@
 /* Article reading surface */
 .article-shell {
   --article-text: #334155;
-  --article-heading: #111827;
-  --article-muted: #667085;
-  --article-soft: #f6f8fa;
+  --article-heading: #0f172a;
+  --article-muted: #64748b;
+  --article-soft: #f4f6f8;
   --article-panel: #ffffff;
-  --article-line: #dde3ea;
-  --article-accent: #4b6875;
-  --article-code-inline: var(--article-soft);
-  --article-code-surface: #ffffff;
-  --article-code-header: #f7f7f7;
-  --article-code-border: rgb(15 23 42 / 7%);
-  --article-code-divider: rgb(15 23 42 / 7%);
+  --article-line: rgb(15 23 42 / 10%);
+  --article-accent: #2563eb;
+  --article-code-inline: rgb(15 23 42 / 5%);
+  --article-code-inline-text: #0f172a;
+  --article-code-surface: #fbfcfd;
+  --article-code-header: #f3f5f8;
+  --article-code-border: rgb(15 23 42 / 9%);
+  --article-code-divider: rgb(15 23 42 / 8%);
   --article-code-gutter: var(--article-code-surface);
-  --article-code-shadow: 0 14px 36px rgb(15 23 42 / 8%);
-  --article-code-text: #0f172a;
-  --article-code-gutter-text: #6f7b88;
+  --article-code-shadow: 0 10px 28px rgb(15 23 42 / 6%);
+  --article-code-text: #1e293b;
+  --article-code-gutter-text: #94a3b8;
   --article-code-label: #334155;
   --article-code-file: #64748b;
-  --article-code-highlight: rgb(71 85 105 / 10%);
+  --article-code-highlight: rgb(37 99 235 / 8%);
   --article-h2-line: var(--article-line);
-  --article-rule-color: #6f8791;
-  --article-rule-glow: rgb(75 104 117 / 14%);
-  --article-block-border: var(--article-line);
+  --article-rule-color: #94a3b8;
+  --article-rule-glow: rgb(37 99 235 / 12%);
+  --article-block-border: color-mix(in oklch, var(--article-accent), var(--article-line) 55%);
   --article-block-bg: #f8fafc;
   --article-block-bg-hover: #f1f5f9;
   --article-block-shadow: none;
   --article-block-shadow-hover: none;
-  --article-table-header: transparent;
+  --article-table-header: #f6f8fa;
+  --article-mark-bg: rgb(250 204 21 / 30%);
+  --article-mark-border: rgb(217 119 6 / 26%);
   --article-motion: cubic-bezier(0.22, 1, 0.36, 1);
   color: var(--article-text);
 }
 
 .dark .article-shell {
-  --article-text: #d1d5db;
-  --article-heading: #f3f4f6;
-  --article-muted: #9ca3af;
-  --article-soft: #272a2f;
-  --article-panel: #222427;
-  --article-line: rgb(255 255 255 / 11%);
-  --article-accent: #94a3b8;
-  --article-code-inline: #28313a;
-  --article-code-surface: #1c1f23;
-  --article-code-header: #24272c;
-  --article-code-border: #464d57;
-  --article-code-divider: rgb(255 255 255 / 8%);
+  --article-text: #cfd7e1;
+  --article-heading: #f1f5f9;
+  --article-muted: #8b96a5;
+  --article-soft: #1c1f24;
+  --article-panel: #16191d;
+  --article-line: rgb(255 255 255 / 9%);
+  --article-accent: #73aef0;
+  --article-code-inline: rgb(255 255 255 / 7%);
+  --article-code-inline-text: #e2e8f0;
+  --article-code-surface: #15181c;
+  --article-code-header: #1c2026;
+  --article-code-border: rgb(255 255 255 / 10%);
+  --article-code-divider: rgb(255 255 255 / 7%);
   --article-code-gutter: var(--article-code-surface);
-  --article-code-shadow: 0 18px 38px rgb(0 0 0 / 18%), inset 0 1px 0 rgb(255 255 255 / 4%);
-  --article-code-text: #f1f5f9;
-  --article-code-gutter-text: #9ca6b2;
-  --article-code-label: #d8dee7;
-  --article-code-file: #b3bcc8;
-  --article-code-highlight: rgb(148 163 184 / 8%);
-  --article-h2-line: color-mix(in oklch, var(--article-line), transparent 10%);
+  --article-code-shadow: 0 16px 36px rgb(0 0 0 / 28%), inset 0 1px 0 rgb(255 255 255 / 4%);
+  --article-code-text: #e2e8f0;
+  --article-code-gutter-text: #5b6675;
+  --article-code-label: #cbd5e1;
+  --article-code-file: #7e8a9a;
+  --article-code-highlight: rgb(115 174 240 / 10%);
+  --article-h2-line: var(--article-line);
   --article-rule-color: var(--article-accent);
-  --article-rule-glow: color-mix(in oklch, var(--article-accent), transparent 40%);
-  --article-block-border: rgb(255 255 255 / 11%);
-  --article-block-bg: #222427;
-  --article-block-bg-hover: #292c31;
-  --article-block-shadow: 0 0 5px 1px rgb(0 0 0 / 16%);
-  --article-block-shadow-hover: 0 0 6px 2px rgb(0 0 0 / 18%);
-  --article-table-header: transparent;
+  --article-rule-glow: color-mix(in oklch, var(--article-accent), transparent 55%);
+  --article-block-border: color-mix(in oklch, var(--article-accent), transparent 36%);
+  --article-block-bg: rgb(255 255 255 / 3%);
+  --article-block-bg-hover: rgb(255 255 255 / 5%);
+  --article-block-shadow: none;
+  --article-block-shadow-hover: none;
+  --article-table-header: rgb(255 255 255 / 3.5%);
+  --article-mark-bg: rgb(250 204 21 / 18%);
+  --article-mark-border: rgb(250 204 21 / 32%);
   --article-motion: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+/* Keep editor tokens aligned with published article tokens for 1:1 visual parity */
 .admin-editor {
   --article-text: #334155;
-  --article-heading: #111827;
-  --article-muted: #667085;
-  --article-soft: #f6f8fa;
+  --article-heading: #0f172a;
+  --article-muted: #64748b;
+  --article-soft: #f4f6f8;
   --article-panel: #ffffff;
-  --article-line: #dde3ea;
-  --article-accent: #4b6875;
+  --article-line: rgb(15 23 42 / 10%);
+  --article-accent: #2563eb;
 }
 
 .dark .admin-editor {
-  --article-text: oklch(0.78 0.018 260);
-  --article-heading: oklch(0.97 0.006 260);
-  --article-muted: oklch(0.64 0.018 260);
-  --article-soft: oklch(0.19 0.006 220);
-  --article-panel: oklch(0.145 0.005 220);
-  --article-line: oklch(1 0 0 / 12%);
-  --article-accent: oklch(0.72 0.15 205);
+  --article-text: #cfd7e1;
+  --article-heading: #f1f5f9;
+  --article-muted: #8b96a5;
+  --article-soft: #1c1f24;
+  --article-panel: #16191d;
+  --article-line: rgb(255 255 255 / 9%);
+  --article-accent: #73aef0;
 }
 
 .article-shell,
 .admin-editor {
-  --article-syntax-comment: #68707d;
-  --article-syntax-keyword: #5b4f93;
-  --article-syntax-name: #2f5f8f;
-  --article-syntax-string: #2f6f4e;
-  --article-syntax-attr: #5d6778;
-  --article-syntax-variable: #2f5f8f;
-  --article-syntax-title: #2f5f8f;
-  --article-syntax-type: #8a5a2b;
-  --article-syntax-number: #6f6532;
-  --article-syntax-regexp: #566b8f;
+  --article-syntax-comment: #6e7781;
+  --article-syntax-keyword: #cf222e;
+  --article-syntax-name: #116329;
+  --article-syntax-string: #0a3069;
+  --article-syntax-attr: #0550ae;
+  --article-syntax-variable: #953800;
+  --article-syntax-title: #6639ba;
+  --article-syntax-type: #953800;
+  --article-syntax-number: #0550ae;
+  --article-syntax-regexp: #116329;
 }
 
 .dark .article-shell,
 .dark .admin-editor {
-  --article-syntax-comment: #7f8a98;
-  --article-syntax-keyword: #c9d8ee;
-  --article-syntax-name: #f1f5f9;
-  --article-syntax-string: #cbd5e1;
-  --article-syntax-attr: #d7dee8;
-  --article-syntax-variable: #e8edf3;
-  --article-syntax-title: #f5f8fb;
-  --article-syntax-type: #d7dee8;
-  --article-syntax-number: #d5dde7;
-  --article-syntax-regexp: #c9d8ee;
+  --article-syntax-comment: #6e7b8b;
+  --article-syntax-keyword: #c792ea;
+  --article-syntax-name: #f07178;
+  --article-syntax-string: #9ccc65;
+  --article-syntax-attr: #ffcb6b;
+  --article-syntax-variable: #f78c6c;
+  --article-syntax-title: #82aaff;
+  --article-syntax-type: #ffcb6b;
+  --article-syntax-number: #f78c6c;
+  --article-syntax-regexp: #89ddff;
 }
 
 .article-hero {
@@ -262,7 +269,7 @@
   --tw-prose-td-borders: var(--article-line);
   color: var(--article-text);
   font-size: var(--article-font-size);
-  font-weight: 500;
+  font-weight: 400;
   line-height: var(--article-line-height);
 }
 
@@ -282,73 +289,61 @@
   color: var(--article-heading);
   font-family: var(--article-font);
   font-weight: 700;
-  line-height: 1.2;
-  letter-spacing: 0;
+  line-height: 1.32;
+  letter-spacing: -0.01em;
   text-wrap: balance;
   word-wrap: break-word;
 }
 
 .article-content.prose h1 {
-  margin: 1.2em 0 0.75em;
-  font-size: 2.25em;
-  line-height: 1.2;
+  margin: 2.1em 0 0.75em;
+  padding-bottom: 0.42em;
+  border-bottom: 1px solid var(--article-line);
+  font-size: 1.72em;
+  line-height: 1.28;
 }
 
 .article-content.prose h2 {
-  margin: 1.2em 0 40px;
+  margin: 1.85em 0 0.65em;
   padding-top: 0;
   border-top: 0;
-  font-size: 1.75em;
-  line-height: 1.2;
+  font-size: 1.4em;
+  line-height: 1.32;
 }
 
 .article-content.prose h3 {
-  margin: 1.2em 0 0.75em;
-  font-size: 1.5em;
-  line-height: 1.2;
+  margin: 1.55em 0 0.55em;
+  font-size: 1.18em;
+  line-height: 1.36;
 }
 
 .article-content.prose h4 {
-  margin: 1.2em 0 0.75em;
-  font-size: 1.25em;
-  line-height: 1.2;
+  margin: 1.35em 0 0.45em;
+  font-size: 1.05em;
+  line-height: 1.4;
 }
 
 .article-content.prose h5,
 .article-content.prose h6 {
-  margin: 1.2em 0 0.75em;
-  font-size: 1em;
-  line-height: 1.2;
+  margin: 1.2em 0 0.4em;
+  font-size: 0.96em;
+  line-height: 1.42;
 }
 
 .article-content.prose h6 {
   color: var(--article-muted);
 }
 
-@media (min-width: 768px) {
-  .article-content.prose h1 {
-    font-size: 2.25em;
-  }
-
-  .article-content.prose h2 {
-    font-size: 1.75em;
-  }
-
-  .article-content.prose h3 {
-    font-size: 1.5em;
-  }
-}
-
 .article-content.prose h1:first-child,
 .article-content.prose h2:first-child,
 .article-content.prose h3:first-child {
-  margin-top: 0;
+  margin-top: 0.2em;
   padding-top: 0;
   border-top: 0;
 }
 
 .article-content.prose p {
-  margin: 18px 0;
+  margin: 0.95em 0;
   color: var(--article-text);
   line-height: var(--article-line-height);
   word-wrap: break-word;
@@ -391,6 +386,13 @@
   font-weight: 700;
 }
 
+.article-content.prose u {
+  text-decoration: underline;
+  text-decoration-color: color-mix(in oklch, var(--article-accent), transparent 32%);
+  text-decoration-thickness: 0.09em;
+  text-underline-offset: 0.22em;
+}
+
 .article-content.prose em,
 .article-content.prose cite {
   font-style: italic;
@@ -400,23 +402,24 @@
   font-size: 0.85em;
 }
 
-.article-content.prose del {
+.article-content.prose del,
+.article-content.prose s {
   color: var(--article-muted);
   text-decoration-color: color-mix(in oklch, var(--article-muted), transparent 18%);
   text-decoration-thickness: 0.08em;
 }
 
 .article-content.prose mark {
-  border: 1px solid var(--article-block-border);
-  border-radius: 6px;
-  background: var(--article-block-bg-hover);
+  border: 1px solid var(--article-mark-border);
+  border-radius: 5px;
+  background: var(--article-mark-bg);
   color: var(--article-heading);
-  padding: 0.1em 0.3em;
+  padding: 0.08em 0.3em;
 }
 
 .article-content.prose kbd {
   display: inline-flex;
-  min-width: 1.8em;
+  min-width: 1.65em;
   align-items: center;
   justify-content: center;
   border: 1px solid var(--article-line);
@@ -424,11 +427,11 @@
   border-radius: 6px;
   background: var(--article-code-inline);
   color: var(--article-heading);
-  padding: 1px 4px;
-  font-family: "JetBrains Mono", "Menlo", "Consolas", monospace;
-  font-size: 1em;
-  font-weight: 500;
-  line-height: var(--article-line-height);
+  padding: 0.08em 0.42em;
+  font-family: var(--font-mono);
+  font-size: 0.82em;
+  font-weight: 600;
+  line-height: 1.4;
 }
 
 .article-content.prose acronym,
@@ -455,26 +458,18 @@
 }
 
 .article-content.prose hr {
-  margin: 12px 0;
-  height: 4px;
+  margin: 2.1rem 0;
+  height: 1px;
   border: 0;
-  background-image: linear-gradient(to right, var(--article-rule-color) 50%, transparent 0%);
-  background-repeat: repeat-x;
-  background-size: 50px 4px;
-  opacity: 0.3;
-  filter: none;
-  transition: opacity 180ms var(--article-motion);
-}
-
-.article-content.prose hr:hover {
-  opacity: 0.5;
+  background: linear-gradient(90deg, transparent, var(--article-line) 12%, var(--article-line) 88%, transparent);
+  opacity: 1;
 }
 
 .article-content.prose ul,
 .article-content.prose ol {
-  margin: 0 20px;
+  margin: 0.95em 0;
   line-height: var(--article-line-height);
-  padding-left: 1.45rem;
+  padding-left: 1.55em;
 }
 
 .article-content.prose ul {
@@ -489,12 +484,12 @@
 .article-content.prose ul ol,
 .article-content.prose ol ul,
 .article-content.prose ol ol {
-  margin-top: 0;
-  margin-bottom: 0;
+  margin-top: 0.35em;
+  margin-bottom: 0.35em;
 }
 
 .article-content.prose dl {
-  margin: 0 20px;
+  margin: 1em 0;
   line-height: var(--article-line-height);
   word-wrap: break-word;
 }
@@ -504,11 +499,16 @@
 }
 
 .article-content.prose li {
-  margin: 4px 0;
-  padding-left: 0.2rem;
+  margin: 0.36em 0;
+  padding-left: 0.25em;
+}
+
+.article-content.prose li > p {
+  margin: 0.3em 0;
 }
 
 .article-content.prose li::marker {
+  color: var(--article-muted);
   transition: color 180ms var(--article-motion);
 }
 
@@ -528,9 +528,29 @@
   padding-left: 0;
 }
 
+.article-content.prose ul[data-type="taskList"] li > label {
+  flex: 0 0 auto;
+  margin-top: 0.2rem;
+  user-select: none;
+}
+
+.article-content.prose ul[data-type="taskList"] li > div {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.article-content.prose ul[data-type="taskList"] li[data-checked="true"] > div {
+  color: var(--article-muted);
+  text-decoration: line-through;
+  text-decoration-color: color-mix(in oklch, var(--article-muted), transparent 35%);
+}
+
 .article-content.prose input[type="checkbox"] {
-  margin-top: 0.45em;
+  width: 1rem;
+  height: 1rem;
+  margin-top: 0.22rem;
   accent-color: var(--article-accent);
+  cursor: pointer;
 }
 
 .article-content.prose dt {
@@ -544,11 +564,13 @@
 }
 
 .article-content.prose :not(pre) > code {
-  border-radius: 6px;
+  border: 1px solid var(--article-line);
+  border-radius: 5px;
   background: var(--article-code-inline);
-  color: var(--article-heading);
-  padding: 1px 4px;
-  font-size: 1em;
+  color: var(--article-code-inline-text, var(--article-heading));
+  padding: 0.14em 0.4em;
+  font-family: var(--font-mono);
+  font-size: 0.85em;
   font-weight: 500;
   transition:
     background-color 180ms var(--article-motion),
@@ -558,28 +580,28 @@
 
 .article-content.prose blockquote {
   display: flow-root;
-  margin: 28px 0;
-  border: 0;
-  border-left: 6px solid var(--article-block-border);
-  border-radius: 10px;
+  margin: 1.5em 0;
+  border: 1px solid var(--article-line);
+  border-left: 3.5px solid var(--article-block-border);
+  border-radius: 0 10px 10px 0;
   background: var(--article-block-bg);
   color: var(--article-text);
-  padding: 0 12px;
+  padding: 0.85rem 1.2rem;
   font-style: normal;
-  box-shadow: var(--article-block-shadow);
-  transition: box-shadow 180ms var(--article-motion);
-}
-
-.dark .article-content.prose blockquote {
-  box-shadow: var(--article-block-shadow);
-}
-
-.article-content.prose blockquote:hover {
-  box-shadow: var(--article-block-shadow-hover);
+  box-shadow: none;
+  transition: border-color 180ms var(--article-motion), background-color 180ms var(--article-motion);
 }
 
 .article-content.prose blockquote p {
-  margin: 16px 0;
+  margin: 0.55em 0;
+}
+
+.article-content.prose blockquote p:first-child {
+  margin-top: 0;
+}
+
+.article-content.prose blockquote p:last-child {
+  margin-bottom: 0;
 }
 
 .article-content.prose blockquote footer {
@@ -604,13 +626,13 @@
 .article-content.prose > table,
 .article-content.prose .table-wrapper table {
   width: 100%;
-  margin: 16px 0 24px;
+  margin: 1.5rem 0 1.85rem;
   border: 1px solid var(--article-line);
   border-collapse: separate;
   border-spacing: 0;
-  border-radius: 8px;
+  border-radius: 10px;
   background: var(--article-panel);
-  font-size: 0.95em;
+  font-size: 0.92em;
   line-height: 1.65;
   overflow: hidden;
 }
@@ -621,18 +643,37 @@
 .article-content.prose > table td,
 .article-content.prose .table-wrapper table th,
 .article-content.prose .table-wrapper table td {
+  position: relative;
   border-bottom: 1px solid var(--article-line);
-  padding: 0.72rem 0.9rem;
+  border-right: 1px solid color-mix(in oklch, var(--article-line), transparent 35%);
+  padding: 0.68rem 0.9rem;
   text-align: left;
   vertical-align: top;
+}
+
+.article-content.prose > .article-table th:last-child,
+.article-content.prose > .article-table td:last-child,
+.article-content.prose > table th:last-child,
+.article-content.prose > table td:last-child,
+.article-content.prose .table-wrapper table th:last-child,
+.article-content.prose .table-wrapper table td:last-child {
+  border-right: 0;
 }
 
 .article-content.prose > .article-table th,
 .article-content.prose > table th,
 .article-content.prose .table-wrapper table th {
-  background: color-mix(in oklch, var(--article-panel), var(--article-soft) 42%);
+  background: var(--article-table-header);
   color: var(--article-heading);
-  font-weight: 800;
+  font-size: 0.88em;
+  font-weight: 700;
+}
+
+.article-content.prose > .article-table td > p,
+.article-content.prose > .article-table th > p,
+.article-content.prose > table td > p,
+.article-content.prose > table th > p {
+  margin: 0;
 }
 
 .article-content.prose > .article-table tr:last-child td,
@@ -644,7 +685,31 @@
 .article-content.prose > .article-table tr:nth-child(even) td,
 .article-content.prose > table tr:nth-child(even) td,
 .article-content.prose .table-wrapper table tr:nth-child(even) td {
-  background: color-mix(in oklch, var(--article-panel), var(--article-soft) 24%);
+  background: color-mix(in oklch, var(--article-panel), var(--article-soft) 32%);
+}
+
+.article-content.prose > .article-table tbody tr:hover td,
+.article-content.prose > table tbody tr:hover td {
+  background: color-mix(in oklch, var(--article-accent), var(--article-panel) 94%);
+}
+
+.article-content.prose .selectedCell::after {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: color-mix(in oklch, var(--article-accent), transparent 84%);
+  content: "";
+  pointer-events: none;
+}
+
+.article-content.prose .column-resize-handle {
+  position: absolute;
+  top: 0;
+  right: -2px;
+  bottom: -2px;
+  width: 4px;
+  background: var(--article-accent);
+  pointer-events: none;
 }
 
 .article-content.prose .table-wrapper {
