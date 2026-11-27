@@ -25,6 +25,7 @@ import {
   Save,
   Search,
   Settings2,
+  Sparkles,
   Star,
   Tag,
   Trash2,
@@ -68,12 +69,14 @@ import {
 } from './form-utils'
 import type { LocalDraftSnapshot } from './form-utils'
 import { MediaPickerDialog } from './media-picker-dialog'
+import { EditorAiSheet } from '@/features/ai/components/editor-ai-sheet'
 import type { PostFormData } from './types'
 import { nowLocalInput } from './utils'
 import styles from './post-editor-workspace.module.css'
 
 type PostEditorWorkspaceProps = {
   mode: 'new' | 'edit'
+  postId?: string | null
   draftKey: string
   formData: PostFormData
   setFormData: Dispatch<SetStateAction<PostFormData>>
@@ -104,6 +107,7 @@ type JsonNode = {
 
 export function PostEditorWorkspace({
   mode,
+  postId,
   draftKey,
   formData,
   setFormData,
@@ -123,6 +127,7 @@ export function PostEditorWorkspace({
   const [markdownDraft, setMarkdownDraft] = useState('')
   const [markdownImporting, setMarkdownImporting] = useState(false)
   const [advancedOpen, setAdvancedOpen] = useState(false)
+  const [aiSheetOpen, setAiSheetOpen] = useState(false)
   const [outlineOpen, setOutlineOpen] = useState(true)
   const [inspectorOpen, setInspectorOpen] = useState(true)
   const [activeOutlineId, setActiveOutlineId] = useState<string | null>(null)
@@ -460,6 +465,17 @@ export function PostEditorWorkspace({
           <span className={styles.topbarDivider} aria-hidden="true" />
 
           <div className={styles.topbarTools}>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-8 gap-1.5 px-2.5 text-xs"
+              onClick={() => setAiSheetOpen(true)}
+              title="打开 AI 写作、摘要与多语言翻译助手"
+            >
+              <Sparkles className="h-3.5 w-3.5 text-primary" />
+              <span>AI 助手</span>
+            </Button>
             {publicUrl ? (
               <a
                 href={publicUrl}
@@ -938,6 +954,21 @@ export function PostEditorWorkspace({
           ) : null}
         </aside>
       </div>
+
+      <EditorAiSheet
+        open={aiSheetOpen}
+        onOpenChange={setAiSheetOpen}
+        postId={postId}
+        formData={formData}
+        onUpdateForm={updateForm}
+        onImportMarkdown={async (markdown, importMode) => {
+          await editorRef.current?.importMarkdown(markdown, importMode)
+          toast.success(importMode === 'replace' ? '已替换正文内容' : '已插入大纲到编辑器')
+        }}
+        getSelectedText={() => editorRef.current?.getSelectedText() ?? ''}
+        onReplaceSelection={(text) => editorRef.current?.replaceSelection(text)}
+        onInsertBelowSelection={(text) => editorRef.current?.insertBelowSelection(text)}
+      />
 
       <MediaPickerDialog
         open={coverPickerOpen}

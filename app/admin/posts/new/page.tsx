@@ -69,6 +69,7 @@ export default function NewPostPage() {
           ...submittedFormData,
           published_at: resolvedPublishedAtIso,
           reading_time: calculateContentSize(formData.content),
+          metadata: submittedFormData.ai_summary ? { ai_summary: submittedFormData.ai_summary } : {},
         }),
       })
 

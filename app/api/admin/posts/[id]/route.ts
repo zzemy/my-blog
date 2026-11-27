@@ -26,7 +26,7 @@ export async function GET(
   if (!ok) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
-  
+
   try {
     const { id } = await params
     const client = getAdminClient(token || undefined)
@@ -58,13 +58,13 @@ export async function PUT(
   if (!ok) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
-  
+
   try {
     const { id } = await params
     const client = getAdminClient(token || undefined)
     const { data: existingPost } = await client
       .from('posts')
-      .select('public_id, slug, tags, published')
+      .select('public_id, slug, tags, published, metadata')
       .eq('id', id)
       .single()
 
@@ -73,6 +73,15 @@ export async function PUT(
     if (!existingPostResult.success) {
       return NextResponse.json({ error: 'Post not found' }, { status: 404 })
     }
+
+    const existingMetadata =
+      existingPost &&
+      typeof existingPost === 'object' &&
+      'metadata' in existingPost &&
+      existingPost.metadata &&
+      typeof existingPost.metadata === 'object'
+        ? (existingPost.metadata as Record<string, unknown>)
+        : {}
 
     const previousPost = existingPostResult.data
     const previousRevalidationState = {
@@ -93,10 +102,33 @@ export async function PUT(
       )
     }
 
-    const body = parsedBody.data
+    const { seo_title, seo_description, metadata: incomingMetadata, ...restBody } = parsedBody.data
+    const updatePayload: Record<string, unknown> = { ...restBody }
+
+    if (seo_title !== undefined || seo_description !== undefined || incomingMetadata !== undefined) {
+      const nextMetadata: Record<string, unknown> = {
+        ...existingMetadata,
+        ...(incomingMetadata ?? {}),
+      }
+      if (seo_title !== undefined) {
+        if (seo_title) {
+          nextMetadata.seo_title = seo_title
+        } else {
+          delete nextMetadata.seo_title
+        }
+      }
+      if (seo_description !== undefined) {
+        if (seo_description) {
+          nextMetadata.seo_description = seo_description
+        } else {
+          delete nextMetadata.seo_description
+        }
+      }
+      updatePayload.metadata = nextMetadata
+    }
 
     // 如果发布状态从 false 变为 true，且未显式传入发布时间，则更新为当前时间
-    if (body.published === true) {
+    if (restBody.published === true) {
       const { data: currentPost } = await client
         .from('posts')
         .select('published')
@@ -106,15 +138,15 @@ export async function PUT(
       const currentPostResult = currentPostPublishStateSchema.safeParse(currentPost)
 
       if (currentPostResult.success && currentPostResult.data.published === false) {
-        if (!body.published_at) {
-          body.published_at = new Date().toISOString()
+        if (!restBody.published_at) {
+          updatePayload.published_at = new Date().toISOString()
         }
       }
     }
 
     const { data, error } = await client
       .from('posts')
-      .update(body as never)
+      .update(updatePayload as never)
       .eq('id', id)
       .select()
       .single()
@@ -128,8 +160,8 @@ export async function PUT(
       before: previousRevalidationState,
       after: {
         publicId: previousPost.public_id,
-        slug: body.slug ?? previousPost.slug,
-        tags: body.tags ?? previousPost.tags ?? [],
+        slug: restBody.slug ?? previousPost.slug,
+        tags: restBody.tags ?? previousPost.tags ?? [],
       },
     })
 
@@ -150,7 +182,7 @@ export async function DELETE(
   if (!ok) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
-  
+
   try {
     const { id } = await params
     const client = getAdminClient(token || undefined)

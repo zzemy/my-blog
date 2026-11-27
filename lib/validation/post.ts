@@ -71,6 +71,15 @@ const basePostSchema = z.object({
     emptyStringToUndefined,
     z.string().datetime({ offset: true }).nullable().optional()
   ),
+  seo_title: z.preprocess(
+    emptyStringToNull,
+    z.string().trim().max(200, 'SEO title is too long').nullable().optional()
+  ),
+  seo_description: z.preprocess(
+    emptyStringToNull,
+    z.string().trim().max(500, 'SEO description is too long').nullable().optional()
+  ),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 })
 
 export const createPostSchema = basePostSchema

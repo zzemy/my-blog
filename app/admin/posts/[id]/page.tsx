@@ -24,6 +24,7 @@ import {
 } from '@/features/admin/posts/form-utils'
 import type { PostFormData } from '@/features/admin/posts/types'
 import { isoToLocalInput } from '@/features/admin/posts/utils'
+import { parseAiSummaryFromMetadata } from '@/lib/ai/types'
 
 export default function EditPostPage() {
   const router = useRouter()
@@ -64,6 +65,10 @@ export default function EditPostPage() {
       const result = await res.json()
       const post = result.post
 
+      const metadataRecord =
+        post.metadata && typeof post.metadata === 'object'
+          ? (post.metadata as Record<string, unknown>)
+          : {}
       const nextFormData: PostFormData = {
         title: post.title,
         slug: post.slug,
@@ -74,8 +79,17 @@ export default function EditPostPage() {
         published: post.published,
         featured: post.featured || false,
         reading_time: post.reading_time || 0,
-        seo_title: post.seo_title || '',
-        seo_description: post.seo_description || '',
+        seo_title:
+          (typeof metadataRecord.seo_title === 'string' ? metadataRecord.seo_title : '') ||
+          post.seo_title ||
+          '',
+        seo_description:
+          (typeof metadataRecord.seo_description === 'string'
+            ? metadataRecord.seo_description
+            : '') ||
+          post.seo_description ||
+          '',
+        ai_summary: parseAiSummaryFromMetadata(metadataRecord),
         published_at: post.published_at ? isoToLocalInput(post.published_at) : '',
       }
 
@@ -129,6 +143,9 @@ export default function EditPostPage() {
         reading_time: calculateContentSize(submittedFormData.content),
         seo_title: submittedFormData.seo_title,
         seo_description: submittedFormData.seo_description,
+        metadata: {
+          ai_summary: submittedFormData.ai_summary,
+        },
       }
 
       if (published && resolvedPublishedAtIso) {
@@ -203,6 +220,7 @@ export default function EditPostPage() {
     <>
       <PostEditorWorkspace
         mode="edit"
+        postId={postId}
         draftKey={postId}
         formData={formData}
         setFormData={setEditorFormData}

@@ -1,4 +1,5 @@
 import type { PostFormData } from './types'
+import { parseAiSummaryFromMetadata } from '@/lib/ai/types'
 
 const DRAFT_STORAGE_PREFIX = 'admin-post-draft:'
 
@@ -21,6 +22,7 @@ export function createEmptyPostForm(): PostFormData {
     published_at: '',
     seo_title: '',
     seo_description: '',
+    ai_summary: null,
   }
 }
 
@@ -128,6 +130,7 @@ export function loadLocalDraft(scope: string): LocalDraftSnapshot | null {
       published_at: typeof rawForm.published_at === 'string' ? rawForm.published_at : base.published_at,
       seo_title: typeof rawForm.seo_title === 'string' ? rawForm.seo_title : base.seo_title,
       seo_description: typeof rawForm.seo_description === 'string' ? rawForm.seo_description : base.seo_description,
+      ai_summary: parseAiSummaryFromMetadata({ ai_summary: rawForm.ai_summary }),
     }
 
     return { formData, savedAt: parsed.savedAt }

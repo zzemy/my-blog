@@ -94,6 +94,9 @@ export type TipTapEditorHandle = {
   importMarkdown: (markdown: string, mode: 'insert' | 'replace') => Promise<void>
   focusStart: () => void
   setContent: (content: Content | undefined) => void
+  getSelectedText: () => string
+  replaceSelection: (text: string) => void
+  insertBelowSelection: (text: string) => void
 }
 
 export const TipTapEditor = forwardRef<TipTapEditorHandle, TipTapEditorProps>(function TipTapEditor(
@@ -293,6 +296,31 @@ export const TipTapEditor = forwardRef<TipTapEditorHandle, TipTapEditorProps>(fu
       setContent(nextContent) {
         if (!editorRef.current) return
         editorRef.current.commands.setContent(nextContent ?? '')
+      },
+      getSelectedText() {
+        const instance = editorRef.current
+        if (!instance) return ''
+        const { from, to } = instance.state.selection
+        if (from === to) return ''
+        return instance.state.doc.textBetween(from, to, '\n\n')
+      },
+      replaceSelection(text: string) {
+        const instance = editorRef.current
+        if (!instance) return
+        instance.chain().focus().insertContent(text).run()
+      },
+      insertBelowSelection(text: string) {
+        const instance = editorRef.current
+        if (!instance) return
+        const { to } = instance.state.selection
+        instance
+          .chain()
+          .focus()
+          .insertContentAt(to, {
+            type: 'paragraph',
+            content: [{ type: 'text', text }],
+          })
+          .run()
       },
     }),
     [],

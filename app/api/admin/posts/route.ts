@@ -117,7 +117,7 @@ export async function POST(request: NextRequest) {
       { status: 401 }
     )
   }
-  
+
   try {
     const client = getAdminClient(token || undefined)
     const rawBody: unknown = await request.json()
@@ -145,7 +145,16 @@ export async function POST(request: NextRequest) {
       published,
       featured,
       reading_time,
+      seo_title,
+      seo_description,
+      metadata,
     } = body
+
+    const mergedMetadata: Record<string, unknown> = {
+      ...(metadata ?? {}),
+      ...(seo_title ? { seo_title } : {}),
+      ...(seo_description ? { seo_description } : {}),
+    }
 
     // 检查 slug 是否已存在
     const { data: existingPost } = await client
@@ -175,6 +184,7 @@ export async function POST(request: NextRequest) {
         published,
         featured,
         reading_time,
+        metadata: mergedMetadata,
         // 若前端提供发布时间则尊重该值；否则在发布时使用当前时间
         published_at: published ? (body.published_at ?? new Date().toISOString()) : null,
       } as never)

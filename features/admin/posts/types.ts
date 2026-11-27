@@ -1,4 +1,5 @@
 import type { Content } from '@tiptap/react'
+import type { AiSummaryData } from '@/lib/ai/types'
 
 export interface AdminPost {
   id: string
@@ -39,6 +40,7 @@ export interface PostFormData {
   published_at: string
   seo_title: string
   seo_description: string
+  ai_summary: AiSummaryData | null
 }
 
 export interface PostStats {

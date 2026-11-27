@@ -202,6 +202,182 @@ export interface Database {
           updated_at?: string
         }
       }
+      ai_providers: {
+        Row: {
+          id: string
+          name: string
+          protocol: 'openai-compatible' | 'anthropic' | 'gemini'
+          base_url: string
+          key_mode: 'encrypted' | 'env'
+          api_key_encrypted: string | null
+          api_key_mask: string | null
+          env_var_name: string | null
+          models: string[]
+          default_model: string
+          custom_headers: Record<string, string>
+          enabled: boolean
+          is_default: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          protocol: 'openai-compatible' | 'anthropic' | 'gemini'
+          base_url: string
+          key_mode?: 'encrypted' | 'env'
+          api_key_encrypted?: string | null
+          api_key_mask?: string | null
+          env_var_name?: string | null
+          models?: string[]
+          default_model?: string
+          custom_headers?: Record<string, string>
+          enabled?: boolean
+          is_default?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          protocol?: 'openai-compatible' | 'anthropic' | 'gemini'
+          base_url?: string
+          key_mode?: 'encrypted' | 'env'
+          api_key_encrypted?: string | null
+          api_key_mask?: string | null
+          env_var_name?: string | null
+          models?: string[]
+          default_model?: string
+          custom_headers?: Record<string, string>
+          enabled?: boolean
+          is_default?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      ai_task_configs: {
+        Row: {
+          task_key: 'summary' | 'metadata' | 'translate' | 'rewrite' | 'outline'
+          provider_id: string | null
+          model: string | null
+          temperature: number
+          max_tokens: number
+          system_prompt: string | null
+          glossary: Array<{ source: string; target: string; note?: string }>
+          updated_at: string
+        }
+        Insert: {
+          task_key: 'summary' | 'metadata' | 'translate' | 'rewrite' | 'outline'
+          provider_id?: string | null
+          model?: string | null
+          temperature?: number
+          max_tokens?: number
+          system_prompt?: string | null
+          glossary?: Array<{ source: string; target: string; note?: string }>
+          updated_at?: string
+        }
+        Update: {
+          task_key?: 'summary' | 'metadata' | 'translate' | 'rewrite' | 'outline'
+          provider_id?: string | null
+          model?: string | null
+          temperature?: number
+          max_tokens?: number
+          system_prompt?: string | null
+          glossary?: Array<{ source: string; target: string; note?: string }>
+          updated_at?: string
+        }
+      }
+      post_translations: {
+        Row: {
+          id: string
+          post_id: string
+          locale: string
+          title: string
+          description: string | null
+          ai_summary: Record<string, unknown> | null
+          content: JSONContent
+          source_hash: string
+          published: boolean
+          model_used: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          post_id: string
+          locale: string
+          title: string
+          description?: string | null
+          ai_summary?: Record<string, unknown> | null
+          content: JSONContent
+          source_hash: string
+          published?: boolean
+          model_used?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          post_id?: string
+          locale?: string
+          title?: string
+          description?: string | null
+          ai_summary?: Record<string, unknown> | null
+          content?: JSONContent
+          source_hash?: string
+          published?: boolean
+          model_used?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      ai_generation_logs: {
+        Row: {
+          id: string
+          post_id: string | null
+          task_key: string
+          provider_id: string | null
+          provider_name: string
+          model: string
+          prompt_tokens: number | null
+          completion_tokens: number | null
+          total_tokens: number | null
+          duration_ms: number
+          status: 'success' | 'error'
+          error_message: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          post_id?: string | null
+          task_key: string
+          provider_id?: string | null
+          provider_name: string
+          model: string
+          prompt_tokens?: number | null
+          completion_tokens?: number | null
+          total_tokens?: number | null
+          duration_ms?: number
+          status: 'success' | 'error'
+          error_message?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          post_id?: string | null
+          task_key?: string
+          provider_id?: string | null
+          provider_name?: string
+          model?: string
+          prompt_tokens?: number | null
+          completion_tokens?: number | null
+          total_tokens?: number | null
+          duration_ms?: number
+          status?: 'success' | 'error'
+          error_message?: string | null
+          created_at?: string
+        }
+      }
     }
   }
 }

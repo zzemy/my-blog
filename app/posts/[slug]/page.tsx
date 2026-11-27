@@ -1,46 +1,52 @@
-import Link from "next/link";
-import { notFound } from "next/navigation";
-import { PostLayout } from "@/features/blog/components/client/post-layout";
-import { FadeIn } from "@/shared/visuals/fade-in";
-import { TipTapRenderer } from "@/features/blog/editor/tiptap-renderer";
-import { PostBreadcrumb } from "@/features/blog/components/shared/post-breadcrumb";
-import { ShareButtons } from "@/features/blog/components/client/share-buttons";
-import { PostStats } from "@/features/blog/components/client/post-stats";
-import { Comments } from "@/features/blog/components/client/comments";
-import { buildToc } from "@/features/blog/utils/toc";
-import { getPostRouteId } from "@/lib/post-public-id";
-import { supabase } from '@/lib/supabase/client';
-import { Database } from "@/lib/supabase/types";
-import { isExpectedSupabaseBuildError, logExpectedSupabaseBuildErrorOnce } from '@/lib/supabase/error-utils';
+import { notFound } from 'next/navigation'
+import type { Content } from '@tiptap/react'
+import { PostReaderView, type PostLocaleVariant } from '@/features/blog/components/client/post-reader-view'
+import { buildToc, type TiptapNode } from '@/features/blog/utils/toc'
+import { getPostRouteId } from '@/lib/post-public-id'
+import { supabase } from '@/lib/supabase/client'
+import type { Database } from '@/lib/supabase/types'
+import { isExpectedSupabaseBuildError, logExpectedSupabaseBuildErrorOnce } from '@/lib/supabase/error-utils'
+import { parseAiSummaryFromMetadata } from '@/lib/ai/types'
 
 // Enable ISR for post detail pages (seconds)
-export const revalidate = 60; // Regenerate at most once per minute
+export const revalidate = 60 // Regenerate at most once per minute
+
+type Post = Database['public']['Tables']['posts']['Row']
+type PostTranslation = Database['public']['Tables']['post_translations']['Row']
+
+function getMetadataString(metadata: unknown, key: string): string | undefined {
+  if (!metadata || typeof metadata !== 'object') return undefined
+  const value = (metadata as Record<string, unknown>)[key]
+  return typeof value === 'string' && value.trim() ? value.trim() : undefined
+}
 
 // 添加 Metadata 生成
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
-  const post = await getPost(slug);
+  const { slug } = await params
+  const post = await getPost(slug)
 
   if (!post) {
     return {
       title: 'Post Not Found',
-    };
+    }
   }
 
+  const seoTitle = getMetadataString(post.metadata, 'seo_title') || post.title
+  const seoDescription =
+    getMetadataString(post.metadata, 'seo_description') || post.description || post.title
+
   return {
-    title: post.metadata?.seo_title || post.title,
-    description: post.metadata?.seo_description || post.description || post.title,
+    title: seoTitle,
+    description: seoDescription,
     openGraph: {
-      title: post.metadata?.seo_title || post.title,
-      description: post.metadata?.seo_description || post.description || post.title,
+      title: seoTitle,
+      description: seoDescription,
       type: 'article',
       publishedTime: post.published_at,
       images: post.cover_image ? [post.cover_image] : [],
     },
-  };
+  }
 }
-
-type Post = Database['public']['Tables']['posts']['Row'];
 
 async function findPostByIdentifier(identifier: string): Promise<Post | null> {
   const { data: postByPublicId, error: publicIdError } = await supabase
@@ -48,14 +54,14 @@ async function findPostByIdentifier(identifier: string): Promise<Post | null> {
     .select('*')
     .eq('public_id', identifier)
     .eq('published', true)
-    .maybeSingle();
+    .maybeSingle()
 
   if (publicIdError) {
-    throw publicIdError;
+    throw publicIdError
   }
 
   if (postByPublicId) {
-    return postByPublicId as Post;
+    return postByPublicId as Post
   }
 
   const { data: postBySlug, error: slugError } = await supabase
@@ -63,29 +69,50 @@ async function findPostByIdentifier(identifier: string): Promise<Post | null> {
     .select('*')
     .eq('slug', identifier)
     .eq('published', true)
-    .maybeSingle();
+    .maybeSingle()
 
   if (slugError) {
-    throw slugError;
+    throw slugError
   }
 
-  return postBySlug ? (postBySlug as Post) : null;
+  return postBySlug ? (postBySlug as Post) : null
 }
 
 async function getPost(slug: string): Promise<Post | null> {
   try {
-    return await findPostByIdentifier(slug);
+    return await findPostByIdentifier(slug)
   } catch (error) {
     if (isExpectedSupabaseBuildError(error)) {
       logExpectedSupabaseBuildErrorOnce(
         'post-page-build-fallback',
         'Skipping post detail fetch because Supabase is unavailable in this environment:',
-        error
+        error,
       )
     } else {
       console.error('Error fetching post:', error)
     }
-    return null;
+    return null
+  }
+}
+
+async function getPublishedTranslations(postId: string): Promise<PostTranslation[]> {
+  try {
+    const { data, error } = await supabase
+      .from('post_translations')
+      .select('*')
+      .eq('post_id', postId)
+      .eq('published', true)
+      .order('created_at', { ascending: true })
+
+    if (error) {
+      // 表尚未执行迁移时静默回退，避免影响文章页渲染
+      if (error.code === '42P01') return []
+      return []
+    }
+
+    return (data as PostTranslation[] | null) ?? []
+  } catch {
+    return []
   }
 }
 
@@ -95,104 +122,75 @@ async function getAllPosts() {
       .from('posts')
       .select('public_id, slug')
       .eq('published', true)
-      .neq('slug', 'about');
+      .neq('slug', 'about')
 
     if (error) {
       if (!isExpectedSupabaseBuildError(error)) {
         console.error('Failed to fetch posts:', error)
       }
-      return [];
+      return []
     }
 
-    return data as { public_id: string | null; slug: string }[];
+    return data as { public_id: string | null; slug: string }[]
   } catch (error) {
     if (isExpectedSupabaseBuildError(error)) {
       logExpectedSupabaseBuildErrorOnce(
         'post-page-all-posts-build-fallback',
         'Using empty post slugs because Supabase is unavailable in this environment:',
-        error
+        error,
       )
     } else {
       console.error('Error fetching posts:', error)
     }
-    return [];
+    return []
   }
 }
 
 // 生成静态路径 (SSG)
 export async function generateStaticParams() {
-  const posts = await getAllPosts();
-  return posts.map((post) => ({ slug: post.public_id || post.slug }));
+  const posts = await getAllPosts()
+  return posts.map((post) => ({ slug: post.public_id || post.slug }))
 }
 
 export default async function PostPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
-  const post = await getPost(slug);
+  const { slug } = await params
+  const post = await getPost(slug)
 
   if (!post) {
-    notFound();
+    notFound()
   }
 
-  // Calculate reading time from content
-  const readingTime = post.reading_time 
-    ? `${post.reading_time} 字` 
-    : null;
+  const publishedTranslations = await getPublishedTranslations(post.id)
 
-  // 生成目录
-  const toc = buildToc(post.content)
+  const readingTime = post.reading_time ? `${post.reading_time} 字` : null
   const routeId = getPostRouteId({ publicId: post.public_id, slug: post.slug })
 
-  return (
-    <PostLayout toc={toc}>
-      <FadeIn>
-        <PostBreadcrumb title={post.title} />
-        
-        <article className="article-shell">
-          <div className="article-hero">
-            <h1 className="article-title text-3xl md:text-4xl lg:text-5xl">{post.title}</h1>
-            <div className="article-meta-row">
-              <div className="flex min-w-0 flex-1 flex-col items-start gap-1 text-sm text-muted-foreground sm:flex-row sm:items-center sm:gap-4">
-                <time dateTime={post.published_at || post.created_at} className="whitespace-nowrap text-sm truncate block min-w-0">
-                  {new Date(post.published_at || post.created_at).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })}
-                </time>
-                {readingTime && (
-                  <div className="flex items-center gap-2 text-sm">
-                    <span className="hidden sm:inline">•</span>
-                    <span className="sm:inline">{readingTime}</span>
-                  </div>
-                )}
-              </div>
-              <div className="flex items-center gap-4 flex-shrink-0">
-                <PostStats slug={routeId} />
-                <ShareButtons
-                  url={`https://blog.zzemy.top/posts/${routeId}`}
-                />
-              </div>
-            </div>
-            {post.tags && post.tags.length > 0 && (
-              <div className="flex flex-wrap gap-2 pt-2">
-                {post.tags.map((tag: string) => (
-                  <Link key={tag} href={`/tags/${tag}`} className="no-underline">
-                    <span className="article-tag">
-                      #{tag}
-                    </span>
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
-          
-          <TipTapRenderer 
-            className="mt-10"
-            content={post.content} 
-            toc={toc}
-          />
+  const originalVariant: PostLocaleVariant = {
+    locale: 'original',
+    title: post.title,
+    description: post.description,
+    content: post.content as Content,
+    aiSummary: parseAiSummaryFromMetadata(post.metadata),
+    toc: buildToc(post.content as TiptapNode),
+  }
 
-          <div className="mt-12 border-t pt-10">
-            <Comments />
-          </div>
-        </article>
-      </FadeIn>
-    </PostLayout>
-  );
+  const translationVariants: PostLocaleVariant[] = publishedTranslations.map((item) => ({
+    locale: item.locale,
+    title: item.title,
+    description: item.description,
+    content: item.content as Content,
+    aiSummary: parseAiSummaryFromMetadata({ ai_summary: item.ai_summary }),
+    toc: buildToc(item.content as TiptapNode),
+  }))
+
+  return (
+    <PostReaderView
+      original={originalVariant}
+      translations={translationVariants}
+      publishedDateIso={post.published_at || post.created_at}
+      readingTime={readingTime}
+      tags={post.tags ?? []}
+      routeId={routeId}
+    />
+  )
 }
