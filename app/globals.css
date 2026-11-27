@@ -71,6 +71,42 @@
   to { background-position: 200% center; }
 }
 
+@keyframes hero-rise {
+  0% {
+    opacity: 0;
+    transform: translateY(16px);
+    filter: blur(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+@keyframes scroll-cue-pulse {
+  0% {
+    transform: scaleY(0);
+    transform-origin: top;
+    opacity: 0;
+  }
+  35% {
+    transform: scaleY(1);
+    transform-origin: top;
+    opacity: 0.75;
+  }
+  70% {
+    transform: scaleY(1);
+    transform-origin: bottom;
+    opacity: 0.75;
+  }
+  100% {
+    transform: scaleY(0);
+    transform-origin: bottom;
+    opacity: 0;
+  }
+}
+
 :root {
   --radius: 0.625rem;
   --font-wenkai: "LXGW WenKai", "霞鹜文楷", "LXGW WenKai Screen", "Source Han Sans SC", "Noto Sans SC", "Microsoft YaHei", "PingFang SC", "Heiti SC", system-ui, sans-serif;
@@ -80,80 +116,89 @@
   --article-font-size-desktop: 1.125rem;
   --article-line-height-desktop: 1.86;
   --article-motion: cubic-bezier(0.22, 1, 0.36, 1);
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.129 0.042 264.695);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.129 0.042 264.695);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.208 0.042 265.755);
-  --primary-foreground: oklch(0.984 0.003 247.858);
-  --secondary: oklch(0.968 0.007 247.896);
-  --secondary-foreground: oklch(0.208 0.042 265.755);
-  --muted: oklch(0.968 0.007 247.896);
-  --muted-foreground: oklch(0.554 0.046 257.417);
-  --accent: oklch(0.968 0.007 247.896);
-  --accent-foreground: oklch(0.208 0.042 265.755);
+  --background: #f8f8f6;
+  --foreground: #17181a;
+  --card: #ffffff;
+  --card-foreground: #17181a;
+  --popover: #ffffff;
+  --popover-foreground: #17181a;
+  --primary: #17181a;
+  --primary-foreground: #f8f8f6;
+  --secondary: #efefe9;
+  --secondary-foreground: #17181a;
+  --muted: #f0f0ec;
+  --muted-foreground: #66686e;
+  --accent: #ecece7;
+  --accent-foreground: #17181a;
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.929 0.013 255.508);
-  --input: oklch(0.929 0.013 255.508);
-  --ring: oklch(0.704 0.04 256.788);
+  --border: rgb(23 24 26 / 9%);
+  --input: rgb(23 24 26 / 12%);
+  --ring: rgb(23 24 26 / 26%);
   --chart-1: oklch(0.58 0.14 224);
   --chart-2: oklch(0.63 0.12 184);
   --chart-3: oklch(0.48 0.08 248);
   --chart-4: oklch(0.7 0.1 198);
   --chart-5: oklch(0.66 0.1 156);
-  --sidebar: oklch(0.984 0.003 247.858);
-  --sidebar-foreground: oklch(0.129 0.042 264.695);
-  --sidebar-primary: oklch(0.208 0.042 265.755);
-  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-accent: oklch(0.968 0.007 247.896);
-  --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
-  --sidebar-border: oklch(0.929 0.013 255.508);
-  --sidebar-ring: oklch(0.704 0.04 256.788);
+  --sidebar: #f4f4f1;
+  --sidebar-foreground: #17181a;
+  --sidebar-primary: #17181a;
+  --sidebar-primary-foreground: #f8f8f6;
+  --sidebar-accent: #ecece7;
+  --sidebar-accent-foreground: #17181a;
+  --sidebar-border: rgb(23 24 26 / 9%);
+  --sidebar-ring: rgb(23 24 26 / 26%);
 }
 
 .dark {
-  --background: #1e1e1e;
-  --foreground: #e5e5e5;
-  --card: #242424;
-  --card-foreground: #e5e5e5;
-  --popover: #242424;
-  --popover-foreground: #e5e5e5;
-  --primary: #e5e5e5;
-  --primary-foreground: #242424;
-  --secondary: #2b2b2b;
-  --secondary-foreground: #e5e5e5;
-  --muted: #2b2b2b;
-  --muted-foreground: #b3b3b3;
-  --accent: #2b2b2b;
-  --accent-foreground: #e5e5e5;
+  --background: #111214;
+  --foreground: #ececef;
+  --card: #17181b;
+  --card-foreground: #ececef;
+  --popover: #17181b;
+  --popover-foreground: #ececef;
+  --primary: #f2f2f5;
+  --primary-foreground: #111214;
+  --secondary: #1e2024;
+  --secondary-foreground: #ececef;
+  --muted: #1b1d21;
+  --muted-foreground: #969aa3;
+  --accent: #22252a;
+  --accent-foreground: #f2f2f5;
   --destructive: oklch(0.704 0.191 22.216);
-  --border: rgb(255 255 255 / 12%);
-  --input: rgb(255 255 255 / 16%);
-  --ring: oklch(0.551 0 0);
+  --border: rgb(255 255 255 / 9%);
+  --input: rgb(255 255 255 / 13%);
+  --ring: rgb(255 255 255 / 26%);
   --chart-1: oklch(0.68 0.13 224);
   --chart-2: oklch(0.72 0.12 184);
   --chart-3: oklch(0.62 0.09 248);
   --chart-4: oklch(0.76 0.1 198);
   --chart-5: oklch(0.7 0.11 156);
-  --sidebar: #1e1e1e;
-  --sidebar-foreground: #e5e5e5;
+  --sidebar: #111214;
+  --sidebar-foreground: #ececef;
   --sidebar-primary: oklch(0.488 0.243 264.376);
   --sidebar-primary-foreground: oklch(0.984 0 0);
-  --sidebar-accent: #2b2b2b;
-  --sidebar-accent-foreground: #e5e5e5;
-  --sidebar-border: rgb(255 255 255 / 12%);
-  --sidebar-ring: oklch(0.551 0 0);
+  --sidebar-accent: #1e2024;
+  --sidebar-accent-foreground: #ececef;
+  --sidebar-border: rgb(255 255 255 / 9%);
+  --sidebar-ring: rgb(255 255 255 / 26%);
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+  ::selection {
+    background-color: rgb(23 24 26 / 12%);
+    color: inherit;
+  }
+  .dark ::selection {
+    background-color: rgb(255 255 255 / 18%);
+    color: #ffffff;
+  }
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-wenkai);
+    text-rendering: optimizeLegibility;
   }
   .font-heading {
     font-family: var(--font-heading);
@@ -166,12 +211,24 @@
   }
   .font-handwriting-cjk {
     font-family: var(--font-wenkai);
-    letter-spacing: 0;
+    letter-spacing: 0.04em;
     font-weight: 400;
   }
   .hero-display {
-    font-family: Georgia, "Times New Roman", "Noto Serif SC", "Songti SC", serif;
-    letter-spacing: 0;
+    font-family: "Didot", "Bodoni MT", "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, "Songti SC", "STSong", serif;
+    letter-spacing: -0.025em;
     font-weight: 400;
+    font-optical-sizing: auto;
+    font-kerning: normal;
+  }
+  .editorial-grain {
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 240 240' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+    background-size: 200px 200px;
+  }
+  .animate-hero-rise {
+    animation: hero-rise 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .animate-scroll-cue {
+    animation: scroll-cue-pulse 2.6s cubic-bezier(0.45, 0, 0.25, 1) infinite;
   }
 }

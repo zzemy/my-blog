@@ -1,12 +1,14 @@
 "use client"
 
+import * as React from "react"
 import Link from "next/link"
-import { ModeToggle } from "@/shared/layout/mode-toggle"
+import { usePathname } from "next/navigation"
 import { Github, MessageCircle, Terminal } from "lucide-react"
+import { ModeToggle } from "@/shared/layout/mode-toggle"
 import { CommandMenu } from "@/shared/layout/command-menu"
 import { MobileNav } from "@/shared/layout/mobile-nav"
 import { SiteUptimeBadge } from "@/shared/components/common/site-uptime"
-import { usePathname } from "next/navigation"
+import { cn } from "@/lib/utils"
 
 const navItems = [
   { href: '/', label: '首页' },
@@ -20,59 +22,87 @@ const navItems = [
 export function SiteHeader() {
   const pathname = usePathname()
   const current = pathname || '/'
+  const isHomepage = current === '/'
+  const [isScrolled, setIsScrolled] = React.useState(false)
+
+  React.useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 24)
+    }
+
+    handleScroll()
+    window.addEventListener("scroll", handleScroll, { passive: true })
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
 
   const isActive = (href: string) => {
     if (href === '/') return current === '/'
     return current === href || current.startsWith(`${href}/`)
   }
 
+  const transparentHeroHeader = isHomepage && !isScrolled
+
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/70 bg-background/90 text-foreground shadow-[0_14px_42px_-36px_rgba(15,23,42,0.45)] backdrop-blur-2xl dark:border-white/10 dark:bg-[#181818]/96 dark:text-white dark:shadow-[0_14px_42px_-36px_rgba(0,0,0,0.9)]">
-      <div className="flex h-16 w-full items-center px-4 md:px-8">
+    <header
+      className={cn(
+        "sticky top-0 z-50 w-full transition-[background-color,border-color,box-shadow,backdrop-filter] duration-500 ease-out",
+        transparentHeroHeader
+          ? "border-b border-transparent bg-transparent text-foreground shadow-none"
+          : "border-b border-border/70 bg-background/80 text-foreground shadow-[0_12px_36px_-28px_rgba(15,23,42,0.35)] backdrop-blur-xl dark:border-white/[0.08] dark:bg-[#111214]/80 dark:shadow-[0_12px_36px_-28px_rgba(0,0,0,0.85)]"
+      )}
+    >
+      <div className="mx-auto flex h-16 w-full max-w-6xl items-center px-4 md:px-8">
         <MobileNav />
-        <div className="flex flex-1 items-center lg:w-72 lg:flex-none">
-          <Link href="/" className="ml-2 flex items-center gap-3 md:ml-0">
-            <span className="flex h-7 w-7 items-center justify-center rounded-md border border-border bg-muted/50 dark:border-white/22 dark:bg-white/[0.03]">
-              <Terminal className="h-4 w-4" />
+
+        <div className="flex flex-1 items-center lg:w-64 lg:flex-none">
+          <Link
+            href="/"
+            className="group ml-1.5 flex items-center gap-2.5 md:ml-0"
+          >
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg border border-foreground/12 bg-foreground/[0.03] transition-colors duration-200 group-hover:border-foreground/25 group-hover:bg-foreground/[0.06] dark:border-white/14 dark:bg-white/[0.04] dark:group-hover:border-white/28 dark:group-hover:bg-white/[0.08]">
+              <Terminal className="h-3.5 w-3.5 text-foreground/85" />
             </span>
-            <span className="text-lg font-extrabold leading-none tracking-normal text-foreground dark:text-white md:text-xl">
+            <span className="hero-display text-xl leading-none tracking-tight text-foreground md:text-[1.35rem]">
               emmm
             </span>
           </Link>
-          <span className="ml-4 hidden h-4 w-px bg-border dark:bg-white/12 xl:block" />
-          <span className="ml-4"><SiteUptimeBadge compact /></span>
+          <span className="ml-4 hidden h-3.5 w-px bg-foreground/12 xl:block" />
+          <span className="ml-3.5">
+            <SiteUptimeBadge compact />
+          </span>
         </div>
-        <nav className="hidden flex-1 items-center justify-center gap-7 text-sm font-bold md:flex lg:gap-8">
+
+        <nav className="hidden flex-1 items-center justify-center gap-7 text-[14px] font-medium md:flex lg:gap-8">
           {navItems.map((item) => {
             const active = isActive(item.href)
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`relative py-5 transition-colors duration-200 after:absolute after:left-0 after:right-0 after:bottom-3 after:mx-auto after:h-px after:transition-[width,background-color] after:duration-200 ${
+                className={cn(
+                  "relative py-5 transition-colors duration-200 after:absolute after:bottom-3.5 after:left-1/2 after:h-[1.5px] after:-translate-x-1/2 after:rounded-full after:transition-all after:duration-300",
                   active
-                    ? 'text-foreground after:w-full after:bg-foreground dark:text-white dark:after:bg-white'
-                    : 'text-foreground/62 after:w-0 after:bg-foreground/35 hover:text-foreground hover:after:w-5 dark:text-white/72 dark:after:bg-white/45 dark:hover:text-white'
-                }`}
+                    ? "text-foreground after:w-4 after:bg-foreground/85"
+                    : "text-foreground/58 after:w-0 after:bg-foreground/40 hover:text-foreground hover:after:w-3"
+                )}
               >
                 {item.label}
               </Link>
             )
           })}
         </nav>
-        <div className="flex flex-1 items-center justify-end gap-1.5 lg:w-72 lg:flex-none">
-          <span className="hidden sm:block"><CommandMenu compact /></span>
-          <div className="hidden h-7 w-px bg-border dark:bg-white/14 sm:block" />
-          <div className="flex items-center gap-1.5 [&_button]:border-border [&_button]:bg-background/70 [&_button]:text-foreground/80 [&_button:hover]:bg-accent [&_button:hover]:text-foreground dark:[&_button]:border-white/16 dark:[&_button]:bg-white/[0.04] dark:[&_button]:text-white/82 dark:[&_button:hover]:bg-white/10 dark:[&_button:hover]:text-white">
-            <ModeToggle />
-          </div>
+
+        <div className="flex flex-1 items-center justify-end gap-1 lg:w-64 lg:flex-none">
+          <CommandMenu compact />
+          <div className="mx-1 hidden h-4 w-px bg-foreground/12 sm:block" />
+          <ModeToggle />
           <a
             href="https://github.com/zzemy"
             target="_blank"
             rel="noreferrer"
             aria-label="GitHub"
             title="GitHub"
-            className="flex size-9 items-center justify-center rounded-md text-foreground/65 transition-colors hover:bg-accent hover:text-foreground dark:text-white/75 dark:hover:bg-white/10 dark:hover:text-white"
+            className="flex size-8 items-center justify-center rounded-lg text-foreground/65 transition-colors duration-200 hover:bg-foreground/[0.06] hover:text-foreground dark:hover:bg-white/[0.08]"
           >
             <Github className="h-4 w-4" />
           </a>
@@ -82,7 +112,7 @@ export function SiteHeader() {
             rel="noreferrer"
             aria-label="QQ"
             title="QQ"
-            className="flex size-9 items-center justify-center rounded-md text-foreground/65 transition-colors hover:bg-accent hover:text-foreground dark:text-white/75 dark:hover:bg-white/10 dark:hover:text-white"
+            className="flex size-8 items-center justify-center rounded-lg text-foreground/65 transition-colors duration-200 hover:bg-foreground/[0.06] hover:text-foreground dark:hover:bg-white/[0.08]"
           >
             <MessageCircle className="h-4 w-4" />
           </a>

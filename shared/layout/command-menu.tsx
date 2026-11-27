@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
-import { Search } from 'lucide-react';
+import { Search, Loader2 } from 'lucide-react';
 import { PostData } from '@/lib/types';
 import { create, insertMultiple, search } from '@orama/orama';
 import { createTokenizer } from '@orama/tokenizers/mandarin';
@@ -28,17 +28,17 @@ function escapeRegExp(string: string) {
 
 function HighlightText({ text, query }: { text: string; query: string }) {
   if (!query || !text) return <>{text}</>;
-  
+
   const escapedQuery = escapeRegExp(query);
   if (!escapedQuery) return <>{text}</>;
 
   const parts = text.split(new RegExp(`(${escapedQuery})`, 'gi'));
-  
+
   return (
     <>
-      {parts.map((part, i) => 
+      {parts.map((part, i) =>
         part.toLowerCase() === query.toLowerCase() ? (
-          <span key={i} className="text-primary font-bold bg-primary/10 rounded-[1px]">
+          <span key={i} className="rounded-[2px] bg-foreground/12 px-0.5 font-semibold text-foreground">
             {part}
           </span>
         ) : (
@@ -52,10 +52,10 @@ function HighlightText({ text, query }: { text: string; query: string }) {
 type SearchScope = 'global' | 'title_summary' | 'content' | 'tags';
 
 const SCOPE_OPTIONS: ReadonlyArray<{ id: SearchScope; label: string }> = [
-  { id: 'global', label: 'Global' },
-  { id: 'title_summary', label: 'Title' },
-  { id: 'content', label: 'Article' },
-  { id: 'tags', label: 'Tag' },
+  { id: 'global', label: '全部' },
+  { id: 'title_summary', label: '标题' },
+  { id: 'content', label: '正文' },
+  { id: 'tags', label: '标签' },
 ];
 
 const SEARCH_SCHEMA = {
@@ -119,36 +119,68 @@ export function CommandMenu({ compact = false }: { compact?: boolean }) {
   const [query, setQuery] = React.useState('');
   const [searchScope, setSearchScope] = React.useState<SearchScope>('global');
   const [oramaDb, setOramaDb] = React.useState<SearchDb | null>(null);
+  const [allPosts, setAllPosts] = React.useState<PostData[]>([]);
   const [results, setResults] = React.useState<PostData[]>([]);
+  const [loading, setLoading] = React.useState(false);
+  const initializingRef = React.useRef(false);
   const searchInputRef = React.useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
+    if (!open || oramaDb || initializingRef.current) return;
+
+    let cancelled = false;
+    initializingRef.current = true;
+    setLoading(true);
+
     const initOrama = async () => {
-      const db = await create({
-        schema: SEARCH_SCHEMA,
-        components: {
-          tokenizer: await createTokenizer(),
-        },
-      });
+      try {
+        const [db, res] = await Promise.all([
+          create({
+            schema: SEARCH_SCHEMA,
+            components: {
+              tokenizer: await createTokenizer(),
+            },
+          }),
+          fetch('/api/search'),
+        ]);
 
-      const res = await fetch(`/api/search`);
-      const data: SearchApiPost[] = await res.json();
-      const searchableDocs = data.map(toSearchDocument);
+        const data: SearchApiPost[] = res.ok ? await res.json() : [];
+        const searchableDocs = data.map(toSearchDocument);
+        await insertMultiple(db, searchableDocs);
 
-      await insertMultiple(db, searchableDocs);
-      setOramaDb(db);
-      setResults(data);
+        if (!cancelled) {
+          setOramaDb(db);
+          setAllPosts(data);
+          setResults(data);
+        }
+      } catch (error) {
+        console.error('Failed to initialize search index:', error);
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+        initializingRef.current = false;
+      }
     };
 
-    initOrama();
-  }, []);
+    void initOrama();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [open, oramaDb]);
 
   React.useEffect(() => {
     const searchOrama = async () => {
       if (!oramaDb) return;
-      
+
+      if (!query.trim()) {
+        setResults(allPosts);
+        return;
+      }
+
       const propertiesByScope: Record<SearchScope, SearchableProperty[] | undefined> = {
-        global: undefined, // search all indexed fields
+        global: undefined,
         title_summary: ['title', 'summary'],
         content: ['content'],
         tags: ['tags'],
@@ -156,23 +188,23 @@ export function CommandMenu({ compact = false }: { compact?: boolean }) {
       const properties = propertiesByScope[searchScope];
 
       const searchResult = await search<SearchDb, SearchDocument>(oramaDb, {
-        term: query, 
-        limit: 5,
-        threshold: 0, // Require exact matches for tokens
-        tolerance: 0, // No typo tolerance
+        term: query,
+        limit: 6,
+        threshold: 0,
+        tolerance: 0,
         properties,
       });
       setResults(searchResult.hits.map(hit => toPostData(hit.document)));
     };
 
-    searchOrama();
-  }, [query, oramaDb, searchScope]);
+    void searchOrama();
+  }, [query, oramaDb, searchScope, allPosts]);
 
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
-      if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
+      if (e.key.toLowerCase() === 'k' && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
-        setOpen((open) => !open);
+        setOpen((prev) => !prev);
       }
     };
 
@@ -202,19 +234,24 @@ export function CommandMenu({ compact = false }: { compact?: boolean }) {
           {compact ? (
             <Button
               variant="ghost"
-              size="icon"
-              className="h-10 w-10 text-foreground/78 hover:bg-accent hover:text-foreground dark:text-white/82 dark:hover:bg-white/10 dark:hover:text-white"
+              size="sm"
+              className="h-8 gap-2 rounded-lg px-2 text-foreground/65 transition-colors duration-200 hover:bg-foreground/[0.06] hover:text-foreground dark:hover:bg-white/[0.08] sm:border sm:border-foreground/10 sm:bg-foreground/[0.025] sm:px-2.5 dark:sm:border-white/10 dark:sm:bg-white/[0.03]"
               aria-label="搜索文章"
+              title="搜索文章 (⌘K)"
             >
-              <Search className="h-5 w-5" />
+              <Search className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
+              <span className="hidden text-xs text-foreground/55 sm:inline">搜索</span>
+              <kbd className="hidden select-none items-center gap-0.5 rounded border border-foreground/10 bg-background/60 px-1 font-mono text-[10px] text-foreground/50 lg:inline-flex">
+                ⌘K
+              </kbd>
             </Button>
           ) : (
             <div className="relative">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <input
                 ref={searchInputRef}
-                className="flex h-9 w-full rounded-md border border-input bg-background dark:bg-input/30 px-3 py-1 text-[15px] shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 pl-8"
-                placeholder="搜索文章"
+                className="flex h-9 w-full rounded-lg border border-input bg-background px-3 py-1 pl-8 text-sm shadow-xs transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                placeholder="搜索文章…"
                 value={query}
                 onChange={(e) => {
                   setQuery(e.target.value);
@@ -222,74 +259,91 @@ export function CommandMenu({ compact = false }: { compact?: boolean }) {
                 }}
                 onClick={() => setOpen(true)}
               />
-              <kbd className="pointer-events-none absolute right-1.5 top-2 hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
-                <span className="text-xs">⌘</span>K
+              <kbd className="pointer-events-none absolute right-2 top-2 hidden h-5 select-none items-center gap-0.5 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground sm:flex">
+                ⌘K
               </kbd>
             </div>
           )}
         </PopoverTrigger>
         <PopoverContent
-          className={cn("p-0", compact ? "w-[min(22rem,calc(100vw-2rem))]" : "w-[var(--radix-popover-trigger-width)]")}
+          className={cn(
+            "overflow-hidden rounded-xl border-border/80 bg-popover/95 p-0 shadow-xl backdrop-blur-xl dark:border-white/12 dark:bg-[#17181b]/95",
+            compact ? "w-[min(23rem,calc(100vw-2rem))]" : "w-[var(--radix-popover-trigger-width)]"
+          )}
           align={compact ? "end" : "start"}
+          sideOffset={8}
           onOpenAutoFocus={(e) => e.preventDefault()}
         >
           {compact && (
-            <div className="relative border-b p-2">
-              <Search className="absolute left-4 top-4 h-4 w-4 text-muted-foreground" />
+            <div className="relative border-b border-border/70 p-2.5">
+              <Search className="absolute left-5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/70" />
               <input
                 ref={searchInputRef}
-                className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 pl-8 text-[15px] shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                placeholder="搜索文章"
+                className="flex h-9 w-full rounded-lg border border-border/70 bg-background/70 px-3 py-1 pl-9 text-sm placeholder:text-muted-foreground/70 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                placeholder="输入关键词搜索文章…"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
               />
             </div>
           )}
-          <div className="flex items-center gap-1 p-2 border-b overflow-x-auto no-scrollbar">
+          <div className="flex items-center gap-1 border-b border-border/60 px-2.5 py-2 overflow-x-auto no-scrollbar">
             {SCOPE_OPTIONS.map((scope) => (
-              <Button
+              <button
                 key={scope.id}
-                variant={searchScope === scope.id ? 'secondary' : 'ghost'}
-                size="sm"
+                type="button"
                 onClick={() => setSearchScope(scope.id)}
                 className={cn(
-                  "h-6 text-xs px-2 rounded-full",
-                  searchScope === scope.id && "bg-primary/10 text-primary hover:bg-primary/20"
+                  "rounded-full px-2.5 py-1 text-xs transition-colors",
+                  searchScope === scope.id
+                    ? "bg-foreground text-background font-medium"
+                    : "text-muted-foreground hover:bg-foreground/[0.06] hover:text-foreground"
                 )}
               >
                 {scope.label}
-              </Button>
+              </button>
             ))}
           </div>
-          <Command shouldFilter={false}>
-            <CommandList>
-              <CommandEmpty>No results found.</CommandEmpty>
-              <CommandGroup heading="Posts">
-                {results.slice(0, 5).map((post) => (
-                  <CommandItem
-                    key={post.id}
-                    value={post.title}
-                    onSelect={() => {
-                      runCommand(() => router.push(`/posts/${getPostRouteId(post)}`));
-                    }}
-                  >
-                    <div className="flex flex-col">
-                      <span>
-                        <HighlightText text={post.title} query={query} />
-                      </span>
-                      {post.tags && post.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mt-0.5">
-                          {post.tags.map((tag) => (
-                            <span key={tag} className="text-xs text-muted-foreground">
-                              #<HighlightText text={tag} query={query} />
-                            </span>
-                          ))}
+          <Command shouldFilter={false} className="bg-transparent">
+            <CommandList className="max-h-72">
+              {loading ? (
+                <div className="flex items-center justify-center gap-2 py-8 text-xs text-muted-foreground">
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  <span>正在加载文章索引…</span>
+                </div>
+              ) : (
+                <>
+                  <CommandEmpty className="py-8 text-center text-xs text-muted-foreground">
+                    未找到相关文章
+                  </CommandEmpty>
+                  <CommandGroup heading={query.trim() ? "搜索结果" : "最近文章"}>
+                    {results.slice(0, 6).map((post) => (
+                      <CommandItem
+                        key={post.id}
+                        value={post.title}
+                        className="cursor-pointer rounded-lg px-2.5 py-2"
+                        onSelect={() => {
+                          runCommand(() => router.push(`/posts/${getPostRouteId(post)}`));
+                        }}
+                      >
+                        <div className="flex min-w-0 flex-col gap-1">
+                          <span className="truncate text-sm font-medium">
+                            <HighlightText text={post.title} query={query} />
+                          </span>
+                          {post.tags && post.tags.length > 0 && (
+                            <div className="flex flex-wrap gap-1.5">
+                              {post.tags.slice(0, 4).map((tag) => (
+                                <span key={tag} className="text-[11px] text-muted-foreground">
+                                  #<HighlightText text={tag} query={query} />
+                                </span>
+                              ))}
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
-                  </CommandItem>
-                ))}
-              </CommandGroup>
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </>
+              )}
             </CommandList>
           </Command>
         </PopoverContent>

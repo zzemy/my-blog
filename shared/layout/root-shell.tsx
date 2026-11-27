@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation"
 import { VantaBackground } from "@/shared/effects/vanta-background"
 import { ScrollToTopButton } from "@/shared/layout/scroll-to-top-button"
+import { SiteFooter } from "@/shared/layout/site-footer"
 import { SiteHeader } from "@/shared/layout/site-header"
 import { SmoothScroll } from "@/shared/layout/smooth-scroll"
 
@@ -21,6 +22,7 @@ export function RootShell({ children }: { children: React.ReactNode }) {
         <main className="flex-1">
           {children}
         </main>
+        <SiteFooter />
         <ScrollToTopButton />
       </div>
     </SmoothScroll>

@@ -2,7 +2,6 @@
 // import { Lora } from 'next/font/google';
 
 import "./globals.css";
-import "katex/dist/katex.min.css";
 import { ThemeProvider } from "@/shared/layout/theme-provider"
 import { VantaProvider } from "@/shared/effects/vanta-context";
 import { RootShell } from "@/shared/layout/root-shell";

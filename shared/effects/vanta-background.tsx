@@ -1,72 +1,134 @@
 "use client"
 
 import { usePathname } from "next/navigation"
-import { useReducedMotion } from "framer-motion"
 import { useTheme } from "next-themes"
 import { useEffect, useRef, useState } from "react"
 import { useVanta } from "./vanta-context"
 import { shouldUseVantaBackground } from "./vanta-routes"
 
 const VIDEO_SRC = "/videos/hero-smoke-720.mp4"
+const VIDEO_POSTER = "/videos/hero-smoke-poster.jpg"
 const LIGHT_VIDEO_SRC = "/videos/hero-light-clouds-720.mp4"
+const LIGHT_VIDEO_POSTER = "/videos/hero-light-clouds-poster.jpg"
 const MAX_VIDEO_SECONDS = 14
 const CROSSFADE_SECONDS = 3.6
-const LIGHT_MEDIA_OPACITY = 0.14
-const HERO_READY_EVENT = "blog:hero-ready"
+const LIGHT_MEDIA_OPACITY = 0.24
 
 export function VantaBackground() {
   const pathname = usePathname()
   const { effect } = useVanta()
-  const reducedMotion = useReducedMotion()
   const { resolvedTheme } = useTheme()
   const [hasMounted, setHasMounted] = useState(false)
   const [mediaReady, setMediaReady] = useState(false)
-  const [heroReady, setHeroReady] = useState(false)
+  const scrollLayerRef = useRef<HTMLDivElement>(null)
   const primaryVideoRef = useRef<HTMLVideoElement>(null)
   const secondaryVideoRef = useRef<HTMLVideoElement>(null)
   const activeVideoRef = useRef<0 | 1>(0)
   const transitioningRef = useRef(false)
+  const pausedByScrollRef = useRef(false)
   const isHomepage = shouldUseVantaBackground(pathname)
   const isDark = resolvedTheme === "dark"
   const themeReady = resolvedTheme === "dark" || resolvedTheme === "light"
   const playbackKey = `${isHomepage}:${isDark}`
   const videoSrc = isDark ? VIDEO_SRC : LIGHT_VIDEO_SRC
+  const posterSrc = isDark ? VIDEO_POSTER : LIGHT_VIDEO_POSTER
 
   useEffect(() => setHasMounted(true), [])
 
   useEffect(() => {
-    const handleHeroReady = () => setHeroReady(true)
-    window.addEventListener(HERO_READY_EVENT, handleHeroReady)
-    return () => window.removeEventListener(HERO_READY_EVENT, handleHeroReady)
-  }, [hasMounted])
+    if (!hasMounted || !themeReady || !isHomepage || effect === "none") return
+
+    let frameId = 0
+
+    const syncScrollFade = () => {
+      frameId = 0
+      const viewportHeight = Math.max(window.innerHeight, 1)
+      const progress = Math.min(1, Math.max(0, window.scrollY / (viewportHeight * 0.85)))
+
+      if (scrollLayerRef.current) {
+        scrollLayerRef.current.style.opacity = String(1 - progress * 0.94)
+      }
+
+      const primary = primaryVideoRef.current
+      const secondary = secondaryVideoRef.current
+      const activeVideo = activeVideoRef.current === 0 ? primary : secondary
+
+      if (progress >= 0.96) {
+        if (!pausedByScrollRef.current) {
+          pausedByScrollRef.current = true
+          primary?.pause()
+          secondary?.pause()
+        }
+      } else if (pausedByScrollRef.current) {
+        pausedByScrollRef.current = false
+        if (activeVideo) {
+          void activeVideo.play().catch(() => {})
+        }
+      }
+    }
+
+    const onScroll = () => {
+      if (frameId) return
+      frameId = window.requestAnimationFrame(syncScrollFade)
+    }
+
+    syncScrollFade()
+    window.addEventListener("scroll", onScroll, { passive: true })
+    window.addEventListener("resize", onScroll, { passive: true })
+
+    return () => {
+      if (frameId) window.cancelAnimationFrame(frameId)
+      window.removeEventListener("scroll", onScroll)
+      window.removeEventListener("resize", onScroll)
+    }
+  }, [effect, hasMounted, isHomepage, themeReady])
 
   useEffect(() => {
     const primary = primaryVideoRef.current
     const secondary = secondaryVideoRef.current
-    if (!hasMounted || !themeReady || !primary || !secondary || reducedMotion || effect === "none" || !isHomepage) return
+    if (!hasMounted || !themeReady || !primary || !secondary || effect === "none" || !isHomepage) return
 
     const videos = [primary, secondary] as const
     const mediaOpacity = isDark ? 1 : LIGHT_MEDIA_OPACITY
-    const playbackRate = isDark ? 0.48 : 0.72
+    const playbackRate = isDark ? 0.5 : 0.68
+    let transitionTimer: number | undefined
+    let started = false
+
     const setOpacity = (video: HTMLVideoElement, opacity: number) => {
       video.style.opacity = String(opacity * mediaOpacity)
       video.style.transition = `opacity ${CROSSFADE_SECONDS}s ease-in-out`
     }
 
+    const ensurePlaying = () => {
+      if (pausedByScrollRef.current) return
+      const active = videos[activeVideoRef.current]
+      active.playbackRate = playbackRate
+      if (active.paused) {
+        void active.play().catch(() => {})
+      }
+    }
+
     const start = () => {
+      if (!started) {
+        started = true
+        videos.forEach((video, index) => {
+          video.playbackRate = playbackRate
+          video.currentTime = 0
+          setOpacity(video, index === activeVideoRef.current ? 1 : 0)
+        })
+      }
       setMediaReady(true)
-      videos.forEach((video, index) => {
-        video.playbackRate = playbackRate
-        video.currentTime = 0
-        setOpacity(video, index === activeVideoRef.current ? 1 : 0)
-      })
-      void primary.play().catch(() => {})
+      ensurePlaying()
+    }
+
+    const handlePlaying = () => {
+      setMediaReady(true)
     }
 
     const handleTimeUpdate = (event: Event) => {
       const current = event.currentTarget as HTMLVideoElement
       const activeIndex = activeVideoRef.current
-      if (current !== videos[activeIndex] || transitioningRef.current || !current.duration) return
+      if (current !== videos[activeIndex] || transitioningRef.current || pausedByScrollRef.current || !current.duration) return
       const effectiveEnd = Math.min(current.duration, MAX_VIDEO_SECONDS)
       if (effectiveEnd - current.currentTime > CROSSFADE_SECONDS) return
 
@@ -80,7 +142,7 @@ export function VantaBackground() {
       void next.play().catch(() => {})
       activeVideoRef.current = nextIndex
 
-      window.setTimeout(() => {
+      transitionTimer = window.setTimeout(() => {
         current.pause()
         current.currentTime = 0
         setOpacity(current, 0)
@@ -89,56 +151,84 @@ export function VantaBackground() {
     }
 
     videos.forEach((video) => video.addEventListener("timeupdate", handleTimeUpdate))
-    if (primary.readyState >= 1) start()
-    else primary.addEventListener("loadedmetadata", start, { once: true })
+    primary.addEventListener("loadedmetadata", start)
+    primary.addEventListener("canplay", ensurePlaying)
+    primary.addEventListener("playing", handlePlaying)
+
+    if (primary.readyState >= 1) {
+      start()
+    } else {
+      ensurePlaying()
+    }
 
     return () => {
+      if (transitionTimer) window.clearTimeout(transitionTimer)
       videos.forEach((video) => {
         video.pause()
         video.removeEventListener("timeupdate", handleTimeUpdate)
       })
       primary.removeEventListener("loadedmetadata", start)
+      primary.removeEventListener("canplay", ensurePlaying)
+      primary.removeEventListener("playing", handlePlaying)
       activeVideoRef.current = 0
       transitioningRef.current = false
+      pausedByScrollRef.current = false
       setMediaReady(false)
     }
-  }, [effect, hasMounted, isDark, isHomepage, playbackKey, reducedMotion, themeReady])
+  }, [effect, hasMounted, isDark, isHomepage, playbackKey, themeReady])
 
   if (!hasMounted || !themeReady || !isHomepage || effect === "none") return null
 
   const mediaClass = isDark
-    ? "grayscale brightness-[0.62] contrast-110"
-    : "grayscale-[0.35] saturate-[0.7] brightness-110 contrast-90 mix-blend-multiply"
-  const overlayClass = isDark
-    ? "bg-[radial-gradient(ellipse_at_center,rgba(6,10,14,0.12),rgba(6,10,14,0.74)_78%)]"
-    : "bg-[linear-gradient(180deg,rgba(255,255,255,0.14),rgba(248,249,250,0.015)_46%,rgba(238,241,244,0.08))]"
+    ? "grayscale brightness-[0.58] contrast-[1.08]"
+    : "grayscale-[0.3] saturate-[0.65] brightness-[1.06] contrast-[0.94] mix-blend-multiply"
+
+  const vignetteClass = isDark
+    ? "bg-[radial-gradient(ellipse_75%_60%_at_50%_38%,rgba(17,18,20,0.08),rgba(17,18,20,0.72)_76%,#111214_100%)]"
+    : "bg-[radial-gradient(ellipse_80%_62%_at_50%_38%,rgba(248,248,246,0.06),rgba(248,248,246,0.58)_76%,#f8f8f6_100%)]"
+
+  const bottomFadeClass = isDark
+    ? "bg-[linear-gradient(180deg,rgba(17,18,20,0.36)_0%,rgba(17,18,20,0.06)_28%,rgba(17,18,20,0.55)_72%,#111214_96%)]"
+    : "bg-[linear-gradient(180deg,rgba(248,248,246,0.48)_0%,rgba(248,248,246,0.08)_30%,rgba(248,248,246,0.68)_74%,#f8f8f6_96%)]"
 
   return (
-    <div aria-hidden="true" className={`pointer-events-none fixed inset-0 -z-10 overflow-hidden ${isDark ? "bg-[#101214]" : "bg-[#f4f5f6]"}`}>
-      <div className={`absolute inset-0 transition-opacity duration-700 ${mediaReady && (heroReady || reducedMotion) ? "opacity-0" : "opacity-100"} ${isDark ? "bg-[#101214]" : "bg-[#f4f5f6]"}`} />
-      {reducedMotion ? (
-        <div
-          className={`absolute inset-0 ${isDark ? "bg-[#101214]" : "bg-[#f4f5f6]"}`}
-        />
-      ) : (
+    <div
+      aria-hidden="true"
+      className={`pointer-events-none fixed inset-0 -z-10 overflow-hidden ${isDark ? "bg-[#111214]" : "bg-[#f8f8f6]"}`}
+    >
+      <div
+        ref={scrollLayerRef}
+        className="absolute inset-0 will-change-[opacity]"
+      >
         <div className="absolute inset-0">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={posterSrc}
+            alt=""
+            className={`absolute inset-0 h-full w-full scale-[1.04] object-cover transition-opacity duration-700 ${mediaClass} ${mediaReady ? "opacity-0" : "opacity-100"}`}
+            style={mediaReady ? undefined : { opacity: isDark ? 0.85 : LIGHT_MEDIA_OPACITY }}
+          />
           {[primaryVideoRef, secondaryVideoRef].map((videoRef, index) => (
             <video
               key={`${playbackKey}-${index}`}
               ref={videoRef}
+              poster={index === 0 ? posterSrc : undefined}
               className={`absolute inset-0 h-full w-full scale-[1.04] object-cover ${mediaClass}`}
               style={{ opacity: index === 0 ? (isDark ? 1 : LIGHT_MEDIA_OPACITY) : 0 }}
+              autoPlay={index === 0}
               muted
               playsInline
-              preload="auto"
+              preload={index === 0 ? "auto" : "metadata"}
             >
               <source src={videoSrc} type="video/mp4" />
             </video>
           ))}
         </div>
-      )}
-      <div className={`absolute inset-0 ${overlayClass}`} />
-      <div className={isDark ? "absolute inset-0 bg-[#101214]/20" : "absolute inset-0 bg-white/[0.015]"} />
+
+        <div className={`absolute inset-0 ${vignetteClass}`} />
+        <div className={`absolute inset-0 ${bottomFadeClass}`} />
+        <div className="editorial-grain absolute inset-0 opacity-[0.025] dark:opacity-[0.04]" />
+      </div>
     </div>
   )
 }
