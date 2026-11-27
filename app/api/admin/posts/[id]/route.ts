@@ -14,6 +14,7 @@ const currentPostCacheStateSchema = z.object({
   slug: z.string(),
   tags: z.array(z.string()).nullable().optional(),
   published: z.boolean(),
+  metadata: z.record(z.string(), z.unknown()).nullable().optional(),
 })
 
 // GET - 获取单个文章（需要认证）
@@ -74,16 +75,8 @@ export async function PUT(
       return NextResponse.json({ error: 'Post not found' }, { status: 404 })
     }
 
-    const existingMetadata =
-      existingPost &&
-      typeof existingPost === 'object' &&
-      'metadata' in existingPost &&
-      existingPost.metadata &&
-      typeof existingPost.metadata === 'object'
-        ? (existingPost.metadata as Record<string, unknown>)
-        : {}
-
     const previousPost = existingPostResult.data
+    const existingMetadata: Record<string, unknown> = previousPost.metadata ?? {}
     const previousRevalidationState = {
       publicId: previousPost.public_id,
       slug: previousPost.slug,
