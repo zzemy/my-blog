@@ -10,6 +10,7 @@ export interface PostData {
   tags?: string[]
   readingTime?: string
   coverImage?: string | null
+  featured?: boolean
 }
 
 export interface TocItem {

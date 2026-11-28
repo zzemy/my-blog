@@ -3,11 +3,12 @@
 import * as React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Github, MessageCircle, Terminal } from "lucide-react"
+import { Github, Globe, Mail, MessageCircle, Terminal } from "lucide-react"
 import { ModeToggle } from "@/shared/layout/mode-toggle"
 import { CommandMenu } from "@/shared/layout/command-menu"
 import { MobileNav } from "@/shared/layout/mobile-nav"
 import { SiteUptimeBadge } from "@/shared/components/common/site-uptime"
+import { useSiteSettings } from "@/shared/layout/site-settings-context"
 import { cn } from "@/lib/utils"
 
 const navItems = [
@@ -19,8 +20,19 @@ const navItems = [
   { href: '/about', label: '关于' },
 ]
 
+function renderSocialIcon(platform: string) {
+  const lower = platform.toLowerCase()
+  if (lower.includes('github')) return <Github className="h-4 w-4" />
+  if (lower.includes('mail') || lower.includes('email')) return <Mail className="h-4 w-4" />
+  if (lower.includes('qq') || lower.includes('wechat') || lower.includes('telegram')) {
+    return <MessageCircle className="h-4 w-4" />
+  }
+  return <Globe className="h-4 w-4" />
+}
+
 export function SiteHeader() {
   const pathname = usePathname()
+  const settings = useSiteSettings()
   const current = pathname || '/'
   const isHomepage = current === '/'
   const [isScrolled, setIsScrolled] = React.useState(false)
@@ -63,7 +75,7 @@ export function SiteHeader() {
               <Terminal className="h-3.5 w-3.5 text-foreground/85" />
             </span>
             <span className="hero-display text-xl leading-none tracking-tight text-foreground md:text-[1.35rem]">
-              emmm
+              {settings.siteTitle}
             </span>
           </Link>
           <span className="ml-4 hidden h-3.5 w-px bg-foreground/12 xl:block" />
@@ -72,13 +84,14 @@ export function SiteHeader() {
           </span>
         </div>
 
-        <nav className="hidden flex-1 items-center justify-center gap-7 text-[14px] font-medium md:flex lg:gap-8">
+        <nav aria-label="主导航" className="hidden flex-1 items-center justify-center gap-7 text-[14px] font-medium md:flex lg:gap-8">
           {navItems.map((item) => {
             const active = isActive(item.href)
             return (
               <Link
                 key={item.href}
                 href={item.href}
+                aria-current={active ? "page" : undefined}
                 className={cn(
                   "relative py-5 transition-colors duration-200 after:absolute after:bottom-3.5 after:left-1/2 after:h-[1.5px] after:-translate-x-1/2 after:rounded-full after:transition-all after:duration-300",
                   active
@@ -96,26 +109,19 @@ export function SiteHeader() {
           <CommandMenu compact />
           <div className="mx-1 hidden h-4 w-px bg-foreground/12 sm:block" />
           <ModeToggle />
-          <a
-            href="https://github.com/zzemy"
-            target="_blank"
-            rel="noreferrer"
-            aria-label="GitHub"
-            title="GitHub"
-            className="flex size-8 items-center justify-center rounded-lg text-foreground/65 transition-colors duration-200 hover:bg-foreground/[0.06] hover:text-foreground dark:hover:bg-white/[0.08]"
-          >
-            <Github className="h-4 w-4" />
-          </a>
-          <a
-            href="https://qm.qq.com/cgi-bin/qm/qr?k=GJV7-av-NF7gsXV13umV8RqQC0Cum5zo"
-            target="_blank"
-            rel="noreferrer"
-            aria-label="QQ"
-            title="QQ"
-            className="flex size-8 items-center justify-center rounded-lg text-foreground/65 transition-colors duration-200 hover:bg-foreground/[0.06] hover:text-foreground dark:hover:bg-white/[0.08]"
-          >
-            <MessageCircle className="h-4 w-4" />
-          </a>
+          {settings.socialLinks.slice(0, 2).map((link) => (
+            <a
+              key={`${link.platform}-${link.url}`}
+              href={link.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={link.platform}
+              title={link.platform}
+              className="hidden size-8 items-center justify-center rounded-lg text-foreground/65 transition-colors duration-200 hover:bg-foreground/[0.06] hover:text-foreground dark:hover:bg-white/[0.08] sm:flex"
+            >
+              {renderSocialIcon(link.platform)}
+            </a>
+          ))}
         </div>
       </div>
     </header>

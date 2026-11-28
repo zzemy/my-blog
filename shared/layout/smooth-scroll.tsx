@@ -4,23 +4,25 @@ import { ReactLenis } from "lenis/react";
 import { useEffect, useState } from "react";
 
 export function SmoothScroll({ children }: { children: React.ReactNode }) {
-  const [isMobile, setIsMobile] = useState(false);
+  const [enableLenis, setEnableLenis] = useState(false);
 
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
+    const check = () => {
+      const isDesktop = window.innerWidth >= 768;
+      const prefersReduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+      setEnableLenis(isDesktop && !prefersReduced);
     };
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
   }, []);
 
-  if (isMobile) {
+  if (!enableLenis) {
     return <>{children}</>;
   }
 
   return (
-    <ReactLenis root options={{ lerp: 0.08, duration: 1.8, smoothWheel: true }}>
+    <ReactLenis root options={{ lerp: 0.1, duration: 1.05, smoothWheel: true }}>
       {children}
     </ReactLenis>
   );

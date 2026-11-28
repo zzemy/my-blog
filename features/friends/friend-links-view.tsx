@@ -1,7 +1,7 @@
 'use client'
 
 import { FormEvent, useCallback, useEffect, useState } from 'react'
-import { ArrowUpRight, CheckCircle2, Globe2, Link2, Loader2, RefreshCw, Send, ShieldCheck } from 'lucide-react'
+import { ArrowUpRight, Check, CheckCircle2, Copy, Globe2, Link2, Loader2, RefreshCw, Send, ShieldCheck } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import type { PublicFriendLink } from '@/lib/supabase/friend-links'
+import { useSiteSettings } from '@/shared/layout/site-settings-context'
 
 type FormState = {
   name: string
@@ -91,12 +92,36 @@ function FriendLinkCard({ link }: { link: PublicFriendLink }) {
 }
 
 export function FriendLinksView({ links }: { links: PublicFriendLink[] }) {
+  const settings = useSiteSettings()
   const [form, setForm] = useState<FormState>(initialForm)
   const [csrfToken, setCsrfToken] = useState('')
   const [csrfLoading, setCsrfLoading] = useState(true)
   const [csrfError, setCsrfError] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const [copiedMode, setCopiedMode] = useState<'url' | 'md' | 'json' | null>(null)
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+
+  const copySiteInfo = async (mode: 'url' | 'md' | 'json') => {
+    const info = {
+      name: settings.siteTitle,
+      url: settings.siteUrl,
+      avatar: settings.authorInfo.avatarUrl || `${settings.siteUrl}/icon`,
+      description: settings.siteDescription,
+    }
+    const text =
+      mode === 'url'
+        ? info.url
+        : mode === 'md'
+          ? `[${info.name}](${info.url}) - ${info.description}`
+          : JSON.stringify(info, null, 2)
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopiedMode(mode)
+      window.setTimeout(() => setCopiedMode(null), 1800)
+    } catch {
+      // ignore
+    }
+  }
 
   const fetchCsrf = useCallback(async () => {
     setCsrfLoading(true)
@@ -197,6 +222,48 @@ export function FriendLinksView({ links }: { links: PublicFriendLink[] }) {
             <div className="mt-7 space-y-3 text-sm text-muted-foreground">
               <div className="flex items-start gap-3"><CheckCircle2 className="mt-0.5 size-4 shrink-0 text-primary" /><span>请确保网站可以正常访问，并已添加本站链接。</span></div>
               <div className="flex items-start gap-3"><ShieldCheck className="mt-0.5 size-4 shrink-0 text-primary" /><span>你的邮箱或联系方式只用于审核沟通，不会公开展示。</span></div>
+            </div>
+
+            {/* 本站友链交换信息卡 */}
+            <div className="mt-7 rounded-xl border border-border/70 bg-card/65 p-4 text-xs dark:border-white/12">
+              <div className="font-semibold text-foreground">本站友链信息</div>
+              <dl className="mt-3 space-y-1.5 text-muted-foreground">
+                <div className="flex gap-2">
+                  <dt className="w-12 shrink-0 text-muted-foreground/75">名称</dt>
+                  <dd className="font-medium text-foreground">{settings.siteTitle}</dd>
+                </div>
+                <div className="flex gap-2">
+                  <dt className="w-12 shrink-0 text-muted-foreground/75">地址</dt>
+                  <dd className="truncate font-mono text-foreground">{settings.siteUrl}</dd>
+                </div>
+                <div className="flex gap-2">
+                  <dt className="w-12 shrink-0 text-muted-foreground/75">简介</dt>
+                  <dd className="text-foreground/85">{settings.siteDescription}</dd>
+                </div>
+              </dl>
+              <div className="mt-3.5 flex flex-wrap gap-1.5">
+                {(
+                  [
+                    { id: 'url', label: '复制链接' },
+                    { id: 'md', label: '复制 Markdown' },
+                    { id: 'json', label: '复制 JSON' },
+                  ] as const
+                ).map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => void copySiteInfo(item.id)}
+                    className="inline-flex items-center gap-1 rounded-md border border-border/80 bg-background/80 px-2.5 py-1 text-[11px] text-foreground/80 transition-colors hover:border-foreground/30 hover:text-foreground"
+                  >
+                    {copiedMode === item.id ? (
+                      <Check className="size-3 text-emerald-500" />
+                    ) : (
+                      <Copy className="size-3 opacity-70" />
+                    )}
+                    <span>{copiedMode === item.id ? '已复制' : item.label}</span>
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 

@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Star } from "lucide-react";
 import { getPublishedPosts } from "@/lib/supabase/posts";
+import { getPostRouteId } from "@/lib/post-public-id";
 import { PostList } from "@/features/blog/components/shared/post-list";
 import { FadeIn } from "@/shared/visuals/fade-in";
 import { HeroTitle } from "@/shared/visuals/hero-title";
@@ -52,6 +53,7 @@ export default async function Home() {
       ? settings.site_description
       : '记录想法，分享发现，也留下痕迹。';
 
+  const featuredPosts = posts.filter((post) => post.featured).slice(0, 2);
   const recentPosts = posts.slice(0, HOME_POST_LIMIT);
   const topTags = collectTopTags(posts, 6);
   const latestDate = formatLatestMonth(posts[0]?.date);
@@ -66,9 +68,54 @@ export default async function Home() {
           latestDate={latestDate}
         />
 
+        {featuredPosts.length > 0 && (
+          <section className="mx-auto mt-6 max-w-4xl md:mt-8">
+            <FadeIn>
+              <div className="mb-4 flex items-center gap-2 text-xs font-mono uppercase tracking-[0.2em] text-muted-foreground/80">
+                <Star className="size-3.5 text-amber-500/80" />
+                <span>Featured / 精选置顶</span>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {featuredPosts.map((post) => (
+                  <Link
+                    key={post.id}
+                    href={`/posts/${getPostRouteId(post)}`}
+                    className="group flex flex-col justify-between rounded-xl border border-border/80 bg-card/75 p-5 no-underline backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-foreground/25 hover:bg-card hover:shadow-md dark:border-white/12 dark:bg-card/65"
+                  >
+                    <div>
+                      <h3 className="line-clamp-2 text-base font-semibold leading-snug text-foreground transition-colors group-hover:text-primary">
+                        {post.title}
+                      </h3>
+                      {post.summary && (
+                        <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-muted-foreground">
+                          {post.summary}
+                        </p>
+                      )}
+                    </div>
+                    <div className="mt-4 flex items-center justify-between text-[11px] text-muted-foreground">
+                      <span className="font-mono tabular-nums">
+                        {new Date(post.date).toLocaleDateString('zh-CN', {
+                          timeZone: 'Asia/Shanghai',
+                          year: 'numeric',
+                          month: '2-digit',
+                          day: '2-digit',
+                        })}
+                      </span>
+                      <span className="inline-flex items-center gap-1 text-foreground/75 transition-colors group-hover:text-foreground">
+                        阅读全文
+                        <ArrowRight className="size-3 transition-transform group-hover:translate-x-0.5" />
+                      </span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </FadeIn>
+          </section>
+        )}
+
         <section
           id="recent-posts"
-          className="mx-auto mt-6 max-w-4xl scroll-mt-24 md:mt-10"
+          className="mx-auto mt-8 max-w-4xl scroll-mt-24 md:mt-12"
         >
           <FadeIn className="border-b border-border/70 pb-5 dark:border-white/[0.09]">
             <div className="flex flex-wrap items-end justify-between gap-4">

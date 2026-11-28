@@ -1,33 +1,66 @@
 "use client"
 
-import Lottie from "lottie-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState } from "react"
+import Lottie from "lottie-react"
+
+const LOTTIE_URLS = [
+  "https://lottie.host/97e023b9-71c5-4191-9431-85b182447221/2pX0P0w4q2.json",
+  "https://assets2.lottiefiles.com/packages/lf20_kcsr6fcp.json",
+]
 
 export function Lottie404() {
-  const [animationData, setAnimationData] = useState(null);
+  const [animationData, setAnimationData] = useState<object | null>(null)
+  const [failed, setFailed] = useState(false)
 
   useEffect(() => {
-    // Try the user provided animation first (without /embed/)
-    fetch('https://lottie.host/9866e4f6-f3cd-4476-863d-28f129285123/2j5X252222.json')
-      .then(res => {
-        if (!res.ok) throw new Error('Network response was not ok');
-        return res.json();
-      })
-      .then(data => setAnimationData(data))
-      .catch(() => {
-        // Fallback to a reliable public JSON for 404 (Ghost)
-        fetch('https://assets2.lottiefiles.com/packages/lf20_kcsr6fcp.json')
-          .then(res => res.json())
-          .then(data => setAnimationData(data))
-          .catch(e => console.error("Fallback failed", e));
-      });
-  }, []);
+    let cancelled = false
 
-  if (!animationData) return <div className="h-64 w-64 bg-muted/20 animate-pulse rounded-lg" />;
+    const load = async () => {
+      for (const url of LOTTIE_URLS) {
+        try {
+          const controller = new AbortController()
+          const timer = window.setTimeout(() => controller.abort(), 3500)
+          const res = await fetch(url, { signal: controller.signal })
+          window.clearTimeout(timer)
+          if (!res.ok) continue
+          const json = await res.json()
+          if (!cancelled && json && typeof json === "object") {
+            setAnimationData(json)
+            return
+          }
+        } catch {
+          // try next fallback URL
+        }
+      }
+      if (!cancelled) setFailed(true)
+    }
 
+    void load()
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  if (animationData) {
+    return (
+      <div className="h-56 w-56 md:h-72 md:w-72">
+        <Lottie animationData={animationData} loop />
+      </div>
+    )
+  }
+
+  // 优雅的离线/兜底排版 404 徽标
   return (
-    <div className="w-full max-w-md mx-auto">
-      <Lottie animationData={animationData} loop={true} />
+    <div
+      className={`flex h-44 w-64 flex-col items-center justify-center rounded-2xl border border-border/70 bg-card/60 backdrop-blur-sm ${
+        failed ? "" : "animate-pulse"
+      }`}
+      aria-hidden="true"
+    >
+      <span className="hero-display text-7xl tracking-tight text-foreground/85">404</span>
+      <span className="mt-2 font-mono text-[11px] uppercase tracking-[0.26em] text-muted-foreground">
+        Not Found
+      </span>
     </div>
-  );
+  )
 }

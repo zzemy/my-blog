@@ -29,8 +29,10 @@ export function ScrollToTopButton() {
     <Button
       variant="outline"
       size="icon"
+      tabIndex={isVisible ? 0 : -1}
+      aria-hidden={!isVisible}
       className={cn(
-        "fixed bottom-7 right-6 z-50 h-10 w-10 rounded-full border-border/70 bg-background/80 text-foreground/75 shadow-lg backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:border-foreground/25 hover:bg-background hover:text-foreground dark:border-white/12 dark:bg-[#17181b]/80 md:bottom-8 md:right-8",
+        "fixed bottom-7 right-6 z-40 h-10 w-10 rounded-full border-border/70 bg-background/80 text-foreground/75 shadow-lg backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:border-foreground/25 hover:bg-background hover:text-foreground dark:border-white/12 dark:bg-[#17181b]/80 md:bottom-8 md:right-8",
         isVisible ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-6 opacity-0"
       )}
       onClick={scrollToTop}

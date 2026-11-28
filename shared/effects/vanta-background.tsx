@@ -5,6 +5,7 @@ import { useTheme } from "next-themes"
 import { useEffect, useRef, useState } from "react"
 import { useVanta } from "./vanta-context"
 import { shouldUseVantaBackground } from "./vanta-routes"
+import { DotPattern, GridPattern } from "./background-pattern"
 
 const VIDEO_SRC = "/videos/hero-smoke-720.mp4"
 const VIDEO_POSTER = "/videos/hero-smoke-poster.jpg"
@@ -36,7 +37,7 @@ export function VantaBackground() {
   useEffect(() => setHasMounted(true), [])
 
   useEffect(() => {
-    if (!hasMounted || !themeReady || !isHomepage || effect === "none") return
+    if (!hasMounted || !themeReady || !isHomepage || effect !== "video") return
 
     let frameId = 0
 
@@ -86,7 +87,7 @@ export function VantaBackground() {
   useEffect(() => {
     const primary = primaryVideoRef.current
     const secondary = secondaryVideoRef.current
-    if (!hasMounted || !themeReady || !primary || !secondary || effect === "none" || !isHomepage) return
+    if (!hasMounted || !themeReady || !primary || !secondary || effect !== "video" || !isHomepage) return
 
     const videos = [primary, secondary] as const
     const mediaOpacity = isDark ? 1 : LIGHT_MEDIA_OPACITY
@@ -128,7 +129,14 @@ export function VantaBackground() {
     const handleTimeUpdate = (event: Event) => {
       const current = event.currentTarget as HTMLVideoElement
       const activeIndex = activeVideoRef.current
-      if (current !== videos[activeIndex] || transitioningRef.current || pausedByScrollRef.current || !current.duration) return
+      if (
+        current !== videos[activeIndex] ||
+        transitioningRef.current ||
+        pausedByScrollRef.current ||
+        !current.duration
+      ) {
+        return
+      }
       const effectiveEnd = Math.min(current.duration, MAX_VIDEO_SECONDS)
       if (effectiveEnd - current.currentTime > CROSSFADE_SECONDS) return
 
@@ -177,7 +185,25 @@ export function VantaBackground() {
     }
   }, [effect, hasMounted, isDark, isHomepage, playbackKey, themeReady])
 
-  if (!hasMounted || !themeReady || !isHomepage || effect === "none") return null
+  if (!hasMounted || !themeReady || effect === "none") return null
+
+  if (effect === "dots") {
+    return (
+      <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+        <DotPattern className="opacity-35 dark:opacity-20 [mask-image:radial-gradient(ellipse_70%_60%_at_50%_30%,white,transparent)]" />
+      </div>
+    )
+  }
+
+  if (effect === "grid") {
+    return (
+      <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+        <GridPattern className="opacity-30 dark:opacity-15 [mask-image:radial-gradient(ellipse_70%_60%_at_50%_30%,white,transparent)]" />
+      </div>
+    )
+  }
+
+  if (!isHomepage) return null
 
   const mediaClass = isDark
     ? "grayscale brightness-[0.58] contrast-[1.08]"
@@ -196,10 +222,7 @@ export function VantaBackground() {
       aria-hidden="true"
       className={`pointer-events-none fixed inset-0 -z-10 overflow-hidden ${isDark ? "bg-[#111214]" : "bg-[#f8f8f6]"}`}
     >
-      <div
-        ref={scrollLayerRef}
-        className="absolute inset-0 will-change-[opacity]"
-      >
+      <div ref={scrollLayerRef} className="absolute inset-0 will-change-[opacity]">
         <div className="absolute inset-0">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img

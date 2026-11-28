@@ -93,6 +93,7 @@ function mapRowToListItem(post: Post): PostListItem {
     tags: post.tags || [],
     readingTime: post.reading_time ? `${post.reading_time} 字` : undefined,
     coverImage: post.cover_image,
+    featured: Boolean(post.featured),
   }
 }
 
