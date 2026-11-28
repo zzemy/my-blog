@@ -16,69 +16,102 @@ export function PostStats({ slug }: PostStatsProps) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let cancelled = false;
+    const encodedSlug = encodeURIComponent(slug);
+    const viewedSessionKey = `viewed:${slug}`;
+
     const fetchStats = async () => {
       try {
-        // Increment view
-        await fetch(`/api/stats?slug=${slug}&type=view`, { method: 'POST' });
-        
-        // Get current stats
-        const res = await fetch(`/api/stats?slug=${slug}`, { cache: 'no-store' });
+        // 同会话内只记一次阅读量，避免 StrictMode 或刷新重复刷数
+        let alreadyViewed = false;
+        try {
+          alreadyViewed = Boolean(sessionStorage.getItem(viewedSessionKey));
+        } catch {
+          alreadyViewed = false;
+        }
+
+        if (!alreadyViewed) {
+          try {
+            sessionStorage.setItem(viewedSessionKey, '1');
+          } catch {
+            // ignore
+          }
+          await fetch(`/api/stats?slug=${encodedSlug}&type=view`, { method: 'POST' });
+        }
+
+        const res = await fetch(`/api/stats?slug=${encodedSlug}`, { cache: 'no-store' });
+        if (!res.ok) return;
         const data = await res.json();
-        setViews(data.views);
-        setLikes(data.likes);
+        if (!cancelled) {
+          setViews(Number(data.views) || 0);
+          setLikes(Number(data.likes) || 0);
+        }
       } catch (error) {
         console.error('Error fetching stats:', error);
       } finally {
-        setIsLoading(false);
+        if (!cancelled) setIsLoading(false);
       }
     };
 
-    // Check local storage for like status
-    const liked = localStorage.getItem(`liked:${slug}`);
-    if (liked) {
-      setHasLiked(true);
+    try {
+      setHasLiked(Boolean(localStorage.getItem(`liked:${slug}`)));
+    } catch {
+      setHasLiked(false);
     }
 
-    fetchStats();
+    void fetchStats();
+
+    return () => {
+      cancelled = true;
+    };
   }, [slug]);
 
   const handleLike = async () => {
     if (hasLiked) return;
 
-    // Optimistic update
-    setLikes(prev => prev + 1);
+    setLikes((prev) => prev + 1);
     setHasLiked(true);
-    localStorage.setItem(`liked:${slug}`, 'true');
+    try {
+      localStorage.setItem(`liked:${slug}`, 'true');
+    } catch {
+      // ignore
+    }
 
     try {
-      await fetch(`/api/stats?slug=${slug}&type=like`, { method: 'POST' });
+      const res = await fetch(`/api/stats?slug=${encodeURIComponent(slug)}&type=like`, {
+        method: 'POST',
+      });
+      if (!res.ok) throw new Error('like_failed');
     } catch (error) {
       console.error('Error liking post:', error);
-      // Revert on error
-      setLikes(prev => prev - 1);
+      setLikes((prev) => Math.max(0, prev - 1));
       setHasLiked(false);
-      localStorage.removeItem(`liked:${slug}`);
+      try {
+        localStorage.removeItem(`liked:${slug}`);
+      } catch {
+        // ignore
+      }
     }
   };
 
   if (isLoading) {
     return (
-      <div className="flex items-center gap-4 text-muted-foreground text-sm h-9">
+      <div className="flex h-8 items-center gap-4 text-sm text-muted-foreground">
         <div className="flex items-center gap-1">
           <Eye className="size-4 animate-pulse" />
-          <span className="w-8 h-4 bg-muted animate-pulse rounded" />
+          <span className="h-4 w-7 animate-pulse rounded bg-muted" />
         </div>
         <div className="flex items-center gap-1">
           <Heart className="size-4 animate-pulse" />
-          <span className="w-8 h-4 bg-muted animate-pulse rounded" />
+          <span className="h-4 w-6 animate-pulse rounded bg-muted" />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex items-center gap-4 text-muted-foreground text-sm">
-      <div className="flex items-center gap-1" title="Views">
+    <div className="flex items-center gap-3 text-sm text-muted-foreground">
+      <div className="flex items-center gap-1 tabular-nums" title="阅读量">
         <Eye className="size-4" />
         <span>{views.toLocaleString()}</span>
       </div>
@@ -86,14 +119,15 @@ export function PostStats({ slug }: PostStatsProps) {
         variant="ghost"
         size="sm"
         className={cn(
-          "flex items-center gap-1 px-2 h-8 hover:bg-red-500/10 hover:text-red-500 transition-colors",
-          hasLiked && "text-red-500"
+          'flex h-8 items-center gap-1 px-2 tabular-nums transition-colors hover:bg-red-500/10 hover:text-red-500',
+          hasLiked && 'text-red-500',
         )}
         onClick={handleLike}
         disabled={hasLiked}
-        title="Like this post"
+        aria-label={hasLiked ? '已点赞' : '点赞文章'}
+        title={hasLiked ? '已点赞' : '点赞文章'}
       >
-        <Heart className={cn("size-4", hasLiked && "fill-current")} />
+        <Heart className={cn('size-4', hasLiked && 'fill-current')} />
         <span>{likes.toLocaleString()}</span>
       </Button>
     </div>

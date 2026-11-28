@@ -1036,3 +1036,84 @@
 .article-content.prose .component-footnotes li {
   color: var(--article-muted);
 }
+
+/* --- Phase 2 Reading Polish: Code Wrap, Scrollbars, Responsive Tables, Focus Mode & Print --- */
+.article-content .code-window-gutter {
+  min-width: 3.1rem;
+}
+
+.article-content .code-window-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(120 124 134 / 28%) transparent;
+}
+
+.article-content .code-window-scroll::-webkit-scrollbar {
+  display: block;
+  height: 6px;
+}
+
+.article-content .code-window-scroll::-webkit-scrollbar-thumb {
+  background-color: rgb(120 124 134 / 28%);
+  border-radius: 9999px;
+}
+
+.article-content .code-window.is-wrapped .code-window-pre,
+.article-content .code-window.is-wrapped .code-window-pre code,
+.article-content .code-window.is-wrapped .code-window-pre > * {
+  min-width: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.article-content .table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 1.5rem 0;
+}
+
+.article-content .table-wrapper table {
+  margin: 0;
+  min-width: 100%;
+}
+
+/* Immersive focus reading mode */
+html[data-reader-focus="true"] header,
+html[data-reader-focus="true"] footer {
+  display: none !important;
+}
+
+/* Clean print stylesheet */
+@media print {
+  header,
+  footer,
+  .article-toc-sidebar,
+  .article-floating-controls,
+  .article-meta-actions,
+  .article-neighbors,
+  .article-related,
+  .article-comments,
+  .paragraph-anchor,
+  .code-window-tools {
+    display: none !important;
+  }
+
+  main {
+    margin-left: 0 !important;
+  }
+
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  .article-content .code-window.is-collapsed .code-window-body {
+    display: flex !important;
+  }
+
+  .article-content a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.78em;
+    color: #555555;
+  }
+}

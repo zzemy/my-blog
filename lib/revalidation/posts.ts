@@ -14,6 +14,10 @@ function revalidateIndexPaths() {
   revalidatePath('/')
   revalidatePath('/posts')
   revalidatePath('/tags')
+  revalidatePath('/sitemap.xml')
+  revalidatePath('/rss.xml')
+  revalidatePath('/atom.xml')
+  revalidatePath('/rss.json')
 }
 
 export function revalidateSearchData() {

@@ -23,7 +23,7 @@ export function buildToc(content: TiptapNode | TiptapNode[] | null | undefined):
     }
 
     if (node.type === 'heading' && node.attrs?.level) {
-      const text = extractText(node)
+      const text = extractText(node).trim()
       if (text) {
         let base = slugifyHeading(text)
         if (!base) base = 'section'
@@ -49,11 +49,13 @@ export function buildToc(content: TiptapNode | TiptapNode[] | null | undefined):
 
 function slugifyHeading(text: string) {
   return text
+    .normalize('NFKC')
     .toLowerCase()
     .trim()
-    .replace(/[^a-z0-9\u4e00-\u9fa5\s-]/g, '')
+    .replace(/[^\p{L}\p{N}\s-]/gu, '')
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
 }
 
 function extractText(node: TiptapNode | null | undefined): string {

@@ -5,7 +5,7 @@
   "license": "AGPL-3.0-only",
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build && node scripts/generate-rss.mjs",
+    "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "publish": "git add . && git commit -m \"chore: update project\" && git push"

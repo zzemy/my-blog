@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { createRoot } from 'react-dom/client'
 import { X } from 'lucide-react'
+import { toast } from 'sonner'
 import { EditorContent, useEditor, ReactNodeViewRenderer } from '@tiptap/react'
 import type { Content } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
@@ -34,11 +35,17 @@ interface TocItem {
 
 interface TipTapRendererProps {
   content: Content
+  ssrHtml?: string
   className?: string
   toc?: TocItem[]
 }
 
-export function TipTapRenderer({ content, className = '', toc = [] }: TipTapRendererProps) {
+export function TipTapRenderer({
+  content,
+  ssrHtml,
+  className = '',
+  toc = [],
+}: TipTapRendererProps) {
   const [previewImage, setPreviewImage] = useState<{ src: string; alt: string } | null>(null)
   const editor = useEditor({
     immediatelyRender: false,
@@ -116,7 +123,7 @@ export function TipTapRenderer({ content, className = '', toc = [] }: TipTapRend
     },
   })
 
-  // 将标题批量设置 id 和 scroll-margin-top（与 buildToc 一致，跳过空标题）
+  // 将标题批量设置 id、scroll-margin-top 并注入可复制直达锚点按钮（与 buildToc 一致，跳过空标题）
   const assignHeadingIds = useCallback(() => {
     if (!editor || !toc.length) return
 
@@ -132,6 +139,28 @@ export function TipTapRenderer({ content, className = '', toc = [] }: TipTapRend
       if (heading) {
         heading.setAttribute('id', item.id)
         heading.style.scrollMarginTop = '96px'
+
+        if (!heading.querySelector('.paragraph-anchor')) {
+          const anchor = document.createElement('a')
+          anchor.href = `#${item.id}`
+          anchor.className = 'paragraph-anchor'
+          anchor.textContent = '#'
+          anchor.setAttribute('aria-label', `复制「${item.text}」段落链接`)
+          anchor.title = '复制段落直达链接'
+          anchor.addEventListener('click', (event) => {
+            event.preventDefault()
+            try {
+              const targetUrl = new URL(window.location.href)
+              targetUrl.hash = item.id
+              window.history.replaceState(null, '', targetUrl.toString())
+              void navigator.clipboard.writeText(targetUrl.toString())
+              toast.success('段落直达链接已复制')
+            } catch {
+              // ignore clipboard failures
+            }
+          })
+          heading.appendChild(anchor)
+        }
       }
 
       index += 1
@@ -149,6 +178,20 @@ export function TipTapRenderer({ content, className = '', toc = [] }: TipTapRend
       editor.off('create', handler)
     }
   }, [editor, assignHeadingIds])
+
+  // 为表格包裹 .table-wrapper 确保中屏/窄屏横向流畅滚动
+  useEffect(() => {
+    if (!editor) return
+    const dom = editor.view.dom
+    const tables = dom.querySelectorAll('table')
+    tables.forEach((table) => {
+      if (table.parentElement?.classList.contains('table-wrapper')) return
+      const wrapper = document.createElement('div')
+      wrapper.className = 'table-wrapper'
+      table.parentNode?.insertBefore(wrapper, table)
+      wrapper.appendChild(table)
+    })
+  }, [editor, content])
 
   // 将纯文本中的 URL 自动转成可点击链接（使用无状态检测正则，避免 /g lastIndex 污染）
   useEffect(() => {
@@ -205,6 +248,7 @@ export function TipTapRenderer({ content, className = '', toc = [] }: TipTapRend
       if (!(link instanceof HTMLAnchorElement)) return
       if (link.dataset.processed) return
       if (link.closest('[data-rich-block]')) return
+      if (link.classList.contains('paragraph-anchor')) return
 
       const href = link.getAttribute('href')?.trim()
       if (!href || !/^https?:\/\//i.test(href)) return
@@ -287,7 +331,14 @@ export function TipTapRenderer({ content, className = '', toc = [] }: TipTapRend
 
   return (
     <>
-      <EditorContent editor={editor} />
+      {editor ? (
+        <EditorContent editor={editor} />
+      ) : ssrHtml ? (
+        <div
+          className={`article-content prose dark:prose-invert max-w-none article-font ${className}`}
+          dangerouslySetInnerHTML={{ __html: ssrHtml }}
+        />
+      ) : null}
       {previewImage && (
         <div
           role="dialog"
