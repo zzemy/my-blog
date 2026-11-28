@@ -3,20 +3,13 @@
 import * as React from "react"
 import Link from "next/link"
 import { Rss, ArrowUpRight } from "lucide-react"
+import { SITE_NAV_ITEMS } from "@/shared/layout/nav-config"
 import { useSiteSettings } from "@/shared/layout/site-settings-context"
 
-const START_TIMESTAMP = new Date("2025-11-20T00:00:00Z").getTime()
+const DEFAULT_START_DATE = "2025-11-20T00:00:00Z"
 const MS_PER_DAY = 24 * 60 * 60 * 1000
 
-const REPO_URL = "https://github.com/zzemy/my-blog"
-
-const footerLinks: Array<{ href: string; label: string; external?: boolean }> = [
-  { href: "/posts", label: "归档" },
-  { href: "/tags", label: "标签" },
-  { href: "/friends", label: "友链" },
-  { href: "/guestbook", label: "留言" },
-  { href: REPO_URL, label: "关于", external: true },
-]
+const footerLinks = SITE_NAV_ITEMS.filter((item) => item.showInFooter)
 
 export function SiteFooter() {
   const settings = useSiteSettings()
@@ -25,9 +18,11 @@ export function SiteFooter() {
 
   React.useEffect(() => {
     const now = Date.now()
-    setDays(Math.floor(Math.max(0, now - START_TIMESTAMP) / MS_PER_DAY))
+    const foundedAt = new Date(settings.foundedDate || DEFAULT_START_DATE).getTime()
+    const startTs = Number.isNaN(foundedAt) ? new Date(DEFAULT_START_DATE).getTime() : foundedAt
+    setDays(Math.floor(Math.max(0, now - startTs) / MS_PER_DAY))
     setCurrentYear(new Date(now).getFullYear())
-  }, [])
+  }, [settings.foundedDate])
 
   if (!settings.featureFlags.enableFooter) {
     return null

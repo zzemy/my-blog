@@ -46,7 +46,7 @@ export function ReadingProgress() {
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none fixed left-0 top-0 z-50 h-[2px] w-full bg-transparent"
+      className="pointer-events-none fixed left-0 top-0 z-50 h-[2px] w-full bg-transparent print:hidden"
     >
       <div
         className="h-full bg-primary transition-[width] duration-100 ease-out"

@@ -40,6 +40,9 @@ const settingsSchema = z.object({
       google_site_verification: z.string().optional(),
       baidu_site_verification: z.string().optional(),
       og_image: z.string().optional(),
+      accent_preset: z.enum(['ink', 'amber', 'teal', 'indigo']).optional(),
+      founded_date: z.string().optional(),
+      custom_css: z.string().optional(),
     })
     .optional(),
   feature_flags: z
@@ -83,7 +86,14 @@ export default function SettingsPage() {
       footer_text: '',
       social_links: [],
       author_info: { name: '', bio: '', avatar_url: '' },
-      seo_config: { google_site_verification: '', baidu_site_verification: '', og_image: '' },
+      seo_config: {
+        google_site_verification: '',
+        baidu_site_verification: '',
+        og_image: '',
+        accent_preset: 'ink',
+        founded_date: '2025-11-20',
+        custom_css: '',
+      },
       feature_flags: {
         enable_comments: true,
         enable_footer: true,
@@ -419,8 +429,48 @@ export default function SettingsPage() {
 
             <Card>
               <CardHeader>
+                <CardTitle>深度定制：强调色、建站日期与自定义 CSS</CardTitle>
+                <CardDescription>无需修改代码即可微调站点强调色皮肤、页脚建站运行起始日以及全局样式覆盖。</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label>站点强调色预设</Label>
+                    <select
+                      {...form.register('seo_config.accent_preset')}
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                    >
+                      <option value="ink">极简水墨（默认）</option>
+                      <option value="amber">暖纸书卷（琥珀金）</option>
+                      <option value="teal">暗夜青灰（翡翠青）</option>
+                      <option value="indigo">深邃靛蓝（靛青）</option>
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>建站日期（页脚运行天数起点）</Label>
+                    <Input
+                      type="date"
+                      {...form.register('seo_config.founded_date')}
+                      placeholder="2025-11-20"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>自定义全局 CSS（可选）</Label>
+                  <Textarea
+                    {...form.register('seo_config.custom_css')}
+                    placeholder="/* 例：:root { --article-line-height: 1.9; } */"
+                    rows={4}
+                    className="font-mono text-xs"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
                 <CardTitle>社交链接</CardTitle>
-                <CardDescription>动态渲染至顶栏、移动端抽屉、页脚与关于页名片。</CardDescription>
+                <CardDescription>动态渲染至顶栏、移动端抽屉与页脚。</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 {socialFields.map((field, index) => (

@@ -1,5 +1,6 @@
 'use client'
 
+import 'katex/dist/katex.min.css'
 import { EditorContent, useEditor, Editor, ReactNodeViewRenderer } from '@tiptap/react'
 import type { Content } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
@@ -111,6 +112,10 @@ export const TipTapEditor = forwardRef<TipTapEditorHandle, TipTapEditorProps>(fu
   ref,
 ) {
   const [isUploading, setIsUploading] = useState(false)
+  const [pendingMarkdownImport, setPendingMarkdownImport] = useState<{
+    filename: string
+    content: string
+  } | null>(null)
   const editorRef = useRef<Editor | null>(null)
   const activeHeadingCallbackRef = useRef(onActiveHeadingChange)
   activeHeadingCallbackRef.current = onActiveHeadingChange
@@ -268,10 +273,9 @@ export const TipTapEditor = forwardRef<TipTapEditorHandle, TipTapEditorProps>(fu
           )
           if (markdownFile) {
             event.preventDefault()
-            void markdownFile.text().then(async (content) => {
+            void markdownFile.text().then((content) => {
               if (!content.trim()) return
-              await insertMarkdownContent(editorRef.current, content, 'insert')
-              toast.success(`已导入「${markdownFile.name}」`)
+              setPendingMarkdownImport({ filename: markdownFile.name, content })
             })
             return true
           }
@@ -443,6 +447,67 @@ export const TipTapEditor = forwardRef<TipTapEditorHandle, TipTapEditorProps>(fu
       {isUploading && (
         <div className="absolute inset-0 z-50 bg-background/50 backdrop-blur-sm flex items-center justify-center">
           <div className="animate-pulse text-primary font-medium">图片上传中...</div>
+        </div>
+      )}
+      {pendingMarkdownImport && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="确认导入 Markdown"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs"
+          onClick={() => setPendingMarkdownImport(null)}
+        >
+          <div
+            className="w-full max-w-lg rounded-xl border border-border bg-background p-5 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-sm font-semibold text-foreground">
+              导入 Markdown：{pendingMarkdownImport.filename}
+            </h3>
+            <p className="mt-1 text-xs text-muted-foreground">
+              共 {pendingMarkdownImport.content.length} 字符 ·{' '}
+              {pendingMarkdownImport.content.split('\n').length} 行，预览前 400 字符：
+            </p>
+            <pre className="mt-3 max-h-48 overflow-auto rounded-lg border border-border/70 bg-muted/40 p-3 font-mono text-xs whitespace-pre-wrap text-foreground/85">
+              {pendingMarkdownImport.content.slice(0, 400)}
+              {pendingMarkdownImport.content.length > 400 ? '\n…' : ''}
+            </pre>
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setPendingMarkdownImport(null)}
+                className="rounded-md border border-border px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground"
+              >
+                取消
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const item = pendingMarkdownImport
+                  setPendingMarkdownImport(null)
+                  void insertMarkdownContent(editorRef.current, item.content, 'insert').then(() => {
+                    toast.success(`已将「${item.filename}」插入到光标处`)
+                  })
+                }}
+                className="rounded-md border border-border bg-secondary px-3 py-1.5 text-xs font-medium text-secondary-foreground hover:opacity-90"
+              >
+                插入到光标处
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const item = pendingMarkdownImport
+                  setPendingMarkdownImport(null)
+                  void insertMarkdownContent(editorRef.current, item.content, 'replace').then(() => {
+                    toast.success(`已使用「${item.filename}」替换当前正文`)
+                  })
+                }}
+                className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:opacity-90"
+              >
+                替换当前正文
+              </button>
+            </div>
+          </div>
         </div>
       )}
       <div className={styles.editorCanvas}>

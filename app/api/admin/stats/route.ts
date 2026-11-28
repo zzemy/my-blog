@@ -26,10 +26,12 @@ export async function GET(request: NextRequest) {
     const oneYearAgo = new Date()
     oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1)
     const sevenDaysAgoIso = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+    const thirtyDaysAgoIso = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
 
     const [
       postsCountRes,
       draftsCountRes,
+      staleDraftsCountRes,
       publishedPostsRes,
       draftsRes,
       activityRes,
@@ -45,6 +47,11 @@ export async function GET(request: NextRequest) {
         .from('posts')
         .select('id', { count: 'exact', head: true })
         .eq('published', false),
+      client
+        .from('posts')
+        .select('id', { count: 'exact', head: true })
+        .eq('published', false)
+        .lt('updated_at', thirtyDaysAgoIso),
       client
         .from('posts')
         .select('id, public_id, slug, title, tags, published_at, created_at')
@@ -128,6 +135,7 @@ export async function GET(request: NextRequest) {
       stats: {
         totalPosts: postsCountRes.count ?? 0,
         draftsCount: draftsCountRes.count ?? 0,
+        staleDraftsCount: staleDraftsCountRes.error ? 0 : (staleDraftsCountRes.count ?? 0),
         totalViews,
         totalLikes,
         pendingFriendsCount: pendingFriendsRes.error ? 0 : (pendingFriendsRes.count ?? 0),

@@ -16,6 +16,14 @@ import {
   Square,
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import Image from 'next/image'
 import { toast } from 'sonner'
 
@@ -72,12 +80,19 @@ export default function MediaLibraryPage() {
   const [hasMore, setHasMore] = useState(false)
   const [nextOffset, setNextOffset] = useState(0)
   const [uploading, setUploading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState<{ done: number; total: number } | null>(null)
   const [dragging, setDragging] = useState(false)
   const [deleting, setDeleting] = useState<string | null>(null)
   const [selectedNames, setSelectedNames] = useState<string[]>([])
   const [bulkDeleting, setBulkDeleting] = useState(false)
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
+  const [deleteDialog, setDeleteDialog] = useState<{
+    mode: 'single' | 'bulk'
+    filenames: string[]
+    references: Record<string, Array<{ id: string; title: string }>>
+    checking: boolean
+  } | null>(null)
 
   const fetchFiles = useCallback(async (offset = 0, append = false) => {
     if (append) {
@@ -110,17 +125,22 @@ export default function MediaLibraryPage() {
     async (rawFiles: File[]) => {
       if (rawFiles.length === 0) return
       setUploading(true)
+      setUploadProgress({ done: 0, total: rawFiles.length })
       let uploadedCount = 0
+      let processedCount = 0
 
       try {
         for (const originalFile of rawFiles) {
+          processedCount += 1
           if (!originalFile.type.startsWith('image/')) {
             toast.error(`「${originalFile.name}」不是有效的图片文件`)
+            setUploadProgress({ done: processedCount, total: rawFiles.length })
             continue
           }
           const file = await maybeCompressImage(originalFile)
           if (file.size > 5 * 1024 * 1024) {
             toast.error(`「${file.name}」压缩后仍超过 5MB 限制`)
+            setUploadProgress({ done: processedCount, total: rawFiles.length })
             continue
           }
 
@@ -138,6 +158,7 @@ export default function MediaLibraryPage() {
             const data = await res.json().catch(() => null)
             toast.error(data?.error || `「${file.name}」上传失败`)
           }
+          setUploadProgress({ done: processedCount, total: rawFiles.length })
         }
 
         if (uploadedCount > 0) {
@@ -148,6 +169,7 @@ export default function MediaLibraryPage() {
         toast.error('上传失败')
       } finally {
         setUploading(false)
+        setUploadProgress(null)
       }
     },
     [fetchFiles],
@@ -179,56 +201,55 @@ export default function MediaLibraryPage() {
     setTimeout(() => setCopiedId(null), 2000)
   }
 
-  const handleDelete = async (filename: string) => {
-    setDeleting(filename)
+  const openDeleteDialog = async (filenames: string[], mode: 'single' | 'bulk') => {
+    if (filenames.length === 0) return
+    setDeleteDialog({ mode, filenames, references: {}, checking: true })
     try {
-      // 删除前自动检测文章引用，防止误删线上配图
-      let refWarning = ''
-      try {
-        const refRes = await fetch(`/api/admin/media?checkRef=${encodeURIComponent(filename)}`)
-        if (refRes.ok) {
-          const refData = (await refRes.json()) as { usedBy?: Array<{ id: string; title: string }> }
-          if (refData.usedBy && refData.usedBy.length > 0) {
-            const titles = refData.usedBy.map((p) => `《${p.title}》`).join('、')
-            refWarning = `\n\n⚠️ 注意：该图片正被以下 ${refData.usedBy.length} 篇文章引用：${titles}\n删除后这些文章中的图片将无法显示！`
-          }
+      const query =
+        filenames.length === 1
+          ? `checkRef=${encodeURIComponent(filenames[0])}`
+          : `checkRefs=${encodeURIComponent(filenames.join(','))}`
+      const refRes = await fetch(`/api/admin/media?${query}`)
+      if (refRes.ok) {
+        const refData = (await refRes.json()) as {
+          usedBy?: Array<{ id: string; title: string }>
+          references?: Record<string, Array<{ id: string; title: string }>>
         }
-      } catch {
-        // ignore check failure
-      }
-
-      if (!confirm(`确定要永久删除「${filename}」吗？${refWarning}`)) {
-        setDeleting(null)
+        const references: Record<string, Array<{ id: string; title: string }>> =
+          refData.references ??
+          (refData.usedBy && refData.usedBy.length > 0 ? { [filenames[0]]: refData.usedBy } : {})
+        setDeleteDialog((prev) => (prev ? { ...prev, references, checking: false } : null))
         return
       }
-
-      const res = await fetch(`/api/admin/media?filename=${encodeURIComponent(filename)}`, {
-        method: 'DELETE',
-      })
-
-      if (res.ok) {
-        setFiles((current) => current.filter((f) => f.name !== filename))
-        setSelectedNames((current) => current.filter((n) => n !== filename))
-        toast.success('图片已删除')
-      } else {
-        const data = await res.json().catch(() => null)
-        toast.error(data?.error || '删除失败')
-      }
     } catch {
-      toast.error('删除失败')
-    } finally {
-      setDeleting(null)
+      // ignore check errors
     }
+    setDeleteDialog((prev) => (prev ? { ...prev, checking: false } : null))
   }
 
-  const handleBulkDelete = async () => {
-    if (selectedNames.length === 0) return
-    if (!confirm(`确定永久删除选中的 ${selectedNames.length} 张图片吗？此操作不可撤销。`)) return
+  const handleDelete = (filename: string) => {
+    void openDeleteDialog([filename], 'single')
+  }
 
-    setBulkDeleting(true)
+  const handleBulkDelete = () => {
+    void openDeleteDialog(selectedNames, 'bulk')
+  }
+
+  const executeConfirmedDelete = async () => {
+    if (!deleteDialog) return
+    const targets = deleteDialog.filenames
+    const isBulk = deleteDialog.mode === 'bulk'
+    setDeleteDialog(null)
+
+    if (isBulk) {
+      setBulkDeleting(true)
+    } else {
+      setDeleting(targets[0])
+    }
+
     try {
       const results = await Promise.all(
-        selectedNames.map(async (name) => {
+        targets.map(async (name) => {
           const res = await fetch(`/api/admin/media?filename=${encodeURIComponent(name)}`, {
             method: 'DELETE',
           })
@@ -238,13 +259,16 @@ export default function MediaLibraryPage() {
       const succeeded = new Set(results.filter((r) => r.ok).map((r) => r.name))
       const failed = results.filter((r) => !r.ok).map((r) => r.name)
       setFiles((current) => current.filter((f) => !succeeded.has(f.name)))
-      setSelectedNames(failed)
+      setSelectedNames((current) => current.filter((n) => !succeeded.has(n)))
       if (failed.length > 0) {
         toast.error(`已删除 ${succeeded.size} 张，${failed.length} 张失败`)
       } else {
-        toast.success(`已批量删除 ${succeeded.size} 张图片`)
+        toast.success(isBulk ? `已批量删除 ${succeeded.size} 张图片` : '图片已删除')
       }
+    } catch {
+      toast.error('删除失败')
     } finally {
+      setDeleting(null)
       setBulkDeleting(false)
     }
   }
@@ -349,6 +373,27 @@ export default function MediaLibraryPage() {
           </Button>
         </div>
       </div>
+
+      {/* 上传进度条 */}
+      {uploadProgress && (
+        <div className="space-y-1.5 rounded-xl border border-border/80 bg-card p-3.5">
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <span>正在处理与上传图片…</span>
+            <span className="font-mono">
+              {uploadProgress.done} / {uploadProgress.total} (
+              {Math.round((uploadProgress.done / Math.max(1, uploadProgress.total)) * 100)}%)
+            </span>
+          </div>
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+            <div
+              className="h-full rounded-full bg-primary transition-[width] duration-300"
+              style={{
+                width: `${Math.round((uploadProgress.done / Math.max(1, uploadProgress.total)) * 100)}%`,
+              }}
+            />
+          </div>
+        </div>
+      )}
 
       {/* 拖拽上传引导区 */}
       <div
@@ -483,6 +528,60 @@ export default function MediaLibraryPage() {
           )}
         </>
       )}
+      <Dialog open={Boolean(deleteDialog)} onOpenChange={(open) => !open && setDeleteDialog(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {deleteDialog?.mode === 'bulk'
+                ? `确认批量删除 ${deleteDialog.filenames.length} 张图片`
+                : '确认永久删除图片'}
+            </DialogTitle>
+            <DialogDescription>
+              {deleteDialog?.mode === 'single'
+                ? `即将删除文件「${deleteDialog.filenames[0]}」，此操作不可撤销。`
+                : `即将永久删除选中的 ${deleteDialog?.filenames.length ?? 0} 张图片，此操作不可撤销。`}
+            </DialogDescription>
+          </DialogHeader>
+
+          {deleteDialog?.checking ? (
+            <div className="flex items-center gap-2 rounded-lg border border-border/70 bg-muted/40 px-3 py-2.5 text-xs text-muted-foreground">
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              <span>正在检查文章与译文中的图片引用…</span>
+            </div>
+          ) : deleteDialog && Object.keys(deleteDialog.references).length > 0 ? (
+            <div className="space-y-1.5 rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-xs text-amber-800 dark:text-amber-300">
+              <p className="font-medium">
+                ⚠️ 检测到 {Object.keys(deleteDialog.references).length} 张图片正被文章/译文引用，删除后将导致破图：
+              </p>
+              <ul className="max-h-32 list-disc space-y-1 overflow-y-auto pl-4">
+                {Object.entries(deleteDialog.references).map(([name, refs]) => (
+                  <li key={name}>
+                    <span className="font-mono">{name}</span>：
+                    {refs.map((r) => `《${r.title}》`).join('、')}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : (
+            <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/5 px-3 py-2 text-xs text-emerald-700 dark:text-emerald-400">
+              未检测到文章或译文引用，可安全删除。
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteDialog(null)}>
+              取消
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={deleteDialog?.checking}
+              onClick={() => void executeConfirmedDelete()}
+            >
+              确认永久删除
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

@@ -27,11 +27,41 @@ function buildUpdatedCookieHeader(
     .join('; ')
 }
 
+const MUTATING_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE'])
+
+function isAllowedAdminWriteOrigin(request: NextRequest): boolean {
+  if (!MUTATING_METHODS.has(request.method.toUpperCase())) {
+    return true
+  }
+
+  const origin = request.headers.get('origin')
+  const expectedOrigin = request.nextUrl.origin
+  if (origin) {
+    return origin === expectedOrigin
+  }
+
+  const referer = request.headers.get('referer')
+  if (referer) {
+    try {
+      return new URL(referer).origin === expectedOrigin
+    } catch {
+      return false
+    }
+  }
+
+  // 允许无 Origin/Referer 的显式 Bearer API 调用，阻止跨站表单/Fetch CSRF
+  return Boolean(request.headers.get('authorization')?.startsWith('Bearer '))
+}
+
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname
   const isAdminApi = pathname.startsWith('/api/admin')
   const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route))
   if (!isProtectedRoute) return NextResponse.next()
+
+  if (isAdminApi && !isAllowedAdminWriteOrigin(request)) {
+    return NextResponse.json({ error: 'Invalid request origin' }, { status: 403 })
+  }
 
   // Keep /admin login page public.
   if (pathname === '/admin' || pathname === '/admin/') {

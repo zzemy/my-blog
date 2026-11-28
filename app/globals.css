@@ -1,4 +1,3 @@
-@import "katex/dist/katex.min.css";
 @import "@fontsource/lxgw-wenkai/300.css";
 @import "@fontsource/lxgw-wenkai/500.css";
 @import "@fontsource/lxgw-wenkai/700.css";
@@ -17,7 +16,7 @@
   --color-foreground: var(--foreground);
   --font-wenkai: "LXGW WenKai", "霞鹜文楷", "LXGW WenKai Screen", "Source Han Sans SC", "Noto Sans SC", "Microsoft YaHei", "PingFang SC", "Heiti SC", system-ui, sans-serif;
   --font-sans: var(--font-wenkai);
-  --font-mono: var(--font-geist-mono, "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", monospace);
+  --font-mono: ui-monospace, "Cascadia Code", "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   --font-serif: var(--font-wenkai);
   --font-heading: var(--font-wenkai);
   --font-heading-cjk: var(--font-wenkai);
@@ -264,11 +263,60 @@
   .animate-scroll-cue {
     animation: scroll-cue-pulse 2.6s cubic-bezier(0.45, 0, 0.25, 1) infinite;
   }
+  .page-transition-enter {
+    animation: page-fade-rise 0.36s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+}
+
+@keyframes page-fade-rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Accent theme presets configurable from Admin Settings */
+html[data-accent-preset="amber"] {
+  --primary: #92400e;
+  --primary-foreground: #fffbeb;
+  --article-accent: #b45309;
+}
+html.dark[data-accent-preset="amber"] {
+  --primary: #f59e0b;
+  --primary-foreground: #1c1917;
+  --article-accent: #fbbf24;
+}
+
+html[data-accent-preset="teal"] {
+  --primary: #0f766e;
+  --primary-foreground: #f0fdfa;
+  --article-accent: #0d9488;
+}
+html.dark[data-accent-preset="teal"] {
+  --primary: #2dd4bf;
+  --primary-foreground: #042f2e;
+  --article-accent: #5eead4;
+}
+
+html[data-accent-preset="indigo"] {
+  --primary: #3730a3;
+  --primary-foreground: #eef2ff;
+  --article-accent: #4f46e5;
+}
+html.dark[data-accent-preset="indigo"] {
+  --primary: #818cf8;
+  --primary-foreground: #1e1b4b;
+  --article-accent: #a5b4fc;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .animate-hero-rise,
-  .animate-scroll-cue {
+  .animate-scroll-cue,
+  .page-transition-enter {
     animation: none !important;
   }
   *,

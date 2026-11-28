@@ -2,10 +2,18 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
-import { Check, Edit3, ExternalLink, Link2, Loader2, Mail, MessageSquare, Plus, Save, Trash2, X } from 'lucide-react'
+import { Activity, Check, CheckCheck, Edit3, ExternalLink, Link2, Loader2, Mail, MessageSquare, Plus, Save, Trash2, X } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
@@ -70,6 +78,12 @@ export default function AdminFriendsPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [actionId, setActionId] = useState<string | null>(null)
+  const [checkingLiveness, setCheckingLiveness] = useState(false)
+  const [livenessMap, setLivenessMap] = useState<
+    Record<string, { ok: boolean; status: number; latencyMs: number; error?: string }>
+  >({})
+  const [batchApproving, setBatchApproving] = useState(false)
+  const [pendingDeleteLink, setPendingDeleteLink] = useState<FriendLink | null>(null)
 
   const authHeaders = useMemo(
     () => (accessToken && accessToken !== 'hidden' ? { Authorization: `Bearer ${accessToken}` } : undefined),
@@ -143,23 +157,84 @@ export default function AdminFriendsPage() {
     }
   }
 
-  const deleteLink = async (link: FriendLink) => {
-    if (!window.confirm(`确定删除「${link.name}」吗？`)) return
-    setActionId(link.id)
+  const deleteLink = (link: FriendLink) => {
+    setPendingDeleteLink(link)
+  }
+
+  const confirmDeleteLink = async () => {
+    if (!pendingDeleteLink) return
+    const target = pendingDeleteLink
+    setPendingDeleteLink(null)
+    setActionId(target.id)
     try {
-      const response = await fetch(`/api/admin/friends/${link.id}`, {
+      const response = await fetch(`/api/admin/friends/${target.id}`, {
         method: 'DELETE',
         credentials: 'include',
         headers: authHeaders,
       })
       if (!response.ok) throw new Error('删除失败')
-      setLinks((current) => current.filter((item) => item.id !== link.id))
-      if (editingId === link.id) resetForm()
-      toast.success(`已删除「${link.name}」`)
+      setLinks((current) => current.filter((item) => item.id !== target.id))
+      if (editingId === target.id) resetForm()
+      toast.success(`已删除「${target.name}」`)
     } catch (error) {
       toast.error(error instanceof Error ? error.message : '删除失败')
     } finally {
       setActionId(null)
+    }
+  }
+
+  const handleCheckLiveness = async () => {
+    setCheckingLiveness(true)
+    try {
+      const res = await fetch('/api/admin/friends/check-links', {
+        method: 'POST',
+        credentials: 'include',
+        headers: authHeaders,
+      })
+      const data = (await res.json().catch(() => ({}))) as {
+        results?: Array<{ id: string; ok: boolean; status: number; latencyMs: number; error?: string }>
+        error?: string
+      }
+      if (!res.ok) throw new Error(data.error || '检测失败')
+      const next: Record<string, { ok: boolean; status: number; latencyMs: number; error?: string }> = {}
+      let failed = 0
+      for (const item of data.results ?? []) {
+        next[item.id] = item
+        if (!item.ok) failed += 1
+      }
+      setLivenessMap(next)
+      toast.success(
+        failed > 0
+          ? `检测完成：${(data.results?.length ?? 0) - failed} 个正常，${failed} 个异常`
+          : `全部 ${data.results?.length ?? 0} 个已通过友链均可正常访问`,
+      )
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : '检测失败')
+    } finally {
+      setCheckingLiveness(false)
+    }
+  }
+
+  const handleApproveAllPending = async () => {
+    const pendingList = links.filter((l) => l.status === 'pending')
+    if (pendingList.length === 0) return
+    setBatchApproving(true)
+    try {
+      const results = await Promise.all(
+        pendingList.map((l) =>
+          fetch(`/api/admin/friends/${l.id}`, {
+            method: 'PATCH',
+            credentials: 'include',
+            headers: { ...authHeaders, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: 'approved' }),
+          }).then((r) => r.ok),
+        ),
+      )
+      const okCount = results.filter(Boolean).length
+      toast.success(`已批量通过 ${okCount} 条待审友链`)
+      await fetchLinks()
+    } finally {
+      setBatchApproving(false)
     }
   }
 
@@ -298,7 +373,32 @@ export default function AdminFriendsPage() {
       <section className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-xl font-bold">友链列表</h2>
-          <div className="inline-flex rounded-lg border bg-muted/40 p-0.5 text-xs">
+          <div className="flex flex-wrap items-center gap-2">
+            {pendingCount > 0 && (
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                disabled={batchApproving}
+                onClick={() => void handleApproveAllPending()}
+                className="h-8 gap-1.5 text-xs text-emerald-600 dark:text-emerald-400"
+              >
+                {batchApproving ? <Loader2 className="size-3.5 animate-spin" /> : <CheckCheck className="size-3.5" />}
+                一键通过全部待审 ({pendingCount})
+              </Button>
+            )}
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              disabled={checkingLiveness || approvedCount === 0}
+              onClick={() => void handleCheckLiveness()}
+              className="h-8 gap-1.5 text-xs"
+            >
+              {checkingLiveness ? <Loader2 className="size-3.5 animate-spin" /> : <Activity className="size-3.5" />}
+              存活性检测
+            </Button>
+            <div className="inline-flex rounded-lg border bg-muted/40 p-0.5 text-xs">
             {(
               [
                 { id: 'all', label: `全部 (${links.length})` },
@@ -320,6 +420,7 @@ export default function AdminFriendsPage() {
                 {tab.label}
               </button>
             ))}
+            </div>
           </div>
         </div>
 
@@ -354,6 +455,21 @@ export default function AdminFriendsPage() {
                     >
                       {statusLabel(link.status)}
                     </span>
+                    {livenessMap[link.id] && (
+                      <span
+                        className={`inline-flex rounded-full px-2 py-0.5 font-mono text-[11px] ring-1 ring-inset ${
+                          livenessMap[link.id].ok
+                            ? 'bg-emerald-500/10 text-emerald-700 ring-emerald-500/20 dark:text-emerald-300'
+                            : 'bg-rose-500/10 text-rose-700 ring-rose-500/20 dark:text-rose-300'
+                        }`}
+                      >
+                        {livenessMap[link.id].ok
+                          ? `HTTP ${livenessMap[link.id].status} · ${livenessMap[link.id].latencyMs}ms`
+                          : livenessMap[link.id].status
+                            ? `异常 HTTP ${livenessMap[link.id].status}`
+                            : '无法访问'}
+                      </span>
+                    )}
                   </div>
                   <a
                     href={link.url}
@@ -438,6 +554,30 @@ export default function AdminFriendsPage() {
           ))
         )}
       </section>
+
+      <Dialog
+        open={Boolean(pendingDeleteLink)}
+        onOpenChange={(open) => {
+          if (!open) setPendingDeleteLink(null)
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>确认删除友链</DialogTitle>
+            <DialogDescription>
+              确定要永久删除友链「{pendingDeleteLink?.name}」吗？此操作不可撤销。
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setPendingDeleteLink(null)}>
+              取消
+            </Button>
+            <Button type="button" variant="destructive" onClick={() => void confirmDeleteLink()}>
+              确认删除
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

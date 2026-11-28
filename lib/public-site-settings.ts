@@ -4,11 +4,16 @@ export type PublicSocialLink = {
   icon?: string
 }
 
+export type AccentPreset = 'ink' | 'amber' | 'teal' | 'indigo'
+
 export type PublicSiteSettings = {
   siteTitle: string
   siteDescription: string
   footerText: string
   siteUrl: string
+  foundedDate: string
+  accentPreset: AccentPreset
+  customCss: string
   socialLinks: PublicSocialLink[]
   authorInfo: {
     name: string
@@ -27,6 +32,9 @@ export const DEFAULT_PUBLIC_SITE_SETTINGS: PublicSiteSettings = {
   siteDescription: '记录想法，分享发现，也留下痕迹。',
   footerText: '慢下来，写给时间与自己。',
   siteUrl: 'https://blog.zzemy.top',
+  foundedDate: '2025-11-20',
+  accentPreset: 'ink',
+  customCss: '',
   socialLinks: [
     { platform: 'GitHub', url: 'https://github.com/zzemy' },
     { platform: 'QQ', url: 'https://qm.qq.com/cgi-bin/qm/qr?k=GJV7-av-NF7gsXV13umV8RqQC0Cum5zo' },

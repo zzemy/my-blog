@@ -77,7 +77,7 @@ export function validatePostForm(
   const trimmedTitle = formData.title.trim()
   const trimmedSlug = formData.slug.trim()
 
-  if (!trimmedTitle) errors.push('标题不能为空')
+  if (requirePublishFields && !trimmedTitle) errors.push('发布文章时标题不能为空')
   if (trimmedTitle.length > 200) errors.push('标题不能超过 200 字')
 
   if (requirePublishFields && !trimmedSlug) {

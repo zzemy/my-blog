@@ -1,9 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import type { ReactNode } from 'react'
-import { Pencil, Save, Trash2, X } from 'lucide-react'
+import { ArrowDown, ArrowUp, FolderOpen, Pencil, Save, Trash2, X } from 'lucide-react'
+import { MediaPickerDialog } from '@/features/admin/posts/media-picker-dialog'
 import type { RichImageItem } from './rich-block-extensions'
 
 type RichBlockEditorPanelProps = {
@@ -85,10 +86,35 @@ export function RichBlockEditorPanel({
   onDelete,
   placement = 'inspector',
 }: RichBlockEditorPanelProps) {
+  const panelId = useId()
+  const anchorRef = useRef<HTMLSpanElement>(null)
   const [inspectorHost, setInspectorHost] = useState<HTMLElement | null>(null)
+  const [insideDialog, setInsideDialog] = useState(false)
+
+  // 确保同一时间只展开一个富文本块检查器
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent('admin-rich-block-activate', { detail: { panelId } }))
+    const handleOtherActivate = (event: Event) => {
+      const detail = (event as CustomEvent<{ panelId?: string }>).detail
+      if (detail?.panelId && detail.panelId !== panelId) {
+        onCancel()
+      }
+    }
+    window.addEventListener('admin-rich-block-activate', handleOtherActivate)
+    return () => {
+      window.removeEventListener('admin-rich-block-activate', handleOtherActivate)
+    }
+  }, [panelId, onCancel])
 
   useEffect(() => {
     if (placement !== 'inspector') return
+
+    // 若编辑器处于弹窗（如译文精修 Dialog）内部，直接就地内联渲染，避免被弹窗遮罩盖住
+    if (anchorRef.current?.closest('[role="dialog"]')) {
+      setInsideDialog(true)
+      setInspectorHost(null)
+      return
+    }
 
     window.dispatchEvent(new CustomEvent('admin-rich-block-edit-open'))
 
@@ -150,11 +176,21 @@ export function RichBlockEditorPanel({
     </div>
   )
 
-  if (placement === 'inspector' && inspectorHost) {
-    return createPortal(panel, inspectorHost)
+  if (placement === 'inspector' && inspectorHost && !insideDialog) {
+    return (
+      <>
+        <span ref={anchorRef} className="hidden" />
+        {createPortal(panel, inspectorHost)}
+      </>
+    )
   }
 
-  return panel
+  return (
+    <>
+      <span ref={anchorRef} className="hidden" />
+      {panel}
+    </>
+  )
 }
 
 export function TextField({ label, value, placeholder, onChange }: TextFieldProps) {
@@ -215,6 +251,42 @@ export function ensureTimelineItems(items: TimelineItem[]) {
   return items.length ? items : [{ label: '阶段', title: '标题', text: '内容' }]
 }
 
+function moveItemAt<T>(items: T[], from: number, to: number): T[] {
+  if (to < 0 || to >= items.length || from === to) return items
+  const next = [...items]
+  const [moved] = next.splice(from, 1)
+  next.splice(to, 0, moved)
+  return next
+}
+
+function RowOrderControls({
+  index,
+  total,
+  onMoveUp,
+  onMoveDown,
+  onRemove,
+}: {
+  index: number
+  total: number
+  onMoveUp: () => void
+  onMoveDown: () => void
+  onRemove: () => void
+}) {
+  return (
+    <div className="flex items-center gap-1.5 pt-1">
+      <button type="button" disabled={index === 0} onClick={onMoveUp} title="上移" aria-label="上移">
+        <ArrowUp className="h-3.5 w-3.5" />
+      </button>
+      <button type="button" disabled={index === total - 1} onClick={onMoveDown} title="下移" aria-label="下移">
+        <ArrowDown className="h-3.5 w-3.5" />
+      </button>
+      <button type="button" onClick={onRemove}>
+        删除
+      </button>
+    </div>
+  )
+}
+
 export function PanelItemsEditor({
   items,
   onChange,
@@ -238,9 +310,13 @@ export function PanelItemsEditor({
             value={item.text}
             onChange={(value) => onChange(updateItemAt(items, index, { ...item, text: value }))}
           />
-          <button type="button" onClick={() => onChange(removeItemAt(items, index))}>
-            删除
-          </button>
+          <RowOrderControls
+            index={index}
+            total={items.length}
+            onMoveUp={() => onChange(moveItemAt(items, index, index - 1))}
+            onMoveDown={() => onChange(moveItemAt(items, index, index + 1))}
+            onRemove={() => onChange(removeItemAt(items, index))}
+          />
         </div>
       ))}
       <button type="button" onClick={() => onChange([...items, { title: '标题', text: '内容' }])}>
@@ -259,6 +335,8 @@ export function ImageItemsEditor({
   onChange: (items: RichImageItem[]) => void
   addLabel: string
 }) {
+  const [pickerIndex, setPickerIndex] = useState<number | null>(null)
+
   return (
     <div className="component-block-editor-wide component-block-editor-list">
       {items.map((item, index) => (
@@ -286,9 +364,35 @@ export function ImageItemsEditor({
             value={item.alt}
             onChange={(value) => onChange(updateItemAt(items, index, { ...item, alt: value }))}
           />
-          <button type="button" onClick={() => onChange(removeItemAt(items, index))}>
-            删除
-          </button>
+          <div className="flex flex-wrap items-center gap-1.5 pt-1">
+            <button
+              type="button"
+              onClick={() => setPickerIndex(index)}
+              className="inline-flex items-center gap-1"
+            >
+              <FolderOpen className="h-3.5 w-3.5" />
+              媒体库选图
+            </button>
+            <button
+              type="button"
+              disabled={index === 0}
+              onClick={() => onChange(moveItemAt(items, index, index - 1))}
+              title="上移"
+            >
+              <ArrowUp className="h-3.5 w-3.5" />
+            </button>
+            <button
+              type="button"
+              disabled={index === items.length - 1}
+              onClick={() => onChange(moveItemAt(items, index, index + 1))}
+              title="下移"
+            >
+              <ArrowDown className="h-3.5 w-3.5" />
+            </button>
+            <button type="button" onClick={() => onChange(removeItemAt(items, index))}>
+              删除
+            </button>
+          </div>
         </div>
       ))}
       <button
@@ -299,6 +403,28 @@ export function ImageItemsEditor({
       >
         {addLabel}
       </button>
+
+      <MediaPickerDialog
+        open={pickerIndex !== null}
+        onOpenChange={(open) => {
+          if (!open) setPickerIndex(null)
+        }}
+        onSelect={(url) => {
+          if (pickerIndex === null) return
+          const target = items[pickerIndex]
+          if (!target) return
+          const fileName = getFileName(url) || target.file || `image-${pickerIndex + 1}.jpg`
+          onChange(
+            updateItemAt(items, pickerIndex, {
+              ...target,
+              src: url,
+              file: fileName,
+              alt: target.alt || `图片说明：${fileName}`,
+            }),
+          )
+          setPickerIndex(null)
+        }}
+      />
     </div>
   )
 }
@@ -323,9 +449,13 @@ export function CardItemsEditor({ items, onChange }: { items: CardItem[]; onChan
             value={item.text}
             onChange={(value) => onChange(updateItemAt(items, index, { ...item, text: value }))}
           />
-          <button type="button" onClick={() => onChange(removeItemAt(items, index))}>
-            删除
-          </button>
+          <RowOrderControls
+            index={index}
+            total={items.length}
+            onMoveUp={() => onChange(moveItemAt(items, index, index - 1))}
+            onMoveDown={() => onChange(moveItemAt(items, index, index + 1))}
+            onRemove={() => onChange(removeItemAt(items, index))}
+          />
         </div>
       ))}
       <button type="button" onClick={() => onChange([...items, { eyebrow: '分类', title: '卡片标题', text: '卡片内容' }])}>
@@ -345,9 +475,13 @@ export function DiagramItemsEditor({ items, onChange }: { items: DiagramItem[]; 
             value={item.label}
             onChange={(value) => onChange(updateItemAt(items, index, { label: value }))}
           />
-          <button type="button" onClick={() => onChange(removeItemAt(items, index))}>
-            删除
-          </button>
+          <RowOrderControls
+            index={index}
+            total={items.length}
+            onMoveUp={() => onChange(moveItemAt(items, index, index - 1))}
+            onMoveDown={() => onChange(moveItemAt(items, index, index + 1))}
+            onRemove={() => onChange(removeItemAt(items, index))}
+          />
         </div>
       ))}
       <button type="button" onClick={() => onChange([...items, { label: '节点' }])}>
@@ -383,9 +517,13 @@ export function TimelineItemsEditor({
             value={item.text}
             onChange={(value) => onChange(updateItemAt(items, index, { ...item, text: value }))}
           />
-          <button type="button" onClick={() => onChange(removeItemAt(items, index))}>
-            删除
-          </button>
+          <RowOrderControls
+            index={index}
+            total={items.length}
+            onMoveUp={() => onChange(moveItemAt(items, index, index - 1))}
+            onMoveDown={() => onChange(moveItemAt(items, index, index + 1))}
+            onRemove={() => onChange(removeItemAt(items, index))}
+          />
         </div>
       ))}
       <button type="button" onClick={() => onChange([...items, { label: '阶段', title: '标题', text: '内容' }])}>

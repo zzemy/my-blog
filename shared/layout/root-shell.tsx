@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Wrench } from "lucide-react"
@@ -21,6 +22,30 @@ export function RootShell({
   settings: PublicSiteSettings
 }) {
   const pathname = usePathname()
+  const [isAdminPreview, setIsAdminPreview] = useState(false)
+  const [checkedAdmin, setCheckedAdmin] = useState(false)
+
+  useEffect(() => {
+    if (!settings.featureFlags.maintenanceMode || pathname?.startsWith('/admin')) {
+      setCheckedAdmin(true)
+      return
+    }
+    let cancelled = false
+    fetch('/api/auth/me', { cache: 'no-store' })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!cancelled && data?.authenticated) {
+          setIsAdminPreview(true)
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setCheckedAdmin(true)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [pathname, settings.featureFlags.maintenanceMode])
 
   if (pathname?.startsWith('/admin')) {
     return (
@@ -30,7 +55,7 @@ export function RootShell({
     )
   }
 
-  if (settings.featureFlags.maintenanceMode) {
+  if (settings.featureFlags.maintenanceMode && (!checkedAdmin || !isAdminPreview)) {
     return (
       <SiteSettingsProvider settings={settings}>
         <div className="flex min-h-screen flex-col items-center justify-center bg-background px-6 text-center">
@@ -69,6 +94,14 @@ export function RootShell({
         >
           跳至正文内容
         </a>
+        {settings.featureFlags.maintenanceMode && isAdminPreview && (
+          <div className="sticky top-0 z-[70] flex items-center justify-center gap-3 bg-amber-500/95 px-4 py-1.5 text-xs font-medium text-amber-950">
+            <span>维护模式已开启 — 当前仅已登录站长可预览前台页面</span>
+            <Link href="/admin/settings" className="underline underline-offset-2">
+              前往系统设置关闭
+            </Link>
+          </div>
+        )}
         <VantaBackground />
         <div className="relative flex min-h-screen flex-col">
           <SiteHeader />

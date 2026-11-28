@@ -1,7 +1,6 @@
 import "./globals.css"
 import type { Metadata } from "next"
 import { ThemeProvider } from "@/shared/layout/theme-provider"
-import { VantaProvider } from "@/shared/effects/vanta-context"
 import { RootShell } from "@/shared/layout/root-shell"
 import {
   DEFAULT_PUBLIC_SITE_SETTINGS,
@@ -40,11 +39,25 @@ function toPublicSiteSettings(raw: Awaited<ReturnType<typeof getSiteSettings>>):
       )
     : []
 
+  const seoExtra = (raw.seo_config ?? {}) as Record<string, unknown>
+  const rawPreset = typeof seoExtra.accent_preset === "string" ? seoExtra.accent_preset : "ink"
+  const accentPreset =
+    rawPreset === "amber" || rawPreset === "teal" || rawPreset === "indigo" ? rawPreset : "ink"
+  const foundedDate =
+    typeof seoExtra.founded_date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(seoExtra.founded_date.trim())
+      ? seoExtra.founded_date.trim()
+      : DEFAULT_PUBLIC_SITE_SETTINGS.foundedDate
+  const customCss =
+    typeof seoExtra.custom_css === "string" ? seoExtra.custom_css.slice(0, 8000) : ""
+
   return {
     siteTitle,
     siteDescription,
     footerText,
     siteUrl,
+    foundedDate,
+    accentPreset,
+    customCss,
     socialLinks: rawSocials.length > 0 ? rawSocials : DEFAULT_PUBLIC_SITE_SETTINGS.socialLinks,
     authorInfo: {
       name: raw.author_info?.name?.trim() || siteTitle,
@@ -125,19 +138,24 @@ export default async function RootLayout({
   const publicSettings = toPublicSiteSettings(rawSettings)
 
   return (
-    <html lang="zh-CN" suppressHydrationWarning>
+    <html
+      lang="zh-CN"
+      suppressHydrationWarning
+      data-accent-preset={publicSettings.accentPreset !== "ink" ? publicSettings.accentPreset : undefined}
+    >
       <body className="min-h-screen bg-background font-sans antialiased">
+        {publicSettings.customCss ? (
+          <style id="site-custom-css" dangerouslySetInnerHTML={{ __html: publicSettings.customCss }} />
+        ) : null}
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"
           enableSystem={true}
           disableTransitionOnChange
         >
-          <VantaProvider>
-            <RootShell settings={publicSettings}>{children}</RootShell>
-            <SpeedInsights />
-            <Analytics />
-          </VantaProvider>
+          <RootShell settings={publicSettings}>{children}</RootShell>
+          <SpeedInsights />
+          <Analytics />
         </ThemeProvider>
       </body>
     </html>

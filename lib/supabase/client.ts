@@ -32,9 +32,7 @@ function parseJwtPayload(token: string): ParsedJwtPayload | null {
     const parts = token.split('.')
     if (parts.length !== 3) return null
 
-    const payload = parts[1]
-      .replace(/-/g, '+')
-      .replace(/_/g, '/')
+    const payload = parts[1].replace(/-/g, '+').replace(/_/g, '/')
     const padded = payload + '='.repeat((4 - (payload.length % 4)) % 4)
     const json = Buffer.from(padded, 'base64').toString('utf8')
     return JSON.parse(json)
@@ -56,14 +54,26 @@ function extractProjectRefFromSupabaseUrl(url?: string): string | null {
 
 type ServiceRoleValidation = {
   ok: boolean
-  reason?: 'missing_key' | 'invalid_jwt' | 'invalid_role' | 'invalid_format' | 'expired' | 'project_ref_mismatch'
+  reason?:
+    | 'missing_key'
+    | 'invalid_jwt'
+    | 'invalid_role'
+    | 'invalid_format'
+    | 'expired'
+    | 'project_ref_mismatch'
   keyRef?: string | null
   urlRef?: string | null
 }
 
 type AnonKeyValidation = {
   ok: boolean
-  reason?: 'missing_key' | 'invalid_jwt' | 'invalid_role' | 'invalid_format' | 'expired' | 'project_ref_mismatch'
+  reason?:
+    | 'missing_key'
+    | 'invalid_jwt'
+    | 'invalid_role'
+    | 'invalid_format'
+    | 'expired'
+    | 'project_ref_mismatch'
   keyRef?: string | null
   urlRef?: string | null
 }
@@ -78,7 +88,7 @@ function isSecretKey(token: string): boolean {
 
 function validateJwtKey(
   token: string | undefined,
-  expectedRole: 'anon' | 'service_role'
+  expectedRole: 'anon' | 'service_role',
 ): ServiceRoleValidation | AnonKeyValidation {
   const urlRef = extractProjectRefFromSupabaseUrl(supabaseUrl)
 
@@ -152,7 +162,9 @@ function getValidatedServiceRoleKey(): string | null {
 
 function getSupabaseClient() {
   if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error('Missing Supabase environment variables: NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY')
+    throw new Error(
+      'Missing Supabase environment variables: NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY',
+    )
   }
 
   if (!supabaseClient) {
@@ -166,7 +178,6 @@ function getSupabaseClient() {
   return supabaseClient
 }
 
-// Lazy-loaded singleton for better build-time compatibility
 export const supabase = new Proxy({} as SupabaseClient<SupabaseDB>, {
   get(_target: unknown, prop: string | symbol) {
     try {
@@ -178,18 +189,15 @@ export const supabase = new Proxy({} as SupabaseClient<SupabaseDB>, {
   },
 }) as SupabaseClient<SupabaseDB>
 
-// 用于服务端的客户端（如果需要）
 export const createServerClient = () => {
   return getSupabaseClient()
 }
 
-// 用于服务端的管理员客户端（使用用户 Token 认证）
 export const getAdminClient = (token?: string) => {
   if (!supabaseUrl || !supabaseAnonKey) {
     throw new Error('Missing Supabase environment variables')
   }
-  
-  // 如果提供了 token，则创建一个带有 Authorization 头的客户端
+
   if (token) {
     return createClient<SupabaseDB>(supabaseUrl, supabaseAnonKey, {
       global: {
@@ -202,8 +210,7 @@ export const getAdminClient = (token?: string) => {
       },
     })
   }
-  
-  // 否则回退到使用 service_role_key（如果存在且有效）或 anon_key
+
   const validatedServiceRoleKey = getValidatedServiceRoleKey()
   if (validatedServiceRoleKey) {
     return createClient<SupabaseDB>(supabaseUrl, validatedServiceRoleKey, {
@@ -212,95 +219,6 @@ export const getAdminClient = (token?: string) => {
       },
     })
   }
-  
-  return getSupabaseClient()
-}
 
-export type Database = {
-  public: {
-    Tables: {
-      posts: {
-        Row: {
-          id: string
-          public_id: string
-          title: string
-          slug: string
-          content: unknown // TipTap JSON content
-          excerpt: string | null
-          cover_image: string | null
-          author: string
-          published: boolean
-          tags: string[]
-          created_at: string
-          updated_at: string
-          published_at: string | null
-          view_count: number
-          reading_time: number | null
-        }
-        Insert: {
-          id?: string
-          public_id: string
-          title: string
-          slug: string
-          content: unknown
-          excerpt?: string | null
-          cover_image?: string | null
-          author?: string
-          published?: boolean
-          tags?: string[]
-          created_at?: string
-          updated_at?: string
-          published_at?: string | null
-          view_count?: number
-          reading_time?: number | null
-        }
-        Update: {
-          id?: string
-          public_id?: string
-          title?: string
-          slug?: string
-          content?: unknown
-          excerpt?: string | null
-          cover_image?: string | null
-          author?: string
-          published?: boolean
-          tags?: string[]
-          created_at?: string
-          updated_at?: string
-          published_at?: string | null
-          view_count?: number
-          reading_time?: number | null
-        }
-      }
-      pages: {
-        Row: {
-          id: string
-          title: string
-          slug: string
-          content: unknown // TipTap JSON content
-          published: boolean
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          title: string
-          slug: string
-          content: unknown
-          published?: boolean
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          title?: string
-          slug?: string
-          content?: unknown
-          published?: boolean
-          created_at?: string
-          updated_at?: string
-        }
-      }
-    }
-  }
+  return getSupabaseClient()
 }

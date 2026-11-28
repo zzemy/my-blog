@@ -43,8 +43,9 @@ export function CodeBlockView({ node, editor, updateAttributes }: NodeViewProps)
 
   const textContent = node.textContent
   const rawLanguage = typeof node.attrs.language === 'string' ? node.attrs.language.trim() : ''
-  // 支持在 language 字段中携带 "ts:app/page.tsx" 形式的可选文件名，兼容既有 schema
-  const [langToken, explicitFileName] = splitLangAndFileName(rawLanguage)
+  // 支持 "ts:app/page.tsx"、"ts title=\"app/page.tsx\" {1,3-5}" 或 "ts:app/page.tsx{1,3-5}"
+  const { langToken, fileName: explicitFileName, highlightSpec, highlightedLines } =
+    parseCodeBlockMeta(rawLanguage)
   const normalizedLanguage = normalizeLanguageKey(langToken)
   const language = formatCodeLanguage(langToken)
   const lines = textContent.split('\n')
@@ -68,16 +69,31 @@ export function CodeBlockView({ node, editor, updateAttributes }: NodeViewProps)
     Boolean(normalizedLanguage) &&
     !CODE_LANGUAGE_OPTIONS.some((option) => option.value === normalizedLanguage)
 
+  const composeLanguageAttr = (nextLang: string, nextFile: string, nextHighlight: string) => {
+    const cleanFile = nextFile.trim()
+    const cleanHighlight = nextHighlight.trim().replace(/^\{|\}$/g, '')
+    const baseLang = nextLang.trim() || (cleanFile || cleanHighlight ? 'text' : '')
+    if (!baseLang && !cleanFile && !cleanHighlight) return null
+    let result = baseLang
+    if (cleanFile) result += `:${cleanFile}`
+    if (cleanHighlight) result += `{${cleanHighlight}}`
+    return result
+  }
+
   const handleLanguageChange = (nextLang: string) => {
-    const combined = explicitFileName ? `${nextLang || 'text'}:${explicitFileName}` : nextLang || null
-    updateAttributes({ language: combined })
+    updateAttributes({ language: composeLanguageAttr(nextLang, explicitFileName, highlightSpec) })
   }
 
   const handleFileNameChange = (nextFileName: string) => {
-    const cleaned = nextFileName.trim()
-    const baseLang = normalizedLanguage || (cleaned ? 'text' : '')
-    const combined = cleaned ? `${baseLang}:${cleaned}` : baseLang || null
-    updateAttributes({ language: combined })
+    updateAttributes({
+      language: composeLanguageAttr(normalizedLanguage, nextFileName, highlightSpec),
+    })
+  }
+
+  const handleHighlightChange = (nextHighlight: string) => {
+    updateAttributes({
+      language: composeLanguageAttr(normalizedLanguage, explicitFileName, nextHighlight),
+    })
   }
 
   return (
@@ -123,7 +139,22 @@ export function CodeBlockView({ node, editor, updateAttributes }: NodeViewProps)
                     event.currentTarget.blur()
                   }
                 }}
-                className="ml-1 w-32 rounded bg-transparent px-1.5 py-0.5 font-mono text-[11px] text-muted-foreground outline-none ring-1 ring-transparent transition-colors placeholder:text-muted-foreground/45 focus:bg-background/60 focus:text-foreground focus:ring-border"
+                className="ml-1 w-28 rounded bg-transparent px-1.5 py-0.5 font-mono text-[11px] text-muted-foreground outline-none ring-1 ring-transparent transition-colors placeholder:text-muted-foreground/45 focus:bg-background/60 focus:text-foreground focus:ring-border"
+              />
+              <input
+                type="text"
+                defaultValue={highlightSpec}
+                placeholder="高亮行 如 1,3-5"
+                aria-label="高亮代码行"
+                data-editor-control="true"
+                onMouseDown={(event) => event.stopPropagation()}
+                onBlur={(event) => handleHighlightChange(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') {
+                    event.currentTarget.blur()
+                  }
+                }}
+                className="ml-1 w-24 rounded bg-transparent px-1.5 py-0.5 font-mono text-[11px] text-muted-foreground outline-none ring-1 ring-transparent transition-colors placeholder:text-muted-foreground/45 focus:bg-background/60 focus:text-foreground focus:ring-border"
               />
             </>
           ) : (
@@ -172,16 +203,34 @@ export function CodeBlockView({ node, editor, updateAttributes }: NodeViewProps)
 
       <div className="code-window-body">
         <div className="code-window-gutter" aria-hidden="true">
-          {lines.map((_, index) => (
-            <span key={index} className="block">
-              {index + 1}
-            </span>
-          ))}
+          {lines.map((_, index) => {
+            const lineNum = index + 1
+            const isHighlighted = highlightedLines.has(lineNum)
+            return (
+              <span key={index} className={`block ${isHighlighted ? 'is-highlighted' : ''}`}>
+                {lineNum}
+              </span>
+            )
+          })}
         </div>
         <div className="code-window-scroll">
-          <pre className="code-window-pre">
+          <pre className="code-window-pre relative">
+            {highlightedLines.size > 0 && !wrapped && (
+              <div className="code-line-highlight-layer" aria-hidden="true">
+                {lines.map((_, index) => (
+                  <div
+                    key={index}
+                    className={
+                      highlightedLines.has(index + 1)
+                        ? 'code-line-highlight-band'
+                        : 'h-[var(--article-code-line-height)]'
+                    }
+                  />
+                ))}
+              </div>
+            )}
             <NodeViewContent
-              className={`!bg-transparent !p-0 !font-inherit !text-inherit ${
+              className={`relative z-[1] !bg-transparent !p-0 !font-inherit !text-inherit ${
                 wrapped ? '!whitespace-pre-wrap !break-words' : '!whitespace-pre'
               }`}
             />
@@ -192,10 +241,67 @@ export function CodeBlockView({ node, editor, updateAttributes }: NodeViewProps)
   )
 }
 
-function splitLangAndFileName(raw: string): [string, string] {
-  const colonIdx = raw.indexOf(':')
-  if (colonIdx === -1) return [raw, '']
-  return [raw.slice(0, colonIdx).trim(), raw.slice(colonIdx + 1).trim()]
+function parseHighlightLines(spec: string): Set<number> {
+  const result = new Set<number>()
+  if (!spec.trim()) return result
+  for (const part of spec.split(',')) {
+    const trimmed = part.trim()
+    if (!trimmed) continue
+    const rangeMatch = trimmed.match(/^(\d+)\s*-\s*(\d+)$/)
+    if (rangeMatch) {
+      const start = Number(rangeMatch[1])
+      const end = Number(rangeMatch[2])
+      if (start > 0 && end >= start && end - start <= 200) {
+        for (let line = start; line <= end; line += 1) {
+          result.add(line)
+        }
+      }
+      continue
+    }
+    const single = Number(trimmed)
+    if (Number.isInteger(single) && single > 0) {
+      result.add(single)
+    }
+  }
+  return result
+}
+
+function parseCodeBlockMeta(raw: string): {
+  langToken: string
+  fileName: string
+  highlightSpec: string
+  highlightedLines: Set<number>
+} {
+  let working = raw.trim()
+  let highlightSpec = ''
+  const hlMatch = working.match(/\{([0-9,\-\s]+)\}/)
+  if (hlMatch) {
+    highlightSpec = hlMatch[1].trim()
+    working = working.replace(hlMatch[0], '').trim()
+  }
+
+  let fileName = ''
+  const titleMatch = working.match(/title=["']([^"']+)["']/)
+  if (titleMatch) {
+    fileName = titleMatch[1].trim()
+    working = working.replace(titleMatch[0], '').trim()
+  }
+
+  if (!fileName) {
+    const colonIdx = working.indexOf(':')
+    if (colonIdx !== -1) {
+      fileName = working.slice(colonIdx + 1).trim()
+      working = working.slice(0, colonIdx).trim()
+    }
+  }
+
+  const langToken = working.split(/\s+/)[0] || ''
+  return {
+    langToken,
+    fileName,
+    highlightSpec,
+    highlightedLines: parseHighlightLines(highlightSpec),
+  }
 }
 
 function normalizeLanguageKey(value: string) {

@@ -28,6 +28,7 @@ interface DashboardStats {
   stats: {
     totalPosts: number
     draftsCount: number
+    staleDraftsCount?: number
     totalViews: number
     totalLikes: number
     pendingFriendsCount: number
@@ -121,7 +122,11 @@ export default function AdminDashboard() {
   }
   const heatmapData = Array.from(activityMap.entries()).map(([date, count]) => ({ date, count }))
 
-  const hasAlerts = data.stats.pendingFriendsCount > 0 || data.stats.recentAiErrors > 0
+  const staleDraftsCount = data.stats.staleDraftsCount ?? 0
+  const hasAlerts =
+    data.stats.pendingFriendsCount > 0 ||
+    data.stats.recentAiErrors > 0 ||
+    staleDraftsCount > 0
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 px-4 py-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -166,6 +171,12 @@ export default function AdminDashboard() {
               <Link href="/admin/ai" className="inline-flex items-center gap-1.5 font-medium underline-offset-4 hover:underline">
                 <Sparkles className="h-3.5 w-3.5" />
                 近 7 天有 {data.stats.recentAiErrors} 次 AI 调用异常
+              </Link>
+            )}
+            {staleDraftsCount > 0 && (
+              <Link href="/admin/posts" className="inline-flex items-center gap-1.5 font-medium underline-offset-4 hover:underline">
+                <Edit3 className="h-3.5 w-3.5" />
+                {staleDraftsCount} 篇草稿已超过 30 天未更新
               </Link>
             )}
           </div>

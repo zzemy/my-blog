@@ -58,6 +58,13 @@ const siteSettingsUpdateSchema = z.object({
       google_site_verification: z.string().trim().max(200).optional(),
       baidu_site_verification: z.string().trim().max(200).optional(),
       og_image: optionalSafeUrl.optional(),
+      accent_preset: z.enum(['ink', 'amber', 'teal', 'indigo']).optional(),
+      founded_date: z
+        .string()
+        .trim()
+        .refine((v) => !v || /^\d{4}-\d{2}-\d{2}$/.test(v), '建站日期格式应为 YYYY-MM-DD')
+        .optional(),
+      custom_css: z.string().max(8000).optional(),
     })
     .optional(),
   feature_flags: z

@@ -111,6 +111,87 @@ function renderBlock(node: NodeLike, indent = ''): string {
       const body = rows.slice(1).map((r) => `| ${r.join(' | ')} |`)
       return [header, divider, ...body].join('\n')
     }
+    case 'articleCallout': {
+      const tone = String(node.attrs?.tone ?? 'note').toUpperCase()
+      const title = String(node.attrs?.title ?? '').trim()
+      const text = String(node.attrs?.text ?? '').trim()
+      const head = `> [!${tone}]${title ? ` ${title}` : ''}`
+      return text ? `${head}\n> ${text.replace(/\n/g, '\n> ')}` : head
+    }
+    case 'articleButton': {
+      const label = String(node.attrs?.label ?? '').trim()
+      const href = String(node.attrs?.href ?? '').trim()
+      return label && href ? `[${label}](${href})` : label
+    }
+    case 'articleTabs': {
+      const panels = Array.isArray(node.attrs?.panels) ? (node.attrs?.panels as Array<Record<string, unknown>>) : []
+      return panels
+        .map((p) => `#### ${String(p.title ?? '').trim()}\n\n${String(p.text ?? '').trim()}`)
+        .filter((s) => s.trim())
+        .join('\n\n')
+    }
+    case 'articleAccordion': {
+      const items = Array.isArray(node.attrs?.items) ? (node.attrs?.items as Array<Record<string, unknown>>) : []
+      return items
+        .map((it) => `<details>\n<summary>${String(it.title ?? '').trim()}</summary>\n\n${String(it.text ?? '').trim()}\n</details>`)
+        .join('\n\n')
+    }
+    case 'articleGallery':
+    case 'articleSlider': {
+      const images = Array.isArray(node.attrs?.images) ? (node.attrs?.images as Array<Record<string, unknown>>) : []
+      return images
+        .map((img) => `![${String(img.alt ?? '').trim()}](${String(img.src ?? '').trim()})`)
+        .filter((s) => !s.endsWith('()'))
+        .join('\n\n')
+    }
+    case 'articleCards': {
+      const cards = Array.isArray(node.attrs?.cards) ? (node.attrs?.cards as Array<Record<string, unknown>>) : []
+      return cards
+        .map((c) => `- **${String(c.title ?? '').trim()}**：${String(c.text ?? '').trim()}`)
+        .join('\n')
+    }
+    case 'articleTimeline': {
+      const items = Array.isArray(node.attrs?.items) ? (node.attrs?.items as Array<Record<string, unknown>>) : []
+      return items
+        .map((it) => `- **${String(it.label ?? '').trim()} · ${String(it.title ?? '').trim()}**：${String(it.text ?? '').trim()}`)
+        .join('\n')
+    }
+    case 'articleFlow': {
+      const parts = [node.attrs?.start, node.attrs?.question, node.attrs?.yes, node.attrs?.no, node.attrs?.end]
+        .map((v) => String(v ?? '').trim())
+        .filter(Boolean)
+      return parts.length ? `> 流程：${parts.join(' -> ')}` : ''
+    }
+    case 'articleDiagram': {
+      const items = Array.isArray(node.attrs?.items) ? (node.attrs?.items as Array<Record<string, unknown>>) : []
+      const labels = items.map((it) => String(it.label ?? '').trim()).filter(Boolean)
+      return labels.length ? `> 关系：${labels.join(' — ')}` : ''
+    }
+    case 'articleEmbed': {
+      const src = String(node.attrs?.src ?? '').trim()
+      const title = String(node.attrs?.title ?? '嵌入视频').trim()
+      return src ? `[${title}](${src})` : ''
+    }
+    case 'articleAudio': {
+      const src = String(node.attrs?.src ?? '').trim()
+      const title = String(node.attrs?.title ?? '音频').trim()
+      return src ? `[${title}](${src})` : ''
+    }
+    case 'articleRichShowcase': {
+      const title = String(node.attrs?.title ?? '').trim()
+      const text = String(node.attrs?.text ?? '').trim()
+      const image = String(node.attrs?.image ?? '').trim()
+      const primaryHref = String(node.attrs?.primaryHref ?? '').trim()
+      const primaryLabel = String(node.attrs?.primaryLabel ?? '').trim()
+      return [
+        image ? `![${title}](${image})` : '',
+        title ? `### ${title}` : '',
+        text,
+        primaryHref && primaryLabel ? `[${primaryLabel}](${primaryHref})` : '',
+      ]
+        .filter(Boolean)
+        .join('\n\n')
+    }
     default:
       return ''
   }

@@ -67,6 +67,46 @@ function extractApiErrorMessage(payload: unknown, fallbackStatus: number): strin
   return `上游 API 请求失败（HTTP ${fallbackStatus}）`
 }
 
+function isRetryableStatus(status: number): boolean {
+  return status === 429 || status === 408 || (status >= 500 && status <= 599)
+}
+
+async function fetchWithRetry(
+  url: string,
+  init: Omit<RequestInit, 'signal'>,
+  timeoutMs: number,
+  maxAttempts = 3,
+): Promise<Response> {
+  let lastError: unknown = null
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    try {
+      const response = await fetch(url, {
+        ...init,
+        signal: AbortSignal.timeout(timeoutMs),
+      })
+      if (!response.ok && isRetryableStatus(response.status) && attempt < maxAttempts) {
+        const retryAfter = Number(response.headers.get('retry-after'))
+        const delayMs =
+          Number.isFinite(retryAfter) && retryAfter > 0
+            ? Math.min(retryAfter * 1000, 8000)
+            : 800 * Math.pow(2, attempt - 1) + Math.floor(Math.random() * 250)
+        await new Promise((resolve) => setTimeout(resolve, delayMs))
+        continue
+      }
+      return response
+    } catch (error) {
+      lastError = error
+      if (attempt < maxAttempts) {
+        const delayMs = 800 * Math.pow(2, attempt - 1)
+        await new Promise((resolve) => setTimeout(resolve, delayMs))
+        continue
+      }
+      throw error
+    }
+  }
+  throw lastError instanceof Error ? lastError : new Error('上游 API 请求重试后仍失败')
+}
+
 async function callOpenAiCompatible(req: LlmCompletionRequest): Promise<LlmCompletionResponse> {
   const startedAt = Date.now()
   const baseUrl = normalizeBaseUrl(req.baseUrl)
@@ -94,12 +134,15 @@ async function callOpenAiCompatible(req: LlmCompletionRequest): Promise<LlmCompl
     body.response_format = { type: 'json_object' }
   }
 
-  const response = await fetch(endpoint, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify(body),
-    signal: AbortSignal.timeout(req.timeoutMs ?? 90_000),
-  })
+  const response = await fetchWithRetry(
+    endpoint,
+    {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(body),
+    },
+    req.timeoutMs ?? 90_000,
+  )
 
   const payload = await safeParseJson(response)
 
@@ -201,18 +244,21 @@ async function callAnthropic(req: LlmCompletionRequest): Promise<LlmCompletionRe
     ...req.customHeaders,
   }
 
-  const response = await fetch(endpoint, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify({
-      model: req.model,
-      max_tokens: req.maxTokens ?? 2048,
-      temperature: req.temperature ?? 0.3,
-      ...(req.systemPrompt ? { system: req.systemPrompt } : {}),
-      messages: [{ role: 'user', content: req.userPrompt }],
-    }),
-    signal: AbortSignal.timeout(req.timeoutMs ?? 90_000),
-  })
+  const response = await fetchWithRetry(
+    endpoint,
+    {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        model: req.model,
+        max_tokens: req.maxTokens ?? 2048,
+        temperature: req.temperature ?? 0.3,
+        ...(req.systemPrompt ? { system: req.systemPrompt } : {}),
+        messages: [{ role: 'user', content: req.userPrompt }],
+      }),
+    },
+    req.timeoutMs ?? 90_000,
+  )
 
   const payload = await safeParseJson(response)
   if (!response.ok) {
@@ -269,15 +315,18 @@ async function callGemini(req: LlmCompletionRequest): Promise<LlmCompletionRespo
     body.systemInstruction = { parts: [{ text: req.systemPrompt }] }
   }
 
-  const response = await fetch(endpoint, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...req.customHeaders,
+  const response = await fetchWithRetry(
+    endpoint,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...req.customHeaders,
+      },
+      body: JSON.stringify(body),
     },
-    body: JSON.stringify(body),
-    signal: AbortSignal.timeout(req.timeoutMs ?? 90_000),
-  })
+    req.timeoutMs ?? 90_000,
+  )
 
   const payload = await safeParseJson(response)
   if (!response.ok) {

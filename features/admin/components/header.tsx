@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   BookOpen,
   ChevronDown,
@@ -67,6 +67,22 @@ export function AdminHeader() {
   const router = useRouter()
   const logout = useSupabaseAuthStore((state) => state.logout)
   const [open, setOpen] = useState(false)
+  const [pendingFriends, setPendingFriends] = useState(0)
+
+  useEffect(() => {
+    let cancelled = false
+    fetch('/api/admin/stats')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((json: { stats?: { pendingFriendsCount?: number } } | null) => {
+        if (!cancelled && typeof json?.stats?.pendingFriendsCount === 'number') {
+          setPendingFriends(json.stats.pendingFriendsCount)
+        }
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [pathname])
 
   // 文章新建/编辑/预览页使用独立顶栏
   if (pathname && /^\/admin\/posts\/.+/.test(pathname)) {
@@ -130,6 +146,11 @@ export function AdminHeader() {
                   )}
                 />
                 <span>{item.label}</span>
+                {item.href === '/admin/friends' && pendingFriends > 0 && (
+                  <span className="ml-0.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 font-mono text-[10px] font-semibold text-white">
+                    {pendingFriends}
+                  </span>
+                )}
               </Link>
             )
           })}

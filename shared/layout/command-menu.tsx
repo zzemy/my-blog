@@ -2,7 +2,23 @@
 
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, Loader2, X, FileText, Hash, Link2, MessageSquare, Github } from 'lucide-react';
+import { useTheme } from 'next-themes';
+import { toast } from 'sonner';
+import {
+  Search,
+  Loader2,
+  X,
+  FileText,
+  Hash,
+  Link2,
+  MessageSquare,
+  Github,
+  Sun,
+  Moon,
+  Monitor,
+  Shuffle,
+  Rss,
+} from 'lucide-react';
 import { Command as CommandPrimitive } from 'cmdk';
 import { PostData } from '@/lib/types';
 import {
@@ -145,6 +161,7 @@ function toResultPost(doc: SearchDocument): SearchApiPost {
 
 export function CommandMenu({ compact = false }: { compact?: boolean }) {
   const router = useRouter();
+  const { setTheme } = useTheme();
   const [open, setOpen] = React.useState(false);
   const [query, setQuery] = React.useState('');
   const [searchScope, setSearchScope] = React.useState<SearchScope>('global');
@@ -452,30 +469,92 @@ export function CommandMenu({ compact = false }: { compact?: boolean }) {
                   </CommandGroup>
 
                   {!query.trim() && (
-                    <CommandGroup heading="快速直达">
-                      {QUICK_PAGES.map((page) => {
-                        const Icon = page.icon;
-                        return (
+                    <>
+                      <CommandGroup heading="快速直达">
+                        {QUICK_PAGES.map((page) => {
+                          const Icon = page.icon;
+                          return (
+                            <CommandItem
+                              key={page.href}
+                              value={`nav-${page.label}`}
+                              className="cursor-pointer rounded-lg px-2.5 py-1.5 text-xs"
+                              onSelect={() =>
+                                runCommand(() => {
+                                  if (page.external) {
+                                    window.open(page.href, '_blank', 'noopener,noreferrer');
+                                  } else {
+                                    router.push(page.href);
+                                  }
+                                })
+                              }
+                            >
+                              <Icon className="mr-2 h-3.5 w-3.5 text-muted-foreground" />
+                              <span>{page.label}</span>
+                            </CommandItem>
+                          );
+                        })}
+                      </CommandGroup>
+
+                      <CommandGroup heading="快捷操作">
+                        {allPosts.length > 0 && (
                           <CommandItem
-                            key={page.href}
-                            value={`nav-${page.label}`}
+                            value="action-random-post"
                             className="cursor-pointer rounded-lg px-2.5 py-1.5 text-xs"
                             onSelect={() =>
                               runCommand(() => {
-                                if (page.external) {
-                                  window.open(page.href, '_blank', 'noopener,noreferrer');
-                                } else {
-                                  router.push(page.href);
+                                const pick = allPosts[Math.floor(Math.random() * allPosts.length)];
+                                if (pick) {
+                                  router.push(`/posts/${getPostRouteId(pick)}`);
                                 }
                               })
                             }
                           >
-                            <Icon className="mr-2 h-3.5 w-3.5 text-muted-foreground" />
-                            <span>{page.label}</span>
+                            <Shuffle className="mr-2 h-3.5 w-3.5 text-muted-foreground" />
+                            <span>随机读一篇文章</span>
                           </CommandItem>
-                        );
-                      })}
-                    </CommandGroup>
+                        )}
+                        <CommandItem
+                          value="action-copy-rss"
+                          className="cursor-pointer rounded-lg px-2.5 py-1.5 text-xs"
+                          onSelect={() =>
+                            runCommand(() => {
+                              const rssUrl = `${window.location.origin}/rss.xml`;
+                              void navigator.clipboard
+                                .writeText(rssUrl)
+                                .then(() => toast.success('RSS 订阅地址已复制'))
+                                .catch(() => toast.error('复制失败'));
+                            })
+                          }
+                        >
+                          <Rss className="mr-2 h-3.5 w-3.5 text-muted-foreground" />
+                          <span>复制 RSS 订阅地址</span>
+                        </CommandItem>
+                        <CommandItem
+                          value="action-theme-light"
+                          className="cursor-pointer rounded-lg px-2.5 py-1.5 text-xs"
+                          onSelect={() => runCommand(() => setTheme('light'))}
+                        >
+                          <Sun className="mr-2 h-3.5 w-3.5 text-muted-foreground" />
+                          <span>切换至浅色主题</span>
+                        </CommandItem>
+                        <CommandItem
+                          value="action-theme-dark"
+                          className="cursor-pointer rounded-lg px-2.5 py-1.5 text-xs"
+                          onSelect={() => runCommand(() => setTheme('dark'))}
+                        >
+                          <Moon className="mr-2 h-3.5 w-3.5 text-muted-foreground" />
+                          <span>切换至深色主题</span>
+                        </CommandItem>
+                        <CommandItem
+                          value="action-theme-system"
+                          className="cursor-pointer rounded-lg px-2.5 py-1.5 text-xs"
+                          onSelect={() => runCommand(() => setTheme('system'))}
+                        >
+                          <Monitor className="mr-2 h-3.5 w-3.5 text-muted-foreground" />
+                          <span>主题跟随系统</span>
+                        </CommandItem>
+                      </CommandGroup>
+                    </>
                   )}
                 </>
               )}

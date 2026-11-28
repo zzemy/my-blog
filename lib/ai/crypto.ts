@@ -10,17 +10,24 @@ function resolveEncryptionSecret(): { secret: string; usingFallback: boolean } {
     return { secret: dedicated, usingFallback: false }
   }
 
-  const fallback =
-    process.env.CSRF_SECRET?.trim() ||
-    process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
-
-  if (fallback && fallback.length >= 16) {
-    return { secret: fallback, usingFallback: true }
+  const csrfFallback = process.env.CSRF_SECRET?.trim()
+  if (csrfFallback && csrfFallback.length >= 16) {
+    return { secret: csrfFallback, usingFallback: true }
   }
 
   throw new Error(
-    '未配置 AI_ENCRYPTION_KEY 环境变量（至少 16 位字符），无法加密存储 API Key。请在 .env.local 或 Vercel 环境变量中配置 AI_ENCRYPTION_KEY，或改用「环境变量引用」模式。',
+    '未配置独立的 AI_ENCRYPTION_KEY 环境变量（至少 16 位字符），无法加密存储 API Key（不再回退至 SUPABASE_SERVICE_ROLE_KEY 以避免数据库密钥轮换导致解密失败）。请在 .env.local 或 Vercel 环境变量中配置 AI_ENCRYPTION_KEY，或改用「环境变量引用」模式。',
   )
+}
+
+function getDecryptionCandidateSecrets(): string[] {
+  const candidates = [
+    process.env.AI_ENCRYPTION_KEY?.trim(),
+    process.env.CSRF_SECRET?.trim(),
+    // 仅用于兼容解密历史旧数据，新加密绝不再使用 SUPABASE_SERVICE_ROLE_KEY
+    process.env.SUPABASE_SERVICE_ROLE_KEY?.trim(),
+  ].filter((val): val is string => Boolean(val && val.length >= 16))
+  return Array.from(new Set(candidates))
 }
 
 function deriveKey(secret: string): Buffer {
@@ -35,8 +42,8 @@ export function getEncryptionKeyStatus(): {
   if (dedicated && dedicated.length >= 16) {
     return { configured: true, usingFallback: false }
   }
-  const fallback = process.env.CSRF_SECRET?.trim() || process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
-  if (fallback && fallback.length >= 16) {
+  const csrfFallback = process.env.CSRF_SECRET?.trim()
+  if (csrfFallback && csrfFallback.length >= 16) {
     return { configured: true, usingFallback: true }
   }
   return { configured: false, usingFallback: false }
@@ -68,16 +75,29 @@ export function decryptApiKey(payload: string): string {
     throw new Error('加密密钥数据结构损坏')
   }
 
-  const { secret } = resolveEncryptionSecret()
-  const key = deriveKey(secret)
+  const candidates = getDecryptionCandidateSecrets()
+  if (candidates.length === 0) {
+    throw new Error('未配置 AI_ENCRYPTION_KEY，无法解密已保存的 API Key')
+  }
+
   const iv = Buffer.from(parts[0], 'base64')
   const authTag = Buffer.from(parts[1], 'base64')
   const encrypted = Buffer.from(parts[2], 'base64')
 
-  const decipher = crypto.createDecipheriv(ALGORITHM, key, iv)
-  decipher.setAuthTag(authTag)
-  const decrypted = Buffer.concat([decipher.update(encrypted), decipher.final()])
-  return decrypted.toString('utf8')
+  let lastError: unknown = null
+  for (const secret of candidates) {
+    try {
+      const key = deriveKey(secret)
+      const decipher = crypto.createDecipheriv(ALGORITHM, key, iv)
+      decipher.setAuthTag(authTag)
+      const decrypted = Buffer.concat([decipher.update(encrypted), decipher.final()])
+      return decrypted.toString('utf8')
+    } catch (error) {
+      lastError = error
+    }
+  }
+
+  throw lastError instanceof Error ? lastError : new Error('解密 API Key 失败')
 }
 
 export function maskApiKey(plainKey: string): string {

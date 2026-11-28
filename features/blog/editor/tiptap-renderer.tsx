@@ -1,8 +1,9 @@
 'use client'
 
+import 'katex/dist/katex.min.css'
 import { useState, useEffect, useCallback } from 'react'
 import { createRoot } from 'react-dom/client'
-import { X } from 'lucide-react'
+import { ChevronLeft, ChevronRight, X, ZoomIn, ZoomOut } from 'lucide-react'
 import { toast } from 'sonner'
 import { EditorContent, useEditor, ReactNodeViewRenderer } from '@tiptap/react'
 import type { Content } from '@tiptap/react'
@@ -46,7 +47,11 @@ export function TipTapRenderer({
   className = '',
   toc = [],
 }: TipTapRendererProps) {
-  const [previewImage, setPreviewImage] = useState<{ src: string; alt: string } | null>(null)
+  const [lightboxState, setLightboxState] = useState<{
+    images: Array<{ src: string; alt: string }>
+    index: number
+  } | null>(null)
+  const [zoomScale, setZoomScale] = useState(1)
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
@@ -138,7 +143,7 @@ export function TipTapRenderer({
       const heading = getHeadingElement(editor.view.nodeDOM(pos))
       if (heading) {
         heading.setAttribute('id', item.id)
-        heading.style.scrollMarginTop = '96px'
+        heading.style.scrollMarginTop = '88px'
 
         if (!heading.querySelector('.paragraph-anchor')) {
           const anchor = document.createElement('a')
@@ -278,7 +283,7 @@ export function TipTapRenderer({
     }
   }, [editor, content])
 
-  // 图片点击放大（排除按钮内缩略图如轮播指示图、链接内图片和显式禁用放大的图片）
+  // 图片增强：点击多图灯箱 + 底部图注（figcaption）+ 加载失败优雅降级
   useEffect(() => {
     if (!editor) return
     const dom = editor.view.dom
@@ -286,48 +291,114 @@ export function TipTapRenderer({
     const isZoomableImage = (img: HTMLElement) =>
       img.tagName === 'IMG' && !img.closest('button, a, [data-no-zoom]')
 
+    const collectZoomableImages = () => {
+      const list: Array<{ src: string; alt: string; el: HTMLImageElement }> = []
+      dom.querySelectorAll('img').forEach((node) => {
+        const img = node as HTMLImageElement
+        if (isZoomableImage(img) && img.src && !img.dataset.loadFailed) {
+          list.push({ src: img.src, alt: img.alt || '', el: img })
+        }
+      })
+      return list
+    }
+
     const clickHandler = (e: Event) => {
       const target = e.target as HTMLElement | null
       if (target && isZoomableImage(target)) {
         const img = target as HTMLImageElement
-        if (img.src) {
-          setPreviewImage({ src: img.src, alt: img.alt || '' })
+        if (img.src && !img.dataset.loadFailed) {
+          const all = collectZoomableImages()
+          const idx = Math.max(0, all.findIndex((item) => item.el === img))
+          setZoomScale(1)
+          setLightboxState({
+            images: all.map(({ src, alt }) => ({ src, alt })),
+            index: idx,
+          })
         }
       }
     }
 
-    const applyCursor = () => {
+    const enhanceImages = () => {
       dom.querySelectorAll('img').forEach((node) => {
-        const el = node as HTMLElement
-        el.style.cursor = isZoomableImage(el) ? 'zoom-in' : ''
+        const img = node as HTMLImageElement
+        img.loading = 'lazy'
+        img.decoding = 'async'
+        img.style.cursor = isZoomableImage(img) ? 'zoom-in' : ''
+
+        // 正文独立图片自动渲染底部图注
+        if (
+          img.alt?.trim() &&
+          !img.closest('[data-rich-block], figure') &&
+          img.parentElement &&
+          !img.dataset.captionMounted
+        ) {
+          img.dataset.captionMounted = '1'
+          const figure = document.createElement('figure')
+          figure.className = 'my-6 flex flex-col items-center gap-2'
+          img.parentNode?.insertBefore(figure, img)
+          figure.appendChild(img)
+          const caption = document.createElement('figcaption')
+          caption.className = 'text-center text-xs text-muted-foreground'
+          caption.textContent = img.alt.trim()
+          figure.appendChild(caption)
+        }
+
+        if (!img.dataset.errorBound) {
+          img.dataset.errorBound = '1'
+          img.addEventListener('error', () => {
+            if (img.dataset.loadFailed) return
+            img.dataset.loadFailed = '1'
+            img.style.cursor = 'default'
+            img.alt = img.alt || '图片加载失败'
+            img.classList.add('opacity-50', 'min-h-[120px]', 'bg-muted/40', 'border', 'border-dashed', 'border-border')
+          })
+        }
       })
     }
 
     dom.addEventListener('click', clickHandler)
-    applyCursor()
-    editor.on('update', applyCursor)
+    enhanceImages()
+    editor.on('update', enhanceImages)
 
     return () => {
       dom.removeEventListener('click', clickHandler)
-      editor.off('update', applyCursor)
+      editor.off('update', enhanceImages)
     }
   }, [editor, content])
 
-  // 键盘 ESC 关闭预览并锁定背景滚动
+  // 键盘 ESC / 左右切换 / 滚轮缩放 + 锁定背景滚动
   useEffect(() => {
-    if (!previewImage) return
+    if (!lightboxState) return
     const prevOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
 
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setPreviewImage(null)
+      if (e.key === 'Escape') {
+        setLightboxState(null)
+      } else if (e.key === 'ArrowLeft') {
+        setZoomScale(1)
+        setLightboxState((prev) =>
+          prev && prev.images.length > 1
+            ? { ...prev, index: (prev.index - 1 + prev.images.length) % prev.images.length }
+            : prev,
+        )
+      } else if (e.key === 'ArrowRight') {
+        setZoomScale(1)
+        setLightboxState((prev) =>
+          prev && prev.images.length > 1
+            ? { ...prev, index: (prev.index + 1) % prev.images.length }
+            : prev,
+        )
+      }
     }
     window.addEventListener('keydown', onKey)
     return () => {
       document.body.style.overflow = prevOverflow
       window.removeEventListener('keydown', onKey)
     }
-  }, [previewImage])
+  }, [lightboxState])
+
+  const activeLightboxImage = lightboxState ? lightboxState.images[lightboxState.index] : null
 
   return (
     <>
@@ -339,31 +410,100 @@ export function TipTapRenderer({
           dangerouslySetInnerHTML={{ __html: ssrHtml }}
         />
       ) : null}
-      {previewImage && (
+      {lightboxState && activeLightboxImage && (
         <div
           role="dialog"
           aria-modal="true"
           aria-label="图片放大预览"
-          className="fixed inset-0 z-[100] flex flex-col items-center justify-center gap-3 bg-black/85 p-4 backdrop-blur-sm"
-          onClick={() => setPreviewImage(null)}
+          className="fixed inset-0 z-[100] flex flex-col items-center justify-center gap-3 bg-black/88 p-4 backdrop-blur-sm"
+          onClick={() => setLightboxState(null)}
+          onWheel={(e) => {
+            e.preventDefault()
+            setZoomScale((prev) =>
+              Math.min(3, Math.max(0.75, Number((prev + (e.deltaY < 0 ? 0.18 : -0.18)).toFixed(2)))),
+            )
+          }}
         >
-          <button
-            type="button"
-            aria-label="关闭预览"
-            onClick={() => setPreviewImage(null)}
-            className="absolute right-4 top-4 inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-black/50 text-white/85 transition-colors hover:bg-black/80 hover:text-white"
+          <div
+            className="absolute right-4 top-4 flex items-center gap-2"
+            onClick={(e) => e.stopPropagation()}
           >
-            <X className="h-5 w-5" />
-          </button>
+            {lightboxState.images.length > 1 && (
+              <span className="rounded-full border border-white/15 bg-black/50 px-3 py-1.5 font-mono text-xs text-white/85">
+                {lightboxState.index + 1} / {lightboxState.images.length}
+              </span>
+            )}
+            <button
+              type="button"
+              aria-label="缩小"
+              onClick={() => setZoomScale((prev) => Math.max(0.75, Number((prev - 0.25).toFixed(2))))}
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-black/50 text-white/85 transition-colors hover:bg-black/80 hover:text-white"
+            >
+              <ZoomOut className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              aria-label="放大"
+              onClick={() => setZoomScale((prev) => Math.min(3, Number((prev + 0.25).toFixed(2))))}
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-black/50 text-white/85 transition-colors hover:bg-black/80 hover:text-white"
+            >
+              <ZoomIn className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              aria-label="关闭预览"
+              onClick={() => setLightboxState(null)}
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-black/50 text-white/85 transition-colors hover:bg-black/80 hover:text-white"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+
+          {lightboxState.images.length > 1 && (
+            <>
+              <button
+                type="button"
+                aria-label="上一张"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setZoomScale(1)
+                  setLightboxState((prev) =>
+                    prev
+                      ? { ...prev, index: (prev.index - 1 + prev.images.length) % prev.images.length }
+                      : prev,
+                  )
+                }}
+                className="absolute left-4 top-1/2 -translate-y-1/2 inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-black/50 text-white/85 transition-colors hover:bg-black/80 hover:text-white"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+              <button
+                type="button"
+                aria-label="下一张"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setZoomScale(1)
+                  setLightboxState((prev) =>
+                    prev ? { ...prev, index: (prev.index + 1) % prev.images.length } : prev,
+                  )
+                }}
+                className="absolute right-4 top-1/2 -translate-y-1/2 inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-black/50 text-white/85 transition-colors hover:bg-black/80 hover:text-white"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </button>
+            </>
+          )}
+
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={previewImage.src}
-            alt={previewImage.alt || '图片预览'}
+            src={activeLightboxImage.src}
+            alt={activeLightboxImage.alt || '图片预览'}
             onClick={(e) => e.stopPropagation()}
-            className="max-h-[85vh] max-w-[92vw] rounded-lg border border-white/10 shadow-2xl"
+            style={{ transform: `scale(${zoomScale})` }}
+            className="max-h-[82vh] max-w-[90vw] rounded-lg border border-white/10 shadow-2xl transition-transform duration-150"
           />
-          {previewImage.alt && (
-            <p className="max-w-2xl text-center text-xs text-white/75">{previewImage.alt}</p>
+          {activeLightboxImage.alt && (
+            <p className="max-w-2xl text-center text-xs text-white/80">{activeLightboxImage.alt}</p>
           )}
         </div>
       )}

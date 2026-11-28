@@ -51,6 +51,7 @@ export const editorInsertRegistry: EditorInsertGroup[] = [
       {
         title: '正文',
         description: '插入一个空白段落',
+        keywords: ['p', 'paragraph', 'text'],
         icon: FileText,
         action: 'insertContent',
         content: { type: 'paragraph' },
@@ -58,6 +59,7 @@ export const editorInsertRegistry: EditorInsertGroup[] = [
       {
         title: '一级标题',
         description: '大章节标题',
+        keywords: ['h1', 'heading1', 'title'],
         icon: Heading1,
         action: 'insertContent',
         content: {
@@ -69,6 +71,7 @@ export const editorInsertRegistry: EditorInsertGroup[] = [
       {
         title: '二级标题',
         description: '段落标题',
+        keywords: ['h2', 'heading2', 'subtitle'],
         icon: Heading2,
         action: 'insertContent',
         content: {
@@ -80,6 +83,7 @@ export const editorInsertRegistry: EditorInsertGroup[] = [
       {
         title: '三级标题',
         description: '小节标题',
+        keywords: ['h3', 'heading3', 'section'],
         icon: Heading3,
         action: 'insertContent',
         content: {
@@ -91,6 +95,7 @@ export const editorInsertRegistry: EditorInsertGroup[] = [
       {
         title: '无序列表',
         description: '项目符号列表',
+        keywords: ['ul', 'list', 'bullet'],
         icon: List,
         action: 'insertContent',
         content: {
@@ -101,6 +106,7 @@ export const editorInsertRegistry: EditorInsertGroup[] = [
       {
         title: '有序列表',
         description: '编号列表',
+        keywords: ['ol', 'ordered', 'number', 'list'],
         icon: ListOrdered,
         action: 'insertContent',
         content: {
@@ -111,6 +117,7 @@ export const editorInsertRegistry: EditorInsertGroup[] = [
       {
         title: '任务',
         description: '待办事项',
+        keywords: ['todo', 'task', 'checkbox', 'check'],
         icon: CheckSquare,
         action: 'insertContent',
         content: {
@@ -127,6 +134,7 @@ export const editorInsertRegistry: EditorInsertGroup[] = [
       {
         title: '引用',
         description: '正文引用块',
+        keywords: ['quote', 'blockquote', 'cite'],
         icon: Quote,
         action: 'insertContent',
         content: {
@@ -184,18 +192,21 @@ export const editorInsertRegistry: EditorInsertGroup[] = [
       {
         title: '图片',
         description: '上传并插入单张图片',
+        keywords: ['img', 'image', 'photo', 'pic', 'upload'],
         icon: ImageIcon,
         action: 'uploadImage',
       },
       {
         title: '媒体库图片',
         description: '从已上传媒体库选择图片',
+        keywords: ['media', 'library', 'img', 'gallery'],
         icon: FolderOpen,
         action: 'pickMediaImage',
       },
       {
         title: '图集',
         description: '插入可编辑图片网格',
+        keywords: ['gallery', 'images', 'grid'],
         icon: Rows3,
         action: 'insertContent',
         content: { type: 'articleGallery', attrs: { openEditor: true, images: [] } },
@@ -203,6 +214,7 @@ export const editorInsertRegistry: EditorInsertGroup[] = [
       {
         title: '轮播',
         description: '插入可编辑图片轮播',
+        keywords: ['slider', 'carousel', 'slides'],
         icon: Columns3,
         action: 'insertContent',
         content: { type: 'articleSlider', attrs: { openEditor: true, images: [] } },
@@ -210,6 +222,7 @@ export const editorInsertRegistry: EditorInsertGroup[] = [
       {
         title: 'YouTube',
         description: '插入视频嵌入块',
+        keywords: ['youtube', 'video', 'bilibili', 'embed'],
         icon: Play,
         action: 'insertContent',
         content: {
@@ -225,6 +238,7 @@ export const editorInsertRegistry: EditorInsertGroup[] = [
       {
         title: '音频',
         description: '插入音频播放器',
+        keywords: ['audio', 'music', 'mp3', 'podcast'],
         icon: Music2,
         action: 'insertContent',
         content: {
@@ -245,6 +259,7 @@ export const editorInsertRegistry: EditorInsertGroup[] = [
       {
         title: '提示块',
         description: 'Callout / Note / Warning',
+        keywords: ['callout', 'note', 'tip', 'warning', 'alert'],
         icon: Info,
         action: 'insertContent',
         content: {
@@ -255,6 +270,7 @@ export const editorInsertRegistry: EditorInsertGroup[] = [
       {
         title: '按钮',
         description: '插入正文操作按钮',
+        keywords: ['button', 'btn', 'cta', 'link'],
         icon: LinkIcon,
         action: 'insertContent',
         content: {
@@ -265,6 +281,7 @@ export const editorInsertRegistry: EditorInsertGroup[] = [
       {
         title: '标签页',
         description: '多组内容切换',
+        keywords: ['tabs', 'tab', 'panel'],
         icon: PanelTop,
         action: 'insertContent',
         content: {
@@ -281,6 +298,7 @@ export const editorInsertRegistry: EditorInsertGroup[] = [
       {
         title: '折叠面板',
         description: '可展开的问答或说明',
+        keywords: ['accordion', 'collapse', 'faq', 'details'],
         icon: FileText,
         action: 'insertContent',
         content: {
@@ -294,6 +312,7 @@ export const editorInsertRegistry: EditorInsertGroup[] = [
       {
         title: '展示块',
         description: '媒体、摘要和操作入口',
+        keywords: ['showcase', 'hero', 'banner', 'feature'],
         icon: Layers3,
         action: 'insertContent',
         content: {
@@ -320,12 +339,14 @@ export const editorInsertRegistry: EditorInsertGroup[] = [
       {
         title: '表格',
         description: '3 x 3 表格',
+        keywords: ['table', 'grid', 'sheet'],
         icon: Table,
         action: 'insertTable',
       },
       {
         title: '流程图',
         description: '简易流程节点',
+        keywords: ['flow', 'flowchart', 'process'],
         icon: CheckSquare,
         action: 'insertContent',
         content: {
@@ -343,6 +364,7 @@ export const editorInsertRegistry: EditorInsertGroup[] = [
       {
         title: '卡片',
         description: '三列摘要卡片',
+        keywords: ['cards', 'card', 'columns'],
         icon: Columns3,
         action: 'insertContent',
         content: {
@@ -356,6 +378,7 @@ export const editorInsertRegistry: EditorInsertGroup[] = [
       {
         title: '关系图',
         description: '节点关系展示',
+        keywords: ['diagram', 'graph', 'nodes'],
         icon: Network,
         action: 'insertContent',
         content: {
@@ -366,6 +389,7 @@ export const editorInsertRegistry: EditorInsertGroup[] = [
       {
         title: '时间线',
         description: '阶段式说明',
+        keywords: ['timeline', 'history', 'steps'],
         icon: Rows3,
         action: 'insertContent',
         content: {

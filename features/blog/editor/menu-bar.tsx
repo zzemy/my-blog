@@ -26,12 +26,14 @@ import {
   List,
   ListOrdered,
   Loader2,
+  Palette,
   Plus,
   Quote,
   Redo,
   RemoveFormatting,
   Rows3,
   Search,
+  Sigma,
   Sparkles,
   Strikethrough,
   Table,
@@ -1042,6 +1044,76 @@ export function SelectionBubbleMenu({ editor }: MenuBarProps) {
       ) : null}
       <button
         type="button"
+        onClick={() => {
+          const { from, to } = editor.state.selection
+          const selected = editor.state.doc.textBetween(from, to, ' ').trim()
+          editor
+            .chain()
+            .focus()
+            .insertContentAt(
+              { from, to },
+              {
+                type: 'inlineMath',
+                attrs: { latex: selected || 'x^2' },
+              },
+            )
+            .run()
+        }}
+        aria-label="转为行内公式"
+        title="转为 LaTeX 行内公式"
+      >
+        <Sigma className="h-4 w-4" />
+      </button>
+      <Popover>
+        <PopoverTrigger asChild>
+          <button
+            type="button"
+            aria-label="文字颜色"
+            title="设置文字颜色"
+          >
+            <Palette className="h-4 w-4" />
+          </button>
+        </PopoverTrigger>
+        <PopoverContent
+          align="center"
+          sideOffset={8}
+          className="w-auto p-2"
+          onMouseDown={(event) => event.preventDefault()}
+        >
+          <div className="flex items-center gap-1.5">
+            {[
+              { color: '', label: '默认' },
+              { color: '#ef4444', label: '红' },
+              { color: '#f97316', label: '橙' },
+              { color: '#eab308', label: '黄' },
+              { color: '#10b981', label: '绿' },
+              { color: '#3b82f6', label: '蓝' },
+              { color: '#8b5cf6', label: '紫' },
+              { color: '#6b7280', label: '灰' },
+            ].map((swatch) => (
+              <button
+                key={swatch.label}
+                type="button"
+                title={swatch.label}
+                aria-label={`文字颜色：${swatch.label}`}
+                onClick={() => {
+                  if (!swatch.color) {
+                    editor.chain().focus().unsetColor().run()
+                  } else {
+                    editor.chain().focus().setColor(swatch.color).run()
+                  }
+                }}
+                className="flex h-5 w-5 items-center justify-center rounded-full border border-border text-[10px] transition-transform hover:scale-110"
+                style={swatch.color ? { backgroundColor: swatch.color } : undefined}
+              >
+                {!swatch.color ? 'A' : null}
+              </button>
+            ))}
+          </div>
+        </PopoverContent>
+      </Popover>
+      <button
+        type="button"
         onClick={() => editor.chain().focus().unsetAllMarks().run()}
         aria-label="清除格式"
         title="清除行内格式"
@@ -1049,18 +1121,48 @@ export function SelectionBubbleMenu({ editor }: MenuBarProps) {
         <RemoveFormatting className="h-4 w-4" />
       </button>
       <span className="doc-selection-divider" aria-hidden="true" />
-      <button
-        type="button"
-        onClick={() => {
-          window.dispatchEvent(new CustomEvent('admin-editor-open-ai-rewrite'))
-        }}
-        aria-label="AI 润色选中内容"
-        title="使用 AI 润色/改写选中文本"
-        className="inline-flex items-center gap-1 px-2 text-xs font-medium text-primary"
-      >
-        <Sparkles className="h-3.5 w-3.5" />
-        <span>AI 润色</span>
-      </button>
+      <Popover>
+        <PopoverTrigger asChild>
+          <button
+            type="button"
+            aria-label="AI 快捷写作"
+            title="使用 AI 润色 / 精简 / 扩写选中文本"
+            className="inline-flex items-center gap-1 px-2 text-xs font-medium text-primary"
+          >
+            <Sparkles className="h-3.5 w-3.5" />
+            <span>AI</span>
+          </button>
+        </PopoverTrigger>
+        <PopoverContent
+          align="end"
+          sideOffset={8}
+          className="w-36 p-1"
+          onMouseDown={(event) => event.preventDefault()}
+        >
+          {[
+            { action: 'polish', label: 'AI 润色表达' },
+            { action: 'concise', label: 'AI 精简压缩' },
+            { action: 'expand', label: 'AI 扩写细节' },
+            { action: 'translate-en', label: 'AI 译为英文' },
+          ].map((item) => (
+            <button
+              key={item.action}
+              type="button"
+              onClick={() => {
+                window.dispatchEvent(
+                  new CustomEvent('admin-editor-open-ai-rewrite', {
+                    detail: { action: item.action },
+                  }),
+                )
+              }}
+              className="flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-left text-xs text-foreground transition-colors hover:bg-muted"
+            >
+              <Sparkles className="h-3 w-3 text-primary" />
+              <span>{item.label}</span>
+            </button>
+          ))}
+        </PopoverContent>
+      </Popover>
       {linkInputOpen ? (
         <form
           className="doc-selection-link-form"

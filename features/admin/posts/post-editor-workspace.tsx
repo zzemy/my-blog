@@ -232,9 +232,17 @@ export function PostEditorWorkspace({
     return () => window.removeEventListener('admin-rich-block-edit-open', handleRichBlockOpen)
   }, [])
 
-  // Listen for inline selection bubble "AI 润色" trigger
+  // Listen for inline selection bubble "AI 润色 / 精简 / 扩写 / 翻译" trigger
+  const [aiRewriteAction, setAiRewriteAction] = useState<
+    'polish' | 'concise' | 'expand' | 'translate-en' | undefined
+  >(undefined)
+
   useEffect(() => {
-    const handleOpenAiRewrite = () => {
+    const handleOpenAiRewrite = (event: Event) => {
+      const detail = (
+        event as CustomEvent<{ action?: 'polish' | 'concise' | 'expand' | 'translate-en' }>
+      ).detail
+      setAiRewriteAction(detail?.action)
       setAiInitialTab('write')
       setAiSheetOpen(true)
     }
@@ -783,6 +791,14 @@ export function PostEditorWorkspace({
             className={styles.titleInput}
             rows={1}
           />
+          <div className="mb-1 flex items-center justify-end gap-3 text-[11px] font-mono text-muted-foreground/65">
+            <span className={formData.title.length > 200 ? 'text-destructive' : ''}>
+              标题 {formData.title.length}/200
+            </span>
+            <span className={formData.description.length > 500 ? 'text-destructive' : ''}>
+              摘要 {formData.description.length}/500
+            </span>
+          </div>
           <textarea
             ref={summaryRef}
             value={formData.description}
@@ -1054,6 +1070,7 @@ export function PostEditorWorkspace({
         open={aiSheetOpen}
         onOpenChange={setAiSheetOpen}
         initialTab={aiInitialTab}
+        initialRewriteAction={aiRewriteAction}
         isDirty={isDirty}
         postId={postId}
         formData={formData}

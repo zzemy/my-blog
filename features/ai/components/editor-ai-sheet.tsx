@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import type { Content } from '@tiptap/react'
 import { toast } from 'sonner'
@@ -60,6 +60,7 @@ interface EditorAiSheetProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   initialTab?: 'summary' | 'metadata' | 'translate' | 'write'
+  initialRewriteAction?: RewriteAction
   isDirty?: boolean
   postId?: string | null
   formData: PostFormData
@@ -128,6 +129,7 @@ export function EditorAiSheet({
   open,
   onOpenChange,
   initialTab = 'summary',
+  initialRewriteAction,
   isDirty = false,
   postId,
   formData,
@@ -142,6 +144,9 @@ export function EditorAiSheet({
   const [providers, setProviders] = useState<AiProviderPublic[]>([])
   const [overrideProviderId, setOverrideProviderId] = useState<string>('')
   const [overrideModel, setOverrideModel] = useState<string>('')
+  const [pendingDeleteTranslation, setPendingDeleteTranslation] = useState<PostTranslationPublic | null>(null)
+  const [dirtyTranslateConfirmOpen, setDirtyTranslateConfirmOpen] = useState(false)
+  const abortControllerRef = useRef<AbortController | null>(null)
 
   // Summary state
   const [summaryLoading, setSummaryLoading] = useState(false)
@@ -209,6 +214,9 @@ export function EditorAiSheet({
     void loadProviders()
     void loadTranslations()
     const currentSelected = getSelectedText().trim()
+    if (initialRewriteAction) {
+      setRewriteAction(initialRewriteAction)
+    }
     if (currentSelected) {
       setSelectedSnippet(currentSelected)
       setActiveTab('write')
@@ -218,7 +226,7 @@ export function EditorAiSheet({
     if (!outlineTopic && formData.title.trim()) {
       setOutlineTopic(formData.title.trim())
     }
-  }, [open, initialTab, loadProviders, loadTranslations, getSelectedText, outlineTopic, formData.title])
+  }, [open, initialTab, initialRewriteAction, loadProviders, loadTranslations, getSelectedText, outlineTopic, formData.title])
 
   const selectedProvider = providers.find((p) => p.id === overrideProviderId)
 
@@ -310,7 +318,7 @@ export function EditorAiSheet({
     toast.success('已应用全部元数据到文章表单')
   }
 
-  const handleTranslatePost = async () => {
+  const executeTranslatePost = async () => {
     if (!postId) {
       toast.error('请先保存草稿后再生成多语言翻译')
       return
@@ -321,11 +329,16 @@ export function EditorAiSheet({
       return
     }
 
+    abortControllerRef.current?.abort()
+    const controller = new AbortController()
+    abortControllerRef.current = controller
+
     setTranslating(true)
     try {
       const res = await fetch('/api/admin/ai/translations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        signal: controller.signal,
         body: JSON.stringify({
           postId,
           locale,
@@ -346,10 +359,26 @@ export function EditorAiSheet({
       )
       await loadTranslations()
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : '翻译失败')
+      if ((error as Error)?.name === 'AbortError') {
+        toast.info('已取消本次翻译请求')
+      } else {
+        toast.error(error instanceof Error ? error.message : '翻译失败')
+      }
     } finally {
       setTranslating(false)
     }
+  }
+
+  const handleTranslatePost = async () => {
+    if (!postId) {
+      toast.error('请先保存草稿后再生成多语言翻译')
+      return
+    }
+    if (isDirty) {
+      setDirtyTranslateConfirmOpen(true)
+      return
+    }
+    await executeTranslatePost()
   }
 
   const handleToggleTranslationPublish = async (item: PostTranslationPublic) => {
@@ -370,10 +399,16 @@ export function EditorAiSheet({
     }
   }
 
-  const handleDeleteTranslation = async (item: PostTranslationPublic) => {
-    if (!window.confirm(`确定删除 ${getLocaleLabel(item.locale)} 译文吗？`)) return
+  const handleDeleteTranslation = (item: PostTranslationPublic) => {
+    setPendingDeleteTranslation(item)
+  }
+
+  const confirmDeleteTranslation = async () => {
+    if (!pendingDeleteTranslation) return
+    const target = pendingDeleteTranslation
+    setPendingDeleteTranslation(null)
     try {
-      const res = await fetch(`/api/admin/ai/translations/${item.id}`, { method: 'DELETE' })
+      const res = await fetch(`/api/admin/ai/translations/${target.id}`, { method: 'DELETE' })
       if (!res.ok) throw new Error('删除失败')
       toast.success('已删除译文')
       await loadTranslations()
@@ -1391,6 +1426,57 @@ export function EditorAiSheet({
             <Button type="button" onClick={() => void handleSaveEditedTranslation()} disabled={savingTranslation}>
               {savingTranslation && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               保存译文
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* 删除译文确认弹窗 */}
+      <Dialog
+        open={Boolean(pendingDeleteTranslation)}
+        onOpenChange={(openState) => {
+          if (!openState) setPendingDeleteTranslation(null)
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>确认删除译文</DialogTitle>
+            <DialogDescription>
+              确定要删除「{pendingDeleteTranslation ? getLocaleLabel(pendingDeleteTranslation.locale) : ''}」语言译文吗？此操作不可撤销。
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setPendingDeleteTranslation(null)}>
+              取消
+            </Button>
+            <Button type="button" variant="destructive" onClick={() => void confirmDeleteTranslation()}>
+              确认删除
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* 未保存改动时触发翻译提醒 */}
+      <Dialog open={dirtyTranslateConfirmOpen} onOpenChange={setDirtyTranslateConfirmOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>当前文章有未保存的改动</DialogTitle>
+            <DialogDescription>
+              多语言翻译基于服务端已保存的文章正文生成。建议先关闭面板并按 Ctrl+S 保存，或直接基于上次已保存版本继续翻译。
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setDirtyTranslateConfirmOpen(false)}>
+              返回先保存
+            </Button>
+            <Button
+              type="button"
+              onClick={() => {
+                setDirtyTranslateConfirmOpen(false)
+                void executeTranslatePost()
+              }}
+            >
+              仍基于已保存版本翻译
             </Button>
           </DialogFooter>
         </DialogContent>

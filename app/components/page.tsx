@@ -1,4 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
+import 'katex/dist/katex.min.css'
+import { notFound } from 'next/navigation'
 import { renderToString } from 'katex'
 import {
   ArrowRight,
@@ -15,7 +17,6 @@ import {
   Sigma,
 } from 'lucide-react'
 import { PostLayout } from '@/features/blog/components/client/post-layout'
-import { Comments } from '@/features/blog/components/client/comments'
 import { FadeIn } from '@/shared/visuals/fade-in'
 import { ReferenceSlider } from './reference-slider'
 import { ReferenceAlerts, ReferenceCodeExamples, ReferenceDiagram, ReferenceFlow } from './reference-showcase'
@@ -152,6 +153,10 @@ export const metadata = {
 }
 
 export default function ComponentsPage() {
+  if (process.env.NODE_ENV === 'production') {
+    notFound()
+  }
+
   return (
     <PostLayout toc={toc}>
       <FadeIn>
@@ -281,7 +286,7 @@ export default function ComponentsPage() {
             </a>
           </p>
           <p>
-            <a href="/README.md">这是一条指向仓库文件的相对链接</a>
+            <a href="https://github.com/zzemy/my-blog/blob/main/README.md" target="_blank" rel="noopener noreferrer">这是一条指向仓库 README 的外部链接</a>
           </p>
           <p>
             普通 URL 也应该能被识别为可点击链接，例如{' '}
@@ -659,10 +664,6 @@ export default function ComponentsPage() {
               </li>
             </ol>
           </section>
-          </div>
-
-          <div className="mt-12 border-t pt-10">
-            <Comments />
           </div>
         </article>
       </FadeIn>

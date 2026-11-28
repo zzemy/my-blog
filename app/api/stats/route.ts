@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
 
   try {
     if (!upstashRedis) {
-      return NextResponse.json({ count: 0, skipped: true })
+      return NextResponse.json({ count: 0, views: 0, likes: 0, skipped: true })
     }
 
     const count =
@@ -74,7 +74,14 @@ export async function POST(req: NextRequest) {
         ? await upstashRedis.incr(`views:${slug}`)
         : await upstashRedis.incr(`likes:${slug}`)
 
-    return NextResponse.json({ count })
+    const otherKey = type === 'view' ? `likes:${slug}` : `views:${slug}`
+    const otherVal = (await upstashRedis.get<number>(otherKey)) || 0
+
+    return NextResponse.json({
+      count,
+      views: type === 'view' ? count : otherVal,
+      likes: type === 'like' ? count : otherVal,
+    })
   } catch (error) {
     console.error('KV Error:', error)
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })

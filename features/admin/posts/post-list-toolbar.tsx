@@ -49,7 +49,7 @@ export function PostListToolbar({
         <div className="flex-1 relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-zinc-400" />
           <Input
-            placeholder="搜索文章标题..."
+            placeholder="搜索文章标题、Slug、摘要或标签..."
             value={searchQuery}
             onChange={(e) => onSearchQueryChange(e.target.value)}
             className="pl-10 bg-zinc-50 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700"

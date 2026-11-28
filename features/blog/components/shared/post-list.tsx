@@ -8,17 +8,24 @@ import { getPostRouteId } from "@/lib/post-public-id";
 interface PostListProps {
   posts: PostData[];
   readMoreText: string;
+  headingLevel?: 'h2' | 'h3';
 }
 
 function formatDate(value: string) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
   return date
-    .toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' })
+    .toLocaleDateString('zh-CN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      timeZone: 'Asia/Shanghai',
+    })
     .replaceAll('/', '.');
 }
 
-export function PostList({ posts, readMoreText }: PostListProps) {
+export function PostList({ posts, readMoreText, headingLevel = 'h3' }: PostListProps) {
+  const TitleTag = headingLevel;
   if (posts.length === 0) {
     return (
       <div className="py-16 text-center">
@@ -57,14 +64,14 @@ export function PostList({ posts, readMoreText }: PostListProps) {
               </div>
 
               <div className="min-w-0">
-                <h3 className="text-xl font-semibold leading-snug tracking-[0.01em] text-foreground/95 transition-colors duration-200 group-hover:text-foreground md:text-[1.45rem] md:leading-[1.45]">
+                <TitleTag className="text-xl font-semibold leading-snug tracking-[0.01em] text-foreground/95 transition-colors duration-200 group-hover:text-foreground md:text-[1.45rem] md:leading-[1.45]">
                   <Link
                     href={`/posts/${postRouteId}`}
                     className="inline no-underline focus-visible:outline-none focus-visible:underline"
                   >
                     {post.title}
                   </Link>
-                </h3>
+                </TitleTag>
 
                 {excerpt && (
                   <p className="mt-3 line-clamp-2 max-w-2xl text-sm leading-7 text-muted-foreground/85 md:text-[0.95rem]">

@@ -928,7 +928,7 @@
 
 .article-content .code-window-body {
   display: grid;
-  grid-template-columns: 2.85rem minmax(0, 1fr);
+  grid-template-columns: minmax(3.15rem, auto) minmax(0, 1fr);
   align-items: start;
   width: 100%;
   min-width: 0;
@@ -951,15 +951,14 @@
   display: flex;
   grid-column: 1;
   grid-row: 1;
-  width: 2.85rem;
-  min-width: 0;
+  min-width: 3.15rem;
   flex-direction: column;
   align-items: flex-end;
   border-right: 1px solid var(--article-code-divider, var(--article-code-border, var(--article-line)));
   background: var(--article-code-gutter);
   color: var(--article-code-gutter-text, color-mix(in oklch, var(--article-muted), var(--article-code-text) 10%));
   padding: 0 0.65rem 0 0.5rem;
-  font-family: "JetBrains Mono", "Menlo", "Consolas", monospace;
+  font-family: var(--font-mono);
   font-size: 0.78rem;
   line-height: var(--article-code-line-height);
   user-select: none;
@@ -968,6 +967,11 @@
 .article-content .code-window-gutter span {
   min-height: var(--article-code-line-height);
   background: transparent;
+}
+
+.article-content .code-window-gutter span.is-highlighted {
+  color: var(--article-accent);
+  font-weight: 700;
 }
 
 .article-content .code-window-scroll {
@@ -1000,7 +1004,7 @@
   overflow: visible;
   background: transparent !important;
   color: var(--article-code-text) !important;
-  font-family: "JetBrains Mono", "Menlo", "Consolas", monospace;
+  font-family: var(--font-mono);
   font-size: 0.92rem;
   line-height: var(--article-code-line-height);
 }
@@ -1083,6 +1087,40 @@ html[data-reader-focus="true"] footer {
   display: none !important;
 }
 
+/* Highlighted code lines */
+.article-content .code-window-pre .code-line-highlight-layer {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  padding: 0;
+}
+
+.article-content .code-window-pre .code-line-highlight-band {
+  height: var(--article-code-line-height);
+  width: 100%;
+  background: var(--article-code-highlight);
+  border-left: 2px solid var(--article-accent);
+}
+
+/* KaTeX long formula subtle horizontal scroll */
+.article-content .katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 0.35rem;
+  scrollbar-width: thin;
+  scrollbar-color: rgb(120 124 134 / 30%) transparent;
+}
+
+.article-content .katex-display::-webkit-scrollbar {
+  display: block !important;
+  height: 5px !important;
+}
+
+.article-content .katex-display::-webkit-scrollbar-thumb {
+  background-color: rgb(120 124 134 / 30%);
+  border-radius: 9999px;
+}
+
 /* Clean print stylesheet */
 @media print {
   header,
@@ -1108,7 +1146,11 @@ html[data-reader-focus="true"] footer {
   }
 
   .article-content .code-window.is-collapsed .code-window-body {
-    display: flex !important;
+    display: grid !important;
+  }
+
+  .article-content details > *:not(summary) {
+    display: block !important;
   }
 
   .article-content a[href^="http"]::after {

@@ -7,20 +7,9 @@ import { Github, Globe, Mail, MessageCircle, Terminal } from "lucide-react"
 import { ModeToggle } from "@/shared/layout/mode-toggle"
 import { CommandMenu } from "@/shared/layout/command-menu"
 import { MobileNav } from "@/shared/layout/mobile-nav"
-import { SiteUptimeBadge } from "@/shared/components/common/site-uptime"
+import { SITE_NAV_ITEMS } from "@/shared/layout/nav-config"
 import { useSiteSettings } from "@/shared/layout/site-settings-context"
 import { cn } from "@/lib/utils"
-
-const REPO_URL = 'https://github.com/zzemy/my-blog'
-
-const navItems: Array<{ href: string; label: string; external?: boolean }> = [
-  { href: '/', label: '首页' },
-  { href: '/posts', label: '文章' },
-  { href: '/tags', label: '标签' },
-  { href: '/friends', label: '友链' },
-  { href: '/guestbook', label: '留言' },
-  { href: REPO_URL, label: '关于', external: true },
-]
 
 function renderSocialIcon(platform: string) {
   const lower = platform.toLowerCase()
@@ -80,14 +69,10 @@ export function SiteHeader() {
               {settings.siteTitle}
             </span>
           </Link>
-          <span className="ml-4 hidden h-3.5 w-px bg-foreground/12 xl:block" />
-          <span className="ml-3.5">
-            <SiteUptimeBadge compact />
-          </span>
         </div>
 
         <nav aria-label="主导航" className="hidden flex-1 items-center justify-center gap-7 text-[14px] font-medium md:flex lg:gap-8">
-          {navItems.map((item) => {
+          {SITE_NAV_ITEMS.map((item) => {
             const active = !item.external && isActive(item.href)
             const linkClassName = cn(
               "relative py-5 transition-colors duration-200 after:absolute after:bottom-3.5 after:left-1/2 after:h-[1.5px] after:-translate-x-1/2 after:rounded-full after:transition-all after:duration-300",

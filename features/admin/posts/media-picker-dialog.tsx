@@ -39,33 +39,44 @@ export function MediaPickerDialog({
 }: MediaPickerDialogProps) {
   const [files, setFiles] = useState<MediaFileItem[]>([])
   const [loading, setLoading] = useState(false)
+  const [loadingMore, setLoadingMore] = useState(false)
+  const [hasMore, setHasMore] = useState(false)
+  const [nextOffset, setNextOffset] = useState(0)
   const [uploading, setUploading] = useState(false)
   const [query, setQuery] = useState('')
   const [error, setError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const fetchMedia = useCallback(async () => {
-    setLoading(true)
+  const fetchMedia = useCallback(async (offset = 0, append = false) => {
+    if (append) {
+      setLoadingMore(true)
+    } else {
+      setLoading(true)
+    }
     setError(null)
     try {
-      const res = await fetch('/api/admin/media')
+      const res = await fetch(`/api/admin/media?limit=48&offset=${offset}`)
       if (!res.ok) {
         throw new Error('加载媒体库失败')
       }
       const data = await res.json()
       const list = Array.isArray(data.files) ? (data.files as MediaFileItem[]) : []
-      setFiles(list.filter((item) => item && typeof item.url === 'string' && typeof item.name === 'string'))
+      const cleaned = list.filter((item) => item && typeof item.url === 'string' && typeof item.name === 'string')
+      setFiles((prev) => (append ? [...prev, ...cleaned] : cleaned))
+      setHasMore(Boolean(data.hasMore))
+      setNextOffset(Number(data.nextOffset) || offset + cleaned.length)
     } catch (err) {
       console.error('Failed to load media library:', err)
       setError(err instanceof Error ? err.message : '加载媒体库失败')
     } finally {
       setLoading(false)
+      setLoadingMore(false)
     }
   }, [])
 
   useEffect(() => {
     if (!open) return
-    void fetchMedia()
+    void fetchMedia(0, false)
   }, [fetchMedia, open])
 
   const handleUpload = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -125,7 +136,7 @@ export function MediaPickerDialog({
             type="button"
             variant="outline"
             size="sm"
-            onClick={() => void fetchMedia()}
+            onClick={() => void fetchMedia(0, false)}
             disabled={loading}
           >
             <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
@@ -151,9 +162,9 @@ export function MediaPickerDialog({
           ) : error ? (
             <div className="flex h-48 flex-col items-center justify-center gap-3 text-sm text-destructive">
               <p>{error}</p>
-              <Button type="button" variant="outline" size="sm" onClick={() => void fetchMedia()}>
-                重试
-              </Button>
+                <Button type="button" variant="outline" size="sm" onClick={() => void fetchMedia(0, false)}>
+                  重试
+                </Button>
             </div>
           ) : visibleFiles.length === 0 ? (
             <div className="flex h-48 flex-col items-center justify-center gap-2 text-sm text-muted-foreground">
@@ -187,6 +198,20 @@ export function MediaPickerDialog({
                   </span>
                 </button>
               ))}
+            </div>
+          )}
+          {hasMore && !loading && (
+            <div className="mt-3 flex justify-center">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={loadingMore}
+                onClick={() => void fetchMedia(nextOffset, true)}
+              >
+                {loadingMore ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : null}
+                加载更多图片
+              </Button>
             </div>
           )}
         </div>

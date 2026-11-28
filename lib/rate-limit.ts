@@ -38,7 +38,7 @@ export type RateLimitResult = {
 }
 
 /**
- * 基于 Upstash Redis 的固定窗口限流器。
+ * 基于 Upstash Redis 的加权滑动窗口限流器（消除固定窗口边界突发）。
  * 未配置 Redis 或 Redis 瞬时异常时降级放行，不阻塞核心功能。
  */
 export async function checkRateLimit({
@@ -57,21 +57,44 @@ export async function checkRateLimit({
   }
 
   const safeId = identifier.replace(/[^a-zA-Z0-9._:-]/g, '_').slice(0, 120) || 'anonymous'
-  const bucket = Math.floor(Date.now() / (windowSeconds * 1000))
-  const key = `rl:${namespace}:${safeId}:${bucket}`
+  const windowMs = windowSeconds * 1000
+  const now = Date.now()
+  const currentBucket = Math.floor(now / windowMs)
+  const previousBucket = currentBucket - 1
+  const currentKey = `rl:${namespace}:${safeId}:${currentBucket}`
+  const previousKey = `rl:${namespace}:${safeId}:${previousBucket}`
 
   try {
-    const count = await upstashRedis.incr(key)
-    if (count === 1) {
-      await upstashRedis.expire(key, windowSeconds + 5)
+    const [prevCountRaw, currCountRaw] = await upstashRedis.mget<[number | null, number | null]>(
+      previousKey,
+      currentKey,
+    )
+    const prevCount = Number(prevCountRaw ?? 0)
+    const currCount = Number(currCountRaw ?? 0)
+    const elapsedMs = now % windowMs
+    const previousWeight = (windowMs - elapsedMs) / windowMs
+    const estimatedBefore = prevCount * previousWeight + currCount
+
+    if (estimatedBefore >= limit) {
+      const retryAfterSeconds = Math.max(1, Math.ceil((windowMs - elapsedMs) / 1000))
+      return {
+        allowed: false,
+        remaining: 0,
+        retryAfterSeconds,
+      }
     }
 
-    const remaining = Math.max(0, limit - count)
-    const elapsedSeconds = Math.floor(Date.now() / 1000) % windowSeconds
-    const retryAfterSeconds = Math.max(1, windowSeconds - elapsedSeconds)
+    const updatedCurr = await upstashRedis.incr(currentKey)
+    if (updatedCurr === 1) {
+      await upstashRedis.expire(currentKey, windowSeconds * 2 + 10)
+    }
+
+    const estimatedAfter = prevCount * previousWeight + updatedCurr
+    const remaining = Math.max(0, Math.floor(limit - estimatedAfter))
+    const retryAfterSeconds = Math.max(1, Math.ceil((windowMs - elapsedMs) / 1000))
 
     return {
-      allowed: count <= limit,
+      allowed: estimatedAfter <= limit,
       remaining,
       retryAfterSeconds,
     }

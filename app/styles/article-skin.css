@@ -30,7 +30,7 @@
 .article-content.prose h4,
 .article-content.prose h5,
 .article-content.prose h6 {
-  scroll-margin-top: 96px;
+  scroll-margin-top: 88px;
 }
 
 .article-content.prose h1::before,
@@ -63,8 +63,9 @@
   transition: opacity 180ms var(--article-motion);
 }
 
-.article-content.prose :is(p, li, dd, dt, td, th, blockquote, details, figure, figcaption):hover > .paragraph-anchor {
-  opacity: 0.4;
+.article-content.prose :is(h1, h2, h3, h4, h5, h6, p, li, dd, dt, td, th, blockquote, details, figure, figcaption):hover > .paragraph-anchor,
+.article-content.prose .paragraph-anchor:focus-visible {
+  opacity: 0.72;
 }
 
 .article-content.prose hr,

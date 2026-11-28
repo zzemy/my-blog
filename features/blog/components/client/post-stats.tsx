@@ -36,7 +36,17 @@ export function PostStats({ slug }: PostStatsProps) {
           } catch {
             // ignore
           }
-          await fetch(`/api/stats?slug=${encodedSlug}&type=view`, { method: 'POST' });
+          const postRes = await fetch(`/api/stats?slug=${encodedSlug}&type=view`, {
+            method: 'POST',
+          });
+          if (postRes.ok) {
+            const data = await postRes.json();
+            if (!cancelled && typeof data.views === 'number') {
+              setViews(data.views);
+              setLikes(Number(data.likes) || 0);
+              return;
+            }
+          }
         }
 
         const res = await fetch(`/api/stats?slug=${encodedSlug}`, { cache: 'no-store' });

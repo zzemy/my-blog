@@ -6,6 +6,14 @@ import { AlertCircle, PlusCircle } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { BatchActionsBar } from '@/features/admin/posts/batch-actions-bar'
 import { PostList } from '@/features/admin/posts/post-list'
 import { PostListToolbar } from '@/features/admin/posts/post-list-toolbar'
@@ -40,6 +48,14 @@ export default function AdminPostsPage() {
 
   const [selectedPosts, setSelectedPosts] = useState<string[]>([])
   const [batchActionLoading, setBatchActionLoading] = useState(false)
+  const [featuredOnly, setFeaturedOnly] = useState(false)
+  const [selectedTagFilter, setSelectedTagFilter] = useState<string>('all')
+  const [confirmDialog, setConfirmDialog] = useState<{
+    title: string
+    description: string
+    destructive?: boolean
+    onConfirm: () => Promise<void>
+  } | null>(null)
 
   const fetchPosts = useCallback(async () => {
     setLoading(true)
@@ -75,27 +91,37 @@ export default function AdminPostsPage() {
     fetchPosts()
   }, [fetchPosts])
 
-  const filteredPosts = filterAndSortPosts(posts, searchQuery, filterStatus, sortBy)
+  const allTags = Array.from(
+    new Set(posts.flatMap((p) => (p.tags ?? []).map((t) => t.trim()).filter(Boolean))),
+  ).sort((a, b) => a.localeCompare(b, 'zh-CN'))
 
-  const deletePost = async (id: string, title: string) => {
-    if (!confirm(`确定要删除文章"${title}"吗？这个操作不能撤销。`)) return
+  const filteredPosts = filterAndSortPosts(posts, searchQuery, filterStatus, sortBy).filter(
+    (post) => {
+      if (featuredOnly && !post.featured) return false
+      if (selectedTagFilter !== 'all' && !(post.tags ?? []).includes(selectedTagFilter)) return false
+      return true
+    },
+  )
 
-    setDeleting(id)
-    try {
-      const res = await fetch(`/api/admin/posts/${id}`, {
-        method: 'DELETE',
-      })
-
-      if (!res.ok) {
-        throw new Error('删除失败')
-      }
-
-      setPosts(posts.filter((p) => p.id !== id))
-    } catch (err) {
-      alert(err instanceof Error ? err.message : '删除失败')
-    } finally {
-      setDeleting(null)
-    }
+  const deletePost = (id: string, title: string) => {
+    setConfirmDialog({
+      title: '确认删除文章',
+      description: `确定要永久删除文章「${title}」吗？此操作不可撤销。`,
+      destructive: true,
+      onConfirm: async () => {
+        setDeleting(id)
+        try {
+          const res = await fetch(`/api/admin/posts/${id}`, { method: 'DELETE' })
+          if (!res.ok) throw new Error('删除失败')
+          setPosts((current) => current.filter((p) => p.id !== id))
+          toast.success(`已删除「${title}」`)
+        } catch (err) {
+          toast.error(err instanceof Error ? err.message : '删除失败')
+        } finally {
+          setDeleting(null)
+        }
+      },
+    })
   }
 
   const togglePublish = async (id: string, currentStatus: boolean) => {
@@ -116,13 +142,16 @@ export default function AdminPostsPage() {
       }
 
       const nowISO = new Date().toISOString()
-      setPosts(posts.map((p) =>
-        p.id === id
-          ? { ...p, published: !currentStatus, published_at: !currentStatus ? nowISO : null }
-          : p
-      ))
+      setPosts((current) =>
+        current.map((p) =>
+          p.id === id
+            ? { ...p, published: !currentStatus, published_at: !currentStatus ? nowISO : null }
+            : p,
+        ),
+      )
+      toast.success(!currentStatus ? '文章已发布' : '文章已转为草稿')
     } catch (err) {
-      alert(err instanceof Error ? err.message : '更新失败')
+      toast.error(err instanceof Error ? err.message : '更新失败')
     } finally {
       setPublishing(null)
     }
@@ -225,83 +254,70 @@ export default function AdminPostsPage() {
     }
   }
 
-  const handleBatchDelete = async () => {
-    if (!confirm(`确定要删除选中的 ${selectedPosts.length} 篇文章吗？这个操作不可撤销。`)) return
-
-    setBatchActionLoading(true)
-    try {
-      const results = await Promise.all(
-        selectedPosts.map(async (id) => {
-          const res = await fetch(`/api/admin/posts/${id}`, {
-            method: 'DELETE',
+  const handleBatchDelete = () => {
+    if (selectedPosts.length === 0) return
+    const targetIds = [...selectedPosts]
+    setConfirmDialog({
+      title: `批量删除 ${targetIds.length} 篇文章`,
+      description: `确定要永久删除选中的 ${targetIds.length} 篇文章吗？此操作不可撤销。`,
+      destructive: true,
+      onConfirm: async () => {
+        setBatchActionLoading(true)
+        try {
+          const res = await fetch('/api/admin/posts/batch', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'delete', ids: targetIds }),
           })
-          return { id, ok: res.ok }
-        }),
-      )
-
-      const succeededIds = new Set(results.filter((item) => item.ok).map((item) => item.id))
-      const failedIds = results.filter((item) => !item.ok).map((item) => item.id)
-
-      if (succeededIds.size > 0) {
-        setPosts((current) => current.filter((p) => !succeededIds.has(p.id)))
-      }
-      setSelectedPosts(failedIds)
-
-      if (failedIds.length > 0) {
-        toast.error(`成功删除 ${succeededIds.size} 篇，${failedIds.length} 篇删除失败`)
-      } else {
-        toast.success(`已删除 ${succeededIds.size} 篇文章`)
-      }
-    } catch {
-      toast.error('批量删除失败')
-    } finally {
-      setBatchActionLoading(false)
-    }
+          const data = (await res.json().catch(() => ({}))) as { affectedIds?: string[]; error?: string }
+          if (!res.ok) throw new Error(data.error || '批量删除失败')
+          const deletedSet = new Set(data.affectedIds ?? targetIds)
+          setPosts((current) => current.filter((p) => !deletedSet.has(p.id)))
+          setSelectedPosts([])
+          toast.success(`已批量删除 ${deletedSet.size} 篇文章`)
+        } catch (err) {
+          toast.error(err instanceof Error ? err.message : '批量删除失败')
+        } finally {
+          setBatchActionLoading(false)
+        }
+      },
+    })
   }
 
-  const handleBatchPublish = async (publish: boolean) => {
-    if (!confirm(`确定要${publish ? '发布' : '转为草稿'}选中的 ${selectedPosts.length} 篇文章吗？`)) return
-
-    setBatchActionLoading(true)
-    try {
-      const results = await Promise.all(
-        selectedPosts.map(async (id) => {
-          const res = await fetch(`/api/admin/posts/${id}`, {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ published: publish }),
+  const handleBatchPublish = (publish: boolean) => {
+    if (selectedPosts.length === 0) return
+    const targetIds = [...selectedPosts]
+    setConfirmDialog({
+      title: publish ? `批量发布 ${targetIds.length} 篇文章` : `批量转为草稿 (${targetIds.length} 篇)`,
+      description: `确定要将选中的 ${targetIds.length} 篇文章${publish ? '公开发布' : '撤回为草稿'}吗？`,
+      onConfirm: async () => {
+        setBatchActionLoading(true)
+        try {
+          const res = await fetch('/api/admin/posts/batch', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: publish ? 'publish' : 'unpublish', ids: targetIds }),
           })
-          return { id, ok: res.ok }
-        }),
-      )
-
-      const succeededIds = new Set(results.filter((item) => item.ok).map((item) => item.id))
-      const failedIds = results.filter((item) => !item.ok).map((item) => item.id)
-      const nowISO = new Date().toISOString()
-
-      if (succeededIds.size > 0) {
-        setPosts((current) =>
-          current.map((p) =>
-            succeededIds.has(p.id)
-              ? { ...p, published: publish, published_at: publish ? (p.published_at || nowISO) : p.published_at }
-              : p,
-          ),
-        )
-      }
-      setSelectedPosts(failedIds)
-
-      if (failedIds.length > 0) {
-        toast.error(`成功更新 ${succeededIds.size} 篇，${failedIds.length} 篇失败`)
-      } else {
-        toast.success(`已将 ${succeededIds.size} 篇文章${publish ? '发布' : '转为草稿'}`)
-      }
-    } catch {
-      toast.error('批量操作失败')
-    } finally {
-      setBatchActionLoading(false)
-    }
+          const data = (await res.json().catch(() => ({}))) as { affectedIds?: string[]; error?: string }
+          if (!res.ok) throw new Error(data.error || '批量操作失败')
+          const updatedSet = new Set(data.affectedIds ?? targetIds)
+          const nowISO = new Date().toISOString()
+          setPosts((current) =>
+            current.map((p) =>
+              updatedSet.has(p.id)
+                ? { ...p, published: publish, published_at: publish ? (p.published_at || nowISO) : p.published_at }
+                : p,
+            ),
+          )
+          setSelectedPosts([])
+          toast.success(`已将 ${updatedSet.size} 篇文章${publish ? '发布' : '转为草稿'}`)
+        } catch (err) {
+          toast.error(err instanceof Error ? err.message : '批量操作失败')
+        } finally {
+          setBatchActionLoading(false)
+        }
+      },
+    })
   }
 
   if (loading) {
@@ -349,6 +365,35 @@ export default function AdminPostsPage() {
           onToggleSelectAll={toggleSelectAll}
         />
 
+        {(allTags.length > 0 || posts.some((p) => p.featured)) && (
+          <div className="-mt-4 mb-6 flex flex-wrap items-center gap-2 text-xs">
+            <Button
+              type="button"
+              size="sm"
+              variant={featuredOnly ? 'default' : 'outline'}
+              onClick={() => setFeaturedOnly((v) => !v)}
+              className="h-8 text-xs"
+            >
+              仅看精选置顶
+            </Button>
+            {allTags.length > 0 && (
+              <select
+                aria-label="按标签筛选"
+                value={selectedTagFilter}
+                onChange={(e) => setSelectedTagFilter(e.target.value)}
+                className="h-8 rounded-md border border-input bg-background px-2.5 text-xs"
+              >
+                <option value="all">全部标签 ({allTags.length})</option>
+                {allTags.map((tag) => (
+                  <option key={tag} value={tag}>
+                    #{tag}
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
+        )}
+
         <PostStatsCards posts={posts} />
 
         {error && (
@@ -395,6 +440,31 @@ export default function AdminPostsPage() {
         onRemoveTag={handleRemoveTag}
         onSave={saveQuickEdit}
       />
+
+      <Dialog open={Boolean(confirmDialog)} onOpenChange={(open) => !open && setConfirmDialog(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{confirmDialog?.title}</DialogTitle>
+            <DialogDescription>{confirmDialog?.description}</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setConfirmDialog(null)}>
+              取消
+            </Button>
+            <Button
+              type="button"
+              variant={confirmDialog?.destructive ? 'destructive' : 'default'}
+              onClick={() => {
+                const action = confirmDialog?.onConfirm
+                setConfirmDialog(null)
+                if (action) void action()
+              }}
+            >
+              确认执行
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   )
 }

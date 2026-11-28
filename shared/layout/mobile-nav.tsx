@@ -7,19 +7,23 @@ import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from 
 import { Button } from "@/components/ui/button"
 import { Menu, Terminal, Home, BookOpen, MessageSquare, Github, Tags, Link2, Rss, ArrowUpRight } from "lucide-react"
 import { Separator } from "@/components/ui/separator"
+import { SITE_NAV_ITEMS, type SiteNavItem } from "@/shared/layout/nav-config"
 import { useSiteSettings } from "@/shared/layout/site-settings-context"
 import { cn } from "@/lib/utils"
 
-const REPO_URL = "https://github.com/zzemy/my-blog"
+const ICON_MAP: Record<SiteNavItem["id"], typeof Home> = {
+  home: Home,
+  posts: BookOpen,
+  tags: Tags,
+  friends: Link2,
+  guestbook: MessageSquare,
+  about: Github,
+}
 
-const mobileLinks: Array<{ href: string; label: string; icon: typeof Home; external?: boolean }> = [
-  { href: "/", label: "首页", icon: Home },
-  { href: "/posts", label: "文章", icon: BookOpen },
-  { href: "/tags", label: "标签", icon: Tags },
-  { href: "/friends", label: "友链", icon: Link2 },
-  { href: "/guestbook", label: "留言", icon: MessageSquare },
-  { href: REPO_URL, label: "关于", icon: Github, external: true },
-]
+const mobileLinks = SITE_NAV_ITEMS.map((item) => ({
+  ...item,
+  icon: ICON_MAP[item.id],
+}))
 
 export function MobileNav() {
   const [open, setOpen] = React.useState(false)

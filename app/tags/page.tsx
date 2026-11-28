@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
 import { getPublishedPosts } from '@/lib/supabase/posts'
+import { TagsExplorerView } from '@/features/blog/components/client/tags-explorer-view'
 
 export const revalidate = 60
 
@@ -25,25 +25,6 @@ export default async function TagsPage() {
   const sortedTags = Array.from(tagCountMap.entries())
     .map(([name, count]) => ({ name, count }))
     .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, 'zh-CN'))
-  const maxCount = sortedTags[0]?.count || 1
-
-  const getTagSizeClass = (count: number) => {
-    const ratio = count / maxCount
-    if (ratio >= 0.8) return 'text-base md:text-lg px-4 py-2.5'
-    if (ratio >= 0.5) return 'text-sm md:text-base px-4 py-2'
-    return 'text-sm px-3.5 py-1.5'
-  }
-
-  const getTagStyleClass = (count: number) => {
-    const ratio = count / maxCount
-    if (ratio >= 0.8) {
-      return 'border-border bg-muted text-foreground'
-    }
-    if (ratio >= 0.5) {
-      return 'border-border/80 bg-muted/70 text-foreground/90'
-    }
-    return 'border-border/70 bg-muted/40 text-foreground/80'
-  }
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8 md:py-12">
@@ -71,22 +52,7 @@ export default async function TagsPage() {
           暂无标签数据
         </div>
       ) : (
-        <section className="mt-8">
-          <div className="flex flex-wrap gap-3 md:gap-3.5">
-            {sortedTags.map((tag) => (
-              <Link
-                key={tag.name}
-                href={`/tags/${encodeURIComponent(tag.name)}`}
-                className={`group inline-flex items-center gap-2 rounded-full border no-underline shadow-xs transition-[border-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:border-foreground/30 hover:shadow-md ${getTagSizeClass(tag.count)} ${getTagStyleClass(tag.count)}`}
-              >
-                <span className="font-medium leading-none">#{tag.name}</span>
-                <span className="rounded-full border border-border/70 bg-background/80 px-2 py-0.5 font-mono text-xs text-muted-foreground">
-                  {tag.count}
-                </span>
-              </Link>
-            ))}
-          </div>
-        </section>
+        <TagsExplorerView tags={sortedTags} />
       )}
     </div>
   )

@@ -30,6 +30,7 @@ export interface LogStats {
   errorCount: number
   totalTokens: number
   avgDurationMs: number
+  estimatedCostUsd?: number
 }
 
 const TASK_BADGES: Record<string, { label: string; className: string }> = {
@@ -89,46 +90,80 @@ export function LogsPanel({ initialLogs, initialStats, onRefreshParent }: LogsPa
     },
   )
   const [loading, setLoading] = useState(!initialLogs)
+  const [loadingMore, setLoadingMore] = useState(false)
+  const [hasMore, setHasMore] = useState(false)
   const [statusFilter, setStatusFilter] = useState<'all' | 'success' | 'error'>('all')
   const [taskFilter, setTaskFilter] = useState<string>('all')
+  const [dateRange, setDateRange] = useState<'all' | '1d' | '7d' | '30d'>('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [copiedErrorId, setCopiedErrorId] = useState<string | null>(null)
 
   useEffect(() => {
-    if (initialLogs) setLogs(initialLogs)
-  }, [initialLogs])
+    if (initialLogs) {
+      setLogs(initialLogs)
+      setHasMore((initialStats?.totalCalls ?? 0) > initialLogs.length)
+    }
+  }, [initialLogs, initialStats?.totalCalls])
 
   useEffect(() => {
     if (initialStats) setStats(initialStats)
   }, [initialStats])
 
-  const fetchLogs = useCallback(async () => {
-    setLoading(true)
-    try {
-      const res = await fetch('/api/admin/ai/logs?limit=60')
-      if (!res.ok) return
-      const data = (await res.json()) as { logs?: AiGenerationLog[]; stats?: LogStats }
-      setLogs(data.logs ?? [])
-      if (data.stats) setStats(data.stats)
-      if (onRefreshParent) {
-        void onRefreshParent()
+  const fetchLogs = useCallback(
+    async (offset = 0, append = false) => {
+      if (append) {
+        setLoadingMore(true)
+      } else {
+        setLoading(true)
       }
-    } finally {
-      setLoading(false)
-    }
-  }, [onRefreshParent])
+      try {
+        const res = await fetch(`/api/admin/ai/logs?limit=60&offset=${offset}`)
+        if (!res.ok) return
+        const data = (await res.json()) as {
+          logs?: AiGenerationLog[]
+          stats?: LogStats
+          hasMore?: boolean
+        }
+        const incoming = data.logs ?? []
+        setLogs((prev) => (append ? [...prev, ...incoming] : incoming))
+        setHasMore(Boolean(data.hasMore))
+        if (data.stats) setStats(data.stats)
+        if (!append && onRefreshParent) {
+          void onRefreshParent()
+        }
+      } finally {
+        setLoading(false)
+        setLoadingMore(false)
+      }
+    },
+    [onRefreshParent],
+  )
 
   useEffect(() => {
     if (!initialLogs) {
-      void fetchLogs()
+      void fetchLogs(0, false)
     }
   }, [initialLogs, fetchLogs])
 
   const filteredLogs = useMemo(() => {
     const keyword = searchQuery.trim().toLowerCase()
+    const now = Date.now()
+    const cutoffMs =
+      dateRange === '1d'
+        ? now - 24 * 60 * 60 * 1000
+        : dateRange === '7d'
+          ? now - 7 * 24 * 60 * 60 * 1000
+          : dateRange === '30d'
+            ? now - 30 * 24 * 60 * 60 * 1000
+            : 0
+
     return logs.filter((log) => {
       if (statusFilter !== 'all' && log.status !== statusFilter) return false
+      if (cutoffMs > 0) {
+        const ts = new Date(log.created_at).getTime()
+        if (!Number.isNaN(ts) && ts < cutoffMs) return false
+      }
       if (taskFilter !== 'all') {
         const matchesTask =
           taskFilter === 'translate'
@@ -142,7 +177,7 @@ export function LogsPanel({ initialLogs, initialStats, onRefreshParent }: LogsPa
       }
       return true
     })
-  }, [logs, statusFilter, taskFilter, searchQuery])
+  }, [logs, statusFilter, taskFilter, dateRange, searchQuery])
 
   const successRate =
     stats.totalCalls > 0 ? Math.round((stats.successCount / stats.totalCalls) * 100) : 0
@@ -232,7 +267,10 @@ export function LogsPanel({ initialLogs, initialStats, onRefreshParent }: LogsPa
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0 text-xs text-muted-foreground">
-            端到端模型推理耗时
+            全量聚合平均耗时
+            {typeof stats.estimatedCostUsd === 'number'
+              ? ` · 预估总费用 ~$${stats.estimatedCostUsd.toFixed(3)}`
+              : ''}
           </CardContent>
         </Card>
       </div>
@@ -243,14 +281,14 @@ export function LogsPanel({ initialLogs, initialStats, onRefreshParent }: LogsPa
           <div>
             <CardTitle>调用明细日志</CardTitle>
             <CardDescription>
-              展示最近 60 次 AI 生成记录，点击任意行可展开 Token 构成与完整报错详情。
+              已加载 {logs.length} / {stats.totalCalls} 条调用记录，点击任意行可展开 Token 构成与完整报错详情。
             </CardDescription>
           </div>
           <Button
             type="button"
             variant="outline"
             size="sm"
-            onClick={() => void fetchLogs()}
+            onClick={() => void fetchLogs(0, false)}
             disabled={loading}
             className="shrink-0"
           >
@@ -298,6 +336,17 @@ export function LogsPanel({ initialLogs, initialStats, onRefreshParent }: LogsPa
                     {meta.label}
                   </option>
                 ))}
+              </select>
+
+              <select
+                value={dateRange}
+                onChange={(e) => setDateRange(e.target.value as 'all' | '1d' | '7d' | '30d')}
+                className="h-8 rounded-md border border-input bg-background px-2.5 text-xs"
+              >
+                <option value="all">全部时间</option>
+                <option value="1d">最近 24 小时</option>
+                <option value="7d">最近 7 天</option>
+                <option value="30d">最近 30 天</option>
               </select>
             </div>
 
@@ -485,6 +534,20 @@ export function LogsPanel({ initialLogs, initialStats, onRefreshParent }: LogsPa
                   })}
                 </tbody>
               </table>
+            </div>
+          )}
+
+          {hasMore && (
+            <div className="flex justify-center pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={loadingMore}
+                onClick={() => void fetchLogs(logs.length, true)}
+              >
+                {loadingMore ? '加载中…' : `加载更多历史日志（已加载 ${logs.length}/${stats.totalCalls}）`}
+              </Button>
             </div>
           )}
         </CardContent>

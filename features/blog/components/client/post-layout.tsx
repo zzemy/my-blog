@@ -75,6 +75,7 @@ export function PostLayout({ children, toc = [], tocTitle = "目录" }: PostLayo
   const [desktopCollapsed, setDesktopCollapsed] = React.useState(false);
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [focusMode, setFocusMode] = React.useState(false);
+  const [smoothScrollOn, setSmoothScrollOn] = React.useState(true);
   const [prefs, setPrefs] = React.useState<ReaderPrefs>(DEFAULT_PREFS);
   const [activeId, setActiveId] = React.useState<string>("");
   const tocRef = React.useRef<HTMLDivElement>(null);
@@ -82,6 +83,7 @@ export function PostLayout({ children, toc = [], tocTitle = "目录" }: PostLayo
   // 读取持久化的读者排版偏好
   React.useEffect(() => {
     try {
+      setSmoothScrollOn(window.localStorage.getItem("reader-smooth-scroll") !== "off");
       const raw = window.localStorage.getItem(PREFS_STORAGE_KEY);
       if (!raw) return;
       const parsed = JSON.parse(raw) as Partial<ReaderPrefs>;
@@ -127,7 +129,7 @@ export function PostLayout({ children, toc = [], tocTitle = "目录" }: PostLayo
 
     const handleScroll = () => {
       let currentActiveId = "";
-      const offset = 104;
+      const offset = 96;
 
       if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 16) {
         if (toc.length > 0) {
@@ -251,8 +253,12 @@ export function PostLayout({ children, toc = [], tocTitle = "目录" }: PostLayo
                       const target = document.getElementById(item.id);
                       if (target) {
                         const headerOffset = focusMode ? 32 : 88;
-                        const y = target.getBoundingClientRect().top + window.scrollY - headerOffset;
-                        window.scrollTo({ top: y, behavior: "smooth" });
+                        if (window.__blogLenis) {
+                          window.__blogLenis.scrollTo(target, { offset: -headerOffset });
+                        } else {
+                          const y = target.getBoundingClientRect().top + window.scrollY - headerOffset;
+                          window.scrollTo({ top: y, behavior: "smooth" });
+                        }
                         window.history.replaceState(null, "", `#${item.id}`);
                       }
                       setMobileOpen(false);
@@ -395,6 +401,33 @@ export function PostLayout({ children, toc = [], tocTitle = "目录" }: PostLayo
                   </button>
                 ))}
               </div>
+            </div>
+
+            <div className="flex items-center justify-between border-t border-border/60 pt-3">
+              <span className="text-[11px] text-muted-foreground">平滑滚动</span>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={smoothScrollOn}
+                onClick={() => {
+                  const next = !smoothScrollOn;
+                  setSmoothScrollOn(next);
+                  try {
+                    window.localStorage.setItem("reader-smooth-scroll", next ? "on" : "off");
+                  } catch {
+                    // ignore
+                  }
+                  window.dispatchEvent(new Event("blog-smooth-scroll-change"));
+                }}
+                className={cn(
+                  "rounded-full border px-2.5 py-0.5 text-[11px] transition-colors",
+                  smoothScrollOn
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border/70 text-muted-foreground hover:text-foreground",
+                )}
+              >
+                {smoothScrollOn ? "开启" : "关闭"}
+              </button>
             </div>
           </PopoverContent>
         </Popover>
