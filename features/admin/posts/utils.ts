@@ -22,13 +22,23 @@ export function filterAndSortPosts(
   filterStatus: PostFilterStatus,
   sortBy: PostSortBy,
 ) {
-  const normalizedQuery = searchQuery.toLowerCase()
+  const normalizedQuery = searchQuery.trim().toLowerCase()
 
   return posts
     .filter((post) => {
       if (filterStatus === 'published' && !post.published) return false
       if (filterStatus === 'draft' && post.published) return false
-      if (normalizedQuery && !post.title.toLowerCase().includes(normalizedQuery)) return false
+      if (normalizedQuery) {
+        const haystacks = [
+          post.title,
+          post.slug,
+          post.description ?? '',
+          ...(post.tags ?? []),
+        ]
+        if (!haystacks.some((item) => item.toLowerCase().includes(normalizedQuery))) {
+          return false
+        }
+      }
 
       return true
     })

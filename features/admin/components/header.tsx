@@ -16,6 +16,7 @@ import {
   Link2,
   LogOut,
   Menu,
+  Plus,
   Settings,
   Sparkles,
 } from 'lucide-react'
@@ -50,12 +51,12 @@ const NAV_ITEMS = [
 
 const EXTERNAL_LINKS = [
   {
-    href: 'https://vercel.com/emmms-projects-cc15f8c7/my-blog',
+    href: process.env.NEXT_PUBLIC_VERCEL_DASHBOARD_URL || 'https://vercel.com/dashboard',
     label: 'Vercel 部署',
     icon: Cloud,
   },
   {
-    href: 'https://supabase.com/dashboard/project/clpmxrgdzhsitzjlmkhf',
+    href: process.env.NEXT_PUBLIC_SUPABASE_DASHBOARD_URL || 'https://supabase.com/dashboard',
     label: 'Supabase 控制台',
     icon: Database,
   },
@@ -67,7 +68,7 @@ export function AdminHeader() {
   const logout = useSupabaseAuthStore((state) => state.logout)
   const [open, setOpen] = useState(false)
 
-  // 文章新建/编辑页使用独立的沉浸式文档顶栏，避免双顶栏占用写作空间
+  // 文章新建/编辑/预览页使用独立顶栏
   if (pathname && /^\/admin\/posts\/.+/.test(pathname)) {
     return null
   }
@@ -80,7 +81,7 @@ export function AdminHeader() {
   const handleLogout = async () => {
     try {
       await logout()
-      router.push('/admin/posts')
+      router.push('/admin')
     } catch (error) {
       console.error('Logout failed:', error)
     }
@@ -89,7 +90,6 @@ export function AdminHeader() {
   return (
     <header className="sticky top-0 z-50 border-b border-zinc-200/80 bg-white/85 backdrop-blur-md dark:border-zinc-800/80 dark:bg-zinc-950/85">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
-        {/* Brand */}
         <Link
           href="/admin"
           className="group flex shrink-0 items-center gap-2.5 whitespace-nowrap"
@@ -102,10 +102,9 @@ export function AdminHeader() {
           </span>
         </Link>
 
-        {/* Primary Desktop Navigation */}
         <nav
           aria-label="后台主导航"
-          className="hidden md:flex items-center gap-1 rounded-lg bg-zinc-100/70 p-1 dark:bg-zinc-900/80"
+          className="hidden items-center gap-1 rounded-lg bg-zinc-100/70 p-1 md:flex dark:bg-zinc-900/80"
         >
           {NAV_ITEMS.map((item) => {
             const Icon = item.icon
@@ -136,8 +135,14 @@ export function AdminHeader() {
           })}
         </nav>
 
-        {/* Right Utility Actions */}
-        <div className="hidden md:flex shrink-0 items-center gap-1.5">
+        <div className="hidden shrink-0 items-center gap-1.5 md:flex">
+          <Button asChild size="sm" className="h-8 gap-1 px-2.5 text-xs">
+            <Link href="/admin/posts/new">
+              <Plus className="h-3.5 w-3.5" />
+              <span className="hidden lg:inline">写文章</span>
+            </Link>
+          </Button>
+
           <a
             href="/"
             target="_blank"
@@ -146,7 +151,7 @@ export function AdminHeader() {
             className="inline-flex h-8 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-md border border-zinc-200/80 bg-background px-2.5 text-xs font-medium text-zinc-700 transition-colors hover:bg-zinc-100 hover:text-zinc-950 dark:border-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-800/80 dark:hover:text-zinc-50"
           >
             <Globe className="h-3.5 w-3.5 shrink-0" />
-            <span className="hidden lg:inline">查看站点</span>
+            <span className="hidden xl:inline">站点</span>
           </a>
 
           <DropdownMenu>
@@ -158,7 +163,6 @@ export function AdminHeader() {
                 title="云服务控制台"
               >
                 <ExternalLink className="h-3.5 w-3.5" />
-                <span className="hidden xl:inline">服务</span>
                 <ChevronDown className="h-3 w-3 opacity-60" />
               </Button>
             </DropdownMenuTrigger>
@@ -191,7 +195,7 @@ export function AdminHeader() {
 
           <div className="mx-0.5 h-4 w-px bg-zinc-200 dark:bg-zinc-800" />
 
-          <ModeToggle />
+          <ModeToggle simple />
 
           <Button
             onClick={handleLogout}
@@ -206,7 +210,12 @@ export function AdminHeader() {
 
         {/* Mobile Menu */}
         <div className="flex items-center gap-1.5 md:hidden">
-          <ModeToggle />
+          <Button asChild size="icon" variant="ghost" className="h-8 w-8" title="新建文章">
+            <Link href="/admin/posts/new">
+              <Plus className="h-4 w-4" />
+            </Link>
+          </Button>
+          <ModeToggle simple />
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="h-9 w-9" aria-label="打开管理菜单">

@@ -95,7 +95,7 @@ export function MobileNav() {
               <Rss className="h-3 w-3" />
               <span>RSS</span>
             </a>
-            {settings.socialLinks.map((link) => (
+            {(settings.socialLinks ?? []).map((link) => (
               <a
                 key={`${link.platform}-${link.url}`}
                 href={link.url}

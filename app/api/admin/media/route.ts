@@ -30,10 +30,50 @@ export async function GET(request: NextRequest) {
   }
 
   try {
+    const { searchParams } = new URL(request.url)
     const client = getAdminClient(token || undefined)
+
+    // 检查某张图片被哪些文章引用（删除前防误删保护）
+    const checkRef = searchParams.get('checkRef')?.trim()
+    if (checkRef) {
+      if (
+        checkRef.includes('..') ||
+        checkRef.includes('/') ||
+        checkRef.includes('\\') ||
+        !SAFE_FILENAME_REGEX.test(checkRef)
+      ) {
+        return NextResponse.json({ error: 'Invalid filename' }, { status: 400 })
+      }
+      const { data: postsData } = await client
+        .from('posts')
+        .select('id, title, cover_image, content')
+      const rows = (postsData as Array<{
+        id: string
+        title: string
+        cover_image: string | null
+        content: unknown
+      }> | null) ?? []
+
+      const usedBy = rows
+        .filter((post) => {
+          if (post.cover_image?.includes(checkRef)) return true
+          try {
+            return JSON.stringify(post.content ?? '').includes(checkRef)
+          } catch {
+            return false
+          }
+        })
+        .map((post) => ({ id: post.id, title: post.title }))
+
+      return NextResponse.json({ filename: checkRef, usedBy })
+    }
+
+    const limit = Math.min(Math.max(Number(searchParams.get('limit') || 60), 1), 100)
+    const offset = Math.max(Number(searchParams.get('offset') || 0), 0)
+
     const { data, error } = await client.storage.from('images').list('uploads', {
-      limit: 100,
-      offset: 0,
+      limit: limit + 1,
+      offset,
       sortBy: { column: 'created_at', order: 'desc' },
     })
 
@@ -41,7 +81,11 @@ export async function GET(request: NextRequest) {
       throw error
     }
 
-    const files = (data as StorageListFile[]).map((file) => {
+    const rawList = (data as StorageListFile[]) ?? []
+    const hasMore = rawList.length > limit
+    const pageSlice = hasMore ? rawList.slice(0, limit) : rawList
+
+    const files = pageSlice.map((file) => {
       const {
         data: { publicUrl },
       } = client.storage.from('images').getPublicUrl(`uploads/${file.name}`)
@@ -57,7 +101,7 @@ export async function GET(request: NextRequest) {
       }
     })
 
-    return NextResponse.json({ files })
+    return NextResponse.json({ files, hasMore, nextOffset: offset + files.length })
   } catch (error) {
     console.error('Error listing images:', error)
     return NextResponse.json({ error: 'Failed to list images' }, { status: 500 })

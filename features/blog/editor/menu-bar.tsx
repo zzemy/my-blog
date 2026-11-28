@@ -29,8 +29,10 @@ import {
   Plus,
   Quote,
   Redo,
+  RemoveFormatting,
   Rows3,
   Search,
+  Sparkles,
   Strikethrough,
   Table,
   Trash2,
@@ -74,6 +76,7 @@ type InsertItem = {
   groupTitle: string
   title: EditorInsertDefinition['title']
   description: EditorInsertDefinition['description']
+  keywords?: EditorInsertDefinition['keywords']
   icon: EditorInsertDefinition['icon']
   action: (pos: number | null) => void
 }
@@ -195,6 +198,7 @@ export function MenuBar({ editor }: MenuBarProps) {
           groupTitle: group.title,
           title: item.title,
           description: item.description,
+          keywords: item.keywords,
           icon: item.icon,
           action: (pos) => {
             if (item.action === 'uploadImage') {
@@ -422,7 +426,10 @@ export function MenuBar({ editor }: MenuBarProps) {
           ...group,
           items: group.items.filter((item) => {
             if (!normalizedQuery) return true
-            return `${group.title} ${item.title} ${item.description}`.toLowerCase().includes(normalizedQuery)
+            const keywordText = (item.keywords ?? []).join(' ')
+            return `${group.title} ${item.title} ${item.description} ${keywordText}`
+              .toLowerCase()
+              .includes(normalizedQuery)
           }),
         }))
         .filter((group) => group.items.length > 0),
@@ -890,13 +897,23 @@ export function SelectionBubbleMenu({ editor }: MenuBarProps) {
   }
 
   const applyLink = () => {
-    const href = linkValue.trim()
+    const raw = linkValue.trim()
 
-    if (!href) {
+    if (!raw) {
       editor.chain().focus().extendMarkRange('link').unsetLink().run()
       setLinkInputOpen(false)
       return
     }
+
+    if (/^(javascript|vbscript|data):/i.test(raw)) {
+      toast.error('不支持不安全的链接协议')
+      return
+    }
+
+    const href =
+      raw.startsWith('/') || raw.startsWith('#') || /^(https?|mailto):/i.test(raw)
+        ? raw
+        : `https://${raw}`
 
     editor.chain().focus().extendMarkRange('link').setLink({ href }).run()
     setLinkInputOpen(false)
@@ -1023,6 +1040,27 @@ export function SelectionBubbleMenu({ editor }: MenuBarProps) {
           <Unlink className="h-4 w-4" />
         </button>
       ) : null}
+      <button
+        type="button"
+        onClick={() => editor.chain().focus().unsetAllMarks().run()}
+        aria-label="清除格式"
+        title="清除行内格式"
+      >
+        <RemoveFormatting className="h-4 w-4" />
+      </button>
+      <span className="doc-selection-divider" aria-hidden="true" />
+      <button
+        type="button"
+        onClick={() => {
+          window.dispatchEvent(new CustomEvent('admin-editor-open-ai-rewrite'))
+        }}
+        aria-label="AI 润色选中内容"
+        title="使用 AI 润色/改写选中文本"
+        className="inline-flex items-center gap-1 px-2 text-xs font-medium text-primary"
+      >
+        <Sparkles className="h-3.5 w-3.5" />
+        <span>AI 润色</span>
+      </button>
       {linkInputOpen ? (
         <form
           className="doc-selection-link-form"

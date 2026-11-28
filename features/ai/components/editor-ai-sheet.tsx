@@ -59,6 +59,8 @@ import {
 interface EditorAiSheetProps {
   open: boolean
   onOpenChange: (open: boolean) => void
+  initialTab?: 'summary' | 'metadata' | 'translate' | 'write'
+  isDirty?: boolean
   postId?: string | null
   formData: PostFormData
   onUpdateForm: (patch: Partial<PostFormData>) => void
@@ -68,9 +70,65 @@ interface EditorAiSheetProps {
   onInsertBelowSelection: (text: string) => void
 }
 
+function buildInlineDiff(original: string, revised: string): Array<{ type: 'same' | 'del' | 'add'; text: string }> {
+  const tokenize = (s: string) => s.match(/[\u4e00-\u9fa5]|[A-Za-z0-9_]+|\s+|[^\s]/g) ?? []
+  const a = tokenize(original)
+  const b = tokenize(revised)
+  // For very long texts, fall back to paragraph-level comparison to stay instant
+  if (a.length * b.length > 60000) {
+    return [
+      { type: 'del', text: original },
+      { type: 'add', text: revised },
+    ]
+  }
+  const m = a.length
+  const n = b.length
+  const dp: number[][] = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0))
+  for (let i = m - 1; i >= 0; i -= 1) {
+    for (let j = n - 1; j >= 0; j -= 1) {
+      dp[i][j] = a[i] === b[j] ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1])
+    }
+  }
+  const segments: Array<{ type: 'same' | 'del' | 'add'; text: string }> = []
+  let i = 0
+  let j = 0
+  const pushSeg = (type: 'same' | 'del' | 'add', token: string) => {
+    const last = segments[segments.length - 1]
+    if (last && last.type === type) {
+      last.text += token
+    } else {
+      segments.push({ type, text: token })
+    }
+  }
+  while (i < m && j < n) {
+    if (a[i] === b[j]) {
+      pushSeg('same', a[i])
+      i += 1
+      j += 1
+    } else if (dp[i + 1][j] >= dp[i][j + 1]) {
+      pushSeg('del', a[i])
+      i += 1
+    } else {
+      pushSeg('add', b[j])
+      j += 1
+    }
+  }
+  while (i < m) {
+    pushSeg('del', a[i])
+    i += 1
+  }
+  while (j < n) {
+    pushSeg('add', b[j])
+    j += 1
+  }
+  return segments
+}
+
 export function EditorAiSheet({
   open,
   onOpenChange,
+  initialTab = 'summary',
+  isDirty = false,
   postId,
   formData,
   onUpdateForm,
@@ -79,6 +137,8 @@ export function EditorAiSheet({
   onReplaceSelection,
   onInsertBelowSelection,
 }: EditorAiSheetProps) {
+  const [activeTab, setActiveTab] = useState<'summary' | 'metadata' | 'translate' | 'write'>(initialTab)
+  const [showDiffPreview, setShowDiffPreview] = useState(true)
   const [providers, setProviders] = useState<AiProviderPublic[]>([])
   const [overrideProviderId, setOverrideProviderId] = useState<string>('')
   const [overrideModel, setOverrideModel] = useState<string>('')
@@ -151,11 +211,14 @@ export function EditorAiSheet({
     const currentSelected = getSelectedText().trim()
     if (currentSelected) {
       setSelectedSnippet(currentSelected)
+      setActiveTab('write')
+    } else {
+      setActiveTab(initialTab)
     }
     if (!outlineTopic && formData.title.trim()) {
       setOutlineTopic(formData.title.trim())
     }
-  }, [open, loadProviders, loadTranslations, getSelectedText, outlineTopic, formData.title])
+  }, [open, initialTab, loadProviders, loadTranslations, getSelectedText, outlineTopic, formData.title])
 
   const selectedProvider = providers.find((p) => p.id === overrideProviderId)
 
@@ -477,7 +540,13 @@ export function EditorAiSheet({
               )}
             </div>
 
-            <Tabs defaultValue="summary" className="w-full">
+            <Tabs
+              value={activeTab}
+              onValueChange={(val) =>
+                setActiveTab(val as 'summary' | 'metadata' | 'translate' | 'write')
+              }
+              className="w-full"
+            >
               <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="summary" className="text-xs">
                   导读摘要
@@ -588,6 +657,76 @@ export function EditorAiSheet({
                         onChange={(e) => updateSummaryDraft({ target_audience: e.target.value })}
                         className="h-8 text-xs"
                       />
+                    </div>
+
+                    <div className="space-y-2 border-t pt-3">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-xs">延伸问答 (FAQ，同步生成 JSON-LD)</Label>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="ghost"
+                          className="h-6 gap-1 text-xs"
+                          onClick={() =>
+                            updateSummaryDraft({
+                              faqs: [...(summaryDraft.faqs ?? []), { question: '', answer: '' }],
+                            })
+                          }
+                        >
+                          <Plus className="h-3 w-3" />
+                          添加问答
+                        </Button>
+                      </div>
+                      {(summaryDraft.faqs ?? []).length > 0 ? (
+                        <div className="space-y-2.5">
+                          {(summaryDraft.faqs ?? []).map((faq, index) => (
+                            <div key={index} className="space-y-1.5 rounded-md border bg-muted/20 p-2.5">
+                              <div className="flex items-center gap-1.5">
+                                <Input
+                                  value={faq.question}
+                                  placeholder="问题"
+                                  onChange={(e) =>
+                                    updateSummaryDraft({
+                                      faqs: (summaryDraft.faqs ?? []).map((item, i) =>
+                                        i === index ? { ...item, question: e.target.value } : item,
+                                      ),
+                                    })
+                                  }
+                                  className="h-7 text-xs font-medium"
+                                />
+                                <Button
+                                  type="button"
+                                  size="icon"
+                                  variant="ghost"
+                                  className="h-7 w-7 shrink-0 text-destructive"
+                                  onClick={() =>
+                                    updateSummaryDraft({
+                                      faqs: (summaryDraft.faqs ?? []).filter((_, i) => i !== index),
+                                    })
+                                  }
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </Button>
+                              </div>
+                              <Textarea
+                                rows={2}
+                                value={faq.answer}
+                                placeholder="回答内容"
+                                onChange={(e) =>
+                                  updateSummaryDraft({
+                                    faqs: (summaryDraft.faqs ?? []).map((item, i) =>
+                                      i === index ? { ...item, answer: e.target.value } : item,
+                                    ),
+                                  })
+                                }
+                                className="text-xs"
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-[11px] text-muted-foreground">暂无延伸问答，可手动添加或重新生成导读。</p>
+                      )}
                     </div>
 
                     <div className="flex items-center justify-between pt-2 text-xs text-muted-foreground">
@@ -999,14 +1138,65 @@ export function EditorAiSheet({
                   </Button>
 
                   {rewriteResult && (
-                    <div className="space-y-2 rounded-md border border-primary/30 bg-primary/5 p-3">
-                      <p className="text-xs font-medium text-primary">AI 修改建议（确认后再应用）</p>
-                      <Textarea
-                        rows={5}
-                        value={rewriteResult}
-                        onChange={(e) => setRewriteResult(e.target.value)}
-                        className="bg-background text-xs"
-                      />
+                    <div className="space-y-2.5 rounded-md border border-primary/30 bg-primary/5 p-3">
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-xs font-medium text-primary">AI 修改建议（确认后再应用）</p>
+                        <div className="inline-flex rounded border bg-background/80 p-0.5 text-[11px]">
+                          <button
+                            type="button"
+                            onClick={() => setShowDiffPreview(true)}
+                            className={`rounded px-2 py-0.5 transition-colors ${
+                              showDiffPreview ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'
+                            }`}
+                          >
+                            Diff 对比
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setShowDiffPreview(false)}
+                            className={`rounded px-2 py-0.5 transition-colors ${
+                              !showDiffPreview ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'
+                            }`}
+                          >
+                            直接编辑
+                          </button>
+                        </div>
+                      </div>
+                      {showDiffPreview && selectedSnippet.trim() ? (
+                        <div className="max-h-56 overflow-y-auto whitespace-pre-wrap rounded-md border bg-background p-3 text-xs leading-relaxed">
+                          {buildInlineDiff(selectedSnippet, rewriteResult).map((seg, idx) =>
+                            seg.type === 'del' ? (
+                              <del
+                                key={idx}
+                                className="rounded bg-red-500/15 px-0.5 text-red-700 dark:text-red-300"
+                              >
+                                {seg.text}
+                              </del>
+                            ) : seg.type === 'add' ? (
+                              <ins
+                                key={idx}
+                                className="rounded bg-emerald-500/15 px-0.5 text-emerald-700 no-underline dark:text-emerald-300"
+                              >
+                                {seg.text}
+                              </ins>
+                            ) : (
+                              <span key={idx}>{seg.text}</span>
+                            ),
+                          )}
+                        </div>
+                      ) : (
+                        <Textarea
+                          rows={5}
+                          value={rewriteResult}
+                          onChange={(e) => setRewriteResult(e.target.value)}
+                          className="bg-background text-xs"
+                        />
+                      )}
+                      {isDirty && (
+                        <p className="text-[11px] text-muted-foreground">
+                          提示：替换后记得按 Ctrl+S 保存文章。
+                        </p>
+                      )}
                       <div className="flex flex-wrap gap-2">
                         <Button
                           type="button"

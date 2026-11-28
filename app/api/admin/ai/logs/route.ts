@@ -13,38 +13,47 @@ export async function GET(request: NextRequest) {
 
   try {
     const { searchParams } = new URL(request.url)
-    const limit = Math.min(Math.max(Number(searchParams.get('limit') || 50), 1), 200)
+    const limit = Math.min(Math.max(Number(searchParams.get('limit') || 60), 1), 200)
+    const offset = Math.max(Number(searchParams.get('offset') || 0), 0)
 
     const client = getAdminClient(token || undefined)
-    const { data, error } = await client
-      .from('ai_generation_logs')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(limit)
+    const [logsRes, totalRes, successRes] = await Promise.all([
+      client
+        .from('ai_generation_logs')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .range(offset, offset + limit - 1),
+      client.from('ai_generation_logs').select('id', { count: 'exact', head: true }),
+      client
+        .from('ai_generation_logs')
+        .select('id', { count: 'exact', head: true })
+        .eq('status', 'success'),
+    ])
 
-    if (error) {
-      if (error.code === '42P01') {
+    if (logsRes.error) {
+      if (logsRes.error.code === '42P01') {
         return NextResponse.json({
           logs: [],
           stats: { totalCalls: 0, successCount: 0, errorCount: 0, totalTokens: 0, avgDurationMs: 0 },
           code: 'MIGRATION_REQUIRED',
         })
       }
-      throw error
+      throw logsRes.error
     }
 
-    const logs = (data as LogRow[] | null) ?? []
-    const totalCalls = logs.length
-    const successCount = logs.filter((l) => l.status === 'success').length
-    const errorCount = totalCalls - successCount
+    const logs = (logsRes.data as LogRow[] | null) ?? []
+    const totalCalls = totalRes.count ?? logs.length
+    const successCount = successRes.count ?? logs.filter((l) => l.status === 'success').length
+    const errorCount = Math.max(0, totalCalls - successCount)
     const totalTokens = logs.reduce((acc, item) => acc + (item.total_tokens ?? 0), 0)
     const avgDurationMs =
-      totalCalls > 0
-        ? Math.round(logs.reduce((acc, item) => acc + (item.duration_ms ?? 0), 0) / totalCalls)
+      logs.length > 0
+        ? Math.round(logs.reduce((acc, item) => acc + (item.duration_ms ?? 0), 0) / logs.length)
         : 0
 
     return NextResponse.json({
       logs,
+      hasMore: offset + logs.length < totalCalls,
       stats: {
         totalCalls,
         successCount,

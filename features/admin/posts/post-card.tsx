@@ -1,5 +1,6 @@
 import Link from 'next/link'
-import { Calendar, CheckCircle2, Circle, Edit, Eye, Settings, Star, Trash2 } from 'lucide-react'
+import { Calendar, CheckCircle2, Circle, Edit, ExternalLink, Eye, Settings, Star, Trash2 } from 'lucide-react'
+import { getPostRouteId } from '@/lib/post-public-id'
 
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -150,6 +151,20 @@ export function PostCard({
           >
             <Settings className="w-4 h-4" />
           </Button>
+
+          <a
+            href={
+              post.published
+                ? `/posts/${getPostRouteId({ publicId: post.public_id, slug: post.slug })}`
+                : `/admin/posts/${post.id}/preview`
+            }
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-md text-zinc-400 transition-colors hover:bg-accent hover:text-zinc-700 dark:hover:text-zinc-200"
+            title={post.published ? '查看公开文章' : '预览草稿'}
+          >
+            <ExternalLink className="h-4 w-4" />
+          </a>
 
           <div className="w-px h-4 bg-zinc-200 dark:bg-zinc-800 mx-1 hidden md:block" />
 

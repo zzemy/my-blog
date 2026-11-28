@@ -1,6 +1,7 @@
 'use client'
 
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
+import Link from 'next/link'
 import { toast } from 'sonner'
 import {
   Activity,
@@ -439,10 +440,14 @@ export function LogsPanel({ initialLogs, initialStats, onRefreshParent }: LogsPa
                                   </span>
                                   {log.post_id && (
                                     <span>
-                                      关联文章 ID：
-                                      <span className="font-mono text-foreground">
-                                        {log.post_id}
-                                      </span>
+                                      关联文章：
+                                      <Link
+                                        href={`/admin/posts/${log.post_id}`}
+                                        onClick={(e) => e.stopPropagation()}
+                                        className="font-mono text-primary underline-offset-4 hover:underline"
+                                      >
+                                        前往编辑 ({log.post_id.slice(0, 8)}…)
+                                      </Link>
                                     </span>
                                   )}
                                 </div>

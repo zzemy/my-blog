@@ -262,7 +262,21 @@ export const TipTapEditor = forwardRef<TipTapEditorHandle, TipTapEditorProps>(fu
       },
       handleDrop: (view, event, _slice, moved) => {
         if (!moved && event.dataTransfer?.files?.length) {
-          const imageFiles = Array.from(event.dataTransfer.files).filter((file) =>
+          const files = Array.from(event.dataTransfer.files)
+          const markdownFile = files.find(
+            (file) => /\.(md|markdown|txt)$/i.test(file.name) || file.type === 'text/markdown',
+          )
+          if (markdownFile) {
+            event.preventDefault()
+            void markdownFile.text().then(async (content) => {
+              if (!content.trim()) return
+              await insertMarkdownContent(editorRef.current, content, 'insert')
+              toast.success(`已导入「${markdownFile.name}」`)
+            })
+            return true
+          }
+
+          const imageFiles = files.filter((file) =>
             file.type.startsWith('image/'),
           )
 
@@ -437,12 +451,6 @@ export const TipTapEditor = forwardRef<TipTapEditorHandle, TipTapEditorProps>(fu
         {editable && showMarkdownGuide && <MarkdownShortcodeGuide />}
         <EditorContent editor={editor} />
       </div>
-      {editable && editor && (
-        <div className={styles.editorStats}>
-          <span>{editor.storage.characterCount.characters()} 字符</span>
-          <span>{editor.storage.characterCount.words()} 词</span>
-        </div>
-      )}
     </div>
   )
 })

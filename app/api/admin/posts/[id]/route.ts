@@ -5,10 +5,6 @@ import { updatePostSchema } from '@/lib/validation/post'
 import { revalidatePostMutation } from '@/lib/revalidation/posts'
 import { z } from 'zod'
 
-const currentPostPublishStateSchema = z.object({
-  published: z.boolean(),
-})
-
 const currentPostCacheStateSchema = z.object({
   public_id: z.string().nullable().optional(),
   slug: z.string(),
@@ -121,20 +117,8 @@ export async function PUT(
     }
 
     // 如果发布状态从 false 变为 true，且未显式传入发布时间，则更新为当前时间
-    if (restBody.published === true) {
-      const { data: currentPost } = await client
-        .from('posts')
-        .select('published')
-        .eq('id', id)
-        .single()
-
-      const currentPostResult = currentPostPublishStateSchema.safeParse(currentPost)
-
-      if (currentPostResult.success && currentPostResult.data.published === false) {
-        if (!restBody.published_at) {
-          updatePayload.published_at = new Date().toISOString()
-        }
-      }
+    if (restBody.published === true && previousPost.published === false && !restBody.published_at) {
+      updatePayload.published_at = new Date().toISOString()
     }
 
     const { data, error } = await client

@@ -7,7 +7,7 @@ import {
   DEFAULT_PUBLIC_SITE_SETTINGS,
   type PublicSiteSettings,
   type PublicSocialLink,
-} from "@/shared/layout/site-settings-context"
+} from "@/lib/public-site-settings"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Analytics } from "@vercel/analytics/react"
 import { getSiteSettings } from "@/lib/site-settings"

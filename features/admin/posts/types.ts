@@ -3,6 +3,7 @@ import type { AiSummaryData } from '@/lib/ai/types'
 
 export interface AdminPost {
   id: string
+  public_id?: string | null
   title: string
   slug: string
   description: string | null

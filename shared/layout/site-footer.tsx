@@ -102,7 +102,7 @@ export function SiteFooter() {
               <Rss className="h-3 w-3" />
               <span>RSS</span>
             </a>
-            {settings.socialLinks.slice(0, 3).map((link) => (
+            {(settings.socialLinks ?? []).slice(0, 3).map((link) => (
               <a
                 key={`${link.platform}-${link.url}`}
                 href={link.url}

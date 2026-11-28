@@ -109,7 +109,7 @@ export function SiteHeader() {
           <CommandMenu compact />
           <div className="mx-1 hidden h-4 w-px bg-foreground/12 sm:block" />
           <ModeToggle />
-          {settings.socialLinks.slice(0, 2).map((link) => (
+          {(settings.socialLinks ?? []).slice(0, 2).map((link) => (
             <a
               key={`${link.platform}-${link.url}`}
               href={link.url}

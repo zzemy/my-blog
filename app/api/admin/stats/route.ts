@@ -1,100 +1,143 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase/client'
 import { getAuthTokenFromRequest, validateAdminRequest } from '@/lib/auth'
-import { Redis } from '@upstash/redis'
+import { upstashRedis } from '@/lib/rate-limit'
 
-function normalizeEnv(value?: string) {
-  const normalized = value?.trim()
-  return normalized && normalized.length > 0 ? normalized : undefined
+type PublishedPostMetricRow = {
+  id: string
+  public_id: string | null
+  slug: string
+  title: string
+  tags: string[] | null
+  published_at: string | null
+  created_at: string
 }
-
-const redisUrl = normalizeEnv(process.env.UPSTASH_REDIS_REST_URL) ?? normalizeEnv(process.env.KV_REST_API_URL)
-const redisToken = normalizeEnv(process.env.UPSTASH_REDIS_REST_TOKEN) ?? normalizeEnv(process.env.KV_REST_API_TOKEN)
-const redisEnabled = Boolean(redisUrl?.startsWith('http') && redisToken)
-const redis = redisEnabled ? new Redis({ url: redisUrl!, token: redisToken! }) : null
 
 export async function GET(request: NextRequest) {
   const token = getAuthTokenFromRequest(request)
   const isValid = await validateAdminRequest(token)
-  
+
   if (!isValid) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
   try {
     const client = getAdminClient(token || undefined)
-    // 1. Overview Counts
-    const { count: postsCount } = await client.from('posts').select('*', { count: 'exact', head: true }).eq('published', true)
-    const { count: draftsCount } = await client.from('posts').select('*', { count: 'exact', head: true }).eq('published', false)
-    
-    // 获取所有文章的短链接标识，然后从 Redis 读取真实阅读量
-    const { data: allPosts } = await client
-      .from('posts')
-      .select('public_id, slug')
-      .eq('published', true)
+    const oneYearAgo = new Date()
+    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1)
+    const sevenDaysAgoIso = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
 
+    const [
+      postsCountRes,
+      draftsCountRes,
+      publishedPostsRes,
+      draftsRes,
+      activityRes,
+      pendingFriendsRes,
+      recentAiErrorsRes,
+    ] = await Promise.all([
+      client
+        .from('posts')
+        .select('id', { count: 'exact', head: true })
+        .eq('published', true)
+        .neq('slug', 'about'),
+      client
+        .from('posts')
+        .select('id', { count: 'exact', head: true })
+        .eq('published', false),
+      client
+        .from('posts')
+        .select('id, public_id, slug, title, tags, published_at, created_at')
+        .eq('published', true)
+        .neq('slug', 'about'),
+      client
+        .from('posts')
+        .select('id, title, updated_at')
+        .eq('published', false)
+        .order('updated_at', { ascending: false })
+        .limit(5),
+      client
+        .from('posts')
+        .select('created_at, published_at')
+        .gte('created_at', oneYearAgo.toISOString()),
+      client
+        .from('friend_links')
+        .select('id', { count: 'exact', head: true })
+        .eq('status', 'pending'),
+      client
+        .from('ai_generation_logs')
+        .select('id', { count: 'exact', head: true })
+        .eq('status', 'error')
+        .gte('created_at', sevenDaysAgoIso),
+    ])
+
+    const publishedPosts = (publishedPostsRes.data as PublishedPostMetricRow[] | null) ?? []
+
+    // 从 Upstash Redis 并行读取所有已发布文章的阅读量与点赞数
     let totalViews = 0
-    const postsArray = (allPosts as { public_id?: string | null; slug: string }[] | null) ?? []
-    if (redis && postsArray.length > 0) {
+    let totalLikes = 0
+    let topPosts: Array<{ id: string; routeId: string; title: string; views: number; likes: number }> = []
+
+    if (upstashRedis && publishedPosts.length > 0) {
       try {
-        const keys = postsArray.map((p) => `views:${p.public_id || p.slug}`)
-        const viewsUnknown = (await redis.mget(...keys)) as unknown[]
-        const viewsArray = viewsUnknown.map((v) => {
-          if (v == null) return null
-          if (typeof v === 'number') return v
-          const n = Number(v)
-          return Number.isFinite(n) ? n : null
-        }) as (number | null)[]
-        totalViews = viewsArray.reduce((sum: number, val) => sum + (val ?? 0), 0)
+        const keys = publishedPosts.flatMap((p) => {
+          const routeId = p.public_id || p.slug
+          return [`views:${routeId}`, `likes:${routeId}`]
+        })
+        const values = (await upstashRedis.mget(...keys)) as unknown[]
+        const metrics = publishedPosts.map((post, idx) => {
+          const rawViews = Number(values[idx * 2] ?? 0)
+          const rawLikes = Number(values[idx * 2 + 1] ?? 0)
+          const views = Number.isFinite(rawViews) ? rawViews : 0
+          const likes = Number.isFinite(rawLikes) ? rawLikes : 0
+          totalViews += views
+          totalLikes += likes
+          return {
+            id: post.id,
+            routeId: post.public_id || post.slug,
+            title: post.title,
+            views,
+            likes,
+          }
+        })
+        topPosts = metrics
+          .filter((item) => item.views > 0 || item.likes > 0)
+          .sort((a, b) => b.views - a.views || b.likes - a.likes)
+          .slice(0, 5)
       } catch (redisError) {
-        console.error('Failed to fetch views from Redis:', redisError)
+        console.error('Failed to fetch stats from Redis:', redisError)
       }
     }
 
-    // 2. Drafts List
-    const { data: drafts } = await client
-      .from('posts')
-      .select('id, title, updated_at')
-      .eq('published', false)
-      .order('updated_at', { ascending: false })
-      .limit(5)
-
-    // 3. Tag Distribution (Calculate from posts directly to ensure accuracy)
-    const { data: postsWithTags } = await client
-      .from('posts')
-      .select('tags')
-      .not('tags', 'is', null)
-
-    const tagCounts: Record<string, number> = {};
-    (postsWithTags as { tags: string[] }[] | null)?.forEach(post => {
-      post.tags?.forEach((tag: string) => {
+    // 标签分布（复用 publishedPosts，不再多打一次数据库）
+    const tagCounts: Record<string, number> = {}
+    for (const post of publishedPosts) {
+      for (const rawTag of post.tags ?? []) {
+        const tag = rawTag.trim()
+        if (!tag) continue
         tagCounts[tag] = (tagCounts[tag] || 0) + 1
-      })
-    })
+      }
+    }
 
     const tags = Object.entries(tagCounts)
       .map(([name, count]) => ({ name, count }))
       .sort((a, b) => b.count - a.count)
-      .slice(0, 6)
-
-    // 4. Activity (Dates for heatmap/trend)
-    // Get last 365 days of posts created_at
-    const oneYearAgo = new Date()
-    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1)
-    const { data: activityData } = await client
-      .from('posts')
-      .select('created_at, published_at')
-      .gte('created_at', oneYearAgo.toISOString())
+      .slice(0, 8)
 
     return NextResponse.json({
       stats: {
-        totalPosts: postsCount || 0,
-        draftsCount: draftsCount || 0,
-        totalViews: totalViews
+        totalPosts: postsCountRes.count ?? 0,
+        draftsCount: draftsCountRes.count ?? 0,
+        totalViews,
+        totalLikes,
+        pendingFriendsCount: pendingFriendsRes.error ? 0 : (pendingFriendsRes.count ?? 0),
+        recentAiErrors: recentAiErrorsRes.error ? 0 : (recentAiErrorsRes.count ?? 0),
+        redisConfigured: Boolean(upstashRedis),
       },
-      drafts,
+      topPosts,
+      drafts: draftsRes.data ?? [],
       tags,
-      activity: activityData
+      activity: activityRes.data ?? [],
     })
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : String(error)

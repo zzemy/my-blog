@@ -24,6 +24,7 @@ import {
   Play,
   Quote,
   Rows3,
+  Sigma,
   Table,
 } from 'lucide-react'
 
@@ -32,6 +33,7 @@ export type EditorInsertAction = 'insertContent' | 'uploadImage' | 'pickMediaIma
 export type EditorInsertDefinition = {
   title: string
   description: string
+  keywords?: string[]
   icon: ComponentType<{ className?: string }>
   action: EditorInsertAction
   content?: Content
@@ -135,6 +137,7 @@ export const editorInsertRegistry: EditorInsertGroup[] = [
       {
         title: '代码块',
         description: '与发布页一致的代码窗口',
+        keywords: ['code', 'codeblock', 'pre', 'ts', 'js'],
         icon: CodeSquare,
         action: 'insertContent',
         content: {
@@ -144,8 +147,31 @@ export const editorInsertRegistry: EditorInsertGroup[] = [
         },
       },
       {
+        title: '数学公式（块级）',
+        description: '插入 LaTeX 块级公式',
+        keywords: ['math', 'latex', 'katex', 'formula', 'equation'],
+        icon: Sigma,
+        action: 'insertContent',
+        content: {
+          type: 'blockMath',
+          attrs: { latex: 'E = mc^2' },
+        },
+      },
+      {
+        title: '行内公式',
+        description: '插入 LaTeX 行内公式',
+        keywords: ['inlinemath', 'math', 'latex', 'katex'],
+        icon: Sigma,
+        action: 'insertContent',
+        content: {
+          type: 'inlineMath',
+          attrs: { latex: 'a^2 + b^2 = c^2' },
+        },
+      },
+      {
         title: '分割线',
         description: '插入水平分割线',
+        keywords: ['hr', 'divider', 'line'],
         icon: Minus,
         action: 'insertContent',
         content: { type: 'horizontalRule' },

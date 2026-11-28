@@ -11,6 +11,7 @@ import {
   CheckCircle,
   ChevronRight,
   Clock,
+  Download,
   ExternalLink,
   FileText,
   FolderOpen,
@@ -70,6 +71,7 @@ import {
 import type { LocalDraftSnapshot } from './form-utils'
 import { MediaPickerDialog } from './media-picker-dialog'
 import { EditorAiSheet } from '@/features/ai/components/editor-ai-sheet'
+import { exportPostToMarkdown } from '@/features/blog/utils/tiptap-to-markdown'
 import type { PostFormData } from './types'
 import { nowLocalInput } from './utils'
 import styles from './post-editor-workspace.module.css'
@@ -128,6 +130,8 @@ export function PostEditorWorkspace({
   const [markdownImporting, setMarkdownImporting] = useState(false)
   const [advancedOpen, setAdvancedOpen] = useState(false)
   const [aiSheetOpen, setAiSheetOpen] = useState(false)
+  const [aiInitialTab, setAiInitialTab] = useState<'summary' | 'metadata' | 'translate' | 'write'>('summary')
+  const [suggestedTags, setSuggestedTags] = useState<string[]>([])
   const [outlineOpen, setOutlineOpen] = useState(true)
   const [inspectorOpen, setInspectorOpen] = useState(true)
   const [activeOutlineId, setActiveOutlineId] = useState<string | null>(null)
@@ -226,6 +230,41 @@ export function PostEditorWorkspace({
 
     window.addEventListener('admin-rich-block-edit-open', handleRichBlockOpen)
     return () => window.removeEventListener('admin-rich-block-edit-open', handleRichBlockOpen)
+  }, [])
+
+  // Listen for inline selection bubble "AI 润色" trigger
+  useEffect(() => {
+    const handleOpenAiRewrite = () => {
+      setAiInitialTab('write')
+      setAiSheetOpen(true)
+    }
+    window.addEventListener('admin-editor-open-ai-rewrite', handleOpenAiRewrite)
+    return () => window.removeEventListener('admin-editor-open-ai-rewrite', handleOpenAiRewrite)
+  }, [])
+
+  // Fetch existing tags for autocomplete suggestions
+  useEffect(() => {
+    let cancelled = false
+    fetch('/api/admin/posts?published=false')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data: { posts?: Array<{ tags?: string[] }> } | null) => {
+        if (cancelled || !data?.posts) return
+        const counts = new Map<string, number>()
+        for (const p of data.posts) {
+          for (const t of p.tags ?? []) {
+            const clean = t.trim()
+            if (clean) counts.set(clean, (counts.get(clean) ?? 0) + 1)
+          }
+        }
+        const sorted = Array.from(counts.entries())
+          .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'zh-CN'))
+          .map(([tag]) => tag)
+        setSuggestedTags(sorted)
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   // Auto-open inspector when validation fails on an inspector field (Slug or Tags)
@@ -471,22 +510,25 @@ export function PostEditorWorkspace({
               variant="outline"
               size="sm"
               className="h-8 gap-1.5 px-2.5 text-xs"
-              onClick={() => setAiSheetOpen(true)}
+              onClick={() => {
+                setAiInitialTab('summary')
+                setAiSheetOpen(true)
+              }}
               title="打开 AI 写作、摘要与多语言翻译助手"
             >
               <Sparkles className="h-3.5 w-3.5 text-primary" />
               <span>AI 助手</span>
             </Button>
-            {publicUrl ? (
+            {publicUrl || postId ? (
               <a
-                href={publicUrl}
+                href={publicUrl || `/admin/posts/${postId}/preview`}
                 target="_blank"
                 rel="noreferrer"
                 className={styles.viewPublicLink}
-                title="在新标签页查看已发布文章"
+                title={publicUrl ? '在新标签页查看已发布文章' : '在新标签页预览当前草稿'}
               >
                 <ExternalLink className="h-3.5 w-3.5" />
-                <span>预览</span>
+                <span>{publicUrl ? '查看' : '预览草稿'}</span>
               </a>
             ) : null}
             <Button
@@ -500,7 +542,7 @@ export function PostEditorWorkspace({
             >
               {isFocusMode ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
             </Button>
-            <ModeToggle />
+            <ModeToggle simple />
             <Sheet open={advancedOpen} onOpenChange={setAdvancedOpen}>
               <SheetTrigger asChild>
                 <Button
@@ -545,6 +587,32 @@ export function PostEditorWorkspace({
                       </Button>
                       <Button type="button" onClick={() => void importMarkdown('replace')} disabled={markdownImporting}>
                         替换正文
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        className="gap-1.5"
+                        onClick={() => {
+                          const md = exportPostToMarkdown({
+                            title: formData.title || '未命名文章',
+                            slug: formData.slug || 'draft',
+                            description: formData.description,
+                            tags: formData.tags,
+                            publishedAt: formData.published_at || undefined,
+                            content: formData.content,
+                          })
+                          const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' })
+                          const url = URL.createObjectURL(blob)
+                          const a = document.createElement('a')
+                          a.href = url
+                          a.download = `${formData.slug || 'post'}.md`
+                          a.click()
+                          URL.revokeObjectURL(url)
+                          toast.success('已导出 Markdown 文件')
+                        }}
+                      >
+                        <Download className="h-3.5 w-3.5" />
+                        导出 .md
                       </Button>
                     </div>
                   </TabsContent>
@@ -808,6 +876,28 @@ export function PostEditorWorkspace({
                 ))}
               </div>
             ) : null}
+            {(() => {
+              const q = draftTag.trim().toLowerCase()
+              const candidates = suggestedTags
+                .filter((tag) => !formData.tags.includes(tag) && (!q || tag.toLowerCase().includes(q)))
+                .slice(0, 8)
+              if (candidates.length === 0) return null
+              return (
+                <div className="mt-2 flex flex-wrap items-center gap-1">
+                  <span className="text-[11px] text-muted-foreground">推荐：</span>
+                  {candidates.map((tag) => (
+                    <button
+                      key={tag}
+                      type="button"
+                      onClick={() => addTagsFromInput(tag)}
+                      className="rounded-full border border-dashed border-border/80 px-2 py-0.5 text-[11px] text-muted-foreground transition-colors hover:border-foreground/30 hover:text-foreground"
+                    >
+                      +{tag}
+                    </button>
+                  ))}
+                </div>
+              )
+            })()}
           </section>
 
           <section className={styles.inspectorSection}>
@@ -963,6 +1053,8 @@ export function PostEditorWorkspace({
       <EditorAiSheet
         open={aiSheetOpen}
         onOpenChange={setAiSheetOpen}
+        initialTab={aiInitialTab}
+        isDirty={isDirty}
         postId={postId}
         formData={formData}
         onUpdateForm={updateForm}
