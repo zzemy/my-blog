@@ -1,6 +1,5 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import { motion, useMotionValue, useSpring } from 'framer-motion'
 
 type HeroTitleProps = {
@@ -11,22 +10,12 @@ type HeroTitleProps = {
 }
 
 export function HeroTitle({ title, description, postCount, latestDate }: HeroTitleProps) {
-  const [reducedMotion, setReducedMotion] = useState(false)
   const offsetX = useMotionValue(0)
   const offsetY = useMotionValue(0)
   const x = useSpring(offsetX, { stiffness: 45, damping: 20, mass: 0.9 })
   const y = useSpring(offsetY, { stiffness: 45, damping: 20, mass: 0.9 })
 
-  useEffect(() => {
-    const mq = window.matchMedia?.('(prefers-reduced-motion: reduce)')
-    const sync = () => setReducedMotion(Boolean(mq?.matches))
-    sync()
-    mq?.addEventListener?.('change', sync)
-    return () => mq?.removeEventListener?.('change', sync)
-  }, [])
-
   const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (reducedMotion) return
     const bounds = event.currentTarget.getBoundingClientRect()
     const horizontal = (event.clientX - bounds.left) / bounds.width - 0.5
     const vertical = (event.clientY - bounds.top) / bounds.height - 0.5
@@ -42,7 +31,7 @@ export function HeroTitle({ title, description, postCount, latestDate }: HeroTit
   const scrollToPosts = () => {
     const target = document.getElementById('recent-posts')
     if (target) {
-      target.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'start' })
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }
   }
 
@@ -69,7 +58,7 @@ export function HeroTitle({ title, description, postCount, latestDate }: HeroTit
           <motion.h1
             aria-label={title}
             className="hero-display bg-gradient-to-b from-foreground via-foreground/95 to-foreground/75 bg-clip-text pb-2 text-6xl font-normal leading-[1.02] text-transparent sm:text-7xl md:text-[6.25rem] lg:text-[7.5rem]"
-            style={reducedMotion ? undefined : { x, y }}
+            style={{ x, y }}
           >
             {title}
           </motion.h1>

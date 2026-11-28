@@ -18,8 +18,6 @@ export function VantaBackground() {
   const { resolvedTheme } = useTheme()
   const [hasMounted, setHasMounted] = useState(false)
   const [mediaReady, setMediaReady] = useState(false)
-  const [reducedMotion, setReducedMotion] = useState(false)
-  const [saveData, setSaveData] = useState(false)
   const scrollLayerRef = useRef<HTMLDivElement>(null)
   const primaryVideoRef = useRef<HTMLVideoElement>(null)
   const secondaryVideoRef = useRef<HTMLVideoElement>(null)
@@ -35,17 +33,6 @@ export function VantaBackground() {
 
   useEffect(() => {
     setHasMounted(true)
-    const mq = window.matchMedia?.("(prefers-reduced-motion: reduce)")
-    const syncMotion = () => setReducedMotion(Boolean(mq?.matches))
-    syncMotion()
-    mq?.addEventListener?.("change", syncMotion)
-    const connection = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection
-    if (connection?.saveData) {
-      setSaveData(true)
-    }
-    return () => {
-      mq?.removeEventListener?.("change", syncMotion)
-    }
   }, [])
 
   useEffect(() => {
@@ -61,8 +48,6 @@ export function VantaBackground() {
       if (scrollLayerRef.current) {
         scrollLayerRef.current.style.opacity = String(1 - progress * 0.94)
       }
-
-      if (reducedMotion) return
 
       const primary = primaryVideoRef.current
       const secondary = secondaryVideoRef.current
@@ -96,12 +81,12 @@ export function VantaBackground() {
       window.removeEventListener("scroll", onScroll)
       window.removeEventListener("resize", onScroll)
     }
-  }, [hasMounted, isHomepage, reducedMotion, themeReady])
+  }, [hasMounted, isHomepage, themeReady])
 
   useEffect(() => {
     const primary = primaryVideoRef.current
     const secondary = secondaryVideoRef.current
-    if (!hasMounted || !themeReady || !primary || !secondary || !isHomepage || reducedMotion) return
+    if (!hasMounted || !themeReady || !primary || !secondary || !isHomepage) return
 
     const videos = [primary, secondary] as const
     const mediaOpacity = isDark ? 1 : LIGHT_MEDIA_OPACITY
@@ -197,7 +182,7 @@ export function VantaBackground() {
       pausedByScrollRef.current = false
       setMediaReady(false)
     }
-  }, [hasMounted, isDark, isHomepage, playbackKey, reducedMotion, themeReady])
+  }, [hasMounted, isDark, isHomepage, playbackKey, themeReady])
 
   if (!hasMounted || !themeReady || !isHomepage) return null
 
@@ -224,25 +209,24 @@ export function VantaBackground() {
           <img
             src={posterSrc}
             alt=""
-            className={`absolute inset-0 h-full w-full scale-[1.04] object-cover transition-opacity duration-700 ${mediaClass} ${mediaReady && !reducedMotion ? "opacity-0" : "opacity-100"}`}
-            style={mediaReady && !reducedMotion ? undefined : { opacity: isDark ? 0.85 : LIGHT_MEDIA_OPACITY }}
+            className={`absolute inset-0 h-full w-full scale-[1.04] object-cover transition-opacity duration-700 ${mediaClass} ${mediaReady ? "opacity-0" : "opacity-100"}`}
+            style={mediaReady ? undefined : { opacity: isDark ? 0.85 : LIGHT_MEDIA_OPACITY }}
           />
-          {!reducedMotion &&
-            [primaryVideoRef, secondaryVideoRef].map((videoRef, index) => (
-              <video
-                key={`${playbackKey}-${index}`}
-                ref={videoRef}
-                poster={index === 0 ? posterSrc : undefined}
-                className={`absolute inset-0 h-full w-full scale-[1.04] object-cover ${mediaClass}`}
-                style={{ opacity: index === 0 ? (isDark ? 1 : LIGHT_MEDIA_OPACITY) : 0 }}
-                autoPlay={index === 0}
-                muted
-                playsInline
-                preload={saveData ? "metadata" : index === 0 ? "auto" : "metadata"}
-              >
-                <source src={videoSrc} type="video/mp4" />
-              </video>
-            ))}
+          {[primaryVideoRef, secondaryVideoRef].map((videoRef, index) => (
+            <video
+              key={`${playbackKey}-${index}`}
+              ref={videoRef}
+              poster={index === 0 ? posterSrc : undefined}
+              className={`absolute inset-0 h-full w-full scale-[1.04] object-cover ${mediaClass}`}
+              style={{ opacity: index === 0 ? (isDark ? 1 : LIGHT_MEDIA_OPACITY) : 0 }}
+              autoPlay={index === 0}
+              muted
+              playsInline
+              preload={index === 0 ? "auto" : "metadata"}
+            >
+              <source src={videoSrc} type="video/mp4" />
+            </video>
+          ))}
         </div>
 
         <div className={`absolute inset-0 ${vignetteClass}`} />

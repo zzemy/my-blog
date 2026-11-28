@@ -36,14 +36,13 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const check = () => {
       const isDesktop = window.innerWidth >= 768;
-      const prefersReduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
       let userDisabled = false;
       try {
         userDisabled = localStorage.getItem(SMOOTH_SCROLL_STORAGE_KEY) === "off";
       } catch {
         userDisabled = false;
       }
-      setEnableLenis(isDesktop && !prefersReduced && !userDisabled);
+      setEnableLenis(isDesktop && !userDisabled);
     };
     check();
     window.addEventListener("resize", check);

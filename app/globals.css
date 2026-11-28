@@ -312,16 +312,3 @@ html.dark[data-accent-preset="indigo"] {
   --primary-foreground: #1e1b4b;
   --article-accent: #a5b4fc;
 }
-
-@media (prefers-reduced-motion: reduce) {
-  .animate-hero-rise,
-  .animate-scroll-cue,
-  .page-transition-enter {
-    animation: none !important;
-  }
-  *,
-  *::before,
-  *::after {
-    scroll-behavior: auto !important;
-  }
-}
