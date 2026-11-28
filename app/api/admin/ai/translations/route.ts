@@ -11,6 +11,8 @@ import { translateHeaderOutputSchema } from '@/lib/ai/prompts'
 import { getLocaleLabel, parseAiSummaryFromMetadata } from '@/lib/ai/types'
 import { revalidatePostMutation } from '@/lib/revalidation/posts'
 
+export const maxDuration = 300
+
 const translatePostSchema = z.object({
   postId: z.string().uuid('无效的文章 ID'),
   locale: z
@@ -35,6 +37,14 @@ interface PostForTranslate {
   metadata: Record<string, unknown> | null
 }
 
+interface TranslationSummaryRow {
+  post_id: string
+  locale: string
+  published: boolean
+  source_hash: string
+  updated_at: string
+}
+
 export async function GET(request: NextRequest) {
   const token = getAuthTokenFromRequest(request)
   if (!(await validateAdminRequest(token))) {
@@ -44,11 +54,41 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const postId = searchParams.get('postId')
-    if (!postId) {
-      return NextResponse.json({ error: '缺少 postId 参数' }, { status: 400 })
-    }
-
     const client = getAdminClient(token || undefined)
+
+    // 未传 postId 时返回全站文章的译文概览（供批量处理中心展示各文章已有译文状态）
+    if (!postId) {
+      const { data, error } = await client
+        .from('post_translations')
+        .select('post_id, locale, published, source_hash, updated_at')
+        .order('created_at', { ascending: true })
+
+      if (error) {
+        if (error.code === '42P01') {
+          return NextResponse.json({ summaries: {}, code: 'MIGRATION_REQUIRED' })
+        }
+        throw error
+      }
+
+      const summaries: Record<
+        string,
+        Array<{ locale: string; published: boolean; source_hash: string; updated_at: string }>
+      > = {}
+
+      for (const row of (data as TranslationSummaryRow[] | null) ?? []) {
+        if (!summaries[row.post_id]) {
+          summaries[row.post_id] = []
+        }
+        summaries[row.post_id].push({
+          locale: row.locale,
+          published: row.published,
+          source_hash: row.source_hash,
+          updated_at: row.updated_at,
+        })
+      }
+
+      return NextResponse.json({ summaries })
+    }
 
     const [{ data: postData }, { data: translations, error }] = await Promise.all([
       client.from('posts').select('title, content').eq('id', postId).maybeSingle(),
@@ -93,6 +133,7 @@ export async function POST(request: NextRequest) {
   let resolvedProviderName = 'unknown'
   let resolvedModel = 'unknown'
   let targetPostId: string | null = null
+  let targetLocaleCode = ''
 
   try {
     const rawBody: unknown = await request.json()
@@ -106,6 +147,7 @@ export async function POST(request: NextRequest) {
 
     const body = parsed.data
     targetPostId = body.postId
+    targetLocaleCode = body.locale
     const client = getAdminClient(token || undefined)
 
     const { data: postData, error: postError } = await client
@@ -136,7 +178,11 @@ export async function POST(request: NextRequest) {
     let completionTokensSum = 0
     let hasUsage = false
 
-    const invokeLlm = async (systemPrompt: string, userPrompt: string) => {
+    const invokeLlm = async (
+      systemPrompt: string,
+      userPrompt: string,
+      options?: { jsonMode?: boolean },
+    ) => {
       const res = await callLlm({
         protocol: context.provider.protocol,
         baseUrl: context.provider.baseUrl,
@@ -145,8 +191,9 @@ export async function POST(request: NextRequest) {
         systemPrompt,
         userPrompt,
         temperature: context.temperature,
-        maxTokens: Math.max(context.maxTokens, 3000),
-        jsonMode: true,
+        // 推理/长文翻译模型需要足够输出预算，避免思考过程耗尽 max_tokens 导致正文为空
+        maxTokens: Math.max(context.maxTokens, 6144),
+        jsonMode: options?.jsonMode ?? true,
         customHeaders: context.provider.customHeaders,
         timeoutMs: 120_000,
       })
@@ -162,7 +209,7 @@ export async function POST(request: NextRequest) {
       return res.text
     }
 
-    // Step 1: 翻译标题、简介与 AI 导读摘要
+    // Step 1: 翻译标题、简介与 AI 导读摘要（失败自动重试一次，必要时降级为仅翻标题）
     const glossaryHint =
       context.glossary.length > 0
         ? `\nTerminology Glossary:\n${context.glossary.map((g) => `- "${g.source}" => "${g.target}"`).join('\n')}`
@@ -181,14 +228,21 @@ export async function POST(request: NextRequest) {
         : null,
     }
 
-    const headerRaw = await invokeLlm(
-      `You are an expert technical blog translator. Translate the provided JSON fields into ${localeLabel}.
-Preserve all technical terms, library names, and JSON keys. Return ONLY valid JSON matching the exact input shape.${glossaryHint}`,
-      `Target language: ${localeLabel}\n\nInput JSON:\n${JSON.stringify(headerPayload, null, 2)}`,
-    )
-    const translatedHeader = translateHeaderOutputSchema.parse(extractJsonFromLlmText(headerRaw))
+    const headerSystemPrompt = `You are an expert technical blog translator. Translate the provided JSON fields into ${localeLabel}.
+Preserve all technical terms, library names, and JSON keys. Return ONLY valid JSON matching the exact input shape.${glossaryHint}`
+    const headerUserPrompt = `Target language: ${localeLabel}\n\nInput JSON:\n${JSON.stringify(headerPayload, null, 2)}`
 
-    // Step 2: AST 节点级无损翻译 TipTap 正文
+    let translatedHeader: z.infer<typeof translateHeaderOutputSchema>
+    try {
+      const headerRaw = await invokeLlm(headerSystemPrompt, headerUserPrompt, { jsonMode: true })
+      translatedHeader = translateHeaderOutputSchema.parse(extractJsonFromLlmText(headerRaw))
+    } catch {
+      // 重试一次（关闭强制 jsonMode 以兼容部分中转模型）
+      const retryRaw = await invokeLlm(headerSystemPrompt, headerUserPrompt, { jsonMode: false })
+      translatedHeader = translateHeaderOutputSchema.parse(extractJsonFromLlmText(retryRaw))
+    }
+
+    // Step 2: AST 节点级无损翻译 TipTap 正文（支持失败自动二分拆批与单段纯文本兜底）
     const bodyResult = await translateTipTapContent({
       content: post.content,
       articleTitle: post.title,
@@ -267,7 +321,7 @@ Preserve all technical terms, library names, and JSON keys. Return ONLY valid JS
       const client = getAdminClient(token || undefined)
       await recordAiLog(client, {
         post_id: targetPostId,
-        task_key: 'translate',
+        task_key: targetLocaleCode ? `translate:${targetLocaleCode}` : 'translate',
         provider_id: resolvedProviderId,
         provider_name: resolvedProviderName,
         model: resolvedModel,

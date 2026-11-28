@@ -54,6 +54,22 @@ const TASK_BADGES: Record<string, { label: string; className: string }> = {
   },
 }
 
+function getTaskBadge(taskKey: string): { label: string; className: string } {
+  if (taskKey.startsWith('translate:')) {
+    const locale = taskKey.slice('translate:'.length).toUpperCase()
+    return {
+      label: `多语言翻译 · ${locale}`,
+      className: TASK_BADGES.translate.className,
+    }
+  }
+  return (
+    TASK_BADGES[taskKey] ?? {
+      label: taskKey,
+      className: 'bg-muted text-muted-foreground',
+    }
+  )
+}
+
 interface LogsPanelProps {
   initialLogs?: AiGenerationLog[]
   initialStats?: LogStats
@@ -112,7 +128,13 @@ export function LogsPanel({ initialLogs, initialStats, onRefreshParent }: LogsPa
     const keyword = searchQuery.trim().toLowerCase()
     return logs.filter((log) => {
       if (statusFilter !== 'all' && log.status !== statusFilter) return false
-      if (taskFilter !== 'all' && log.task_key !== taskFilter) return false
+      if (taskFilter !== 'all') {
+        const matchesTask =
+          taskFilter === 'translate'
+            ? log.task_key === 'translate' || log.task_key.startsWith('translate:')
+            : log.task_key === taskFilter
+        if (!matchesTask) return false
+      }
       if (keyword) {
         const haystack = `${log.provider_name} ${log.model} ${log.task_key} ${log.error_message ?? ''}`.toLowerCase()
         return haystack.includes(keyword)
@@ -322,10 +344,7 @@ export function LogsPanel({ initialLogs, initialStats, onRefreshParent }: LogsPa
                 <tbody className="divide-y divide-border/70">
                   {filteredLogs.map((log) => {
                     const expanded = expandedId === log.id
-                    const badge = TASK_BADGES[log.task_key] ?? {
-                      label: log.task_key,
-                      className: 'bg-muted text-muted-foreground',
-                    }
+                    const badge = getTaskBadge(log.task_key)
 
                     return (
                       <Fragment key={log.id}>

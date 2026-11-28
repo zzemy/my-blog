@@ -129,6 +129,11 @@ async function callOpenAiCompatible(req: LlmCompletionRequest): Promise<LlmCompl
   return parseOpenAiResponse(payload, Date.now() - startedAt)
 }
 
+function stripThinkingTags(text: string): string {
+  // 部分推理/中转模型会在 content 中夹带 <think>...</think> 思考过程
+  return text.replace(/<think>[\s\S]*?<\/think>/gi, '').trim()
+}
+
 function parseOpenAiResponse(payload: unknown, durationMs: number): LlmCompletionResponse {
   if (!isRecord(payload) || !Array.isArray(payload.choices) || payload.choices.length === 0) {
     throw new Error('模型返回结构异常（缺少 choices）')
@@ -136,18 +141,32 @@ function parseOpenAiResponse(payload: unknown, durationMs: number): LlmCompletio
 
   const firstChoice = payload.choices[0]
   let text = ''
-  if (isRecord(firstChoice) && isRecord(firstChoice.message)) {
-    const content = firstChoice.message.content
-    if (typeof content === 'string') {
-      text = content
-    } else if (Array.isArray(content)) {
-      text = content
-        .map((part) => (isRecord(part) && typeof part.text === 'string' ? part.text : ''))
-        .join('')
+  let finishReason = ''
+  let hasReasoningOnly = false
+  if (isRecord(firstChoice)) {
+    if (typeof firstChoice.finish_reason === 'string') {
+      finishReason = firstChoice.finish_reason
+    }
+    if (isRecord(firstChoice.message)) {
+      const content = firstChoice.message.content
+      if (typeof content === 'string') {
+        text = content
+      } else if (Array.isArray(content)) {
+        text = content
+          .map((part) => (isRecord(part) && typeof part.text === 'string' ? part.text : ''))
+          .join('')
+      }
+      if (!text.trim() && typeof firstChoice.message.reasoning_content === 'string' && firstChoice.message.reasoning_content.trim()) {
+        hasReasoningOnly = true
+      }
     }
   }
 
-  if (!text.trim()) {
+  const cleanedText = stripThinkingTags(text)
+  if (!cleanedText) {
+    if (finishReason === 'length' || hasReasoningOnly) {
+      throw new Error('模型输出触及 max_tokens 上限导致正文为空（思考/输出被截断），将自动拆小批次或请适当调大 Max Tokens')
+    }
     throw new Error('模型返回内容为空')
   }
 
@@ -159,7 +178,7 @@ function parseOpenAiResponse(payload: unknown, durationMs: number): LlmCompletio
     (promptTokens !== null && completionTokens !== null ? promptTokens + completionTokens : null)
 
   return {
-    text: text.trim(),
+    text: cleanedText,
     usage: { promptTokens, completionTokens, totalTokens },
     durationMs,
     rawModel: typeof payload.model === 'string' ? payload.model : undefined,
@@ -401,33 +420,40 @@ export async function fetchProviderModels(params: {
 }
 
 export function extractJsonFromLlmText(rawText: string): unknown {
-  const trimmed = rawText.trim()
+  const trimmed = stripThinkingTags(rawText)
 
-  try {
-    return JSON.parse(trimmed)
-  } catch {
-    // 尝试提取 ```json ... ``` 或 ``` ... ``` 代码块
+  const tryParse = (candidate: string): { ok: true; value: unknown } | { ok: false } => {
+    try {
+      return { ok: true, value: JSON.parse(candidate) }
+    } catch {
+      // 尝试修复尾随逗号等常见小瑕疵
+      try {
+        const withoutTrailingCommas = candidate.replace(/,\s*([}\]])/g, '$1')
+        return { ok: true, value: JSON.parse(withoutTrailingCommas) }
+      } catch {
+        return { ok: false }
+      }
+    }
   }
 
-  const fenceMatch = trimmed.match(/```(?:json)?\s*([\s\S]*?)```/i)
-  if (fenceMatch?.[1]) {
-    try {
-      return JSON.parse(fenceMatch[1].trim())
-    } catch {
-      // continue
-    }
+  const direct = tryParse(trimmed)
+  if (direct.ok) return direct.value
+
+  // 尝试提取所有 ```json ... ``` 或 ``` ... ``` 代码块（从后往前，优先取最终输出）
+  const fenceMatches = Array.from(trimmed.matchAll(/```(?:json)?\s*([\s\S]*?)```/gi))
+  for (let i = fenceMatches.length - 1; i >= 0; i -= 1) {
+    const block = fenceMatches[i]?.[1]?.trim()
+    if (!block) continue
+    const parsed = tryParse(block)
+    if (parsed.ok) return parsed.value
   }
 
   // 尝试定位最外层 { ... }
   const firstBrace = trimmed.indexOf('{')
   const lastBrace = trimmed.lastIndexOf('}')
   if (firstBrace !== -1 && lastBrace > firstBrace) {
-    const candidate = trimmed.slice(firstBrace, lastBrace + 1)
-    try {
-      return JSON.parse(candidate)
-    } catch {
-      // continue
-    }
+    const parsed = tryParse(trimmed.slice(firstBrace, lastBrace + 1))
+    if (parsed.ok) return parsed.value
   }
 
   throw new Error('无法将模型返回内容解析为合法 JSON，请重试或更换更稳定的模型')

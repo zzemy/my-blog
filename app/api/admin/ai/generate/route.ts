@@ -13,6 +13,8 @@ import {
 import type { AiSummaryData, RewriteAction } from '@/lib/ai/types'
 import { revalidatePostMutation } from '@/lib/revalidation/posts'
 
+export const maxDuration = 300
+
 const generateRequestSchema = z.object({
   task: z.enum(['summary', 'metadata', 'rewrite', 'outline']),
   postId: z.string().uuid().optional(),

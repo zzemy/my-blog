@@ -5,9 +5,27 @@ import { extractJsonFromLlmText } from './providers'
 
 type JsonRecord = Record<string, unknown>
 
-const SKIP_NODE_TYPES = new Set(['codeBlock', 'mathematics', 'inlineMath', 'blockMath', 'image', 'horizontalRule'])
+const SKIP_NODE_TYPES = new Set([
+  'codeBlock',
+  'mathematics',
+  'inlineMath',
+  'blockMath',
+  'image',
+  'horizontalRule',
+])
 
-const TRANSLATABLE_ATTR_KEYS = ['title', 'text', 'label', 'caption', 'eyebrow', 'start', 'question', 'yes', 'no', 'end']
+const TRANSLATABLE_ATTR_KEYS = [
+  'title',
+  'text',
+  'label',
+  'caption',
+  'eyebrow',
+  'start',
+  'question',
+  'yes',
+  'no',
+  'end',
+]
 const TRANSLATABLE_LIST_KEYS = ['panels', 'items', 'cards']
 const TRANSLATABLE_ITEM_KEYS = ['title', 'text', 'label', 'eyebrow']
 
@@ -108,14 +126,21 @@ function collectTranslatableSegments(node: unknown, segments: ExtractedSegment[]
   }
 }
 
-function batchSegments(segments: ExtractedSegment[], maxCharsPerBatch = 2200, maxItemsPerBatch = 30): ExtractedSegment[][] {
+function batchSegments(
+  segments: ExtractedSegment[],
+  maxCharsPerBatch = 1100,
+  maxItemsPerBatch = 16,
+): ExtractedSegment[][] {
   const batches: ExtractedSegment[][] = []
   let current: ExtractedSegment[] = []
   let currentChars = 0
 
   for (const segment of segments) {
     const nextChars = currentChars + segment.text.length
-    if (current.length > 0 && (nextChars > maxCharsPerBatch || current.length >= maxItemsPerBatch)) {
+    if (
+      current.length > 0 &&
+      (nextChars > maxCharsPerBatch || current.length >= maxItemsPerBatch)
+    ) {
       batches.push(current)
       current = []
       currentChars = 0
@@ -135,14 +160,46 @@ const batchResponseSchema = z.object({
   translations: z.record(z.string(), z.string()),
 })
 
+function parseTranslationMap(rawOutput: string): Record<string, string> {
+  const parsedJson = extractJsonFromLlmText(rawOutput)
+
+  // 兼容模型直接返回 {"0": "..."} 或 {"translations": {"0": "..."}}
+  const parsedWrapped = batchResponseSchema.safeParse(parsedJson)
+  if (parsedWrapped.success) {
+    return parsedWrapped.data.translations
+  }
+
+  if (isRecord(parsedJson)) {
+    const direct: Record<string, string> = {}
+    for (const [key, val] of Object.entries(parsedJson)) {
+      if (typeof val === 'string') {
+        direct[key] = val
+      }
+    }
+    if (Object.keys(direct).length > 0) {
+      return direct
+    }
+  }
+
+  throw new Error('模型返回的 JSON 中缺少有效的翻译映射')
+}
+
 export interface TranslateTipTapParams {
   content: JSONContent
   articleTitle: string
   targetLocaleLabel: string
   glossary?: AiGlossaryEntry[]
   customSystemPrompt?: string | null
-  invokeBatch: (systemPrompt: string, userPrompt: string) => Promise<string>
-  onProgress?: (progress: { completedBatches: number; totalBatches: number; totalSegments: number }) => void
+  invokeBatch: (
+    systemPrompt: string,
+    userPrompt: string,
+    options?: { jsonMode?: boolean },
+  ) => Promise<string>
+  onProgress?: (progress: {
+    completedBatches: number
+    totalBatches: number
+    totalSegments: number
+  }) => void
 }
 
 export async function translateTipTapContent(params: TranslateTipTapParams): Promise<{
@@ -178,17 +235,24 @@ Rules:
 3. Return ONLY a valid JSON object matching: {"translations": {"<id>": "<translated text>"}}.
 4. Every input id MUST appear in "translations". Do not merge or skip entries.${glossaryBlock}`
 
-  const batches = batchSegments(segments)
-  let translatedSegments = 0
+  const plainSingleSystemPrompt = `You are an expert technical blog translator. Translate the given text accurately and naturally into ${params.targetLocaleLabel}. Preserve technical terms, code identifiers, and URLs. Return ONLY the translated text without quotes, markdown fences, or explanations.${glossaryBlock}`
 
-  params.onProgress?.({
-    completedBatches: 0,
-    totalBatches: batches.length,
-    totalSegments: segments.length,
-  })
+  const translateSinglePlain = async (seg: ExtractedSegment): Promise<number> => {
+    const userPrompt = `Article Title Context: ${params.articleTitle}\nTarget Language: ${params.targetLocaleLabel}\n\nText to translate:\n${seg.text}`
+    const translated = (
+      await params.invokeBatch(plainSingleSystemPrompt, userPrompt, { jsonMode: false })
+    ).trim()
+    if (translated) {
+      seg.apply(translated)
+      return 1
+    }
+    return 0
+  }
 
-  for (let batchIndex = 0; batchIndex < batches.length; batchIndex += 1) {
-    const batch = batches[batchIndex]
+  const translateBatchWithFallback = async (
+    batch: ExtractedSegment[],
+    depth = 0,
+  ): Promise<number> => {
     const inputMap: Record<string, string> = {}
     for (const seg of batch) {
       inputMap[seg.id] = seg.text
@@ -201,31 +265,70 @@ Rules:
       JSON.stringify(inputMap, null, 2),
     ].join('\n\n')
 
-    const rawOutput = await params.invokeBatch(systemPrompt, userPrompt)
-    const parsedJson = extractJsonFromLlmText(rawOutput)
+    // 尝试 JSON 批量翻译（失败后若有多段则自动二分拆批，单段则降级为纯文本翻译）
+    try {
+      const rawOutput = await params.invokeBatch(systemPrompt, userPrompt, { jsonMode: true })
+      const map = parseTranslationMap(rawOutput)
+      let count = 0
+      const missing: ExtractedSegment[] = []
 
-    // 兼容模型直接返回 {"0": "..."} 或 {"translations": {"0": "..."}}
-    let map: Record<string, string> = {}
-    const parsedWrapped = batchResponseSchema.safeParse(parsedJson)
-    if (parsedWrapped.success) {
-      map = parsedWrapped.data.translations
-    } else if (isRecord(parsedJson)) {
-      const direct: Record<string, string> = {}
-      for (const [key, val] of Object.entries(parsedJson)) {
-        if (typeof val === 'string') {
-          direct[key] = val
+      for (const seg of batch) {
+        const translated = map[seg.id]
+        if (typeof translated === 'string' && translated.trim()) {
+          seg.apply(translated)
+          count += 1
+        } else {
+          missing.push(seg)
         }
       }
-      map = direct
-    }
 
-    for (const seg of batch) {
-      const translated = map[seg.id]
-      if (typeof translated === 'string' && translated.trim()) {
-        seg.apply(translated)
-        translatedSegments += 1
+      // 补漏：若模型漏译少量条目，单独补译
+      if (missing.length > 0 && missing.length <= 4 && depth < 2) {
+        for (const seg of missing) {
+          try {
+            count += await translateSinglePlain(seg)
+          } catch {
+            // 保留原文，避免整篇失败
+          }
+        }
       }
+
+      return count
+    } catch (firstError) {
+      if (batch.length > 1) {
+        const mid = Math.ceil(batch.length / 2)
+        const left = batch.slice(0, mid)
+        const right = batch.slice(mid)
+        const leftCount = await translateBatchWithFallback(left, depth + 1)
+        const rightCount = await translateBatchWithFallback(right, depth + 1)
+        return leftCount + rightCount
+      }
+
+      // 单段在 JSON 模式下仍失败时，降级为纯文本翻译，彻底规避 JSON 转义/格式问题
+      if (batch.length === 1) {
+        try {
+          return await translateSinglePlain(batch[0])
+        } catch {
+          throw firstError
+        }
+      }
+
+      throw firstError
     }
+  }
+
+  const batches = batchSegments(segments)
+  let translatedSegments = 0
+
+  params.onProgress?.({
+    completedBatches: 0,
+    totalBatches: batches.length,
+    totalSegments: segments.length,
+  })
+
+  for (let batchIndex = 0; batchIndex < batches.length; batchIndex += 1) {
+    const batch = batches[batchIndex]
+    translatedSegments += await translateBatchWithFallback(batch)
 
     params.onProgress?.({
       completedBatches: batchIndex + 1,

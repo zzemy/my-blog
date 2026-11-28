@@ -7,6 +7,7 @@ import {
   AlertCircle,
   CheckCircle2,
   ExternalLink,
+  Globe,
   Languages,
   Loader2,
   Play,
@@ -31,12 +32,53 @@ interface BatchPostItem {
   slug: string
   published: boolean
   description: string | null
+  tags: string[] | null
   metadata: Record<string, unknown> | null
 }
 
+interface TranslationSummaryItem {
+  locale: string
+  published: boolean
+  source_hash: string
+  updated_at: string
+}
+
 type BatchAction = 'summary' | 'metadata' | 'translate'
-type PostFilter = 'all' | 'missing-summary' | 'published' | 'draft'
+type PostFilter =
+  | 'all'
+  | 'missing-summary'
+  | 'missing-seo'
+  | 'missing-translation'
+  | 'published'
+  | 'draft'
 type RowStatus = 'idle' | 'running' | 'success' | 'error'
+
+function getPostSeoStatus(post: BatchPostItem): {
+  complete: boolean
+  missingFields: string[]
+  tagCount: number
+} {
+  const meta = post.metadata && typeof post.metadata === 'object' ? post.metadata : {}
+  const hasDescription = Boolean(post.description?.trim())
+  const hasSeoTitle = typeof meta.seo_title === 'string' && meta.seo_title.trim().length > 0
+  const hasSeoDesc =
+    typeof meta.seo_description === 'string' && meta.seo_description.trim().length > 0
+  const tagCount = Array.isArray(post.tags)
+    ? post.tags.filter((t) => typeof t === 'string' && t.trim().length > 0).length
+    : 0
+
+  const missingFields: string[] = []
+  if (!hasDescription) missingFields.push('简介')
+  if (!hasSeoTitle) missingFields.push('SEO标题')
+  if (!hasSeoDesc) missingFields.push('SEO描述')
+  if (tagCount === 0) missingFields.push('标签')
+
+  return {
+    complete: missingFields.length === 0,
+    missingFields,
+    tagCount,
+  }
+}
 
 const BATCH_ACTIONS: Array<{
   key: BatchAction
@@ -80,6 +122,9 @@ export function BatchCenter({
   onBatchComplete,
 }: BatchCenterProps) {
   const [posts, setPosts] = useState<BatchPostItem[]>([])
+  const [translationSummaries, setTranslationSummaries] = useState<
+    Record<string, TranslationSummaryItem[]>
+  >({})
   const [loading, setLoading] = useState(true)
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [action, setAction] = useState<BatchAction>('summary')
@@ -100,10 +145,20 @@ export function BatchCenter({
   const fetchPosts = useCallback(async () => {
     setLoading(true)
     try {
-      const res = await fetch('/api/admin/posts?published=false')
-      if (!res.ok) throw new Error('加载文章列表失败')
-      const data = (await res.json()) as { posts?: BatchPostItem[] }
-      setPosts((data.posts ?? []).filter((p) => p.slug !== 'about'))
+      const [postsRes, transRes] = await Promise.all([
+        fetch('/api/admin/posts?published=false'),
+        fetch('/api/admin/ai/translations'),
+      ])
+      if (!postsRes.ok) throw new Error('加载文章列表失败')
+      const postsData = (await postsRes.json()) as { posts?: BatchPostItem[] }
+      setPosts((postsData.posts ?? []).filter((p) => p.slug !== 'about'))
+
+      if (transRes.ok) {
+        const transData = (await transRes.json().catch(() => ({}))) as {
+          summaries?: Record<string, TranslationSummaryItem[]>
+        }
+        setTranslationSummaries(transData.summaries ?? {})
+      }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : '加载文章失败')
     } finally {
@@ -115,22 +170,45 @@ export function BatchCenter({
     void fetchPosts()
   }, [fetchPosts])
 
+  const hasLocaleTranslation = useCallback(
+    (postId: string, locale: string) => {
+      const list = translationSummaries[postId] ?? []
+      return list.some((item) => item.locale.toLowerCase() === locale.toLowerCase())
+    },
+    [translationSummaries],
+  )
+
   const counts = useMemo(() => {
     let missingSummary = 0
+    let missingSeo = 0
+    let missingTranslation = 0
     let published = 0
     let draft = 0
     for (const p of posts) {
       if (!parseAiSummaryFromMetadata(p.metadata)) missingSummary += 1
+      if (!getPostSeoStatus(p).complete) missingSeo += 1
+      if (!hasLocaleTranslation(p.id, targetLocale)) missingTranslation += 1
       if (p.published) published += 1
       else draft += 1
     }
-    return { all: posts.length, missingSummary, published, draft }
-  }, [posts])
+    return {
+      all: posts.length,
+      missingSummary,
+      missingSeo,
+      missingTranslation,
+      published,
+      draft,
+    }
+  }, [posts, targetLocale, hasLocaleTranslation])
 
   const filteredPosts = useMemo(() => {
     const keyword = searchQuery.trim().toLowerCase()
     return posts.filter((post) => {
       if (filter === 'missing-summary' && parseAiSummaryFromMetadata(post.metadata)) return false
+      if (filter === 'missing-seo' && getPostSeoStatus(post).complete) return false
+      if (filter === 'missing-translation' && hasLocaleTranslation(post.id, targetLocale)) {
+        return false
+      }
       if (filter === 'published' && !post.published) return false
       if (filter === 'draft' && post.published) return false
       if (keyword) {
@@ -140,7 +218,7 @@ export function BatchCenter({
       }
       return true
     })
-  }, [posts, filter, searchQuery])
+  }, [posts, filter, searchQuery, targetLocale, hasLocaleTranslation])
 
   const failedIds = useMemo(
     () => Object.entries(statuses).filter(([, s]) => s.state === 'error').map(([id]) => id),
@@ -151,10 +229,24 @@ export function BatchCenter({
     setSelectedIds((prev) => (prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]))
   }
 
-  const selectMissingSummary = () => {
-    const missing = posts.filter((p) => !parseAiSummaryFromMetadata(p.metadata)).map((p) => p.id)
+  const handleSmartQuickSelect = () => {
+    if (action === 'summary') {
+      const missing = posts.filter((p) => !parseAiSummaryFromMetadata(p.metadata)).map((p) => p.id)
+      setSelectedIds(missing)
+      toast.info(`已选中 ${missing.length} 篇缺少 AI 摘要的文章`)
+      return
+    }
+    if (action === 'metadata') {
+      const missing = posts.filter((p) => !getPostSeoStatus(p).complete).map((p) => p.id)
+      setSelectedIds(missing)
+      toast.info(`已选中 ${missing.length} 篇缺少 SEO / 简介 / 标签的文章`)
+      return
+    }
+    const missing = posts
+      .filter((p) => !hasLocaleTranslation(p.id, targetLocale))
+      .map((p) => p.id)
     setSelectedIds(missing)
-    toast.info(`已选中 ${missing.length} 篇缺少 AI 摘要的文章`)
+    toast.info(`已选中 ${missing.length} 篇尚未翻译 ${targetLocale.toUpperCase()} 的文章`)
   }
 
   const toggleSelectFiltered = () => {
@@ -253,7 +345,9 @@ export function BatchCenter({
     setRunning(false)
     setStopping(false)
     if (wasStopped) {
-      toast.info(`已停止队列：已完成 ${doneCount}/${queueIds.length} 篇（成功 ${okCount}，失败 ${failCount}）`)
+      toast.info(
+        `已停止队列：已完成 ${doneCount}/${queueIds.length} 篇（成功 ${okCount}，失败 ${failCount}）`,
+      )
     } else {
       toast.success(`批量任务结束：成功 ${okCount} 篇，失败 ${failCount} 篇`)
     }
@@ -265,6 +359,20 @@ export function BatchCenter({
     filteredPosts.length > 0 && filteredPosts.every((p) => selectedIds.includes(p.id))
   const progressPercent =
     progress.total > 0 ? Math.round((progress.done / progress.total) * 100) : 0
+
+  const quickSelectLabel =
+    action === 'summary'
+      ? `选缺摘要 (${counts.missingSummary})`
+      : action === 'metadata'
+        ? `选缺 SEO (${counts.missingSeo})`
+        : `选未译 ${targetLocale.toUpperCase()} (${counts.missingTranslation})`
+
+  const quickSelectCount =
+    action === 'summary'
+      ? counts.missingSummary
+      : action === 'metadata'
+        ? counts.missingSeo
+        : counts.missingTranslation
 
   return (
     <div className="space-y-5">
@@ -293,7 +401,7 @@ export function BatchCenter({
           <div>
             <CardTitle>历史文章批量处理</CardTitle>
             <CardDescription>
-              串行队列安全执行，实时追踪进度并支持随时中止。生成结果直接写入对应文章（翻译默认保存为未发布草稿）。
+              串行队列安全执行，实时展示每篇文章的导读摘要、SEO/标签与多语言译文覆盖状态。
             </CardDescription>
           </div>
           <Button
@@ -305,7 +413,7 @@ export function BatchCenter({
             className="shrink-0"
           >
             <RefreshCw className={cn('mr-1.5 h-3.5 w-3.5', loading && 'animate-spin')} />
-            刷新文章
+            刷新状态
           </Button>
         </CardHeader>
 
@@ -376,7 +484,7 @@ export function BatchCenter({
             </div>
           )}
 
-          {/* Live Progress Bar when running or just finished */}
+          {/* Live Progress Bar */}
           {(running || progress.total > 0) && (
             <div className="space-y-2 rounded-xl border border-border/80 bg-muted/30 p-3.5">
               <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
@@ -418,9 +526,9 @@ export function BatchCenter({
           )}
 
           {/* Search, Filter & Execution Toolbar */}
-          <div className="flex flex-col gap-3 rounded-xl border border-border/80 bg-muted/25 p-3 lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="relative w-full sm:w-56">
+          <div className="space-y-3 rounded-xl border border-border/80 bg-muted/25 p-3">
+            <div className="flex flex-col gap-2.5 lg:flex-row lg:items-center lg:justify-between">
+              <div className="relative w-full lg:w-64">
                 <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   value={searchQuery}
@@ -430,94 +538,99 @@ export function BatchCenter({
                 />
               </div>
 
-              <div className="flex flex-wrap items-center gap-1">
-                {(
-                  [
-                    { key: 'all', label: `全部 ${counts.all}` },
-                    { key: 'missing-summary', label: `缺摘要 ${counts.missingSummary}` },
-                    { key: 'published', label: `已发布 ${counts.published}` },
-                    { key: 'draft', label: `草稿 ${counts.draft}` },
-                  ] as const
-                ).map((tab) => (
-                  <button
-                    key={tab.key}
-                    type="button"
-                    onClick={() => setFilter(tab.key)}
-                    className={cn(
-                      'rounded-md px-2.5 py-1 text-xs font-medium transition-colors',
-                      filter === tab.key
-                        ? 'bg-background text-foreground shadow-2xs ring-1 ring-border'
-                        : 'text-muted-foreground hover:text-foreground',
-                    )}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2">
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                onClick={selectMissingSummary}
-                disabled={running || counts.missingSummary === 0}
-                className="h-8 text-xs"
-              >
-                选缺摘要 ({counts.missingSummary})
-              </Button>
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                onClick={toggleSelectFiltered}
-                disabled={running || filteredPosts.length === 0}
-                className="h-8 text-xs"
-              >
-                {allVisibleSelected ? '取消全选' : '全选当前'}
-              </Button>
-
-              {!running && failedIds.length > 0 && (
+              <div className="flex flex-wrap items-center gap-2">
                 <Button
                   type="button"
                   size="sm"
                   variant="outline"
-                  onClick={() => void executeQueue(failedIds)}
-                  className="h-8 gap-1 border-destructive/40 text-xs text-destructive hover:bg-destructive/10"
+                  onClick={handleSmartQuickSelect}
+                  disabled={running || quickSelectCount === 0}
+                  className="h-8 text-xs"
                 >
-                  <RotateCcw className="h-3 w-3" />
-                  重试失败 ({failedIds.length})
+                  {quickSelectLabel}
                 </Button>
-              )}
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={toggleSelectFiltered}
+                  disabled={running || filteredPosts.length === 0}
+                  className="h-8 text-xs"
+                >
+                  {allVisibleSelected ? '取消全选' : '全选当前'}
+                </Button>
 
-              {running ? (
-                <Button
+                {!running && failedIds.length > 0 && (
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => void executeQueue(failedIds)}
+                    className="h-8 gap-1 border-destructive/40 text-xs text-destructive hover:bg-destructive/10"
+                  >
+                    <RotateCcw className="h-3 w-3" />
+                    重试失败 ({failedIds.length})
+                  </Button>
+                )}
+
+                {running ? (
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="destructive"
+                    disabled={stopping}
+                    onClick={() => {
+                      stopRequestedRef.current = true
+                      setStopping(true)
+                    }}
+                    className="h-8 gap-1.5 text-xs"
+                  >
+                    <Square className="h-3 w-3 fill-current" />
+                    {stopping ? '停止中...' : '停止队列'}
+                  </Button>
+                ) : (
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() => void executeQueue(selectedIds)}
+                    disabled={selectedIds.length === 0 || !hasEnabledProvider}
+                    className="h-8 gap-1.5 text-xs"
+                  >
+                    <Play className="h-3.5 w-3.5" />
+                    开始执行 ({selectedIds.length})
+                  </Button>
+                )}
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-1 border-t border-border/50 pt-2.5">
+              {(
+                [
+                  { key: 'all', label: `全部 ${counts.all}` },
+                  { key: 'missing-summary', label: `缺摘要 ${counts.missingSummary}` },
+                  { key: 'missing-seo', label: `缺 SEO/标签 ${counts.missingSeo}` },
+                  {
+                    key: 'missing-translation',
+                    label: `未译 ${targetLocale.toUpperCase()} ${counts.missingTranslation}`,
+                  },
+                  { key: 'published', label: `已发布 ${counts.published}` },
+                  { key: 'draft', label: `草稿 ${counts.draft}` },
+                ] as const
+              ).map((tab) => (
+                <button
+                  key={tab.key}
                   type="button"
-                  size="sm"
-                  variant="destructive"
-                  disabled={stopping}
-                  onClick={() => {
-                    stopRequestedRef.current = true
-                    setStopping(true)
-                  }}
-                  className="h-8 gap-1.5 text-xs"
+                  onClick={() => setFilter(tab.key)}
+                  className={cn(
+                    'rounded-md px-2.5 py-1 text-xs font-medium transition-colors',
+                    filter === tab.key
+                      ? 'bg-background text-foreground shadow-2xs ring-1 ring-border'
+                      : 'text-muted-foreground hover:text-foreground',
+                  )}
                 >
-                  <Square className="h-3 w-3 fill-current" />
-                  {stopping ? '停止中...' : '停止队列'}
-                </Button>
-              ) : (
-                <Button
-                  type="button"
-                  size="sm"
-                  onClick={() => void executeQueue(selectedIds)}
-                  disabled={selectedIds.length === 0 || !hasEnabledProvider}
-                  className="h-8 gap-1.5 text-xs"
-                >
-                  <Play className="h-3.5 w-3.5" />
-                  开始执行 ({selectedIds.length})
-                </Button>
-              )}
+                  {tab.label}
+                </button>
+              ))}
             </div>
           </div>
 
@@ -525,7 +638,7 @@ export function BatchCenter({
           {loading ? (
             <div className="space-y-2">
               {[0, 1, 2, 3].map((idx) => (
-                <div key={idx} className="h-14 animate-pulse rounded-lg bg-muted/40" />
+                <div key={idx} className="h-16 animate-pulse rounded-lg bg-muted/40" />
               ))}
             </div>
           ) : filteredPosts.length === 0 ? (
@@ -536,6 +649,9 @@ export function BatchCenter({
             <div className="divide-y divide-border/70 overflow-hidden rounded-xl border border-border/80">
               {filteredPosts.map((post) => {
                 const hasSummary = Boolean(parseAiSummaryFromMetadata(post.metadata))
+                const seoStatus = getPostSeoStatus(post)
+                const translations = translationSummaries[post.id] ?? []
+                const hasTargetLocale = hasLocaleTranslation(post.id, targetLocale)
                 const status = statuses[post.id]
                 const checked = selectedIds.includes(post.id)
                 const isRowRunning = status?.state === 'running'
@@ -562,7 +678,8 @@ export function BatchCenter({
                       />
                       <div className="min-w-0">
                         <p className="truncate font-medium">{post.title}</p>
-                        <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[11px]">
+                        <div className="mt-1.5 flex flex-wrap items-center gap-1.5 text-[11px]">
+                          {/* 发布状态 */}
                           <span
                             className={cn(
                               'rounded-full px-2 py-0.5 font-medium',
@@ -573,6 +690,8 @@ export function BatchCenter({
                           >
                             {post.published ? '已发布' : '草稿'}
                           </span>
+
+                          {/* AI 导读摘要状态 */}
                           <span
                             className={cn(
                               'inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-medium',
@@ -582,12 +701,59 @@ export function BatchCenter({
                             )}
                           >
                             <Sparkles className="h-2.5 w-2.5" />
-                            {hasSummary ? '已有摘要' : '缺少摘要'}
+                            {hasSummary ? '已有摘要' : '缺摘要'}
                           </span>
-                          {action === 'translate' && (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-violet-500/10 px-2 py-0.5 font-medium text-violet-700 dark:text-violet-300">
+
+                          {/* SEO / 简介 / 标签状态 */}
+                          <span
+                            className={cn(
+                              'inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-medium',
+                              seoStatus.complete
+                                ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'
+                                : 'bg-amber-500/12 text-amber-700 dark:text-amber-300',
+                            )}
+                            title={
+                              seoStatus.complete
+                                ? `简介、SEO 标题/描述与 ${seoStatus.tagCount} 个标签均已完善`
+                                : `缺少：${seoStatus.missingFields.join('、')}`
+                            }
+                          >
+                            <Tag className="h-2.5 w-2.5" />
+                            {seoStatus.complete
+                              ? `SEO 完整 · ${seoStatus.tagCount}标签`
+                              : seoStatus.missingFields.length === 4
+                                ? '缺 SEO/标签'
+                                : `缺 ${seoStatus.missingFields.slice(0, 2).join('·')}${seoStatus.missingFields.length > 2 ? '等' : ''}`}
+                          </span>
+
+                          {/* 已有多语言译文状态 */}
+                          {translations.length > 0 ? (
+                            translations.map((tr) => (
+                              <span
+                                key={tr.locale}
+                                className={cn(
+                                  'inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-medium',
+                                  tr.published
+                                    ? 'bg-violet-500/15 text-violet-700 dark:text-violet-300'
+                                    : 'bg-violet-500/8 text-violet-600/90 ring-1 ring-violet-500/20 dark:text-violet-300/80',
+                                )}
+                                title={`${tr.locale.toUpperCase()} 译文（${tr.published ? '前台已发布' : '未发布草稿'}），更新于 ${new Date(tr.updated_at).toLocaleDateString('zh-CN')}`}
+                              >
+                                <Globe className="h-2.5 w-2.5" />
+                                {tr.locale.toUpperCase()} {tr.published ? '已发布' : '草稿'}
+                              </span>
+                            ))
+                          ) : (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-muted/80 px-2 py-0.5 text-muted-foreground">
                               <Languages className="h-2.5 w-2.5" />
-                              目标: {targetLocale}
+                              暂无译文
+                            </span>
+                          )}
+
+                          {/* 翻译模式下若缺少当前目标语言，明确提示 */}
+                          {action === 'translate' && !hasTargetLocale && translations.length > 0 && (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/12 px-2 py-0.5 font-medium text-amber-700 dark:text-amber-300">
+                              未译 {targetLocale.toUpperCase()}
                             </span>
                           )}
                         </div>
@@ -611,7 +777,7 @@ export function BatchCenter({
                           )}
                           {status.state === 'error' && (
                             <span
-                              className="inline-flex max-w-[220px] items-center gap-1 truncate rounded-full bg-destructive/10 px-2.5 py-0.5 font-medium text-destructive"
+                              className="inline-flex max-w-[260px] items-center gap-1 truncate rounded-full bg-destructive/10 px-2.5 py-0.5 font-medium text-destructive"
                               title={status.message}
                             >
                               <XCircle className="h-3 w-3 shrink-0" />
