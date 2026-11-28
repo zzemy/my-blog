@@ -107,8 +107,8 @@
   text-decoration: none;
 }
 
-.article-content.prose :where(p, li, dd, dt, td, th, blockquote, figcaption) > a:not([href^="#"]):not(:has(code))::after,
-.article-content.prose :where(p, li, dd, dt, td, th, blockquote, figcaption) .article-link:not([href^="#"]):not(:has(code))::after {
+.article-content.prose :where(p, li, dd, dt, td, th, blockquote, figcaption) > a:not([href^="#"]):not([href^="/"]):not(:has(code))::after,
+.article-content.prose :where(p, li, dd, dt, td, th, blockquote, figcaption) .article-link:not([href^="#"]):not([href^="/"]):not(:has(code))::after {
   content: "↗";
   display: inline-block;
   margin: 0 0.35em;
@@ -117,8 +117,8 @@
   vertical-align: middle;
 }
 
-.article-content.prose :where(p, li, dd, dt, td, th, blockquote, figcaption) > a:not([href^="#"]) code::after,
-.article-content.prose :where(p, li, dd, dt, td, th, blockquote, figcaption) .article-link:not([href^="#"]) code::after {
+.article-content.prose :where(p, li, dd, dt, td, th, blockquote, figcaption) > a:not([href^="#"]):not([href^="/"]) code::after,
+.article-content.prose :where(p, li, dd, dt, td, th, blockquote, figcaption) .article-link:not([href^="#"]):not([href^="/"]) code::after {
   content: "↗";
   display: inline-block;
   margin: 0 0.35em;

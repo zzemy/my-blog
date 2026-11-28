@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
   const auth = await validateAdminRequestWithReason(token)
   if (!auth.ok) {
     return NextResponse.json(
-      { error: 'Unauthorized', reason: auth.reason, email: auth.email || null, expected: auth.expected || null },
+      { error: 'Unauthorized', reason: auth.reason },
       { status: 401 }
     )
   }
@@ -66,7 +66,9 @@ export async function GET(request: NextRequest) {
 
     let query = client
       .from('posts')
-      .select('*')
+      .select(
+        'id, public_id, title, slug, description, cover_image, author, tags, published, featured, views, reading_time, created_at, updated_at, published_at, metadata',
+      )
       .order('published_at', { ascending: false })
 
     if (published) {
@@ -113,7 +115,7 @@ export async function POST(request: NextRequest) {
   const auth = await validateAdminRequestWithReason(token)
   if (!auth.ok) {
     return NextResponse.json(
-      { error: 'Unauthorized', reason: auth.reason, email: auth.email || null, expected: auth.expected || null },
+      { error: 'Unauthorized', reason: auth.reason },
       { status: 401 }
     )
   }

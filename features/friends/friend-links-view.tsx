@@ -1,14 +1,14 @@
 'use client'
 
-import { FormEvent, useEffect, useState } from 'react'
-import { ArrowUpRight, CheckCircle2, Globe2, Link2, Loader2, Send, ShieldCheck } from 'lucide-react'
+import { FormEvent, useCallback, useEffect, useState } from 'react'
+import { ArrowUpRight, CheckCircle2, Globe2, Link2, Loader2, RefreshCw, Send, ShieldCheck } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import type { FriendLink } from '@/lib/supabase/types'
+import type { PublicFriendLink } from '@/lib/supabase/friend-links'
 
 type FormState = {
   name: string
@@ -17,18 +17,20 @@ type FormState = {
   description: string
   contact: string
   note: string
+  website: string
 }
 
 const initialForm: FormState = {
   name: '',
-  url: 'https://',
+  url: '',
   avatar_url: '',
   description: '',
   contact: '',
   note: '',
+  website: '',
 }
 
-function FriendAvatar({ link }: { link: Pick<FriendLink, 'name' | 'avatar_url'> }) {
+function FriendAvatar({ link }: { link: Pick<PublicFriendLink, 'name' | 'avatar_url'> }) {
   const [failed, setFailed] = useState(false)
   const initial = link.name.trim().charAt(0).toUpperCase() || '?'
 
@@ -52,44 +54,70 @@ function FriendAvatar({ link }: { link: Pick<FriendLink, 'name' | 'avatar_url'> 
   )
 }
 
-function FriendLinkCard({ link }: { link: FriendLink }) {
+function FriendLinkCard({ link }: { link: PublicFriendLink }) {
   return (
-    <Card className="group h-full rounded-lg border-border/70 bg-card/72 shadow-sm backdrop-blur-md transition-[border-color,box-shadow,transform,background-color] duration-200 hover:-translate-y-1 hover:border-primary/35 hover:bg-card/88 hover:shadow-lg dark:border-white/12 dark:bg-[#242424]/62 dark:hover:border-primary/40 dark:hover:bg-[#292929]/78">
-      <CardContent className="flex h-full flex-col p-5 sm:p-6">
-        <div className="flex items-start gap-4">
-          <FriendAvatar link={link} />
-          <div className="min-w-0 flex-1">
-            <h2 className="truncate text-lg font-bold text-foreground dark:text-zinc-100">{link.name}</h2>
-            <a
-              href={link.url}
-              target="_blank"
-              rel="noreferrer"
-              className="mt-1 flex min-w-0 items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-primary"
-            >
-              <Globe2 className="size-3.5 shrink-0" />
-              <span className="truncate">{link.url.replace(/^https?:\/\//, '').replace(/\/$/, '')}</span>
-              <ArrowUpRight className="size-3.5 shrink-0 opacity-0 transition-opacity group-hover:opacity-100" />
-            </a>
+    <a
+      href={link.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="group block h-full no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-lg"
+    >
+      <Card className="h-full rounded-lg border-border/70 bg-card/75 shadow-sm backdrop-blur-md transition-[border-color,box-shadow,transform,background-color] duration-200 hover:-translate-y-1 hover:border-foreground/25 hover:bg-card hover:shadow-lg dark:border-white/12 dark:bg-card/70 dark:hover:border-white/25 dark:hover:bg-card/90">
+        <CardContent className="flex h-full flex-col p-5 sm:p-6">
+          <div className="flex items-start gap-4">
+            <FriendAvatar link={link} />
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center justify-between gap-2">
+                <h2 className="truncate text-lg font-bold text-foreground transition-colors group-hover:text-primary">
+                  {link.name}
+                </h2>
+                <ArrowUpRight className="size-4 shrink-0 text-muted-foreground opacity-50 transition-all group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-foreground group-hover:opacity-100" />
+              </div>
+              <div className="mt-1 flex min-w-0 items-center gap-1 text-xs text-muted-foreground">
+                <Globe2 className="size-3.5 shrink-0" />
+                <span className="truncate">{link.url.replace(/^https?:\/\//, '').replace(/\/$/, '')}</span>
+              </div>
+            </div>
           </div>
-        </div>
-        {link.description && <p className="mt-5 line-clamp-3 flex-1 text-sm leading-7 text-muted-foreground dark:text-zinc-300">{link.description}</p>}
-      </CardContent>
-    </Card>
+          {link.description && (
+            <p className="mt-5 line-clamp-3 flex-1 text-sm leading-7 text-muted-foreground">
+              {link.description}
+            </p>
+          )}
+        </CardContent>
+      </Card>
+    </a>
   )
 }
 
-export function FriendLinksView({ links }: { links: FriendLink[] }) {
+export function FriendLinksView({ links }: { links: PublicFriendLink[] }) {
   const [form, setForm] = useState<FormState>(initialForm)
   const [csrfToken, setCsrfToken] = useState('')
+  const [csrfLoading, setCsrfLoading] = useState(true)
+  const [csrfError, setCsrfError] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
-  useEffect(() => {
-    fetch('/api/auth/csrf', { credentials: 'include' })
-      .then((response) => response.json())
-      .then((data) => setCsrfToken(data.csrfToken || ''))
-      .catch(() => setCsrfToken(''))
+  const fetchCsrf = useCallback(async () => {
+    setCsrfLoading(true)
+    setCsrfError(false)
+    try {
+      const response = await fetch('/api/auth/csrf', { credentials: 'include' })
+      if (!response.ok) throw new Error('csrf_failed')
+      const data = await response.json()
+      if (!data.csrfToken) throw new Error('missing_csrf')
+      setCsrfToken(data.csrfToken)
+    } catch {
+      setCsrfToken('')
+      setCsrfError(true)
+    } finally {
+      setCsrfLoading(false)
+    }
   }, [])
+
+  useEffect(() => {
+    void fetchCsrf()
+  }, [fetchCsrf])
 
   const updateField = (field: keyof FormState, value: string) => {
     setForm((current) => ({ ...current, [field]: value }))
@@ -97,15 +125,24 @@ export function FriendLinksView({ links }: { links: FriendLink[] }) {
 
   const submitApplication = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+    if (!csrfToken) {
+      setFeedback({ type: 'error', text: '安全令牌未就绪，请点击下方重试后再提交。' })
+      return
+    }
     setSubmitting(true)
     setFeedback(null)
 
     try {
+      const normalizedUrl =
+        form.url.trim() && !/^https?:\/\//i.test(form.url.trim())
+          ? `https://${form.url.trim()}`
+          : form.url.trim()
+
       const response = await fetch('/api/friends', {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, csrfToken, website: '' }),
+        body: JSON.stringify({ ...form, url: normalizedUrl, csrfToken }),
       })
       const data = await response.json().catch(() => ({}))
       if (!response.ok) throw new Error(data.error || '提交失败，请稍后再试')
@@ -163,22 +200,62 @@ export function FriendLinksView({ links }: { links: FriendLink[] }) {
             </div>
           </div>
 
-          <form onSubmit={submitApplication} className="space-y-6 rounded-xl border border-border/80 bg-background/75 p-5 shadow-[0_18px_50px_-40px_rgba(15,23,42,0.6)] backdrop-blur-xl dark:border-white/14 dark:bg-[#1d1f21]/78 dark:shadow-[0_18px_50px_-34px_rgba(0,0,0,0.95)] sm:p-7">
+          <form onSubmit={submitApplication} className="space-y-6 rounded-xl border border-border/80 bg-card/75 p-5 shadow-sm backdrop-blur-xl dark:border-white/12 dark:bg-card/70 sm:p-7">
             <div className="grid gap-5 sm:grid-cols-2">
-              <div className="grid gap-2"><Label className="text-foreground/75 dark:text-white/75" htmlFor="friend-name">个人昵称 *</Label><Input className="border-border/80 bg-background/80 shadow-none placeholder:text-muted-foreground/60 dark:border-white/14 dark:bg-white/[0.04]" id="friend-name" value={form.name} onChange={(event) => updateField('name', event.target.value)} placeholder="你希望展示的昵称" required maxLength={60} /></div>
-              <div className="grid gap-2"><Label className="text-foreground/75 dark:text-white/75" htmlFor="friend-url">网站地址 *</Label><Input className="border-border/80 bg-background/80 shadow-none placeholder:text-muted-foreground/60 dark:border-white/14 dark:bg-white/[0.04]" id="friend-url" type="url" value={form.url} onChange={(event) => updateField('url', event.target.value)} placeholder="example.com" required /></div>
+              <div className="grid gap-2">
+                <Label className="text-foreground/75 dark:text-white/75" htmlFor="friend-name">个人昵称 *</Label>
+                <Input className="border-border/80 bg-background/80 shadow-none placeholder:text-muted-foreground/60 dark:border-white/14 dark:bg-white/[0.04]" id="friend-name" value={form.name} onChange={(event) => updateField('name', event.target.value)} placeholder="你希望展示的昵称" required maxLength={60} />
+              </div>
+              <div className="grid gap-2">
+                <Label className="text-foreground/75 dark:text-white/75" htmlFor="friend-url">网站地址 *</Label>
+                <Input className="border-border/80 bg-background/80 shadow-none placeholder:text-muted-foreground/60 dark:border-white/14 dark:bg-white/[0.04]" id="friend-url" type="url" value={form.url} onChange={(event) => updateField('url', event.target.value)} placeholder="https://example.com" required />
+              </div>
             </div>
-            <div className="grid gap-2"><Label className="text-foreground/75 dark:text-white/75" htmlFor="friend-avatar">头像地址</Label><Input className="border-border/80 bg-background/80 shadow-none placeholder:text-muted-foreground/60 dark:border-white/14 dark:bg-white/[0.04]" id="friend-avatar" type="url" value={form.avatar_url} onChange={(event) => updateField('avatar_url', event.target.value)} placeholder="https://example.com/avatar.png" /><p className="text-xs text-muted-foreground">没有头像也可以提交，页面会使用昵称首字。</p></div>
-            <div className="grid gap-2"><Label className="text-foreground/75 dark:text-white/75" htmlFor="friend-description">网站介绍</Label><Textarea id="friend-description" value={form.description} onChange={(event) => updateField('description', event.target.value)} placeholder="可选，一句话介绍你的网站" maxLength={180} rows={3} className="resize-none border-border/80 bg-background/80 shadow-none placeholder:text-muted-foreground/60 dark:border-white/14 dark:bg-white/[0.04]" /></div>
+            <div className="grid gap-2">
+              <Label className="text-foreground/75 dark:text-white/75" htmlFor="friend-avatar">头像地址</Label>
+              <Input className="border-border/80 bg-background/80 shadow-none placeholder:text-muted-foreground/60 dark:border-white/14 dark:bg-white/[0.04]" id="friend-avatar" type="url" value={form.avatar_url} onChange={(event) => updateField('avatar_url', event.target.value)} placeholder="https://example.com/avatar.png" />
+              <p className="text-xs text-muted-foreground">没有头像也可以提交，页面会使用昵称首字。</p>
+            </div>
+            <div className="grid gap-2">
+              <Label className="text-foreground/75 dark:text-white/75" htmlFor="friend-description">网站介绍</Label>
+              <Textarea id="friend-description" value={form.description} onChange={(event) => updateField('description', event.target.value)} placeholder="可选，一句话介绍你的网站" maxLength={180} rows={3} className="resize-none border-border/80 bg-background/80 shadow-none placeholder:text-muted-foreground/60 dark:border-white/14 dark:bg-white/[0.04]" />
+            </div>
             <div className="grid gap-5 sm:grid-cols-2">
-              <div className="grid gap-2"><Label className="text-foreground/75 dark:text-white/75" htmlFor="friend-contact">联系方式</Label><Input className="border-border/80 bg-background/80 shadow-none placeholder:text-muted-foreground/60 dark:border-white/14 dark:bg-white/[0.04]" id="friend-contact" value={form.contact} onChange={(event) => updateField('contact', event.target.value)} placeholder="邮箱 / QQ / Telegram" maxLength={120} /></div>
-              <div className="grid gap-2"><Label className="text-foreground/75 dark:text-white/75" htmlFor="friend-note">给站长留言</Label><Input className="border-border/80 bg-background/80 shadow-none placeholder:text-muted-foreground/60 dark:border-white/14 dark:bg-white/[0.04]" id="friend-note" value={form.note} onChange={(event) => updateField('note', event.target.value)} placeholder="选填，不会公开展示" maxLength={180} /></div>
+              <div className="grid gap-2">
+                <Label className="text-foreground/75 dark:text-white/75" htmlFor="friend-contact">联系方式</Label>
+                <Input className="border-border/80 bg-background/80 shadow-none placeholder:text-muted-foreground/60 dark:border-white/14 dark:bg-white/[0.04]" id="friend-contact" value={form.contact} onChange={(event) => updateField('contact', event.target.value)} placeholder="邮箱 / QQ / Telegram" maxLength={120} />
+              </div>
+              <div className="grid gap-2">
+                <Label className="text-foreground/75 dark:text-white/75" htmlFor="friend-note">给站长留言</Label>
+                <Input className="border-border/80 bg-background/80 shadow-none placeholder:text-muted-foreground/60 dark:border-white/14 dark:bg-white/[0.04]" id="friend-note" value={form.note} onChange={(event) => updateField('note', event.target.value)} placeholder="选填，不会公开展示" maxLength={180} />
+              </div>
             </div>
-            <input tabIndex={-1} autoComplete="off" aria-hidden="true" className="absolute -left-[9999px] h-px w-px opacity-0" name="website" />
-            {feedback && <p role="status" className={`rounded-md border px-3 py-2 text-sm ${feedback.type === 'success' ? 'border-emerald-500/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300' : 'border-destructive/25 bg-destructive/10 text-destructive'}`}>{feedback.text}</p>}
-            <Button type="submit" disabled={submitting || !csrfToken} className="w-full gap-2 sm:w-auto">
+            <input
+              tabIndex={-1}
+              autoComplete="off"
+              aria-hidden="true"
+              className="absolute -left-[9999px] h-px w-px opacity-0"
+              name="website"
+              value={form.website}
+              onChange={(event) => updateField('website', event.target.value)}
+            />
+            {csrfError && (
+              <div className="flex items-center justify-between gap-3 rounded-md border border-destructive/25 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                <span>安全验证令牌加载失败，请重试后提交。</span>
+                <Button type="button" variant="outline" size="sm" onClick={() => void fetchCsrf()} className="h-7 gap-1.5">
+                  <RefreshCw className="size-3.5" />
+                  重试
+                </Button>
+              </div>
+            )}
+            {feedback && (
+              <p role="status" className={`rounded-md border px-3 py-2 text-sm ${feedback.type === 'success' ? 'border-emerald-500/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300' : 'border-destructive/25 bg-destructive/10 text-destructive'}`}>
+                {feedback.text}
+              </p>
+            )}
+            <Button type="submit" disabled={submitting || csrfLoading || !csrfToken} className="w-full gap-2 sm:w-auto">
               {submitting ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
-              {submitting ? '提交中…' : '提交申请'}
+              {submitting ? '提交中…' : csrfLoading ? '初始化验证…' : '提交申请'}
             </Button>
           </form>
         </div>

@@ -10,7 +10,10 @@ const normalizeEmail = (email: string | null | undefined) =>
   (email ?? '').trim().toLowerCase()
 
 export function isAllowedAdminEmail(email: string | null | undefined): boolean {
-  if (!ADMIN_EMAIL) return true
+  if (!ADMIN_EMAIL.trim()) {
+    console.error('[AUTH] ADMIN_EMAIL is not configured; denying admin access (fail-closed).')
+    return false
+  }
   return normalizeEmail(email) === normalizeEmail(ADMIN_EMAIL)
 }
 
@@ -223,14 +226,16 @@ export async function validateAdminRequestWithReason(token: string | null): Prom
     return { ok: false, reason: 'token_invalid', email: null, expected }
   }
 
-  if (expected) {
-    const actual = normalizeEmail(data.user.email)
-    if (expected !== actual) {
-      return { ok: false, reason: 'email_mismatch', email: data.user.email, expected }
-    }
+  if (!expected) {
+    return { ok: false, reason: 'missing_admin_email', email: data.user.email, expected: null }
   }
 
-  return { ok: true, email: data.user.email, expected }
+  const actual = normalizeEmail(data.user.email)
+  if (expected !== actual) {
+    return { ok: false, reason: 'email_mismatch', email: data.user.email, expected: null }
+  }
+
+  return { ok: true, email: data.user.email, expected: null }
 }
 
 /**

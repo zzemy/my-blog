@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { getAdminClient } from '@/lib/supabase/client'
 import { getAuthTokenFromRequest, validateAdminRequestWithReason } from '@/lib/auth'
 import { friendLinkAdminSchema } from '@/lib/validation/friend-link'
+
+const STATUS_PRIORITY: Record<string, number> = {
+  pending: 0,
+  approved: 1,
+  rejected: 2,
+}
 
 async function authorize(request: NextRequest) {
   const token = getAuthTokenFromRequest(request)
@@ -18,11 +25,13 @@ export async function GET(request: NextRequest) {
     const { data, error } = await client
       .from('friend_links')
       .select('*')
-      .order('status', { ascending: true })
       .order('sort_order', { ascending: true })
       .order('created_at', { ascending: false })
     if (error) throw error
-    return NextResponse.json({ links: data ?? [] })
+    const links = ((data ?? []) as Array<{ status?: string }>).sort(
+      (a, b) => (STATUS_PRIORITY[a.status ?? ''] ?? 9) - (STATUS_PRIORITY[b.status ?? ''] ?? 9),
+    )
+    return NextResponse.json({ links })
   } catch (error) {
     console.error('Error fetching admin friend links:', error)
     return NextResponse.json({ error: '友链加载失败' }, { status: 500 })
@@ -44,6 +53,7 @@ export async function POST(request: NextRequest) {
       .select()
       .single()
     if (error) throw error
+    revalidatePath('/friends')
     return NextResponse.json({ link: data }, { status: 201 })
   } catch (error) {
     console.error('Error creating admin friend link:', error)

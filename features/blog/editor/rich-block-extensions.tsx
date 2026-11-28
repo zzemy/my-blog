@@ -127,26 +127,46 @@ export function createImageItemsFromUrls(value: string): RichImageItem[] {
     })
 }
 
-export function toYouTubeEmbed(value: string) {
+export function sanitizeRichHref(value: string | undefined | null): string {
+  const trimmed = (value ?? '').trim()
+  if (!trimmed) return '#'
+  if (trimmed.startsWith('/') || trimmed.startsWith('#')) return trimmed
   try {
-    const url = new URL(value)
-    const host = url.hostname.toLowerCase().replace(/^www\./, '')
+    const parsed = new URL(trimmed)
+    if (parsed.protocol === 'http:' || parsed.protocol === 'https:' || parsed.protocol === 'mailto:') {
+      return trimmed
+    }
+    return '#'
+  } catch {
+    return '#'
+  }
+}
 
-    // Strict hostname validation - must be exactly youtube.com or youtu.be
-    const isYouTube = host === 'youtube.com' || host === 'youtu.be'
-
-    if (!isYouTube) {
-      return value
+export function toYouTubeEmbed(value: string): string | null {
+  try {
+    const url = new URL(value.trim())
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+      return null
     }
 
-    const id =
-      host === 'youtu.be'
-        ? url.pathname.slice(1)
-        : url.searchParams.get('v') || url.pathname.split('/').filter(Boolean).pop()
+    const host = url.hostname.toLowerCase().replace(/^www\./, '')
 
-    return id ? `https://www.youtube-nocookie.com/embed/${id}?rel=0` : value
+    // Allowlisted video embed hosts only
+    if (host === 'youtube.com' || host === 'youtu.be' || host === 'youtube-nocookie.com') {
+      const id =
+        host === 'youtu.be'
+          ? url.pathname.slice(1).split('/')[0]
+          : url.searchParams.get('v') || url.pathname.split('/').filter(Boolean).pop()
+      return id ? `https://www.youtube-nocookie.com/embed/${encodeURIComponent(id)}?rel=0` : null
+    }
+
+    if (host === 'player.bilibili.com' || host === 'player.vimeo.com') {
+      return url.toString()
+    }
+
+    return null
   } catch {
-    return value
+    return null
   }
 }
 
@@ -743,7 +763,7 @@ function ButtonView({ node, editor, updateAttributes, deleteNode }: NodeViewProp
     >
       <a
         className={`component-button component-button-${variant}`}
-        href={href}
+        href={sanitizeRichHref(href)}
         onClick={(event) => {
           if (editor.isEditable) event.preventDefault()
         }}
@@ -1133,15 +1153,24 @@ function EmbedView({ node, editor, updateAttributes, deleteNode }: NodeViewProps
             <span>{title}</span>
           </div>
         </>
-      ) : (
-        <iframe
-          src={toYouTubeEmbed(src)}
-          title={title}
-          loading="lazy"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          allowFullScreen
-        />
-      )}
+      ) : (() => {
+        const embedUrl = toYouTubeEmbed(src)
+        return embedUrl ? (
+          <iframe
+            src={embedUrl}
+            title={title}
+            loading="lazy"
+            sandbox="allow-scripts allow-same-origin allow-presentation allow-popups"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowFullScreen
+          />
+        ) : (
+          <div className="component-placeholder">
+            <span>不支持的嵌入来源</span>
+            <p>仅支持 YouTube、Bilibili Player 或 Vimeo 嵌入链接。</p>
+          </div>
+        )
+      })()}
       {editor.isEditable && isEditing ? (
         <RichBlockEditorPanel
           title="编辑嵌入媒体"
@@ -1543,7 +1572,7 @@ function RichShowcaseView({ node, editor, updateAttributes, deleteNode }: NodeVi
           <div className="component-mini-actions">
             {primaryLabel && primaryHref ? (
               <a
-                href={primaryHref}
+                href={sanitizeRichHref(primaryHref)}
                 onClick={(event) => {
                   if (editor.isEditable) event.preventDefault()
                 }}
@@ -1553,7 +1582,7 @@ function RichShowcaseView({ node, editor, updateAttributes, deleteNode }: NodeVi
             ) : null}
             {secondaryLabel && secondaryHref ? (
               <a
-                href={secondaryHref}
+                href={sanitizeRichHref(secondaryHref)}
                 onClick={(event) => {
                   if (editor.isEditable) event.preventDefault()
                 }}

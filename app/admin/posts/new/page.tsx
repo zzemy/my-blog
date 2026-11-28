@@ -10,6 +10,7 @@ import {
   calculateContentSize,
   clearLocalDraft,
   createEmptyPostForm,
+  generatePostSlug,
   resolvePublishedAtForSubmit,
   validatePostForm,
 } from '@/features/admin/posts/form-utils'
@@ -41,7 +42,16 @@ export default function NewPostPage() {
   const handleSubmit = async (published: boolean) => {
     setError(null)
 
-    const errors = validatePostForm(formData)
+    const effectiveSlug =
+      formData.slug.trim() || (!published && formData.title.trim() ? generatePostSlug(formData.title) : '')
+    const effectiveContent = formData.content ?? { type: 'doc', content: [{ type: 'paragraph' }] }
+    const normalizedForm: PostFormData = {
+      ...formData,
+      slug: effectiveSlug,
+      content: effectiveContent,
+    }
+
+    const errors = validatePostForm(normalizedForm, { requirePublishFields: published })
     if (errors.length > 0) {
       setError(errors.join('，'))
       return
@@ -51,13 +61,12 @@ export default function NewPostPage() {
     try {
       const resolvedPublishedAtIso = resolvePublishedAtForSubmit(
         published,
-        formData.published,
-        formData.published_at,
+        normalizedForm.published_at,
       )
       const submittedFormData: PostFormData = {
-        ...formData,
+        ...normalizedForm,
         published,
-        published_at: resolvedPublishedAtIso ? isoToLocalInput(resolvedPublishedAtIso) : '',
+        published_at: resolvedPublishedAtIso ? isoToLocalInput(resolvedPublishedAtIso) : normalizedForm.published_at,
       }
 
       const res = await fetch('/api/admin/posts', {
@@ -67,8 +76,8 @@ export default function NewPostPage() {
         },
         body: JSON.stringify({
           ...submittedFormData,
-          published_at: resolvedPublishedAtIso,
-          reading_time: calculateContentSize(formData.content),
+          published_at: published ? resolvedPublishedAtIso : null,
+          reading_time: calculateContentSize(submittedFormData.content),
           metadata: submittedFormData.ai_summary ? { ai_summary: submittedFormData.ai_summary } : {},
         }),
       })

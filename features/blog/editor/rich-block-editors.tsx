@@ -227,7 +227,7 @@ export function PanelItemsEditor({
   return (
     <div className="component-block-editor-wide component-block-editor-list">
       {items.map((item, index) => (
-        <div key={`${item.title}-${index}`} className="component-block-editor-row">
+        <div key={index} className="component-block-editor-row">
           <TextField
             label="标题"
             value={item.title}
@@ -262,7 +262,7 @@ export function ImageItemsEditor({
   return (
     <div className="component-block-editor-wide component-block-editor-list">
       {items.map((item, index) => (
-        <div key={`${item.src}-${index}`} className="component-block-editor-row">
+        <div key={index} className="component-block-editor-row">
           <TextField
             label="图片 URL"
             value={item.src}
@@ -307,7 +307,7 @@ export function CardItemsEditor({ items, onChange }: { items: CardItem[]; onChan
   return (
     <div className="component-block-editor-wide component-block-editor-list">
       {items.map((item, index) => (
-        <div key={`${item.title}-${index}`} className="component-block-editor-row">
+        <div key={index} className="component-block-editor-row">
           <TextField
             label="眉标"
             value={item.eyebrow}
@@ -339,7 +339,7 @@ export function DiagramItemsEditor({ items, onChange }: { items: DiagramItem[]; 
   return (
     <div className="component-block-editor-wide component-block-editor-list">
       {items.map((item, index) => (
-        <div key={`${item.label}-${index}`} className="component-block-editor-row">
+        <div key={index} className="component-block-editor-row">
           <TextField
             label="节点"
             value={item.label}
@@ -367,7 +367,7 @@ export function TimelineItemsEditor({
   return (
     <div className="component-block-editor-wide component-block-editor-list">
       {items.map((item, index) => (
-        <div key={`${item.label}-${item.title}-${index}`} className="component-block-editor-row">
+        <div key={index} className="component-block-editor-row">
           <TextField
             label="阶段"
             value={item.label}

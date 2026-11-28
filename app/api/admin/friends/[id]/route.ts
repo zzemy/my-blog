@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { getAdminClient } from '@/lib/supabase/client'
 import { getAuthTokenFromRequest, validateAdminRequest } from '@/lib/auth'
 import { friendLinkAdminSchema } from '@/lib/validation/friend-link'
@@ -31,6 +32,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       if (error.code === 'PGRST116') return NextResponse.json({ error: '友链不存在' }, { status: 404 })
       throw error
     }
+    revalidatePath('/friends')
     return NextResponse.json({ link: data })
   } catch (error) {
     console.error('Error updating friend link:', error)
@@ -46,6 +48,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     const { id } = await params
     const { error } = await client.from('friend_links').delete().eq('id', id)
     if (error) throw error
+    revalidatePath('/friends')
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Error deleting friend link:', error)

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { createRoot } from 'react-dom/client'
+import { X } from 'lucide-react'
 import { EditorContent, useEditor, ReactNodeViewRenderer } from '@tiptap/react'
 import type { Content } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
@@ -38,7 +39,7 @@ interface TipTapRendererProps {
 }
 
 export function TipTapRenderer({ content, className = '', toc = [] }: TipTapRendererProps) {
-  const [previewSrc, setPreviewSrc] = useState<string | null>(null)
+  const [previewImage, setPreviewImage] = useState<{ src: string; alt: string } | null>(null)
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
@@ -57,6 +58,8 @@ export function TipTapRenderer({ content, className = '', toc = [] }: TipTapRend
       Image.configure({
         HTMLAttributes: {
           class: 'article-image',
+          loading: 'lazy',
+          decoding: 'async',
           referrerPolicy: 'no-referrer',
         },
       }),
@@ -113,13 +116,14 @@ export function TipTapRenderer({ content, className = '', toc = [] }: TipTapRend
     },
   })
 
-  // 将标题批量设置 id 和 scroll-margin-top
+  // 将标题批量设置 id 和 scroll-margin-top（与 buildToc 一致，跳过空标题）
   const assignHeadingIds = useCallback(() => {
     if (!editor || !toc.length) return
 
     let index = 0
     editor.state.doc.descendants((node, pos) => {
       if (node.type.name !== 'heading') return
+      if (!node.textContent.trim()) return
 
       const item = toc[index]
       if (!item) return
@@ -134,7 +138,6 @@ export function TipTapRenderer({ content, className = '', toc = [] }: TipTapRend
     })
   }, [editor, toc])
 
-  // 给标题添加 id 和 scroll-margin-top，支持目录定位并避免被顶部遮挡
   useEffect(() => {
     assignHeadingIds()
     if (!editor) return
@@ -147,11 +150,12 @@ export function TipTapRenderer({ content, className = '', toc = [] }: TipTapRend
     }
   }, [editor, assignHeadingIds])
 
-  // 将纯文本中的 URL 自动转成可点击链接（避免内容里未显式插入链接时无法点击）
+  // 将纯文本中的 URL 自动转成可点击链接（使用无状态检测正则，避免 /g lastIndex 污染）
   useEffect(() => {
     if (!editor) return
     const dom = editor.view.dom
-    const urlRegex = /(https?:\/\/[^\s<>"]+)/g
+    const urlCheckRegex = /https?:\/\/[^\s<>"]+/
+    const urlSplitRegex = /(https?:\/\/[^\s<>"]+)/g
 
     const walker = document.createTreeWalker(dom, NodeFilter.SHOW_TEXT)
     const targets: Text[] = []
@@ -159,22 +163,20 @@ export function TipTapRenderer({ content, className = '', toc = [] }: TipTapRend
     while (walker.nextNode()) {
       const node = walker.currentNode as Text
       if (!node.nodeValue) continue
-      if (!urlRegex.test(node.nodeValue)) continue
+      if (!urlCheckRegex.test(node.nodeValue)) continue
       const parent = node.parentElement
       if (!parent) continue
-      // 跳过已在链接或代码块内的文本
-      if (parent.closest('a, code, pre')) continue
+      if (parent.closest('a, code, pre, [data-rich-block]')) continue
       targets.push(node)
     }
 
     targets.forEach((node) => {
       const text = node.nodeValue || ''
-      const parts = text.split(urlRegex)
+      const parts = text.split(urlSplitRegex)
       const frag = document.createDocumentFragment()
 
       parts.forEach((part, idx) => {
         if (!part) return
-        // 奇数索引是被捕获的 URL 片段
         if (idx % 2 === 1) {
           const a = document.createElement('a')
           a.href = part
@@ -192,7 +194,7 @@ export function TipTapRenderer({ content, className = '', toc = [] }: TipTapRend
     })
   }, [editor, content])
 
-  // Replace external anchors with LinkPreview components for hover cards
+  // 仅对正文中的外部 http(s) 链接注入 LinkPreview 悬停卡片（跳过富文本块按钮与 mailto:）
   useEffect(() => {
     if (!editor) return
     const dom = editor.view.dom
@@ -202,16 +204,17 @@ export function TipTapRenderer({ content, className = '', toc = [] }: TipTapRend
     links.forEach((link) => {
       if (!(link instanceof HTMLAnchorElement)) return
       if (link.dataset.processed) return
+      if (link.closest('[data-rich-block]')) return
 
-      const href = link.getAttribute('href')
-      if (!href || href.startsWith('/') || href.startsWith('#')) return
+      const href = link.getAttribute('href')?.trim()
+      if (!href || !/^https?:\/\//i.test(href)) return
 
       link.dataset.processed = 'true'
 
       const container = document.createElement('span')
       link.parentNode?.insertBefore(container, link)
 
-      const content = link.innerHTML
+      const linkContent = link.innerHTML
       const classes = link.className
       link.remove()
 
@@ -219,7 +222,7 @@ export function TipTapRenderer({ content, className = '', toc = [] }: TipTapRend
       roots.push(root)
       root.render(
         <LinkPreview url={href} className={classes}>
-          <span dangerouslySetInnerHTML={{ __html: content }} />
+          <span dangerouslySetInnerHTML={{ __html: linkContent }} />
         </LinkPreview>
       )
     })
@@ -231,49 +234,86 @@ export function TipTapRenderer({ content, className = '', toc = [] }: TipTapRend
     }
   }, [editor, content])
 
-  // 图片点击放大（事件委托，避免重复绑定与动态内容遗漏）
+  // 图片点击放大（排除按钮内缩略图如轮播指示图、链接内图片和显式禁用放大的图片）
   useEffect(() => {
     if (!editor) return
     const dom = editor.view.dom
+
+    const isZoomableImage = (img: HTMLElement) =>
+      img.tagName === 'IMG' && !img.closest('button, a, [data-no-zoom]')
+
     const clickHandler = (e: Event) => {
-      const target = e.target as HTMLElement
-      if (target && target.tagName === 'IMG') {
+      const target = e.target as HTMLElement | null
+      if (target && isZoomableImage(target)) {
         const img = target as HTMLImageElement
-        if (img.src) setPreviewSrc(img.src)
+        if (img.src) {
+          setPreviewImage({ src: img.src, alt: img.alt || '' })
+        }
       }
     }
-    dom.addEventListener('click', clickHandler)
-    // 设置鼠标样式
-    const imgs = dom.querySelectorAll('img')
-    imgs.forEach((node) => ((node as HTMLElement).style.cursor = 'zoom-in'))
-    return () => dom.removeEventListener('click', clickHandler)
-  }, [editor])
 
-  // 键盘 ESC 关闭预览
+    const applyCursor = () => {
+      dom.querySelectorAll('img').forEach((node) => {
+        const el = node as HTMLElement
+        el.style.cursor = isZoomableImage(el) ? 'zoom-in' : ''
+      })
+    }
+
+    dom.addEventListener('click', clickHandler)
+    applyCursor()
+    editor.on('update', applyCursor)
+
+    return () => {
+      dom.removeEventListener('click', clickHandler)
+      editor.off('update', applyCursor)
+    }
+  }, [editor, content])
+
+  // 键盘 ESC 关闭预览并锁定背景滚动
   useEffect(() => {
-    if (!previewSrc) return
+    if (!previewImage) return
+    const prevOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setPreviewSrc(null)
+      if (e.key === 'Escape') setPreviewImage(null)
     }
     window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [previewSrc])
+    return () => {
+      document.body.style.overflow = prevOverflow
+      window.removeEventListener('keydown', onKey)
+    }
+  }, [previewImage])
 
   return (
     <>
       <EditorContent editor={editor} />
-      {previewSrc && (
+      {previewImage && (
         <div
-          className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
-          onClick={() => setPreviewSrc(null)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="图片放大预览"
+          className="fixed inset-0 z-[100] flex flex-col items-center justify-center gap-3 bg-black/85 p-4 backdrop-blur-sm"
+          onClick={() => setPreviewImage(null)}
         >
-          {/* Intentional raw img for runtime external URL preview in modal overlay */}
+          <button
+            type="button"
+            aria-label="关闭预览"
+            onClick={() => setPreviewImage(null)}
+            className="absolute right-4 top-4 inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-black/50 text-white/85 transition-colors hover:bg-black/80 hover:text-white"
+          >
+            <X className="h-5 w-5" />
+          </button>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={previewSrc}
-            alt="preview"
-            className="max-h-[90vh] max-w-[90vw] rounded-lg shadow-2xl border border-white/10"
+            src={previewImage.src}
+            alt={previewImage.alt || '图片预览'}
+            onClick={(e) => e.stopPropagation()}
+            className="max-h-[85vh] max-w-[92vw] rounded-lg border border-white/10 shadow-2xl"
           />
+          {previewImage.alt && (
+            <p className="max-w-2xl text-center text-xs text-white/75">{previewImage.alt}</p>
+          )}
         </div>
       )}
     </>

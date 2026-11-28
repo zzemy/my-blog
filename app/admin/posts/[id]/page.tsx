@@ -113,7 +113,13 @@ export default function EditPostPage() {
   const handleSubmit = async (published: boolean) => {
     setError(null)
 
-    const errors = validatePostForm(formData)
+    const effectiveContent = formData.content ?? { type: 'doc', content: [{ type: 'paragraph' }] }
+    const normalizedForm: PostFormData = {
+      ...formData,
+      content: effectiveContent,
+    }
+
+    const errors = validatePostForm(normalizedForm, { requirePublishFields: published })
     if (errors.length > 0) {
       setError(errors.join('，'))
       return
@@ -123,13 +129,12 @@ export default function EditPostPage() {
     try {
       const resolvedPublishedAtIso = resolvePublishedAtForSubmit(
         published,
-        formData.published,
-        formData.published_at,
+        normalizedForm.published_at,
       )
       const submittedFormData: PostFormData = {
-        ...formData,
+        ...normalizedForm,
         published,
-        published_at: resolvedPublishedAtIso ? isoToLocalInput(resolvedPublishedAtIso) : '',
+        published_at: resolvedPublishedAtIso ? isoToLocalInput(resolvedPublishedAtIso) : normalizedForm.published_at,
       }
       const submitData: Record<string, unknown> = {
         title: submittedFormData.title,

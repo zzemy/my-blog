@@ -2,6 +2,7 @@
 // But supabase client is client-side usually if it uses 'createBrowserClient'.
 // For server components using 'createClient' from '@supabase/supabase-js' with anon key is fine for public data.
 
+import { cache } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import { isExpectedSupabaseBuildError, logExpectedSupabaseBuildErrorOnce } from '@/lib/supabase/error-utils'
 
@@ -27,7 +28,7 @@ function getServerReadKey() {
   return supabaseServiceKey || supabaseAnonKey
 }
 
-export const getSiteSettings = async () => {
+export const getSiteSettings = cache(async () => {
   try {
     const serverReadKey = getServerReadKey()
     if (!supabaseUrl || !serverReadKey) {
@@ -75,7 +76,8 @@ export const getSiteSettings = async () => {
       social_links: [],
       feature_flags: {
         enable_footer: true,
+        enable_comments: true,
       }
     }
   }
-}
+})

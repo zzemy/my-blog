@@ -198,36 +198,45 @@ export const TipTapEditor = forwardRef<TipTapEditorHandle, TipTapEditorProps>(fu
         class: 'article-content prose dark:prose-invert max-w-none focus:outline-none min-h-[500px] article-font',
       },
       handlePaste: (view, event) => {
-        // 1. Image Paste Support
-        const item = event.clipboardData?.items[0]
-        if (item?.type.indexOf('image') === 0) {
+        // 1. Image Paste Support (traverse all clipboard items so browser-copied images work even when text/html is index 0)
+        const items = Array.from(event.clipboardData?.items ?? [])
+        const imageFiles = items
+          .filter((item) => item.type.startsWith('image/'))
+          .map((item) => item.getAsFile())
+          .filter((file): file is File => Boolean(file))
+
+        if (imageFiles.length > 0) {
           event.preventDefault()
-          const file = item.getAsFile()
-          if (file) {
-            setIsUploading(true)
-            uploadImage(file)
-              .then((url) => {
+          setIsUploading(true)
+          void (async () => {
+            try {
+              for (const file of imageFiles) {
+                const url = await uploadImage(file)
                 if (url) {
-                  const { schema } = view.state
-                  const node = schema.nodes.image.create({ src: url })
-                  const transaction = view.state.tr.replaceSelectionWith(node)
-                  view.dispatch(transaction)
+                  const currentEditor = editorRef.current
+                  if (currentEditor) {
+                    currentEditor.chain().focus().setImage({ src: url }).run()
+                  }
                 } else {
-                  toast.error('图片上传失败，请检查 Supabase Storage 设置')
+                  toast.error(`图片「${file.name || '剪贴板图片'}」上传失败`)
                 }
-              })
-              .finally(() => {
-                setIsUploading(false)
-              })
-          }
+              }
+            } finally {
+              setIsUploading(false)
+            }
+          })()
           return true
         }
 
-        // 2. Existing Markdown Support
+        // 2. Skip Markdown paste interception when pasting inside a code block
+        if (editorRef.current?.isActive('codeBlock')) {
+          return false
+        }
+
+        // 3. Existing Markdown Support
         try {
           const text = event.clipboardData?.getData('text/markdown') || event.clipboardData?.getData('text/plain') || ''
 
-          // Include all common markdown triggers: math, tables, headers, lists, quotes, code, formatting, html, footnotes
           const looksMarkdown =
             /(^|\n)\s{0,3}(#{1,6}\s|[-*+]\s|\d+\.\s|>|```|~~|[*_](?!\s)|`|[-*_]{3,}|!\[|\[|\||\$\$?|\\|<\/?[a-z]|\[\^)/i.test(
               text,
@@ -251,31 +260,37 @@ export const TipTapEditor = forwardRef<TipTapEditorHandle, TipTapEditorProps>(fu
 
         return false
       },
-      handleDrop: (view, event, slice, moved) => {
-        if (!moved && event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0]) {
-          const file = event.dataTransfer.files[0]
+      handleDrop: (view, event, _slice, moved) => {
+        if (!moved && event.dataTransfer?.files?.length) {
+          const imageFiles = Array.from(event.dataTransfer.files).filter((file) =>
+            file.type.startsWith('image/'),
+          )
 
-          if (file.type.indexOf('image') === 0) {
+          if (imageFiles.length > 0) {
             event.preventDefault()
-
+            const coordinates = view.posAtCoords({ left: event.clientX, top: event.clientY })
             setIsUploading(true)
-            uploadImage(file)
-              .then((url) => {
-                if (url) {
-                  const { schema } = view.state
-                  const coordinates = view.posAtCoords({ left: event.clientX, top: event.clientY })
-                  if (coordinates) {
+
+            void (async () => {
+              try {
+                let insertPos = coordinates?.pos ?? view.state.selection.to
+                for (const file of imageFiles) {
+                  const url = await uploadImage(file)
+                  if (url) {
+                    const { schema } = view.state
                     const node = schema.nodes.image.create({ src: url })
-                    const transaction = view.state.tr.insert(coordinates.pos, node)
+                    const safePos = Math.min(insertPos, view.state.doc.content.size)
+                    const transaction = view.state.tr.insert(safePos, node)
                     view.dispatch(transaction)
+                    insertPos = safePos + node.nodeSize
+                  } else {
+                    toast.error(`图片「${file.name}」上传失败`)
                   }
-                } else {
-                  toast.error('图片上传失败，请检查 Supabase Storage 设置')
                 }
-              })
-              .finally(() => {
+              } finally {
                 setIsUploading(false)
-              })
+              }
+            })()
             return true
           }
         }
@@ -307,20 +322,34 @@ export const TipTapEditor = forwardRef<TipTapEditorHandle, TipTapEditorProps>(fu
       replaceSelection(text: string) {
         const instance = editorRef.current
         if (!instance) return
-        instance.chain().focus().insertContent(text).run()
+        void (async () => {
+          try {
+            const html = await markdownToHtml(text)
+            instance.chain().focus().insertContent(html).run()
+          } catch {
+            instance.chain().focus().insertContent(text).run()
+          }
+        })()
       },
       insertBelowSelection(text: string) {
         const instance = editorRef.current
         if (!instance) return
         const { to } = instance.state.selection
-        instance
-          .chain()
-          .focus()
-          .insertContentAt(to, {
-            type: 'paragraph',
-            content: [{ type: 'text', text }],
-          })
-          .run()
+        void (async () => {
+          try {
+            const html = await markdownToHtml(text)
+            instance.chain().focus().insertContentAt(to, html).run()
+          } catch {
+            instance
+              .chain()
+              .focus()
+              .insertContentAt(to, {
+                type: 'paragraph',
+                content: [{ type: 'text', text }],
+              })
+              .run()
+          }
+        })()
       },
     }),
     [],

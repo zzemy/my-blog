@@ -1,7 +1,8 @@
 import crypto from 'node:crypto'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { sendAdminNotification } from '@/lib/email/admin-notification'
+import { formatBeijingDateTime, sendAdminNotification } from '@/lib/email/admin-notification'
+import { upstashRedis } from '@/lib/rate-limit'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -11,24 +12,35 @@ const discussionCommentSchema = z.object({
   comment: z.object({
     body: z.string().optional(),
     html_url: z.string().url().optional(),
-    user: z.object({
-      login: z.string().optional(),
-      html_url: z.string().url().optional(),
-    }).nullable().optional(),
+    user: z
+      .object({
+        login: z.string().optional(),
+        html_url: z.string().url().optional(),
+        avatar_url: z.string().url().optional(),
+      })
+      .nullable()
+      .optional(),
     created_at: z.string().optional(),
   }),
-  discussion: z.object({
-    title: z.string().optional(),
-    html_url: z.string().url().optional(),
-    number: z.number().optional(),
-  }).optional(),
-  repository: z.object({
-    full_name: z.string().optional(),
-  }).optional(),
-  sender: z.object({
-    login: z.string().optional(),
-    html_url: z.string().url().optional(),
-  }).optional(),
+  discussion: z
+    .object({
+      title: z.string().optional(),
+      html_url: z.string().url().optional(),
+      number: z.number().optional(),
+    })
+    .optional(),
+  repository: z
+    .object({
+      full_name: z.string().optional(),
+    })
+    .optional(),
+  sender: z
+    .object({
+      login: z.string().optional(),
+      html_url: z.string().url().optional(),
+      avatar_url: z.string().url().optional(),
+    })
+    .optional(),
 })
 
 export async function POST(request: NextRequest) {
@@ -42,6 +54,20 @@ export async function POST(request: NextRequest) {
   const event = request.headers.get('x-github-event')
   if (event !== 'discussion_comment') {
     return NextResponse.json({ ok: true, ignored: true, reason: 'unsupported_event' })
+  }
+
+  // 基于 X-GitHub-Delivery 做幂等去重，避免 GitHub 重试导致重复发信
+  const deliveryId = request.headers.get('x-github-delivery')?.trim()
+  if (deliveryId && upstashRedis) {
+    try {
+      const dedupKey = `gh:delivery:${deliveryId}`
+      const firstSeen = await upstashRedis.set(dedupKey, '1', { nx: true, ex: 60 * 60 * 24 })
+      if (!firstSeen) {
+        return NextResponse.json({ ok: true, ignored: true, reason: 'duplicate_delivery' })
+      }
+    } catch (error) {
+      console.error('[GITHUB_WEBHOOK] Delivery dedup check failed:', error)
+    }
   }
 
   let json: unknown
@@ -62,25 +88,35 @@ export async function POST(request: NextRequest) {
   }
 
   const discussionTitle = data.discussion?.title || '未命名讨论'
-  const actor = data.comment.user?.login || data.sender?.login || 'unknown'
-  const commentBody = truncate(data.comment.body || '', 1200)
+  const actor = data.comment.user?.login || data.sender?.login || '访客'
+  const actorUrl = data.comment.user?.html_url || data.sender?.html_url
+  const actorAvatar = data.comment.user?.avatar_url || data.sender?.avatar_url
+  const commentBody = truncate(data.comment.body?.trim() || '评论内容为空或无法读取。', 1200)
+  const formattedTime = formatBeijingDateTime(data.comment.created_at)
 
   const result = await sendAdminNotification({
-    subject: `Giscus 新评论：${discussionTitle}`,
-    title: '收到新的 Giscus 评论',
-    message: commentBody || '评论内容为空或无法读取。',
-    action: {
-      label: '查看评论',
-      href: data.comment.html_url,
+    category: 'comment',
+    badge: '新评论',
+    subject: `新评论 · ${actor} 留言了「${discussionTitle}」`,
+    title: `${actor} 在「${discussionTitle}」发表了评论`,
+    subtitle: formattedTime,
+    preheader: `${actor}：${truncate(commentBody.replace(/\s+/g, ' '), 90)}`,
+    quote: {
+      author: `@${actor}`,
+      authorUrl: actorUrl,
+      avatarUrl: actorAvatar,
+      meta: data.discussion?.number ? `Discussion #${data.discussion.number}` : 'Giscus 评论区',
+      body: commentBody,
     },
     lines: [
-      ['评论者', actor],
-      ['讨论标题', discussionTitle],
-      ['讨论编号', data.discussion?.number ? `#${data.discussion.number}` : undefined],
-      ['评论链接', data.comment.html_url],
-      ['讨论链接', data.discussion?.html_url],
+      ['所属页面', discussionTitle, data.discussion?.html_url],
+      ['评论者', `@${actor}`, actorUrl],
       ['仓库', data.repository?.full_name],
-      ['创建时间', data.comment.created_at],
+      ['评论时间', formattedTime],
+    ],
+    actions: [
+      { label: '立即查看并回复', href: data.comment.html_url, variant: 'primary' },
+      { label: '查看完整讨论', href: data.discussion?.html_url, variant: 'secondary' },
     ],
   })
 

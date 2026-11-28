@@ -247,7 +247,7 @@
 }
 
 .dark .article-content.prose a {
-  color: color-mix(in oklch, var(--article-heading), var(--article-accent) 20%);
+  color: var(--article-accent);
 }
 
 .article-content.prose {

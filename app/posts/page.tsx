@@ -1,77 +1,33 @@
-import { PostList } from "@/features/blog/components/shared/post-list";
-import { supabase } from '@/lib/supabase/client';
-import { isExpectedSupabaseBuildError, logExpectedSupabaseBuildErrorOnce } from '@/lib/supabase/error-utils';
+import type { Metadata } from 'next'
+import { PostList } from '@/features/blog/components/shared/post-list'
+import { getPublishedPosts } from '@/lib/supabase/posts'
 
-// Enable ISR for posts index page (seconds)
-export const revalidate = 60; // Regenerate at most once per minute
+export const revalidate = 60
 
-type PostRow = {
-  id: string;
-  public_id: string | null;
-  slug: string;
-  title: string;
-  published_at: string | null;
-  created_at: string;
-  description: string | null;
-  tags: string[] | null;
-  reading_time: number | null;
-  cover_image: string | null;
-};
-
-async function getPosts() {
-  try {
-    const { data, error } = await supabase
-      .from('posts')
-      .select('*')
-      .eq('published', true)
-      .neq('slug', 'about')
-      .order('published_at', { ascending: false });
-
-    if (error) {
-      console.error('Failed to fetch posts:', error);
-      return [];
-    }
-
-    return (data as PostRow[]).map((post) => ({
-      id: post.id,
-      publicId: post.public_id,
-      slug: post.slug,
-      title: post.title,
-      date: post.published_at || post.created_at,
-      summary: post.description || undefined,
-      excerpt: post.description || undefined,
-      tags: post.tags || undefined,
-      readingTime: post.reading_time ? `${post.reading_time} 字` : undefined,
-      coverImage: post.cover_image,
-    }));
-  } catch (error) {
-    if (isExpectedSupabaseBuildError(error)) {
-      logExpectedSupabaseBuildErrorOnce(
-        'posts-page-build-fallback',
-        'Using empty localized posts list because Supabase is unavailable in this environment:',
-        error
-      )
-    } else {
-      console.error('Error fetching posts:', error)
-    }
-    return [];
-  }
+export const metadata: Metadata = {
+  title: '所有文章',
+  description: '一些技术分享或是生活随笔。',
 }
 
 export default async function PostsPage() {
-  const posts = await getPosts();
+  const posts = await getPublishedPosts()
+
   return (
-    <div className="mx-auto max-w-5xl px-4 py-6 md:py-10">
-      <div className="flex flex-col items-start gap-4 md:flex-row md:justify-between md:gap-8">
-        <div className="flex-1 space-y-4">
-          <h1 className="inline-block font-bold text-4xl tracking-tight lg:text-5xl">所有文章</h1>
-          <p className="text-xl text-muted-foreground">
+    <div className="mx-auto max-w-5xl px-4 py-8 md:py-12">
+      <div className="flex flex-col items-start gap-4 border-b border-border/70 pb-8 dark:border-white/12 md:flex-row md:items-end md:justify-between md:gap-8">
+        <div className="flex-1 space-y-3">
+          <h1 className="inline-block text-4xl font-bold tracking-tight lg:text-5xl">所有文章</h1>
+          <p className="text-base text-muted-foreground md:text-lg">
             一些技术分享或是生活随笔
           </p>
         </div>
+        <span className="inline-flex items-center rounded-full border border-border/70 bg-muted/40 px-3 py-1 font-mono text-xs text-muted-foreground">
+          共 {posts.length} 篇
+        </span>
       </div>
-      <hr className="my-8" />
-      <PostList posts={posts} readMoreText="阅读更多" />
+      <div className="mt-4">
+        <PostList posts={posts} readMoreText="阅读全文" />
+      </div>
     </div>
-  );
+  )
 }

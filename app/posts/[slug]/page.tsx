@@ -1,8 +1,10 @@
+import { cache } from 'react'
 import { notFound } from 'next/navigation'
 import type { Content } from '@tiptap/react'
 import { PostReaderView, type PostLocaleVariant } from '@/features/blog/components/client/post-reader-view'
 import { buildToc, type TiptapNode } from '@/features/blog/utils/toc'
 import { getPostRouteId } from '@/lib/post-public-id'
+import { getSiteSettings } from '@/lib/site-settings'
 import { supabase } from '@/lib/supabase/client'
 import type { Database } from '@/lib/supabase/types'
 import { isExpectedSupabaseBuildError, logExpectedSupabaseBuildErrorOnce } from '@/lib/supabase/error-utils'
@@ -49,11 +51,14 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 }
 
 async function findPostByIdentifier(identifier: string): Promise<Post | null> {
+  const publishFilter = `published_at.is.null,published_at.lte.${new Date().toISOString()}`
+
   const { data: postByPublicId, error: publicIdError } = await supabase
     .from('posts')
     .select('*')
     .eq('public_id', identifier)
     .eq('published', true)
+    .or(publishFilter)
     .maybeSingle()
 
   if (publicIdError) {
@@ -69,6 +74,7 @@ async function findPostByIdentifier(identifier: string): Promise<Post | null> {
     .select('*')
     .eq('slug', identifier)
     .eq('published', true)
+    .or(publishFilter)
     .maybeSingle()
 
   if (slugError) {
@@ -78,7 +84,7 @@ async function findPostByIdentifier(identifier: string): Promise<Post | null> {
   return postBySlug ? (postBySlug as Post) : null
 }
 
-async function getPost(slug: string): Promise<Post | null> {
+const getPost = cache(async (slug: string): Promise<Post | null> => {
   try {
     return await findPostByIdentifier(slug)
   } catch (error) {
@@ -93,7 +99,7 @@ async function getPost(slug: string): Promise<Post | null> {
     }
     return null
   }
-}
+})
 
 async function getPublishedTranslations(postId: string): Promise<PostTranslation[]> {
   try {
@@ -160,7 +166,11 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
     notFound()
   }
 
-  const publishedTranslations = await getPublishedTranslations(post.id)
+  const [publishedTranslations, settings] = await Promise.all([
+    getPublishedTranslations(post.id),
+    getSiteSettings(),
+  ])
+  const commentsEnabled = settings.feature_flags?.enable_comments !== false
 
   const readingTime = post.reading_time ? `${post.reading_time} 字` : null
   const routeId = getPostRouteId({ publicId: post.public_id, slug: post.slug })
@@ -191,6 +201,7 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
       readingTime={readingTime}
       tags={post.tags ?? []}
       routeId={routeId}
+      commentsEnabled={commentsEnabled}
     />
   )
 }

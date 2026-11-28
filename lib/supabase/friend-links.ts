@@ -4,11 +4,22 @@ import { isExpectedSupabaseBuildError, logExpectedSupabaseBuildErrorOnce } from 
 
 export type FriendLinkStatus = FriendLink['status']
 
-export async function getApprovedFriendLinks(): Promise<FriendLink[]> {
+export type PublicFriendLink = Pick<
+  FriendLink,
+  'id' | 'name' | 'url' | 'avatar_url' | 'description' | 'sort_order' | 'status' | 'created_at' | 'updated_at'
+>
+
+const PUBLIC_FRIEND_LINK_COLUMNS =
+  'id, name, url, avatar_url, description, sort_order, status, created_at, updated_at'
+
+const LEGACY_PUBLIC_FRIEND_LINK_COLUMNS =
+  'id, name, url, avatar_url, description, sort_order, created_at'
+
+export async function getApprovedFriendLinks(): Promise<PublicFriendLink[]> {
   try {
     const { data, error } = await supabase
       .from('friend_links')
-      .select('*')
+      .select(PUBLIC_FRIEND_LINK_COLUMNS)
       .eq('status', 'approved')
       .order('sort_order', { ascending: true })
       .order('created_at', { ascending: false })
@@ -17,7 +28,7 @@ export async function getApprovedFriendLinks(): Promise<FriendLink[]> {
       // Keep existing installations readable until the workflow migration is applied.
       const legacy = await supabase
         .from('friend_links')
-        .select('*')
+        .select(LEGACY_PUBLIC_FRIEND_LINK_COLUMNS)
         .order('sort_order', { ascending: true })
         .order('created_at', { ascending: false })
 
@@ -30,7 +41,6 @@ export async function getApprovedFriendLinks(): Promise<FriendLink[]> {
         description: string | null
         sort_order: number
         created_at: string
-        updated_at?: string | null
       }>
 
       return legacyLinks.map((link) => ({
@@ -41,14 +51,12 @@ export async function getApprovedFriendLinks(): Promise<FriendLink[]> {
         description: link.description,
         sort_order: link.sort_order,
         created_at: link.created_at,
-        note: null,
-        contact: null,
         status: 'approved' as const,
-        updated_at: link.updated_at ?? link.created_at,
-      })) as FriendLink[]
+        updated_at: link.created_at,
+      }))
     }
     if (error) throw error
-    return (data ?? []) as FriendLink[]
+    return (data ?? []) as PublicFriendLink[]
   } catch (error) {
     if (isExpectedSupabaseBuildError(error)) {
       logExpectedSupabaseBuildErrorOnce(

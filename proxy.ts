@@ -3,13 +3,13 @@ import type { NextRequest } from 'next/server'
 import {
   applyAuthCookies,
   clearAuthCookies,
+  getAuthTokenFromRequest,
   isJwtExpiringSoon,
   refreshAdminSession,
   validateAdminRequest,
 } from '@/lib/auth'
 
-// Routes that require auth guard.
-const protectedRoutes = ['/admin']
+const protectedRoutes = ['/admin', '/api/admin']
 
 function buildUpdatedCookieHeader(
   request: NextRequest,
@@ -29,7 +29,7 @@ function buildUpdatedCookieHeader(
 
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname
-
+  const isAdminApi = pathname.startsWith('/api/admin')
   const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route))
   if (!isProtectedRoute) return NextResponse.next()
 
@@ -38,7 +38,7 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next()
   }
 
-  const authToken = request.cookies.get('auth-token')?.value ?? null
+  const authToken = getAuthTokenFromRequest(request)
   const refreshToken = request.cookies.get('refresh-token')?.value ?? null
 
   // 1. 当前 access_token 有效且距离过期还超过 10 分钟，直接放行
@@ -73,12 +73,18 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // 4. 彻底失效，清理 Cookie 并跳转登录页
+  // 4. API 路由返回 JSON 401，页面路由重定向到登录页
+  if (isAdminApi) {
+    const response = NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    clearAuthCookies(response, request)
+    return response
+  }
+
   const response = NextResponse.redirect(new URL('/admin', request.url))
   clearAuthCookies(response, request)
   return response
 }
 
 export const config = {
-  matcher: ['/admin/:path*'],
+  matcher: ['/admin/:path*', '/api/admin/:path*'],
 }

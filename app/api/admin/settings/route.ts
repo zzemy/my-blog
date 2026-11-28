@@ -1,79 +1,74 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getAdminClient, hasValidServiceRoleKey, validateAnonKey, validateServiceRoleKey } from '@/lib/supabase/client'
+import { z } from 'zod'
+import { getAdminClient, hasValidServiceRoleKey } from '@/lib/supabase/client'
 import { getAuthTokenFromRequest, validateAdminRequest } from '@/lib/auth'
 import { revalidateSiteSettings } from '@/lib/revalidation/settings'
 
-function keyReasonText(reason?: string, keyName?: string, keyRef?: string | null, urlRef?: string | null) {
-  const prefix = keyName ? `${keyName}: ` : ''
-  switch (reason) {
-    case 'missing_key':
-      return `${prefix}缺少配置`
-    case 'invalid_jwt':
-      return `${prefix}不是合法 JWT`
-    case 'invalid_format':
-      return `${prefix}格式不合法（应为 JWT 或 sb_publishable/sb_secret）`
-    case 'invalid_role':
-      return `${prefix}角色不匹配`
-    case 'expired':
-      return `${prefix}已过期`
-    case 'project_ref_mismatch':
-      return `${prefix}项目不匹配（key.ref=${keyRef}, url.ref=${urlRef}）`
-    default:
-      return `${prefix}格式看似正确但被 Supabase 拒绝（常见于复制不完整/密钥已轮换失效）`
-  }
-}
+const optionalSafeUrl = z
+  .string()
+  .trim()
+  .max(1000)
+  .refine(
+    (val) => {
+      if (!val) return true
+      if (val.startsWith('/')) return true
+      try {
+        const u = new URL(val)
+        return u.protocol === 'http:' || u.protocol === 'https:'
+      } catch {
+        return false
+      }
+    },
+    { message: '请输入合法的 http(s) 或站内路径 URL' },
+  )
 
-function normalizeEnvValue(value?: string) {
-  if (!value) return undefined
-  let normalized = value.trim()
-  normalized = normalized.replace(/[\u200B-\u200D\uFEFF]/g, '')
-  if (
-    (normalized.startsWith('"') && normalized.endsWith('"')) ||
-    (normalized.startsWith("'") && normalized.endsWith("'"))
-  ) {
-    normalized = normalized.slice(1, -1).trim()
-  }
-  normalized = normalized.replace(/\s+/g, '')
-  return normalized || undefined
-}
+const socialLinkSchema = z.object({
+  platform: z.string().trim().min(1, '平台名称不能为空').max(60),
+  url: z
+    .string()
+    .trim()
+    .url('请输入有效的社交链接 URL')
+    .refine((val) => {
+      try {
+        const u = new URL(val)
+        return u.protocol === 'http:' || u.protocol === 'https:' || u.protocol === 'mailto:'
+      } catch {
+        return false
+      }
+    }, '仅支持 http(s) 或 mailto 链接'),
+  icon: z.string().trim().max(60).optional(),
+})
 
-function keyFingerprint(value?: string) {
-  const normalized = normalizeEnvValue(value)
-  if (!normalized) return 'missing'
-  const len = normalized.length
-  const head = normalized.slice(0, 8)
-  const tail = normalized.slice(-8)
-  return `len=${len}, head=${head}, tail=${tail}`
-}
-
-function extractProjectRefFromSupabaseUrl(url?: string) {
-  const normalized = normalizeEnvValue(url)
-  if (!normalized) return null
-  try {
-    const hostname = new URL(normalized).hostname
-    const match = hostname.match(/^([a-z0-9-]+)\.supabase\.co$/i)
-    return match?.[1] ?? null
-  } catch {
-    return null
-  }
-}
-
-function buildApiKeyErrorDetails() {
-  const anon = validateAnonKey()
-  const service = validateServiceRoleKey()
-  const normalizedUrl = normalizeEnvValue(process.env.NEXT_PUBLIC_SUPABASE_URL)
-  const urlRef = extractProjectRefFromSupabaseUrl(process.env.NEXT_PUBLIC_SUPABASE_URL)
-
-  return [
-    keyReasonText(anon.reason, 'NEXT_PUBLIC_SUPABASE_ANON_KEY', anon.keyRef, anon.urlRef),
-    keyReasonText(service.reason, 'SUPABASE_SERVICE_ROLE_KEY', service.keyRef, service.urlRef),
-    `NEXT_PUBLIC_SUPABASE_URL: ${normalizedUrl || 'missing'} (url.ref=${urlRef || 'unknown'})`,
-    `NEXT_PUBLIC_SUPABASE_ANON_KEY ref: ${anon.keyRef || 'unknown'} (url.ref=${anon.urlRef || urlRef || 'unknown'})`,
-    `SUPABASE_SERVICE_ROLE_KEY ref: ${service.keyRef || 'unknown'} (url.ref=${service.urlRef || urlRef || 'unknown'})`,
-    `NEXT_PUBLIC_SUPABASE_ANON_KEY 指纹: ${keyFingerprint(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)}`,
-    `SUPABASE_SERVICE_ROLE_KEY 指纹: ${keyFingerprint(process.env.SUPABASE_SERVICE_ROLE_KEY)}`,
-  ]
-}
+const siteSettingsUpdateSchema = z.object({
+  site_title: z.string().trim().min(1, '网站标题不能为空').max(120),
+  site_description: z.string().trim().max(500).default(''),
+  site_keywords: z.array(z.string().trim().min(1).max(60)).max(30).default([]),
+  favicon_url: optionalSafeUrl.default(''),
+  footer_text: z.string().trim().max(300).optional(),
+  social_links: z.array(socialLinkSchema).max(20).optional(),
+  author_info: z
+    .object({
+      name: z.string().trim().max(80).optional(),
+      bio: z.string().trim().max(500).optional(),
+      avatar_url: optionalSafeUrl.optional(),
+    })
+    .optional(),
+  seo_config: z
+    .object({
+      google_site_verification: z.string().trim().max(200).optional(),
+      baidu_site_verification: z.string().trim().max(200).optional(),
+      og_image: optionalSafeUrl.optional(),
+    })
+    .optional(),
+  feature_flags: z
+    .object({
+      enable_comments: z.boolean().optional(),
+      enable_footer: z.boolean().optional(),
+      enable_registrations: z.boolean().optional(),
+      maintenance_mode: z.boolean().optional(),
+    })
+    .optional(),
+})
 
 function getErrorMessage(error: unknown) {
   if (error instanceof Error) return error.message
@@ -88,39 +83,42 @@ function getErrorCode(error: unknown) {
   return undefined
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const token = getAuthTokenFromRequest(request)
+  const ok = await validateAdminRequest(token)
+  if (!ok) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   try {
-    const client = getAdminClient()
+    const client = getAdminClient(token || undefined)
     const { data, error } = await client
       .from('site_settings')
       .select('*')
       .eq('id', 1)
       .single()
 
-    if (error && error.code !== 'PGRST116') { // PGRST116 is code for 0 rows
-       throw error
+    if (error && error.code !== 'PGRST116') {
+      throw error
     }
 
-    // Default if not found (though migration should ensure it exists)
     const settings = data || {
       site_title: 'My Blog',
       site_keywords: [],
-      social_links: []
+      social_links: [],
     }
 
     return NextResponse.json({ settings })
   } catch (error: unknown) {
-    const message = getErrorMessage(error).toLowerCase()
-    if (message.includes('invalid api key')) {
+    const message = getErrorMessage(error)
+    console.error('[ADMIN_SETTINGS_GET] Failed to load settings:', message)
+    if (message.toLowerCase().includes('invalid api key')) {
       return NextResponse.json(
-        {
-          error: 'Supabase API Key 无效',
-          details: buildApiKeyErrorDetails(),
-        },
-        { status: 500 }
+        { error: 'Supabase 服务端配置异常，请检查环境变量' },
+        { status: 500 },
       )
     }
-    return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 })
+    return NextResponse.json({ error: '加载系统设置失败' }, { status: 500 })
   }
 }
 
@@ -132,9 +130,22 @@ export async function PUT(request: NextRequest) {
   }
 
   try {
-    const body = await request.json()
-    // Singleton row update only (id = 1)
-    const payload = { ...body, updated_at: new Date().toISOString() }
+    const rawBody: unknown = await request.json()
+    const parsed = siteSettingsUpdateSchema.safeParse(rawBody)
+    if (!parsed.success) {
+      return NextResponse.json(
+        {
+          error: '设置参数校验失败',
+          details: parsed.error.issues.map((issue) => issue.message),
+        },
+        { status: 400 },
+      )
+    }
+
+    const payload = {
+      ...parsed.data,
+      updated_at: new Date().toISOString(),
+    }
 
     const client = getAdminClient(token || undefined)
     const { data, error } = await client
@@ -146,86 +157,56 @@ export async function PUT(request: NextRequest) {
 
     if (error) {
       if (error.code === 'PGRST116') {
-        const hasServiceRole = hasValidServiceRoleKey()
-        const validation = validateServiceRoleKey()
-        if (!hasServiceRole) {
-          const reasonMap: Record<string, string> = {
-            missing_key: '缺少 SUPABASE_SERVICE_ROLE_KEY',
-            invalid_jwt: 'SUPABASE_SERVICE_ROLE_KEY 不是合法 JWT',
-            invalid_format: 'SUPABASE_SERVICE_ROLE_KEY 格式不合法（应为 JWT 或 sb_secret）',
-            invalid_role: 'SUPABASE_SERVICE_ROLE_KEY 不是 service_role key',
-            expired: 'SUPABASE_SERVICE_ROLE_KEY 已过期',
-            project_ref_mismatch: `service_role key 项目不匹配（key.ref=${validation.keyRef}, url.ref=${validation.urlRef}）`,
-          }
-
+        if (!hasValidServiceRoleKey()) {
           return NextResponse.json(
-            {
-              error: 'site_settings 缺少默认行（id=1），且 SUPABASE_SERVICE_ROLE_KEY 无法用于自动初始化',
-              details: reasonMap[validation.reason || ''] || '未知 service_role 校验失败原因',
-            },
-            { status: 500 }
+            { error: 'site_settings 缺少默认行（id=1），无法自动初始化' },
+            { status: 500 },
           )
         }
 
         const adminClient = getAdminClient()
         const { data: repaired, error: repairError } = await adminClient
           .from('site_settings')
-          .upsert({ id: 1, ...payload, site_title: body?.site_title || 'My Blog' })
+          .upsert({ id: 1, ...payload } as never)
           .select()
           .single()
 
-        if (repairError) {
-          if ((repairError?.message || '').toLowerCase().includes('invalid api key')) {
-            return NextResponse.json(
-              {
-                error: 'Supabase API Key 无效',
-                details: buildApiKeyErrorDetails(),
-              },
-              { status: 500 }
-            )
-          }
-          throw repairError
-        }
+        if (repairError) throw repairError
 
         revalidateSiteSettings()
-
         return NextResponse.json({ settings: repaired })
       }
       throw error
     }
 
     revalidateSiteSettings()
-
     return NextResponse.json({ settings: data })
   } catch (error: unknown) {
     const code = getErrorCode(error)
     const message = getErrorMessage(error) || 'Unknown error'
-    const lowerMessage = message.toLowerCase()
+    console.error('[ADMIN_SETTINGS_PUT] Failed to save settings:', code, message)
 
-    if (lowerMessage.includes('invalid api key')) {
+    if (message.toLowerCase().includes('invalid api key')) {
       return NextResponse.json(
-        {
-          error: 'Supabase API Key 无效',
-          details: buildApiKeyErrorDetails(),
-        },
-        { status: 500 }
+        { error: 'Supabase 服务端配置异常，请检查环境变量' },
+        { status: 500 },
       )
     }
 
     if (code === '42703') {
       return NextResponse.json(
-        { error: '数据库缺少设置字段（请执行最新 migration）', details: message, code },
-        { status: 500 }
+        { error: '数据库缺少设置字段（请执行最新 migration）', code },
+        { status: 500 },
       )
     }
 
     if (code === '42P01') {
       return NextResponse.json(
-        { error: '数据库缺少 site_settings 表（请执行初始化 schema/migration）', details: message, code },
-        { status: 500 }
+        { error: '数据库缺少 site_settings 表（请执行初始化 schema/migration）', code },
+        { status: 500 },
       )
     }
 
-    return NextResponse.json({ error: message, code }, { status: 500 })
+    return NextResponse.json({ error: '保存系统设置失败', code }, { status: 500 })
   }
 }

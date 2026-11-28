@@ -194,8 +194,9 @@ export function PostEditorWorkspace({
     if (!isDirty || !draftKey) return
 
     const timer = window.setTimeout(() => {
-      saveLocalDraft(draftKey, formData)
-      setLocalDraftSavedAt(new Date().toISOString())
+      if (saveLocalDraft(draftKey, formData)) {
+        setLocalDraftSavedAt(new Date().toISOString())
+      }
     }, 1200)
 
     return () => window.clearTimeout(timer)
@@ -874,20 +875,19 @@ export function PostEditorWorkspace({
             <div className={styles.switchRow}>
               <div className={styles.switchLabel}>
                 <Calendar className="h-3.5 w-3.5" />
-                <span>自定义发布时间</span>
+                <span>自定义 / 定时发布时间</span>
               </div>
               <Switch
-                checked={formData.published}
+                checked={Boolean(formData.published_at)}
                 onCheckedChange={(checked) => {
                   updateForm({
-                    published: checked,
-                    published_at: checked && !formData.published_at ? nowLocalInput() : formData.published_at,
+                    published_at: checked ? (formData.published_at || nowLocalInput()) : '',
                   })
                 }}
-                aria-label="自定义发布时间"
+                aria-label="自定义或定时发布时间"
               />
             </div>
-            {formData.published ? (
+            {formData.published_at ? (
               <label>
                 <span>发布时间</span>
                 <Input
@@ -895,6 +895,11 @@ export function PostEditorWorkspace({
                   value={formData.published_at}
                   onChange={(event) => updateForm({ published_at: event.target.value })}
                 />
+                {new Date(formData.published_at).getTime() > Date.now() ? (
+                  <small className="text-[11px] text-amber-600 dark:text-amber-400">
+                    设为未来时间后，发布时将自动定时并在该时间点后对前台可见。
+                  </small>
+                ) : null}
               </label>
             ) : null}
             <div className={styles.switchRow}>

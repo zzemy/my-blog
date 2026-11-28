@@ -24,13 +24,86 @@ export interface PostData {
   seo_description?: string
 }
 
+export interface SearchablePostItem extends PostListItem {
+  content: string
+}
+
+const POST_LIST_COLUMNS =
+  'id, public_id, slug, title, description, cover_image, tags, reading_time, published_at, created_at, featured'
+
+function publishedAtFilter(): string {
+  return `published_at.is.null,published_at.lte.${new Date().toISOString()}`
+}
+
+function extractPlainTextFromContent(node: unknown, maxLength = 6000): string {
+  const chunks: string[] = []
+  let currentLength = 0
+
+  const walk = (item: unknown) => {
+    if (!item || currentLength >= maxLength) return
+    if (typeof item === 'string') {
+      const cleaned = item.trim()
+      if (cleaned) {
+        chunks.push(cleaned)
+        currentLength += cleaned.length + 1
+      }
+      return
+    }
+    if (Array.isArray(item)) {
+      for (const child of item) {
+        if (currentLength >= maxLength) break
+        walk(child)
+      }
+      return
+    }
+    if (typeof item === 'object') {
+      const obj = item as Record<string, unknown>
+      if (typeof obj.text === 'string' && obj.text.trim()) {
+        chunks.push(obj.text)
+        currentLength += obj.text.length + 1
+      }
+      if (obj.attrs && typeof obj.attrs === 'object') {
+        const attrs = obj.attrs as Record<string, unknown>
+        for (const key of ['title', 'text', 'label', 'caption', 'eyebrow']) {
+          if (typeof attrs[key] === 'string' && attrs[key].trim()) {
+            chunks.push(attrs[key])
+            currentLength += attrs[key].length + 1
+          }
+        }
+      }
+      if (Array.isArray(obj.content)) {
+        walk(obj.content)
+      }
+    }
+  }
+
+  walk(node)
+  return chunks.join(' ').replace(/\s+/g, ' ').trim().slice(0, maxLength)
+}
+
+function mapRowToListItem(post: Post): PostListItem {
+  return {
+    id: post.id,
+    publicId: post.public_id,
+    slug: post.slug,
+    title: post.title,
+    date: post.published_at || post.created_at,
+    summary: post.description || '',
+    excerpt: post.description || '',
+    tags: post.tags || [],
+    readingTime: post.reading_time ? `${post.reading_time} 字` : undefined,
+    coverImage: post.cover_image,
+  }
+}
+
 export async function getPublishedPosts(): Promise<PostListItem[]> {
   try {
     const { data, error } = await supabase
       .from('posts')
-      .select('*')
+      .select(POST_LIST_COLUMNS)
       .eq('published', true)
       .neq('slug', 'about')
+      .or(publishedAtFilter())
       .order('published_at', { ascending: false })
 
     if (error) {
@@ -47,19 +120,7 @@ export async function getPublishedPosts(): Promise<PostListItem[]> {
     }
 
     const rows = (data || []) as Post[]
-
-    return rows.map(post => ({
-      id: post.id,
-      publicId: post.public_id,
-      slug: post.slug,
-      title: post.title,
-      date: post.published_at || post.created_at,
-      summary: post.description || '',
-      excerpt: post.description || '',
-      tags: post.tags || [],
-      readingTime: post.reading_time ? `${post.reading_time} 字` : undefined,
-      coverImage: post.cover_image,
-    }))
+    return rows.map(mapRowToListItem)
   } catch (error) {
     if (isExpectedSupabaseBuildError(error)) {
       logExpectedSupabaseBuildErrorOnce(
@@ -74,12 +135,57 @@ export async function getPublishedPosts(): Promise<PostListItem[]> {
   }
 }
 
+export async function getPublishedPostsForSearch(): Promise<SearchablePostItem[]> {
+  try {
+    const { data, error } = await supabase
+      .from('posts')
+      .select(`${POST_LIST_COLUMNS}, content`)
+      .eq('published', true)
+      .neq('slug', 'about')
+      .or(publishedAtFilter())
+      .order('published_at', { ascending: false })
+
+    if (error) {
+      if (isExpectedSupabaseBuildError(error)) {
+        logExpectedSupabaseBuildErrorOnce(
+          'get-search-posts-query-fallback',
+          'Using empty search post list because Supabase is unavailable in this environment:',
+          error
+        )
+      } else {
+        console.error('Error fetching search posts:', error)
+      }
+      return []
+    }
+
+    const rows = (data || []) as Post[]
+    return rows.map((post) => ({
+      ...mapRowToListItem(post),
+      content: extractPlainTextFromContent(post.content),
+    }))
+  } catch (error) {
+    if (isExpectedSupabaseBuildError(error)) {
+      logExpectedSupabaseBuildErrorOnce(
+        'get-search-posts-build-fallback',
+        'Using empty search post list because Supabase is unavailable in this environment:',
+        error
+      )
+    } else {
+      console.error('Error fetching search posts:', error)
+    }
+    return []
+  }
+}
+
 async function findPublishedPostByIdentifier(identifier: string): Promise<Post | null> {
+  const filter = publishedAtFilter()
+
   const { data: postByPublicId, error: publicIdError } = await supabase
     .from('posts')
     .select('*')
     .eq('public_id', identifier)
     .eq('published', true)
+    .or(filter)
     .maybeSingle()
 
   if (publicIdError) {
@@ -95,6 +201,7 @@ async function findPublishedPostByIdentifier(identifier: string): Promise<Post |
     .select('*')
     .eq('slug', identifier)
     .eq('published', true)
+    .or(filter)
     .maybeSingle()
 
   if (slugError) {
@@ -184,9 +291,10 @@ export async function getPostsByTag(tag: string): Promise<PostListItem[]> {
   try {
     const { data, error } = await supabase
       .from('posts')
-      .select('*')
+      .select(POST_LIST_COLUMNS)
       .eq('published', true)
       .neq('slug', 'about')
+      .or(publishedAtFilter())
       .contains('tags', [tag])
       .order('published_at', { ascending: false })
 
@@ -204,19 +312,7 @@ export async function getPostsByTag(tag: string): Promise<PostListItem[]> {
     }
 
     const rows = (data || []) as Post[]
-
-    return rows.map(post => ({
-      id: post.id,
-      publicId: post.public_id,
-      slug: post.slug,
-      title: post.title,
-      date: post.published_at || post.created_at,
-      summary: post.description || '',
-      excerpt: post.description || '',
-      tags: post.tags || [],
-      readingTime: post.reading_time ? `${post.reading_time} 字` : undefined,
-      coverImage: post.cover_image,
-    }))
+    return rows.map(mapRowToListItem)
   } catch (error) {
     if (isExpectedSupabaseBuildError(error)) {
       logExpectedSupabaseBuildErrorOnce(

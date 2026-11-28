@@ -31,6 +31,7 @@ interface PostReaderViewProps {
   readingTime: string | null
   tags: string[]
   routeId: string
+  commentsEnabled?: boolean
 }
 
 export function PostReaderView({
@@ -40,6 +41,7 @@ export function PostReaderView({
   readingTime,
   tags,
   routeId,
+  commentsEnabled = true,
 }: PostReaderViewProps) {
   const [activeLocale, setActiveLocale] = useState<string>('original')
 
@@ -170,7 +172,7 @@ export function PostReaderView({
           />
 
           <div className="mt-12 border-t pt-10">
-            <Comments />
+            <Comments enabled={commentsEnabled} />
           </div>
         </article>
       </FadeIn>

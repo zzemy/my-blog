@@ -66,31 +66,64 @@ export function hasMeaningfulContent(content: PostFormData['content']): boolean 
   return hasNonTextMediaOrBlock(content)
 }
 
-export function validatePostForm(formData: PostFormData) {
-  const errors: string[] = []
+const SLUG_REGEX = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 
-  if (!formData.title.trim()) errors.push('标题不能为空')
-  if (!formData.slug.trim()) errors.push('URL Slug 不能为空')
-  if (!hasMeaningfulContent(formData.content)) errors.push('内容不能为空')
-  if (formData.tags.length === 0) errors.push('至少需要一个标签')
+export function validatePostForm(
+  formData: PostFormData,
+  options?: { requirePublishFields?: boolean },
+) {
+  const requirePublishFields = options?.requirePublishFields ?? true
+  const errors: string[] = []
+  const trimmedTitle = formData.title.trim()
+  const trimmedSlug = formData.slug.trim()
+
+  if (!trimmedTitle) errors.push('标题不能为空')
+  if (trimmedTitle.length > 200) errors.push('标题不能超过 200 字')
+
+  if (requirePublishFields && !trimmedSlug) {
+    errors.push('URL Slug 不能为空')
+  } else if (trimmedSlug && !SLUG_REGEX.test(trimmedSlug)) {
+    errors.push('URL Slug 仅支持小写字母、数字和连字符')
+  }
+
+  if (formData.description.trim().length > 500) {
+    errors.push('文章摘要不能超过 500 字')
+  }
+
+  if (formData.cover_image.trim()) {
+    try {
+      const parsed = new URL(formData.cover_image.trim())
+      if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+        errors.push('封面图片必须是合法的 http(s) URL')
+      }
+    } catch {
+      errors.push('封面图片必须是合法的 URL')
+    }
+  }
+
+  if (requirePublishFields) {
+    if (!hasMeaningfulContent(formData.content)) errors.push('发布文章时正文内容不能为空')
+    if (formData.tags.length === 0) errors.push('发布文章时至少需要一个标签')
+  }
 
   return errors
 }
 
 export function resolvePublishedAtForSubmit(
   published: boolean,
-  scheduleEnabled: boolean,
   localPublishedAt: string,
 ) {
-  if (!published) return null
+  if (!published) {
+    return localPublishedAt ? new Date(localPublishedAt).toISOString() : null
+  }
 
-  return scheduleEnabled && localPublishedAt
+  return localPublishedAt
     ? new Date(localPublishedAt).toISOString()
     : new Date().toISOString()
 }
 
-export function saveLocalDraft(scope: string, formData: PostFormData) {
-  if (typeof window === 'undefined' || !scope) return
+export function saveLocalDraft(scope: string, formData: PostFormData): boolean {
+  if (typeof window === 'undefined' || !scope) return false
 
   try {
     const payload: LocalDraftSnapshot = {
@@ -98,8 +131,9 @@ export function saveLocalDraft(scope: string, formData: PostFormData) {
       savedAt: new Date().toISOString(),
     }
     window.localStorage.setItem(`${DRAFT_STORAGE_PREFIX}${scope}`, JSON.stringify(payload))
+    return true
   } catch {
-    // Ignore storage quota / private mode failures
+    return false
   }
 }
 

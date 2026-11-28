@@ -2,16 +2,33 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { applyAuthCookies, isAllowedAdminEmail, resolveAuthCookieDomain } from '@/lib/auth'
 import { validateCSRFToken } from '@/lib/csrf'
-import { sendAdminNotification } from '@/lib/email/admin-notification'
+import { formatBeijingDateTime, sendAdminNotification } from '@/lib/email/admin-notification'
+import { checkRateLimit, getClientIp } from '@/lib/rate-limit'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
 export async function POST(request: NextRequest) {
   try {
+    const clientIp = getClientIp(request)
+    const rateLimit = await checkRateLimit({
+      namespace: 'admin_login',
+      identifier: clientIp,
+      limit: 10,
+      windowSeconds: 900, // 15 minutes
+    })
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: '尝试过于频繁，请稍后再试' },
+        {
+          status: 429,
+          headers: { 'Retry-After': String(rateLimit.retryAfterSeconds) },
+        },
+      )
+    }
+
     const { email, password, csrfToken } = await request.json()
 
-    // 验证 CSRF token
     if (!csrfToken) {
       return NextResponse.json({ error: 'CSRF token required' }, { status: 403 })
     }
@@ -54,7 +71,6 @@ export async function POST(request: NextRequest) {
       { status: 200 },
     )
 
-    // 统一写入 auth-token（7天 Cookie）与 refresh-token（30天 Cookie）
     applyAuthCookies(
       response,
       {
@@ -64,7 +80,6 @@ export async function POST(request: NextRequest) {
       request,
     )
 
-    // 清除 CSRF token cookie（一次性使用）
     response.cookies.set({
       name: 'x-csrf-token',
       value: '',
@@ -76,7 +91,7 @@ export async function POST(request: NextRequest) {
       domain: resolveAuthCookieDomain(request),
     })
 
-    await sendAdminLoginNotification(request, data.user?.email || email)
+    await sendAdminLoginNotification(request, data.user?.email || email, clientIp)
 
     return response
   } catch (error) {
@@ -85,29 +100,30 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function sendAdminLoginNotification(request: NextRequest, email: string) {
+async function sendAdminLoginNotification(request: NextRequest, email: string, clientIp: string) {
   if (process.env.ADMIN_LOGIN_EMAIL_NOTIFICATIONS !== 'true') {
     return
   }
 
-  await sendAdminNotification({
-    subject: '博客后台登录通知',
-    title: '博客后台发生一次登录',
-    message: '如果这不是你本人操作，请尽快检查 Supabase 账号和后台访问记录。',
-    lines: [
-      ['登录邮箱', email],
-      ['登录时间', new Date().toISOString()],
-      ['IP', getClientIp(request)],
-      ['User-Agent', request.headers.get('user-agent')],
-      ['环境', process.env.NODE_ENV],
-    ],
-  })
-}
+  const loginTime = formatBeijingDateTime()
+  const origin = request.nextUrl.origin
 
-function getClientIp(request: NextRequest) {
-  return (
-    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
-    request.headers.get('x-real-ip') ||
-    'unknown'
-  )
+  await sendAdminNotification({
+    category: 'alert',
+    badge: '安全通知',
+    subject: `后台登录提醒 · ${clientIp}`,
+    title: '博客后台发生一次管理员登录',
+    subtitle: loginTime,
+    preheader: `${email} 从 ${clientIp} 登录了博客后台`,
+    message: '如果本次登录是你本人操作，可忽略此邮件；若非本人操作，请立即前往 Supabase 修改密码并吊销会话。',
+    siteUrl: origin,
+    lines: [
+      ['登录账号', email],
+      ['登录时间', loginTime],
+      ['来源 IP', clientIp],
+      ['客户端', request.headers.get('user-agent') || 'unknown'],
+      ['运行环境', process.env.NODE_ENV || 'unknown'],
+    ],
+    actions: [{ label: '前往博客后台', href: `${origin}/admin`, variant: 'primary' }],
+  })
 }

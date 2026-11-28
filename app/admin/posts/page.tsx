@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { AlertCircle, PlusCircle } from 'lucide-react'
+import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
 import { BatchActionsBar } from '@/features/admin/posts/batch-actions-bar'
@@ -191,13 +192,20 @@ export default function AdminPostsPage() {
 
       setPosts(posts.map((p) =>
         p.id === editingPost.id
-          ? { ...p, title: editForm.title, featured: editForm.featured, published_at: newPublishedAtISO ?? p.published_at }
+          ? {
+              ...p,
+              title: editForm.title,
+              featured: editForm.featured,
+              tags: editForm.tags,
+              published_at: newPublishedAtISO ?? p.published_at,
+            }
           : p
       ))
 
       setEditingPost(null)
+      toast.success('文章信息已更新')
     } catch (err) {
-      alert(err instanceof Error ? err.message : '更新失败')
+      toast.error(err instanceof Error ? err.message : '更新失败')
     }
   }
 
@@ -222,15 +230,30 @@ export default function AdminPostsPage() {
 
     setBatchActionLoading(true)
     try {
-      await Promise.all(selectedPosts.map((id) =>
-        fetch(`/api/admin/posts/${id}`, {
-          method: 'DELETE',
-        })
-      ))
-      setPosts(posts.filter((p) => !selectedPosts.includes(p.id)))
-      setSelectedPosts([])
+      const results = await Promise.all(
+        selectedPosts.map(async (id) => {
+          const res = await fetch(`/api/admin/posts/${id}`, {
+            method: 'DELETE',
+          })
+          return { id, ok: res.ok }
+        }),
+      )
+
+      const succeededIds = new Set(results.filter((item) => item.ok).map((item) => item.id))
+      const failedIds = results.filter((item) => !item.ok).map((item) => item.id)
+
+      if (succeededIds.size > 0) {
+        setPosts((current) => current.filter((p) => !succeededIds.has(p.id)))
+      }
+      setSelectedPosts(failedIds)
+
+      if (failedIds.length > 0) {
+        toast.error(`成功删除 ${succeededIds.size} 篇，${failedIds.length} 篇删除失败`)
+      } else {
+        toast.success(`已删除 ${succeededIds.size} 篇文章`)
+      }
     } catch {
-      alert('批量删除部分或全部失败')
+      toast.error('批量删除失败')
     } finally {
       setBatchActionLoading(false)
     }
@@ -241,25 +264,41 @@ export default function AdminPostsPage() {
 
     setBatchActionLoading(true)
     try {
-      await Promise.all(selectedPosts.map((id) =>
-        fetch(`/api/admin/posts/${id}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ published: publish }),
-        })
-      ))
+      const results = await Promise.all(
+        selectedPosts.map(async (id) => {
+          const res = await fetch(`/api/admin/posts/${id}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ published: publish }),
+          })
+          return { id, ok: res.ok }
+        }),
+      )
 
+      const succeededIds = new Set(results.filter((item) => item.ok).map((item) => item.id))
+      const failedIds = results.filter((item) => !item.ok).map((item) => item.id)
       const nowISO = new Date().toISOString()
-      setPosts(posts.map((p) =>
-        selectedPosts.includes(p.id)
-          ? { ...p, published: publish, published_at: publish ? (p.published_at || nowISO) : null }
-          : p
-      ))
-      setSelectedPosts([])
+
+      if (succeededIds.size > 0) {
+        setPosts((current) =>
+          current.map((p) =>
+            succeededIds.has(p.id)
+              ? { ...p, published: publish, published_at: publish ? (p.published_at || nowISO) : p.published_at }
+              : p,
+          ),
+        )
+      }
+      setSelectedPosts(failedIds)
+
+      if (failedIds.length > 0) {
+        toast.error(`成功更新 ${succeededIds.size} 篇，${failedIds.length} 篇失败`)
+      } else {
+        toast.success(`已将 ${succeededIds.size} 篇文章${publish ? '发布' : '转为草稿'}`)
+      }
     } catch {
-      alert('批量操作失败')
+      toast.error('批量操作失败')
     } finally {
       setBatchActionLoading(false)
     }

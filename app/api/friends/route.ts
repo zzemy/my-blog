@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase/client'
 import { validateCSRFToken } from '@/lib/csrf'
-import { sendAdminNotification } from '@/lib/email/admin-notification'
+import { formatBeijingDateTime, sendAdminNotification } from '@/lib/email/admin-notification'
 import { friendLinkSubmissionSchema } from '@/lib/validation/friend-link'
 import { getApprovedFriendLinks } from '@/lib/supabase/friend-links'
+import { checkRateLimit, getClientIp } from '@/lib/rate-limit'
 
 export const dynamic = 'force-dynamic'
 
@@ -18,6 +19,22 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    const rateLimit = await checkRateLimit({
+      namespace: 'friends_submit',
+      identifier: getClientIp(request),
+      limit: 5,
+      windowSeconds: 600,
+    })
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: '提交过于频繁，请稍后再试' },
+        {
+          status: 429,
+          headers: { 'Retry-After': String(rateLimit.retryAfterSeconds) },
+        },
+      )
+    }
+
     const rawBody = await request.json()
     const parsed = friendLinkSubmissionSchema.safeParse(rawBody)
 
@@ -56,22 +73,41 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: '这个网站已经提交过友链申请' }, { status: 409 })
     }
 
-    const { data, error } = await client.from('friend_links').insert(payload as never).select().single()
+    const { data, error } = await client
+      .from('friend_links')
+      .insert(payload as never)
+      .select('id, name, url, avatar_url, description, status, created_at')
+      .single()
     if (error) throw error
 
     const origin = request.nextUrl.origin
+    const submittedAt = formatBeijingDateTime()
     await sendAdminNotification({
-      subject: `新的友链申请：${payload.name}`,
-      title: '收到一条新的友链申请',
-      message: '请登录后台审核，通过后该友链才会显示在公开页面。',
+      category: 'friend',
+      badge: '友链申请',
+      subject: `友链申请 · ${payload.name}`,
+      title: `收到来自「${payload.name}」的友链申请`,
+      subtitle: `提交于 ${submittedAt}`,
+      preheader: `${payload.name} (${payload.url}) 申请交换友链`,
+      message: '请登录后台审核，通过后该站点才会公开展示在友链页。',
+      siteUrl: origin,
+      quote: {
+        author: payload.name,
+        authorUrl: payload.url,
+        avatarUrl: payload.avatar_url,
+        meta: payload.url,
+        body: payload.description || '对方未填写站点简介。',
+      },
       lines: [
-        ['昵称', payload.name],
-        ['网站', payload.url],
-        ['网站介绍', payload.description],
+        ['站点地址', payload.url, payload.url],
         ['联系方式', payload.contact],
         ['申请备注', payload.note],
+        ['提交时间', submittedAt],
       ],
-      action: { label: '打开友链管理', href: `${origin}/admin/friends` },
+      actions: [
+        { label: '前往后台审核', href: `${origin}/admin/friends`, variant: 'primary' },
+        { label: '访问申请站点', href: payload.url, variant: 'secondary' },
+      ],
     })
 
     return NextResponse.json({ success: true, link: data }, { status: 201 })
