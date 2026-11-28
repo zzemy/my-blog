@@ -1,9 +1,31 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { validateAdminRequest } from '@/lib/auth'
+import {
+  applyAuthCookies,
+  clearAuthCookies,
+  isJwtExpiringSoon,
+  refreshAdminSession,
+  validateAdminRequest,
+} from '@/lib/auth'
 
 // Routes that require auth guard.
 const protectedRoutes = ['/admin']
+
+function buildUpdatedCookieHeader(
+  request: NextRequest,
+  nextAccessToken: string,
+  nextRefreshToken: string,
+): string {
+  const cookieMap = new Map<string, string>()
+  for (const cookie of request.cookies.getAll()) {
+    cookieMap.set(cookie.name, cookie.value)
+  }
+  cookieMap.set('auth-token', nextAccessToken)
+  cookieMap.set('refresh-token', nextRefreshToken)
+  return Array.from(cookieMap.entries())
+    .map(([name, value]) => `${name}=${value}`)
+    .join('; ')
+}
 
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname
@@ -16,27 +38,45 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next()
   }
 
-  const authToken = request.cookies.get('auth-token')?.value
-  if (!authToken) {
-    return NextResponse.redirect(new URL('/admin', request.url))
+  const authToken = request.cookies.get('auth-token')?.value ?? null
+  const refreshToken = request.cookies.get('refresh-token')?.value ?? null
+
+  // 1. 当前 access_token 有效且距离过期还超过 10 分钟，直接放行
+  let accessTokenValid = false
+  if (authToken) {
+    accessTokenValid = await validateAdminRequest(authToken)
+    if (accessTokenValid && !isJwtExpiringSoon(authToken, 600)) {
+      return NextResponse.next()
+    }
   }
 
-  const isValid = await validateAdminRequest(authToken)
-  if (!isValid) {
-    const response = NextResponse.redirect(new URL('/admin', request.url))
-    response.cookies.set({
-      name: 'auth-token',
-      value: '',
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 0,
-      path: '/',
-    })
-    return response
+  // 2. access_token 缺失、已过期或即将过期时，使用 refresh-token 无感续期
+  if (refreshToken) {
+    const refreshed = await refreshAdminSession(refreshToken)
+    if (refreshed) {
+      const requestHeaders = new Headers(request.headers)
+      requestHeaders.set(
+        'cookie',
+        buildUpdatedCookieHeader(request, refreshed.accessToken, refreshed.refreshToken),
+      )
+
+      const response = NextResponse.next({
+        request: { headers: requestHeaders },
+      })
+      applyAuthCookies(response, refreshed, request)
+      return response
+    }
   }
 
-  return NextResponse.next()
+  // 3. 若续期失败但当前 access_token 仍在有效期内，暂不强踢
+  if (accessTokenValid) {
+    return NextResponse.next()
+  }
+
+  // 4. 彻底失效，清理 Cookie 并跳转登录页
+  const response = NextResponse.redirect(new URL('/admin', request.url))
+  clearAuthCookies(response, request)
+  return response
 }
 
 export const config = {

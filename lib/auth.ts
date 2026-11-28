@@ -1,4 +1,5 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient, type User } from '@supabase/supabase-js'
+import type { NextResponse } from 'next/server'
 import { getAuthTokenFromCookie } from '@/lib/server-auth'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -7,6 +8,152 @@ const ADMIN_EMAIL = process.env.ADMIN_EMAIL || ''
 
 const normalizeEmail = (email: string | null | undefined) =>
   (email ?? '').trim().toLowerCase()
+
+export function isAllowedAdminEmail(email: string | null | undefined): boolean {
+  if (!ADMIN_EMAIL) return true
+  return normalizeEmail(email) === normalizeEmail(ADMIN_EMAIL)
+}
+
+/**
+ * 解析当前请求对应的认证 Cookie domain（避免在非主域/预览域强行绑定导致 Cookie 被拒，同时保持清/写一致）
+ */
+export function resolveAuthCookieDomain(request?: Request): string | undefined {
+  if (process.env.NODE_ENV !== 'production') return undefined
+  const host = request?.headers.get('host')?.split(':')[0]?.toLowerCase() ?? ''
+  if (host === 'blog.zzemy.top' || host.endsWith('.blog.zzemy.top')) {
+    return '.blog.zzemy.top'
+  }
+  return undefined
+}
+
+/**
+ * 统一写入 auth-token 与 refresh-token HttpOnly Cookie
+ */
+export function applyAuthCookies(
+  response: NextResponse,
+  tokens: { accessToken: string; refreshToken?: string | null },
+  request?: Request,
+) {
+  const isProduction = process.env.NODE_ENV === 'production'
+  const domain = resolveAuthCookieDomain(request)
+
+  response.cookies.set({
+    name: 'auth-token',
+    value: tokens.accessToken,
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: 'lax',
+    maxAge: 60 * 60 * 24 * 7, // 7 days
+    path: '/',
+    domain,
+  })
+
+  if (tokens.refreshToken) {
+    response.cookies.set({
+      name: 'refresh-token',
+      value: tokens.refreshToken,
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 30, // 30 days
+      path: '/',
+      domain,
+    })
+  }
+}
+
+/**
+ * 统一清除 auth-token 与 refresh-token Cookie
+ */
+export function clearAuthCookies(response: NextResponse, request?: Request) {
+  const isProduction = process.env.NODE_ENV === 'production'
+  const domain = resolveAuthCookieDomain(request)
+
+  response.cookies.set({
+    name: 'auth-token',
+    value: '',
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: 'lax',
+    maxAge: 0,
+    path: '/',
+    domain,
+  })
+
+  response.cookies.set({
+    name: 'refresh-token',
+    value: '',
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: 'lax',
+    maxAge: 0,
+    path: '/',
+    domain,
+  })
+}
+
+/**
+ * 读取 JWT 的 exp（秒级时间戳），用于判断是否即将过期（无需发起网络请求）
+ */
+export function getJwtExpiration(token: string): number | null {
+  try {
+    const parts = token.split('.')
+    if (parts.length < 2) return null
+    const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/')
+    const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), '=')
+    const jsonStr = atob(padded)
+    const payload = JSON.parse(jsonStr) as { exp?: unknown }
+    return typeof payload.exp === 'number' ? payload.exp : null
+  } catch {
+    return null
+  }
+}
+
+/**
+ * 判断 JWT 是否已过期或即将在 thresholdSeconds 秒内过期
+ */
+export function isJwtExpiringSoon(token: string, thresholdSeconds = 900): boolean {
+  const exp = getJwtExpiration(token)
+  if (!exp) return true
+  const nowSeconds = Math.floor(Date.now() / 1000)
+  return exp - nowSeconds <= thresholdSeconds
+}
+
+/**
+ * 使用 refresh-token 向 Supabase 无感续期管理员会话
+ */
+export async function refreshAdminSession(refreshToken: string | null): Promise<{
+  user: User
+  accessToken: string
+  refreshToken: string
+} | null> {
+  if (!refreshToken || !supabaseUrl || !supabaseAnonKey) return null
+
+  try {
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: { persistSession: false },
+    })
+    const { data, error } = await supabase.auth.refreshSession({
+      refresh_token: refreshToken,
+    })
+
+    if (error || !data.session || !data.user) {
+      return null
+    }
+
+    if (!isAllowedAdminEmail(data.user.email)) {
+      return null
+    }
+
+    return {
+      user: data.user,
+      accessToken: data.session.access_token,
+      refreshToken: data.session.refresh_token,
+    }
+  } catch {
+    return null
+  }
+}
 
 /**
  * 从请求头或 Cookie 中提取认证令牌
@@ -23,12 +170,11 @@ export function getAuthTokenFromRequest(request: Request): string | null {
   }
 
   // 2. 尝试从 Cookie 获取 (auth-token)
-  // 注意：NextRequest 对象有 cookies 属性，但为了保持通用性，我们解析 Cookie 头部
   const cookieHeader = request.headers.get('cookie')
   if (cookieHeader) {
-    const match = cookieHeader.match(/auth-token=([^;]+)/)
+    const match = cookieHeader.match(/(?:^|;\s*)auth-token=([^;]+)/)
     if (match && match[1]) {
-      return match[1]
+      return decodeURIComponent(match[1])
     }
   }
 
@@ -49,22 +195,24 @@ export async function validateAdminRequest(token: string | null): Promise<boolea
   const { data, error } = await supabase.auth.getUser(token)
   if (error || !data.user) return false
 
-  if (ADMIN_EMAIL) {
-    const expected = normalizeEmail(ADMIN_EMAIL)
-    const actual = normalizeEmail(data.user.email)
-    if (expected !== actual) return false
-  }
-  return true
+  return isAllowedAdminEmail(data.user.email)
 }
 
 /**
  * 带原因的管理员校验，便于排查 401 问题
  */
-export async function validateAdminRequestWithReason(token: string | null): Promise<{ ok: boolean; reason?: string; email?: string | null; expected?: string | null }> {
+export async function validateAdminRequestWithReason(token: string | null): Promise<{
+  ok: boolean
+  reason?: string
+  email?: string | null
+  expected?: string | null
+}> {
   const expected = ADMIN_EMAIL ? normalizeEmail(ADMIN_EMAIL) : null
 
   if (!token) return { ok: false, reason: 'missing_token', email: null, expected }
-  if (!supabaseUrl || !supabaseAnonKey) return { ok: false, reason: 'missing_supabase_env', email: null, expected }
+  if (!supabaseUrl || !supabaseAnonKey) {
+    return { ok: false, reason: 'missing_supabase_env', email: null, expected }
+  }
 
   const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     auth: { persistSession: false },
@@ -95,7 +243,7 @@ export async function getAdminUser(token: string | null) {
   })
   const { data, error } = await supabase.auth.getUser(token)
   if (error || !data.user) return null
-  if (ADMIN_EMAIL && normalizeEmail(data.user.email) !== normalizeEmail(ADMIN_EMAIL)) return null
+  if (!isAllowedAdminEmail(data.user.email)) return null
   return data.user
 }
 
