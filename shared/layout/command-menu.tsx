@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, Loader2, X, FileText, Hash, Link2, MessageSquare, User } from 'lucide-react';
+import { Search, Loader2, X, FileText, Hash, Link2, MessageSquare, Github } from 'lucide-react';
 import { Command as CommandPrimitive } from 'cmdk';
 import { PostData } from '@/lib/types';
 import {
@@ -69,13 +69,18 @@ const SCOPE_OPTIONS: ReadonlyArray<{ id: SearchScope; label: string }> = [
   { id: 'tags', label: '标签' },
 ];
 
-const QUICK_PAGES = [
+const QUICK_PAGES: ReadonlyArray<{
+  label: string;
+  href: string;
+  icon: typeof FileText;
+  external?: boolean;
+}> = [
   { label: '全部文章', href: '/posts', icon: FileText },
   { label: '标签索引', href: '/tags', icon: Hash },
   { label: '友情链接', href: '/friends', icon: Link2 },
   { label: '留言板', href: '/guestbook', icon: MessageSquare },
-  { label: '关于我', href: '/about', icon: User },
-] as const;
+  { label: '关于（GitHub 仓库）', href: 'https://github.com/zzemy/my-blog', icon: Github, external: true },
+];
 
 const SEARCH_SCHEMA = {
   id: 'string',
@@ -455,7 +460,15 @@ export function CommandMenu({ compact = false }: { compact?: boolean }) {
                             key={page.href}
                             value={`nav-${page.label}`}
                             className="cursor-pointer rounded-lg px-2.5 py-1.5 text-xs"
-                            onSelect={() => runCommand(() => router.push(page.href))}
+                            onSelect={() =>
+                              runCommand(() => {
+                                if (page.external) {
+                                  window.open(page.href, '_blank', 'noopener,noreferrer');
+                                } else {
+                                  router.push(page.href);
+                                }
+                              })
+                            }
                           >
                             <Icon className="mr-2 h-3.5 w-3.5 text-muted-foreground" />
                             <span>{page.label}</span>

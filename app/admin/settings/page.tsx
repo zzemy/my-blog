@@ -334,7 +334,7 @@ export default function SettingsPage() {
             <Card>
               <CardHeader>
                 <CardTitle>作者资料</CardTitle>
-                <CardDescription>将展示在关于页名片、文章署名、RSS 订阅源与友链交换卡片中。</CardDescription>
+                <CardDescription>将展示在文章署名、RSS 订阅源与友链交换卡片中。</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">

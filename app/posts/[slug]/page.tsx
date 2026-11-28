@@ -323,7 +323,7 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
       mainEntityOfPage: { '@type': 'WebPage', '@id': canonicalUrl },
       datePublished: post.published_at || post.created_at,
       dateModified: post.updated_at || post.published_at || post.created_at,
-      author: { '@type': 'Person', name: authorName, url: `${siteUrl}/about` },
+      author: { '@type': 'Person', name: authorName, url: 'https://github.com/zzemy/my-blog' },
       publisher: { '@type': 'Person', name: siteTitle, url: siteUrl },
       keywords: (post.tags ?? []).join(', '),
       ...(post.cover_image ? { image: [post.cover_image] } : {}),

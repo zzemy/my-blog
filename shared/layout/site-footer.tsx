@@ -8,12 +8,14 @@ import { useSiteSettings } from "@/shared/layout/site-settings-context"
 const START_TIMESTAMP = new Date("2025-11-20T00:00:00Z").getTime()
 const MS_PER_DAY = 24 * 60 * 60 * 1000
 
-const footerLinks = [
+const REPO_URL = "https://github.com/zzemy/my-blog"
+
+const footerLinks: Array<{ href: string; label: string; external?: boolean }> = [
   { href: "/posts", label: "归档" },
   { href: "/tags", label: "标签" },
   { href: "/friends", label: "友链" },
   { href: "/guestbook", label: "留言" },
-  { href: "/about", label: "关于" },
+  { href: REPO_URL, label: "关于", external: true },
 ]
 
 export function SiteFooter() {
@@ -84,15 +86,28 @@ export function SiteFooter() {
           )}
 
           <nav aria-label="页脚导航" className="flex flex-wrap items-center gap-4">
-            {footerLinks.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="transition-colors duration-200 hover:text-foreground"
-              >
-                {item.label}
-              </Link>
-            ))}
+            {footerLinks.map((item) =>
+              item.external ? (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-0.5 transition-colors duration-200 hover:text-foreground"
+                >
+                  <span>{item.label}</span>
+                  <ArrowUpRight className="h-3 w-3 opacity-60" />
+                </a>
+              ) : (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="transition-colors duration-200 hover:text-foreground"
+                >
+                  {item.label}
+                </Link>
+              ),
+            )}
             <a
               href="/rss.xml"
               target="_blank"

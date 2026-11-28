@@ -3,7 +3,6 @@ import { revalidatePath } from 'next/cache'
 export function revalidateSiteSettings() {
   revalidatePath('/', 'layout')
   revalidatePath('/')
-  revalidatePath('/about')
   revalidatePath('/posts')
   revalidatePath('/tags')
   revalidatePath('/friends')

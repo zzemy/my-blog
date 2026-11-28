@@ -11,13 +11,15 @@ import { SiteUptimeBadge } from "@/shared/components/common/site-uptime"
 import { useSiteSettings } from "@/shared/layout/site-settings-context"
 import { cn } from "@/lib/utils"
 
-const navItems = [
+const REPO_URL = 'https://github.com/zzemy/my-blog'
+
+const navItems: Array<{ href: string; label: string; external?: boolean }> = [
   { href: '/', label: '首页' },
   { href: '/posts', label: '文章' },
   { href: '/tags', label: '标签' },
   { href: '/friends', label: '友链' },
   { href: '/guestbook', label: '留言' },
-  { href: '/about', label: '关于' },
+  { href: REPO_URL, label: '关于', external: true },
 ]
 
 function renderSocialIcon(platform: string) {
@@ -86,18 +88,32 @@ export function SiteHeader() {
 
         <nav aria-label="主导航" className="hidden flex-1 items-center justify-center gap-7 text-[14px] font-medium md:flex lg:gap-8">
           {navItems.map((item) => {
-            const active = isActive(item.href)
+            const active = !item.external && isActive(item.href)
+            const linkClassName = cn(
+              "relative py-5 transition-colors duration-200 after:absolute after:bottom-3.5 after:left-1/2 after:h-[1.5px] after:-translate-x-1/2 after:rounded-full after:transition-all after:duration-300",
+              active
+                ? "text-foreground after:w-4 after:bg-foreground/85"
+                : "text-foreground/58 after:w-0 after:bg-foreground/40 hover:text-foreground hover:after:w-3"
+            )
+            if (item.external) {
+              return (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={linkClassName}
+                >
+                  {item.label}
+                </a>
+              )
+            }
             return (
               <Link
                 key={item.href}
                 href={item.href}
                 aria-current={active ? "page" : undefined}
-                className={cn(
-                  "relative py-5 transition-colors duration-200 after:absolute after:bottom-3.5 after:left-1/2 after:h-[1.5px] after:-translate-x-1/2 after:rounded-full after:transition-all after:duration-300",
-                  active
-                    ? "text-foreground after:w-4 after:bg-foreground/85"
-                    : "text-foreground/58 after:w-0 after:bg-foreground/40 hover:text-foreground hover:after:w-3"
-                )}
+                className={linkClassName}
               >
                 {item.label}
               </Link>

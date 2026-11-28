@@ -52,7 +52,7 @@ export async function generateBlogFeed(): Promise<Feed> {
     },
     author: {
       name: authorName,
-      link: `${siteUrl}/about`,
+      link: 'https://github.com/zzemy/my-blog',
     },
   })
 
@@ -70,7 +70,7 @@ export async function generateBlogFeed(): Promise<Feed> {
       link: postUrl,
       description: post.description || '',
       content: htmlContent || post.description || '',
-      author: [{ name: post.author || authorName, link: `${siteUrl}/about` }],
+      author: [{ name: post.author || authorName, link: 'https://github.com/zzemy/my-blog' }],
       date: Number.isNaN(publishedDate.getTime()) ? new Date() : publishedDate,
       published: Number.isNaN(publishedDate.getTime()) ? undefined : publishedDate,
       category: (post.tags ?? []).map((tag) => ({ name: tag })),

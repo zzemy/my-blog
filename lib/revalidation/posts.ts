@@ -27,16 +27,12 @@ export function revalidateSearchData() {
 export function revalidatePostPaths(post: RevalidatePostInput) {
   revalidateIndexPaths()
 
-  if (post.slug === 'about') {
-    revalidatePath('/about')
-  } else {
-    if (post.publicId) {
-      revalidatePath(`/posts/${post.publicId}`)
-    }
+  if (post.publicId) {
+    revalidatePath(`/posts/${post.publicId}`)
+  }
 
-    if (post.slug) {
-      revalidatePath(`/posts/${post.slug}`)
-    }
+  if (post.slug) {
+    revalidatePath(`/posts/${post.slug}`)
   }
 
   for (const tag of normalizeTags(post.tags)) {
